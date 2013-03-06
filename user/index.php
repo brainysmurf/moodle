@@ -6,9 +6,9 @@
     require_once($CFG->libdir.'/tablelib.php');
     require_once($CFG->libdir.'/filelib.php');
 
-    define('USER_SMALL_CLASS', 20);   // Below this is considered small
+    define('USER_SMALL_CLASS', 30);   // Below this is considered small
     define('USER_LARGE_CLASS', 200);  // Above this is considered large
-    define('DEFAULT_PAGE_SIZE', 20);
+    define('DEFAULT_PAGE_SIZE', 30);
     define('SHOW_ALL_PAGE_SIZE', 5000);
     define('MODE_BRIEF', 0);
     define('MODE_USERDETAILS', 1);
@@ -186,12 +186,26 @@
     $controlstable->data[] = new html_table_row();
 
 /// Print my course menus
+//    echo '<center>Please scroll to the bottom to <strong>search</strong></center>';
+
+// This array comprises the id of every course that is in the "Teaching & Learning" section of the site
+// This is the sql that derived it:
+// select crse.id, crse.fullname from ssismdl_course crse join ssismdl_course_categories cc on cc.id = crse.category and cc.parent = 50;
+//
+// Modified code below to only display courses in there:
+// This really has been cherry-picked and it's unlikely to be able to be abstracted away for general use...
+$teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 1137, 1120, 1290, 1166, 1162, 1360, 1043, 1045, 1113, 1055, 1019, 1060, 1361, 1280, 1100, 1292, 1082, 1151, 1101, 1131, 1357, 1020, 1167, 1112, 1279, 1070, 1118, 1244, 1146, 1076, 1119, 1029, 1037, 1142, 1358, 1048, 1035, 1128, 1046, 1114, 1078, 1098, 1152, 1033, 1256, 1115, 1050, 1106, 1191, 1025, 1159, 1054, 1062, 1355, 1177, 1034, 1086, 1140, 1246, 1194, 1179, 1134, 1184, 1091, 1190, 1263, 1096, 1089, 1121, 1108, 1067, 1168, 1192, 1149, 1094, 1289, 1104, 1041, 1053, 1154, 1235, 1072, 1052, 1283, 1138, 1049, 1092, 1187, 1281, 1087, 1171, 1145, 1165, 1147, 1196, 1148, 1175, 1099,1058, 1066, 1243, 1153, 1265, 1063, 1061, 107, 1028, 1026, 1064, 1039, 1073, 1038, 1047, 1174, 1150, 1132, 1288, 1136, 1102, 1141, 1095, 1198, 1261, 1085, 1326, 1199,1040, 1036, 1032, 1065, 1044, 1282, 1031, 1236, 1193, 1158, 1107, 1129, 1122, 1024, 1195, 1155, 1110, 1186, 1276, 1285, 1059, 1057, 1111, 1135, 1027, 1126, 1069, 1090,1117, 1130, 1068, 1286, 1156, 1077, 1245, 1169, 1021, 1178, 1042, 1097, 1197, 1183, 1109, 1164, 1030, 1051, 1172, 1116, 1125, 1318, 1079, 1176, 1144, 1075, 1157, 1127,1088, 1081, 1188, 1056, 1074, 1161, 1023);
+
     if ($mycourses = enrol_get_my_courses()) {
         $courselist = array();
         $popupurl = new moodle_url('/user/index.php?roleid='.$roleid.'&sifirst=&silast=');
         foreach ($mycourses as $mycourse) {
+	    // filter out
+	  if ( in_array($mycourse->id, $teachinglearning) ) {
             $coursecontext = context_course::instance($mycourse->id);
-            $courselist[$mycourse->id] = format_string($mycourse->shortname, true, array('context' => $coursecontext));
+	    // use fullname instead of shortname
+            $courselist[$mycourse->id] = format_string($mycourse->fullname, true, array('context' => $coursecontext));
+	  }
         }
         if (has_capability('moodle/site:viewparticipants', $systemcontext)) {
             unset($courselist[SITEID]);
@@ -199,7 +213,7 @@
         }
         $select = new single_select($popupurl, 'id', $courselist, $course->id, array(''=>'choosedots'), 'courseform');
         $select->set_label(get_string('mycourses'));
-        $controlstable->data[0]->cells[] = $OUTPUT->render($select);
+        //$controlstable->data[0]->cells[] = $OUTPUT->render($select);
     }
 
     $controlstable->data[0]->cells[] = groups_print_course_menu($course, $baseurl->out(), true);
@@ -563,12 +577,27 @@
                         echo ' <a href="'.$baseurl->out().'&amp;silast='.$letter.'">'.$letter.'</a>';
                     }
                 }
-                echo '</div>';
+                echo '</div><br />';
 
                 $pagingbar = new paging_bar($matchcount, intval($table->get_page_start() / $perpage), $perpage, $baseurl);
                 $pagingbar->pagevar = 'spage';
                 echo $OUTPUT->render($pagingbar);
             }
+
+	    // For teachers, print out the class emails:
+           if ( has_capability('moodle/grade:edit', $context) ) {
+               $every_group = groups_get_all_groups($course->id);
+               if ($every_group) {
+                   echo "<br /><b>Class emails:</b><br />";
+                   }
+               foreach ($every_group as $this_group) {
+                   $email_addr = groups_get_group($this_group->id)->name.'@student.ssis-suzhou.net';
+                   echo '<a href="mailto:'.$email_addr.'">'.$email_addr.'</a><br />';
+               }
+               if ($every_group) {
+                   echo "<br />";
+               }
+           }
 
             if ($matchcount > 0) {
                 $usersprinted = array();
@@ -614,7 +643,7 @@
                         $row->cells[1]->text .= get_string('email').get_string('labelsep', 'langconfig').html_writer::link("mailto:$user->email", $user->email) . '<br />';
                     }
                     foreach ($extrafields as $field) {
-                        if ($field === 'email') {
+		      if ( ($field === 'email') or ($field === 'lastaccess') ) {
                             // Skip email because it was displayed with different
                             // logic above (because this page is intended for
                             // students too)
@@ -623,28 +652,44 @@
                         $row->cells[1]->text .= get_user_field_name($field) .
                                 get_string('labelsep', 'langconfig') . s($user->{$field}) . '<br />';
                     }
-                    if (($user->city or $user->country) and (!isset($hiddenfields['city']) or !isset($hiddenfields['country']))) {
-                        $row->cells[1]->text .= get_string('city').get_string('labelsep', 'langconfig');
-                        if ($user->city && !isset($hiddenfields['city'])) {
-                            $row->cells[1]->text .= $user->city;
-                        }
-                        if (!empty($countries[$user->country]) && !isset($hiddenfields['country'])) {
-                            if ($user->city && !isset($hiddenfields['city'])) {
-                                $row->cells[1]->text .= ', ';
-                            }
-                            $row->cells[1]->text .= $countries[$user->country];
-                        }
-                        $row->cells[1]->text .= '<br />';
-                    }
 
-                    if (!isset($hiddenfields['lastaccess'])) {
-                        if ($user->lastaccess) {
-                            $row->cells[1]->text .= get_string('lastaccess').get_string('labelsep', 'langconfig').userdate($user->lastaccess);
-                            $row->cells[1]->text .= '&nbsp; ('. format_time(time() - $user->lastaccess, $datestring) .')';
-                        } else {
-                            $row->cells[1]->text .= get_string('lastaccess').get_string('labelsep', 'langconfig').get_string('never');
-                        }
-                    }
+                   if ( has_capability('moodle/grade:edit', $context) ) {
+                     if ( strlen($user->idnumber) == 5 ) {
+                        $parent_email_address = $user->username . "PARENTS@student.ssis-suzhou.net";
+                        $row->cells[1]->text .= "Parent's Email: " . '<a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a>'  . '<br />';
+                        $teachers_email_address = $user->username . "TEACHERS@student.ssis-suzhou.net";
+                        $row->cells[1]->text .= "All Teacher's Emails: " . '<a href="mailto:' . $teachers_email_address . '">' . $teachers_email_address . '</a>' . '<br />';
+                        $hr_email_address = $user->username . "HR@student.ssis-suzhou.net";
+                        $row->cells[1]->text .= "Homeroom Teacher's Email: " . '<a href="mailto:' . $hr_email_address . '">' . $hr_email_address . '</a>' . '<br />';
+                     }
+                   } else {
+                   if ( (substr($USER->idnumber, -1) == 'P') and (substr($user->idnumber, -1) != 'P') ) {
+                     $parent_email_address = $user->username . "PARENTS@student.ssis-suzhou.net";
+                      $row->cells[1]->text .= "Parent's Email: " . '<a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a>' . '<br />';
+                   }
+                   }
+
+                    #if (($user->city or $user->country) and (!isset($hiddenfields['city']) or !isset($hiddenfields['country']))) {
+                    #    $row->cells[1]->text .= get_string('city').get_string('labelsep', 'langconfig');
+                    #    if ($user->city && !isset($hiddenfields['city'])) {
+                    #        $row->cells[1]->text .= $user->city;
+                    #    }
+                    #    if (!empty($countries[$user->country]) && !isset($hiddenfields['country'])) {
+                    #        if ($user->city && !isset($hiddenfields['city'])) {
+                    #            $row->cells[1]->text .= ', ';
+                    #        }
+                    #        $row->cells[1]->text .= $countries[$user->country];
+                    #    }
+                    #    $row->cells[1]->text .= '<br />';
+                    #}
+                    #if (!isset($hiddenfields['lastaccess'])) {
+                    #    if ($user->lastaccess) {
+                    #        $row->cells[1]->text .= get_string('lastaccess').get_string('labelsep', 'langconfig').userdate($user->lastaccess);
+                    #        $row->cells[1]->text .= '&nbsp; ('. format_time(time() - $user->lastaccess, $datestring) .')';
+                    #    } else {
+                    #        $row->cells[1]->text .= get_string('lastaccess').get_string('labelsep', 'langconfig').get_string('never');
+                    #    }
+                    #}
 
                     $row->cells[1]->text .= $OUTPUT->container_end();
 
@@ -654,9 +699,9 @@
 
                     $links = array();
 
-                    if ($CFG->bloglevel > 0) {
-                        $links[] = html_writer::link(new moodle_url('/blog/index.php?userid='.$user->id), get_string('blogs','blog'));
-                    }
+                    #if ($CFG->bloglevel > 0) {
+                    #    $links[] = html_writer::link(new moodle_url('/blog/index.php?userid='.$user->id), get_string('blogs','blog'));
+                    #}
 
                     if (!empty($CFG->enablenotes) and (has_capability('moodle/notes:manage', $context) || has_capability('moodle/notes:view', $context))) {
                         $links[] = html_writer::link(new moodle_url('/notes/index.php?course=' . $course->id. '&user='.$user->id), get_string('notes','notes'));
