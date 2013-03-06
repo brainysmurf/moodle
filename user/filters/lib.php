@@ -34,10 +34,10 @@ class user_filtering {
         }
 
         if (empty($fieldnames)) {
-            $fieldnames = array('realname'=>0, 'lastname'=>1, 'firstname'=>1, 'email'=>1, 'city'=>1, 'country'=>1,
+            $fieldnames = array('realname'=>0, 'lastname'=>1, 'firstname'=>1, 'email'=>0, 'city'=>1, 'country'=>1,
                                 'confirmed'=>1, 'suspended'=>1, 'profile'=>1, 'courserole'=>1, 'systemrole'=>1, 'cohort'=>1,
                                 'firstaccess'=>1, 'lastaccess'=>1, 'neveraccessed'=>1, 'timemodified'=>1,
-                                'nevermodified'=>1, 'username'=>1, 'auth'=>1, 'mnethostid'=>1);
+                                'nevermodified'=>1, 'username'=>1, 'auth'=>1, 'mnethostid'=>1, 'idnumber'=>0);
         }
 
         $this->_fields  = array();
@@ -102,6 +102,7 @@ class user_filtering {
         global $USER, $CFG, $DB, $SITE;
 
         switch ($fieldname) {
+	    case 'idnumber': return new user_filter_text('idnumber', get_string('idnumber'), $advanced, 'idnumber');
             case 'username':    return new user_filter_text('username', get_string('username'), $advanced, 'username');
             case 'realname':    return new user_filter_text('realname', get_string('fullnameuser'), $advanced, $DB->sql_fullname());
             case 'lastname':    return new user_filter_text('lastname', get_string('lastname'), $advanced, 'lastname');
