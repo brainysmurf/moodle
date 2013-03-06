@@ -245,13 +245,15 @@ echo '</div>';
 
 echo '<table class="list" summary="">';
 
-if (! isset($hiddenfields['country']) && $user->country) {
-    print_row(get_string('country') . ':', get_string($user->country, 'countries'));
-}
+//if (! isset($hiddenfields['country']) && $user->country) {
+//    print_row(get_string('country') . ':', get_string($user->country, 'countries'));
+//}
 
-if (! isset($hiddenfields['city']) && $user->city) {
-    print_row(get_string('city') . ':', $user->city);
-}
+//if (! isset($hiddenfields['city']) && $user->city) {
+//    print_row(get_string('city') . ':', $user->city);
+//}
+
+print_row("Instructions:", "Find teacher emails below.<br />At right, click on 'Messages' and 'Activity Reports' to view activity.");
 
 if (isset($identityfields['address']) && $user->address) {
     print_row(get_string("address").":", "$user->address");
@@ -284,67 +286,67 @@ if (isset($identityfields['email']) and ($currentuser
     print_row(get_string("email").":", obfuscate_mailto($user->email, ''));
 }
 
-if ($user->url && !isset($hiddenfields['webpage'])) {
-    $url = $user->url;
-    if (strpos($user->url, '://') === false) {
-        $url = 'http://'. $url;
-    }
-    print_row(get_string("webpage") .":", '<a href="'.s($url).'">'.s($user->url).'</a>');
-}
+//if ($user->url && !isset($hiddenfields['webpage'])) {
+//    $url = $user->url;
+//    if (strpos($user->url, '://') === false) {
+//        $url = 'http://'. $url;
+//    }
+//    print_row(get_string("webpage") .":", '<a href="'.s($url).'">'.s($user->url).'</a>');
+//}
 
-if ($user->icq && !isset($hiddenfields['icqnumber'])) {
-    print_row(get_string('icqnumber').':',"<a href=\"http://web.icq.com/wwp?uin=".urlencode($user->icq)."\">".s($user->icq)." <img src=\"http://web.icq.com/whitepages/online?icq=".urlencode($user->icq)."&amp;img=5\" alt=\"\" /></a>");
-}
+//if ($user->icq && !isset($hiddenfields['icqnumber'])) {
+//    print_row(get_string('icqnumber').':',"<a href=\"http://web.icq.com/wwp?uin=".urlencode($user->icq)."\">".s($user->icq)." <img src=\"http://web.icq.com/whitepages/online?icq=".urlencode($user->icq)."&amp;img=5\" alt=\"\" /></a>");
+//}
 
-if ($user->skype && !isset($hiddenfields['skypeid'])) {
-    if (strpos($CFG->httpswwwroot, 'https:') === 0) {
+//if ($user->skype && !isset($hiddenfields['skypeid'])) {
+//    if (strpos($CFG->httpswwwroot, 'https:') === 0) {
         // Bad luck, skype devs are lazy to set up SSL on their servers - see MDL-37233.
-        $statusicon = '';
-    } else {
-        $statusicon = ' '.html_writer::empty_tag('img', array('src'=>'http://mystatus.skype.com/smallicon/'.urlencode($user->skype), 'alt'=>get_string('status')));
-    }
-    print_row(get_string('skypeid').':','<a href="skype:'.urlencode($user->skype).'?call">'.s($user->skype).$statusicon.'</a>');
-}
-if ($user->yahoo && !isset($hiddenfields['yahooid'])) {
-    print_row(get_string('yahooid').':', '<a href="http://edit.yahoo.com/config/send_webmesg?.target='.urlencode($user->yahoo).'&amp;.src=pg">'.s($user->yahoo)." <img src=\"http://opi.yahoo.com/online?u=".urlencode($user->yahoo)."&m=g&t=0\" alt=\"\"></a>");
-}
-if ($user->aim && !isset($hiddenfields['aimid'])) {
-    print_row(get_string('aimid').':', '<a href="aim:goim?screenname='.urlencode($user->aim).'">'.s($user->aim).'</a>');
-}
-if ($user->msn && !isset($hiddenfields['msnid'])) {
-    print_row(get_string('msnid').':', s($user->msn));
-}
+//        $statusicon = '';
+//    } else {
+//        $statusicon = ' '.html_writer::empty_tag('img', array('src'=>'http://mystatus.skype.com/smallicon/'.urlencode($user->skype), 'alt'=>get_string('status')));
+//    }
+//    print_row(get_string('skypeid').':','<a href="skype:'.urlencode($user->skype).'?call">'.s($user->skype).$statusicon.'</a>');
+//}
+//if ($user->yahoo && !isset($hiddenfields['yahooid'])) {
+//    print_row(get_string('yahooid').':', '<a href="http://edit.yahoo.com/config/send_webmesg?.target='.urlencode($user->yahoo).'&amp;.src=pg">'.s($user->yahoo)." <img src=\"http://opi.yahoo.com/online?u=".urlencode($user->yahoo)."&m=g&t=0\" alt=\"\"></a>");
+//}
+//if ($user->aim && !isset($hiddenfields['aimid'])) {
+//    print_row(get_string('aimid').':', '<a href="aim:goim?screenname='.urlencode($user->aim).'">'.s($user->aim).'</a>');
+//}
+//if ($user->msn && !isset($hiddenfields['msnid'])) {
+//   print_row(get_string('msnid').':', s($user->msn));
+//}
 
 /// Print the Custom User Fields
 profile_display_fields($user->id);
 
 
-if (!isset($hiddenfields['mycourses'])) {
-    if ($mycourses = enrol_get_all_users_courses($user->id, true, NULL, 'visible DESC,sortorder ASC')) {
-        $shown=0;
-        $courselisting = '';
-        foreach ($mycourses as $mycourse) {
-            if ($mycourse->category) {
-                context_helper::preload_from_record($mycourse);
-                $ccontext = context_course::instance($mycourse->id);
-                $class = '';
-                if ($mycourse->visible == 0) {
-                    if (!has_capability('moodle/course:viewhiddencourses', $ccontext)) {
-                        continue;
-                    }
-                    $class = 'class="dimmed"';
-                }
-                $courselisting .= "<a href=\"{$CFG->wwwroot}/user/view.php?id={$user->id}&amp;course={$mycourse->id}\" $class >" . $ccontext->get_context_name(false) . "</a>, ";
-            }
-            $shown++;
-            if($shown==20) {
-                $courselisting.= "...";
-                break;
-            }
-        }
-        print_row(get_string('courseprofiles').':', rtrim($courselisting,', '));
-    }
-}
+//if (!isset($hiddenfields['mycourses'])) {
+//    if ($mycourses = enrol_get_all_users_courses($user->id, true, NULL, 'visible DESC,sortorder ASC')) {
+//        $shown=0;
+//        $courselisting = '';
+//        foreach ($mycourses as $mycourse) {
+//            if ($mycourse->category) {
+//               context_helper::preload_from_record($mycourse);
+//                $ccontext = context_course::instance($mycourse->id);
+//                $class = '';
+//                if ($mycourse->visible == 0) {
+//                    if (!has_capability('moodle/course:viewhiddencourses', $ccontext)) {
+//                        continue;
+//                    }
+//                    $class = 'class="dimmed"';
+//                }
+//                $courselisting .= "<a href=\"{$CFG->wwwroot}/user/view.php?id={$user->id}&amp;course={$mycourse->id}\" $class >" . $ccontext->get_context_name(false) . "</a>, ";
+//            }
+//            $shown++;
+//            if($shown==20) {
+//               $courselisting.= "...";
+//                break;
+//            }
+//        }
+//        print_row(get_string('courseprofiles').':', rtrim($courselisting,', '));
+//    }
+//}
 if (!isset($hiddenfields['firstaccess'])) {
     if ($user->firstaccess) {
         $datestring = userdate($user->firstaccess)."&nbsp; (".format_time(time() - $user->firstaccess).")";
