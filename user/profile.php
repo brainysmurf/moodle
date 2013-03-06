@@ -244,15 +244,8 @@ echo '</div>';
 // Print all the little details in a list
 
 echo html_writer::start_tag('dl', array('class'=>'list'));
-if (!isset($hiddenfields['country']) && $user->country) {
-    echo html_writer::tag('dt', get_string('country'));
-    echo html_writer::tag('dd', get_string($user->country, 'countries'));
-}
 
-if (!isset($hiddenfields['city']) && $user->city) {
-    echo html_writer::tag('dt', get_string('city'));
-    echo html_writer::tag('dd', $user->city);
-}
+print_row("Instructions:", "Find teacher emails below.<br />At right, click on 'Messages' and 'Activity Reports' to view activity.");
 
 if (isset($identityfields['address']) && $user->address) {
     echo html_writer::tag('dt', get_string('address'));
@@ -292,84 +285,10 @@ if (isset($identityfields['email']) and ($currentuser
     echo html_writer::tag('dd', obfuscate_mailto($user->email, ''));
 }
 
-if ($user->url && !isset($hiddenfields['webpage'])) {
-    $url = $user->url;
-    if (strpos($user->url, '://') === false) {
-        $url = 'http://'. $url;
-    }
-    $webpageurl = new moodle_url($url);
-    echo html_writer::tag('dt', get_string('webpage'));
-    echo html_writer::tag('dd', html_writer::link($webpageurl, s($user->url)));
-}
-
-if ($user->icq && !isset($hiddenfields['icqnumber'])) {
-    $imurl = new moodle_url('http://web.icq.com/wwp', array('uin'=>$user->icq) );
-    $iconurl = new moodle_url('http://web.icq.com/whitepages/online', array('icq'=>$user->icq, 'img'=>'5'));
-    $statusicon = html_writer::tag('img', '', array('src'=>$iconurl, 'class'=>'icon icon-post', 'alt'=>get_string('status')));
-    echo html_writer::tag('dt', get_string('icqnumber'));
-    echo html_writer::tag('dd', html_writer::link($imurl, s($user->icq) . $statusicon));
-}
-
-if ($user->skype && !isset($hiddenfields['skypeid'])) {
-    $imurl = 'skype:'.urlencode($user->skype).'?call';
-    $iconurl = new moodle_url('http://mystatus.skype.com/smallicon/'.$user->skype);
-    if (strpos($CFG->httpswwwroot, 'https:') === 0) {
-        // Bad luck, skype devs are lazy to set up SSL on their servers - see MDL-37233.
-        $statusicon = '';
-    } else {
-        $statusicon = html_writer::empty_tag('img', array('src'=>$iconurl, 'class'=>'icon icon-post', 'alt'=>get_string('status')));
-    }
-    echo html_writer::tag('dt', get_string('skypeid'));
-    echo html_writer::tag('dd', html_writer::link($imurl, s($user->skype) . $statusicon));
-}
-if ($user->yahoo && !isset($hiddenfields['yahooid'])) {
-    $imurl = new moodle_url('http://edit.yahoo.com/config/send_webmesg', array('.target'=>$user->yahoo, '.src'=>'pg'));
-    $iconurl = new moodle_url('http://opi.yahoo.com/online', array('u'=>$user->yahoo, 'm'=>'g', 't'=>'0'));
-    $statusicon = html_writer::tag('img', '', array('src'=>$iconurl, 'class'=>'iconsmall icon-post', 'alt'=>get_string('status')));
-    echo html_writer::tag('dt', get_string('yahooid'));
-    echo html_writer::tag('dd', html_writer::link($imurl, s($user->yahoo) . $statusicon));
-}
-if ($user->aim && !isset($hiddenfields['aimid'])) {
-    $imurl = 'aim:goim?screenname='.urlencode($user->aim);
-    echo html_writer::tag('dt', get_string('aimid'));
-    echo html_writer::tag('dd', html_writer::link($imurl, s($user->aim)));
-}
-if ($user->msn && !isset($hiddenfields['msnid'])) {
-    echo html_writer::tag('dt', get_string('msnid'));
-    echo html_writer::tag('dd', s($user->msn));
-}
-
 /// Print the Custom User Fields
 profile_display_fields($user->id);
 
 
-if (!isset($hiddenfields['mycourses'])) {
-    if ($mycourses = enrol_get_all_users_courses($user->id, true, NULL, 'visible DESC,sortorder ASC')) {
-        $shown=0;
-        $courselisting = '';
-        foreach ($mycourses as $mycourse) {
-            if ($mycourse->category) {
-                context_helper::preload_from_record($mycourse);
-                $ccontext = context_course::instance($mycourse->id);
-                $class = '';
-                if ($mycourse->visible == 0) {
-                    if (!has_capability('moodle/course:viewhiddencourses', $ccontext)) {
-                        continue;
-                    }
-                    $class = 'class="dimmed"';
-                }
-                $courselisting .= "<a href=\"{$CFG->wwwroot}/user/view.php?id={$user->id}&amp;course={$mycourse->id}\" $class >" . $ccontext->get_context_name(false) . "</a>, ";
-            }
-            $shown++;
-            if($shown==20) {
-                $courselisting.= "...";
-                break;
-            }
-        }
-        echo html_writer::tag('dt', get_string('courseprofiles'));
-        echo html_writer::tag('dd', rtrim($courselisting,', '));
-    }
-}
 if (!isset($hiddenfields['firstaccess'])) {
     if ($user->firstaccess) {
         $datestring = userdate($user->firstaccess)."&nbsp; (".format_time(time() - $user->firstaccess).")";
