@@ -141,6 +141,7 @@ class mod_assign_mod_form extends moodleform_mod {
 
         $name = get_string('teamsubmission', 'assign');
         $mform->addElement('selectyesno', 'teamsubmission', $name);
+
         $mform->addHelpButton('teamsubmission', 'teamsubmission', 'assign');
         $mform->setDefault('teamsubmission', 0);
 
@@ -169,12 +170,12 @@ class mod_assign_mod_form extends moodleform_mod {
         $name = get_string('sendnotifications', 'assign');
         $mform->addElement('selectyesno', 'sendnotifications', $name);
         $mform->addHelpButton('sendnotifications', 'sendnotifications', 'assign');
-        $mform->setDefault('sendnotifications', 1);
+        $mform->setDefault('sendnotifications', 0);
 
         $name = get_string('sendlatenotifications', 'assign');
         $mform->addElement('selectyesno', 'sendlatenotifications', $name);
         $mform->addHelpButton('sendlatenotifications', 'sendlatenotifications', 'assign');
-        $mform->setDefault('sendlatenotifications', 1);
+        $mform->setDefault('sendlatenotifications', 0);
         $mform->disabledIf('sendlatenotifications', 'sendnotifications', 'eq', 1);
 
         // Plagiarism enabling form.
