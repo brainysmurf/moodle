@@ -164,8 +164,9 @@
     $context = context_system::instance();
     $extracolumns = get_extra_user_fields($context);
     $columns = array_merge(array('firstname', 'lastname'), $extracolumns,
-            array('city', 'country', 'lastaccess'));
-
+			   //        array('city', 'country', 'lastaccess'));
+			   array('lastaccess'));
+			   
     foreach ($columns as $column) {
         $string[$column] = get_user_field_name($column);
         if ($sort != $column) {
@@ -266,10 +267,11 @@
             $table->head[] = ${$field};
             $table->colclasses[] = 'leftalign';
         }
-        $table->head[] = $city;
-        $table->colclasses[] = 'leftalign';
-        $table->head[] = $country;
-        $table->colclasses[] = 'leftalign';
+	// Remove city and country
+        //$table->head[] = $city;
+        //$table->align[] = 'left';
+        //$table->head[] = $country;
+        //$table->align[] = 'left';
         $table->head[] = $lastaccess;
         $table->colclasses[] = 'leftalign';
         $table->head[] = get_string('edit');
@@ -356,8 +358,9 @@
             foreach ($extracolumns as $field) {
                 $row[] = $user->{$field};
             }
-            $row[] = $user->city;
-            $row[] = $user->country;
+	    // remove city and country
+            //$row[] = $user->city;
+            //$row[] = $user->country;
             $row[] = $strlastaccess;
             if ($user->suspended) {
                 foreach ($row as $k=>$v) {
