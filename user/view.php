@@ -304,9 +304,9 @@ if (!isset($hiddenfields['mycourses'])) {
                         $class = 'class="dimmed"';
                     }
                     $courselisting .= "<a href=\"{$CFG->wwwroot}/user/view.php?id={$user->id}&amp;course={$mycourse->id}\" $class >"
-                        . $cfullname . "</a>, ";
+                        . $cfullname . "</a><br />";
                 } else {
-                    $courselisting .= $cfullname . ", ";
+                    $courselisting .= $cfullname . "<br />";
                     $PAGE->navbar->add($cfullname);
                 }
             }
