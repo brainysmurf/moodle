@@ -1197,12 +1197,13 @@ sup {vertical-align: super;}
 /* The instruction/help area */
 .jsenabled .choosercontainer #chooseform .instruction,
 .jsenabled .choosercontainer #chooseform .typesummary {
+    font-size: 10pt;
     display: none;
     position: absolute;
     top: 0px;
     right: 0px;
     bottom: 0px;
-    left: 20.3em;
+    left: 18em;
     margin: 0;
     padding: 1.6em;
     background-color: #FFFFFF;
