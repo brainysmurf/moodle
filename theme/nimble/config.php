@@ -245,7 +245,7 @@ $THEME->rarrow    = '&rang;';
 // include.
 ////////////////////////////////////////////////////
 
-// $THEME->rendererfactory
+$THEME->rendererfactory = 'theme_overridden_renderer_factory';
 
 ////////////////////////////////////////////////////
 // Sets a custom render factory to use with the
