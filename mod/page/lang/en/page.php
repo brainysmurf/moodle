@@ -34,16 +34,15 @@ $string['legacyfiles'] = 'Migration of old course file';
 $string['legacyfilesactive'] = 'Active';
 $string['legacyfilesdone'] = 'Finished';
 $string['modulename'] = 'Page';
-$string['modulename_help'] = 'The page module enables a teacher to create a web page resource using the text editor. A page can display text, images, sound, video, web links and embedded code, such as Google maps.
+$string['modulename_help'] = 'Common uses with _Page_:
 
-Advantages of using the page module rather than the file module include the resource being more accessible (for example to users of mobile devices) and easier to update.
+* To display a few movies that students can view in one place
+* To add a large amount of information and put it in one place
+* To add another web site with html
 
-For large amounts of content, it\'s recommended that a book is used rather than a page.
+Basically, if you want to put something in your course that students see immediately when they open your course, use a _Label_.
 
-A page may be used
-
-* To present the terms and conditions of a course or a summary of the course syllabus
-* To embed several videos or sound files together with some explanatory text';
+If you want to add something to a new page on your course, not on the top level, but one click away, you should use a _Page_.';
 $string['modulename_link'] = 'mod/page/view';
 $string['modulenameplural'] = 'Pages';
 $string['neverseen'] = 'Never seen';
