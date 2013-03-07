@@ -27,13 +27,14 @@
 $string['label:addinstance'] = 'Add a new label';
 $string['labeltext'] = 'Label text';
 $string['modulename'] = 'Label';
-$string['modulename_help'] = 'The label module enables text and multimedia to be inserted into the course page in between links to other resources and activities. Labels are very versatile and can help to improve the appearance of a course if used thoughtfully.
+$string['modulename_help'] = 'Common uses with _Label_:
 
-Labels may be used
+* To display a movie in the top level of the course
+* To add graphics or information to the top level
 
-* To split up a long list of activities with a subheading or an image
-* To display an embedded sound file or video directly on the course page
-* To add a short description to a course section';
+Basically, if you want to put something in your course that students see immediately when they open your course, use a _Label_.
+
+If you want to add something to a new page on your course, not on the top level, but one click away, you should use a _Page_.';
 $string['modulename_link'] = 'mod/label/view';
 $string['modulenameplural'] = 'Labels';
 $string['pluginadministration'] = 'Label administration';
