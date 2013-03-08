@@ -70,7 +70,10 @@ class mod_url_mod_form extends moodleform_mod {
             $mform->setDefault('display', key($options));
         } else {
             $mform->addElement('select', 'display', get_string('displayselect', 'url'), $options);
-            $mform->setDefault('display', $config->display);
+	    //ssis default should be to open a url, change default:
+            //$mform->setDefault('display', $config->display);
+	    $mform->setDefault('display', RESOURCELIB_DISPLAY_OPEN);
+            $mform->setAdvanced('display', $config->display_adv);
             $mform->addHelpButton('display', 'displayselect', 'url');
         }
 
