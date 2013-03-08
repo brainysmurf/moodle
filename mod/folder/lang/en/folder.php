@@ -31,12 +31,14 @@ $string['folder:managefiles'] = 'Manage files in folder module';
 $string['folder:view'] = 'View folder content';
 $string['foldercontent'] = 'Files and subfolders';
 $string['modulename'] = 'Folder';
-$string['modulename_help'] = 'The folder module enables a teacher to display a number of related files inside a single folder, reducing scrolling on the course page. A zipped folder may be uploaded and unzipped for display, or an empty folder created and files uploaded into it.
+$string['modulename_help'] = '_Folders_ are a collection of files. Some common uses:
 
-A folder may be used
+* Collection of PDFs for a research project
+* A place for students to share their file-based projects
 
-* For a series of files on one topic, for example a set of past examination papers in pdf format or a collection of image files for use in student projects
-* To provide a shared uploading space for teachers on the course page (keeping the folder hidden so that only teachers can see it)';
+You can use drag\'n\'drop, you can remove and add more files later on.
+
+Students can be given permissions to upload to a folder too, ask if you do not know how.';
 $string['modulename_link'] = 'mod/folder/view';
 $string['modulenameplural'] = 'Folders';
 $string['neverseen'] = 'Never seen';
