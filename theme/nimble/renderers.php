@@ -3,8 +3,92 @@
 require_once($CFG->dirroot.'/course/lib.php');
 
 class theme_nimble_core_renderer extends core_renderer {
+
+    protected function seek(&$branch) {
+      foreach ($branch as $b) {
+	  if ($b->categories) {
+	      $this->seek($b->categories);
+	  }
+
+        foreach ( $b->courses as $course ) {
+  	    if ($course && ! $this->user_courses[$course->id]) {
+	        unset($b->courses[$course->id]);
+	    }
+        }
+
+      }
+    }
+
+    protected function ridof(&$branch) {
+        foreach ($branch as $b) {
+	    if ($b->categories) {
+	        $this->ridof($b->categories);
+	    }
+        }
+	
+        for ($i = 0, $size = count($branch); $i < $size; $i++) {
+	    if ( $branch[$i] && ! $branch[$i]->courses && ! $branch[$i]->categories ) {
+	        unset($branch[$i]);
+	    }
+        }
+    }
+
+    protected function howmany($branch) {
+        $this_total = 0;
+        foreach ($branch as $b) {
+	    if ($b->courses) {
+	        $this_total += count($b->courses);
+	    }
+	    if ($b->categories) {
+		$this_total += $this->howmany($b->categories); 
+	    }
+        }
+	return $this_total;
+    }
+
+    protected function return_courses($branch) {
+        $these_courses = array();
+	foreach ($branch as $b) {
+            if ($b->categories) {
+	        foreach ($this->return_courses($b->categories) as $course) {
+		    $these_courses[$course->id] = $course;
+		    $these_courses[$course->id]->category = 50;
+	        }
+	    }
+	    if ($b->courses) {
+	        foreach ($b->courses as $course) {
+	            $these_courses[$course->id] = $course;
+		    $these_courses[$course->id]->category = 50;
+	        }
+            }
+	}
+	return $these_courses;
+    }
+
+    protected function spellout(&$branch) {
+        $teachinglearningbranchindex = 3;
+	$maximumnumber = 20;
+
+	$teachinglearningbranch = array($branch[$teachinglearningbranchindex]);
+        if ($this->howmany($teachinglearningbranch) <= 20) {
+	    $branch[$teachinglearningbranchindex]->courses = $this->return_courses($teachinglearningbranch);
+	    $branch[$teachinglearningbranchindex]->categories = array();
+	}
+    }
+
+    public function setup_courses() {
+         $this->my_courses = get_course_category_tree();
+	 $this->all_courses = $this->my_courses;  // copies it
+         $this->user_courses = enrol_get_my_courses('category', 'visible DESC, fullname ASC');
+	 
+	 $this->seek($this->my_courses);
+	 $this->ridof($this->my_courses);
+	 $this->spellout($this->my_courses);
+     }
+
     protected function render_custom_menu(custom_menu $menu) {
         // First check if the user is logged in. No point proceeding if they arn't
+
         if (isloggedin())
 	  if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) {
 	    $sort = 1000;
@@ -13,24 +97,10 @@ class theme_nimble_core_renderer extends core_renderer {
 	      $this->add_category_to_custom_menu_for_admins($menu, $category);
 	    }
 	  } else {
-              // Get the my courses branch. If it doesn't exist (not enrolled in any courses) then
-              // this will be false otherwise it will be a navigation_node instance.
-              //$mycourses = $this->page->navigation->get('mycourses');
-              $mycategories = enrol_get_my_courses('category', 'visible DESC, fullname ASC');
-              foreach ($mycategories as $catnode) {
-		print_object($catnode);
-		$this->add_category_to_custom_menu($menu, $catnode);
-	      }
-              //if ( $mycourses  && ($mycourses->has_children()) ) {
-                  // Get the category nodes within the my courses branch. This will return an array of navigation_node instances.
-                  // If there arn't any categories this will return an empty array.
-                  //$categories = $mycourses->children->type(navigation_node::TYPE_CATEGORY);
-                  //foreach ($categories as $catnode) {
-                      // Add each category to the custom menu structure we already have (gets added to the end)
-	              //    $this->add_category_to_custom_menu($menu, $catnode);
-	          //}
-              }
-	//}
+    	      $this->setup_courses();
+	      $this->add_to_custom_menu($menu, $this->my_courses);
+	      $this->teachinglearningnode->add('Browse ALL Courses', new moodle_url('/course/category.php', array('id' => 50)), 'Browse ALL Courses');
+          }
         return parent::render_custom_menu($menu);
     }
 
@@ -38,7 +108,7 @@ class theme_nimble_core_renderer extends core_renderer {
         // We use a sort starting at a high value to ensure the category gets added to the end
         static $sort = 1000;
 	$old_sort = $sort;
-	$node = $menu->add($category->name, new moodle_url('/course/category.php', array('id' =>  $category->id)), NULL, NULL, $sort++);
+	$node = $menu->add($category->name, new moodle_url('/course/category.php', array('id' =>  $category->id)), NULL, NULL, $old_sort++);
 
         // Add subcategories to the category node by recursivily calling this method.
         $subcategories = $category->categories;
@@ -56,65 +126,20 @@ class theme_nimble_core_renderer extends core_renderer {
 	$sort = $old_sort + 2;
     }
 
-    protected function add_category_to_custom_menu($menu, stdClass $category) {
-        // We use a sort starting at a high value to ensure the category gets added to the end
-        static $sort = 1000;
-	$old_sort = $sort;
-	static $teachinglearning = array("English", "Arts", "Science", "World Languages", "Humanities", "Design", "Library, Study Skills, Other", "IB", "Physical Education", "Math", "Homeroom", "Chinese");
-	static $top_level = array(
-		"Parents" => 500,
-		"Curriculum" => 450,
-		"Teaching & Learning" => 300,
-		"School Life" => 250,
-		"Community" => 200,
-		"Other" => 400);
+    protected function add_to_custom_menu($menu, $array) {
+	foreach ($array as $a) {
+	    $categories_no_click = NULL; // no clicking, change this to a url if you want clicking
 
-        $category_title = $category->get_title();
+	    $node = $menu->add($a->name, $categories_no_click, NULL, NULL, $a->sortorder);
+	    if ($a->name == 'Teaching & Learning') {
+	        $this->teachinglearningnode = $node;
+	    }
 
-	if ($category_title == "Invisible") {
-		// Do not show at all
-		return ;
-	}
+            $this->add_to_custom_menu($node, $a->categories);
 
-	if (in_array($category_title, $top_level)) {
-	  $this_sort = $top_level[$category_title];
+            foreach ($a->courses as $course) {
+	      $node->add($course->fullname, new moodle_url('/course/view.php', array('id' => $course->id)), $course->fullname);
+            }
         }
-
-	// We need to figure out what to make node
-	// node should point to the teaching & learning node (which is captured along the way)
-	// so that courses go on there directly without having subcategories
-	// However, if the number of courses is too large (which happens with some teachers, esp heads)
-	// We SHOULD use categories!
-
-	// So, get the courses and subcategories first so we can do the right math
-	$courses = $category->children->type(navigation_node::TYPE_COURSE);
-	$subcategories = $category->children->type(navigation_node::TYPE_CATEGORY);
-
-	// If we are inside a category we want to hide...
-	if (in_array($category_title, $teachinglearning) && count($courses) < 10) {
-	  //...set node to the captured teaching & learning node...
-	  $node = $this->captured_teaching_learning;
-	} else {
-	  //...otherwise continue on as normal
-          $node = $menu->add($category->get_title(), $category->action, $category->get_title(), $sort++);
-	}
-
-        if ($category_title == "Teaching & Learning") {
-	  $this->captured_teaching_learning = $node;
-	}
-
-        // Add subcategories to the category node by recursivily calling this method.
-        foreach ($subcategories as $subcategory) {
-            // We need to provide the category node and the subcategory to add
-
-            $this->add_category_to_custom_menu($node, $subcategory);
-        }
-
-        // Now we add courses to the category node in the menu
-        foreach ($courses as $course) {
-            $node->add($course->get_title(), $course->action, $course->get_title());
-        }
-
-	$sort = $old_sort + 2;
     }
 }
