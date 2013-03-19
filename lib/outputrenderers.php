@@ -631,6 +631,7 @@ class core_renderer extends renderer_base {
         }
 
         $loggedinas = '<div class="logininfo">'.$loggedinas.'</div>';
+	$loggedinas .= '<a href="http://dragonnet.ssis-suzhou.net"><img src="http://dragonnet.ssis-suzhou.net/pix/smallogono.gif" /></a>';
 
         if (isset($SESSION->justloggedin)) {
             unset($SESSION->justloggedin);
