@@ -527,11 +527,12 @@ function groups_print_course_menu($course, $urlroot, $return=false) {
         }
     }
 
-    if ($groupmode == VISIBLEGROUPS) {
-        $grouplabel = get_string('groupsvisible');
-    } else {
-        $grouplabel = get_string('groupsseparate');
-    }
+    //if ($groupmode == VISIBLEGROUPS) {
+      //$grouplabel = get_string('groupsvisible');
+    $grouplabel = 'Filter by classes'; 
+	//} else {
+      //$grouplabel = get_string('groupsseparate');
+	//}
 
     if ($aag and $course->defaultgroupingid) {
         if ($grouping = groups_get_grouping($course->defaultgroupingid)) {
