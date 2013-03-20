@@ -130,12 +130,12 @@ class theme_nimble_core_renderer extends core_renderer {
 	foreach ($array as $a) {
 	    $categories_no_click = NULL; // no clicking, change this to a url if you want clicking
 
+	    if ($a->name == 'Invisible') { continue; }
+
 	    $node = $menu->add($a->name, $categories_no_click, NULL, NULL, $a->sortorder);
 	    if ($a->name == 'Teaching & Learning') {
 	        $this->teachinglearningnode = $node;
 	    }
-
-	    if ($a->name == 'Invisible') { continue; }
 
             $this->add_to_custom_menu($node, $a->categories);
 
