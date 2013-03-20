@@ -65,6 +65,12 @@
     $rolenamesurl = new moodle_url("$CFG->wwwroot/user/index.php?contextid=$context->id&sifirst=&silast=");
 
     $rolenames = role_fix_names(get_profile_roles($context), $context, ROLENAME_ALIAS, true);
+
+    // SSIS doesn't want parents in the list, remove them
+    if ( in_array('Parents', $rolenames) ) {
+      array_splice($rolenames, array_search('Parents', $rolenames));
+    }
+
     if ($isfrontpage) {
         $rolenames[0] = get_string('allsiteusers', 'role');
     } else {
@@ -194,7 +200,7 @@
 //
 // Modified code below to only display courses in there:
 // This really has been cherry-picked and it's unlikely to be able to be abstracted away for general use...
-$teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 1137, 1120, 1290, 1166, 1162, 1360, 1043, 1045, 1113, 1055, 1019, 1060, 1361, 1280, 1100, 1292, 1082, 1151, 1101, 1131, 1357, 1020, 1167, 1112, 1279, 1070, 1118, 1244, 1146, 1076, 1119, 1029, 1037, 1142, 1358, 1048, 1035, 1128, 1046, 1114, 1078, 1098, 1152, 1033, 1256, 1115, 1050, 1106, 1191, 1025, 1159, 1054, 1062, 1355, 1177, 1034, 1086, 1140, 1246, 1194, 1179, 1134, 1184, 1091, 1190, 1263, 1096, 1089, 1121, 1108, 1067, 1168, 1192, 1149, 1094, 1289, 1104, 1041, 1053, 1154, 1235, 1072, 1052, 1283, 1138, 1049, 1092, 1187, 1281, 1087, 1171, 1145, 1165, 1147, 1196, 1148, 1175, 1099,1058, 1066, 1243, 1153, 1265, 1063, 1061, 107, 1028, 1026, 1064, 1039, 1073, 1038, 1047, 1174, 1150, 1132, 1288, 1136, 1102, 1141, 1095, 1198, 1261, 1085, 1326, 1199,1040, 1036, 1032, 1065, 1044, 1282, 1031, 1236, 1193, 1158, 1107, 1129, 1122, 1024, 1195, 1155, 1110, 1186, 1276, 1285, 1059, 1057, 1111, 1135, 1027, 1126, 1069, 1090,1117, 1130, 1068, 1286, 1156, 1077, 1245, 1169, 1021, 1178, 1042, 1097, 1197, 1183, 1109, 1164, 1030, 1051, 1172, 1116, 1125, 1318, 1079, 1176, 1144, 1075, 1157, 1127,1088, 1081, 1188, 1056, 1074, 1161, 1023);
+$teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 1137, 1120, 1290, 1166, 1162, 1360, 1043, 1045, 1113, 1055, 1019, 1060, 1361, 1280, 1100, 1292, 1082, 1151, 1101, 1131, 1357, 1020, 1167, 1112, 1279, 1070, 1118, 1244, 1146, 1076, 1119, 1029, 1037, 1142, 1358, 1048, 1035, 1128, 1046, 1114, 1078, 1098, 1152, 1033, 1256, 1115, 1050, 1106, 1191, 1025, 1159, 1054, 1062, 1355, 1177, 1034, 1086, 1140, 1246, 1194, 1179, 1134, 1184, 1091, 1190, 1263, 1096, 1089, 1121, 1108, 1067, 1168, 1192, 1149, 1094, 1289, 1104, 1041, 1053, 1154, 1235, 1072, 1052, 1283, 1138, 1049, 1092, 1187, 1281, 1087, 1171, 1145, 1165, 1147, 1196, 1148, 1175, 1099,1058, 1066, 1243, 1153, 1265, 1063, 1061, 107, 1028, 1026, 1064, 1039, 1073, 1038, 1047, 1174, 1150, 1132, 1288, 1136, 1102, 1141, 1095, 1198, 1261, 1085, 1326, 1199,1040, 1036, 1032, 1065, 1044, 1282, 1031, 1236, 1193, 1158, 1107, 1129, 1122, 1024, 1195, 1155, 1110, 1186, 1276, 1285, 1059, 1057, 1111, 1135, 1027, 1126, 1069, 1090,1117, 1130, 1068, 1286, 1156, 1077, 1245, 1169, 1021, 1178, 1042, 1097, 1197, 1183, 1109, 1164, 1030, 1051, 1172, 1116, 1125, 1318, 1079, 1176, 1144, 1075, 1157, 1127,1088, 1081, 1188, 1056, 1074, 1161, 1023, 1384);
 
     if ($mycourses = enrol_get_my_courses()) {
         $courselist = array();
@@ -212,68 +218,13 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
             $courselist = array(SITEID => format_string($SITE->shortname, true, array('context' => $systemcontext))) + $courselist;
         }
         $select = new single_select($popupurl, 'id', $courselist, $course->id, array(''=>'choosedots'), 'courseform');
-        $select->set_label(get_string('mycourses'));
-        //$controlstable->data[0]->cells[] = $OUTPUT->render($select);
+        $select->set_label('Filter by courses: ');
+        $controlstable->data[0]->cells[] = $OUTPUT->render($select);
     }
 
     $controlstable->data[0]->cells[] = groups_print_course_menu($course, $baseurl->out(), true);
 
-    if (!isset($hiddenfields['lastaccess'])) {
-        // get minimum lastaccess for this course and display a dropbox to filter by lastaccess going back this far.
-        // we need to make it diferently for normal courses and site course
-        if (!$isfrontpage) {
-            $minlastaccess = $DB->get_field_sql('SELECT min(timeaccess)
-                                                   FROM {user_lastaccess}
-                                                  WHERE courseid = ?
-                                                        AND timeaccess != 0', array($course->id));
-            $lastaccess0exists = $DB->record_exists('user_lastaccess', array('courseid'=>$course->id, 'timeaccess'=>0));
-        } else {
-            $minlastaccess = $DB->get_field_sql('SELECT min(lastaccess)
-                                                   FROM {user}
-                                                  WHERE lastaccess != 0');
-            $lastaccess0exists = $DB->record_exists('user', array('lastaccess'=>0));
-        }
-
-        $now = usergetmidnight(time());
-        $timeaccess = array();
-        $baseurl->remove_params('accesssince');
-
-        // makes sense for this to go first.
-        $timeoptions[0] = get_string('selectperiod');
-
-        // days
-        for ($i = 1; $i < 7; $i++) {
-            if (strtotime('-'.$i.' days',$now) >= $minlastaccess) {
-                $timeoptions[strtotime('-'.$i.' days',$now)] = get_string('numdays','moodle',$i);
-            }
-        }
-        // weeks
-        for ($i = 1; $i < 10; $i++) {
-            if (strtotime('-'.$i.' weeks',$now) >= $minlastaccess) {
-                $timeoptions[strtotime('-'.$i.' weeks',$now)] = get_string('numweeks','moodle',$i);
-            }
-        }
-        // months
-        for ($i = 2; $i < 12; $i++) {
-            if (strtotime('-'.$i.' months',$now) >= $minlastaccess) {
-                $timeoptions[strtotime('-'.$i.' months',$now)] = get_string('nummonths','moodle',$i);
-            }
-        }
-        // try a year
-        if (strtotime('-1 year',$now) >= $minlastaccess) {
-            $timeoptions[strtotime('-1 year',$now)] = get_string('lastyear');
-        }
-
-        if (!empty($lastaccess0exists)) {
-            $timeoptions[-1] = get_string('never');
-        }
-
-        if (count($timeoptions) > 1) {
-            $select = new single_select($baseurl, 'accesssince', $timeoptions, $accesssince, null, 'timeoptions');
-            $select->set_label(get_string('usersnoaccesssince'));
-            $controlstable->data[0]->cells[] = $OUTPUT->render($select);
-        }
-    }
+    // ssis doesn't need this lastaccess ability, deleted here
 
     $formatmenu = array( '0' => get_string('brief'),
                          '1' => get_string('userdetails'));
@@ -505,7 +456,7 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
             $headingurl = new moodle_url($CFG->wwwroot . '/' . $CFG->admin . '/roles/assign.php',
                     array('roleid' => $roleid, 'contextid' => $context->id));
             $heading .= $OUTPUT->action_icon($headingurl, new pix_icon('t/edit', get_string('edit')));
-        }
+	     }
         echo $OUTPUT->heading($heading, 3);
     } else {
         if ($course->id != SITEID && has_capability('moodle/course:enrolreview', $context)) {
@@ -585,19 +536,19 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
             }
 
 	    // For teachers, print out the class emails:
-           if ( has_capability('moodle/grade:edit', $context) ) {
-               $every_group = groups_get_all_groups($course->id);
-               if ($every_group) {
-                   echo "<br /><b>Class emails:</b><br />";
-                   }
-               foreach ($every_group as $this_group) {
-                   $email_addr = groups_get_group($this_group->id)->name.'@student.ssis-suzhou.net';
-                   echo '<a href="mailto:'.$email_addr.'">'.$email_addr.'</a><br />';
+           if ( $currentgroup && has_capability('moodle/grade:edit', $context) ) {
+	       $groupname = groups_get_group_name($currentgroup);
+	       echo '<br /><b>Bulk Emails for This Class:</b><br />';
+	       $emailaddr = $groupname.'@student.ssis-suzhou.net';
+	       echo '<a href="mailto:'.$emailaddr.'">'.$emailaddr.'</a><br />';
+               echo "<br /><b>Bulk Emails to parents for Entire Class:</b><br />";
+	       $emailaddr = $groupname.'PARENTS@student.ssis-suzhou.net';
+	       echo '<a href="mailto:'.$emailaddr.'">'.$emailaddr.'</a><br /><br />';
                }
-               if ($every_group) {
-                   echo "<br />";
-               }
-           }
+
+	   else {
+	     echo '<p>Looking for class bulk emails? Use the \'Filter by classes\' feature above</p>';
+	     }
 
             if ($matchcount > 0) {
                 $usersprinted = array();
@@ -637,59 +588,56 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
                     if (!empty($user->role)) {
                         $row->cells[1]->text .= get_string('role').get_string('labelsep', 'langconfig').$user->role.'<br />';
                     }
-                    if ($user->maildisplay == 1 or ($user->maildisplay == 2 and ($course->id != SITEID) and !isguestuser()) or
+
+		    if ( substr($user->idnumber, 0, 3) == '000' ) {
+		      // do nothing because ssis individuals with three leading zeroes gets a different print out
+		    } else {
+
+                      if ($user->maildisplay == 1 or ($user->maildisplay == 2 and ($course->id != SITEID) and !isguestuser()) or
                                 has_capability('moodle/course:viewhiddenuserfields', $context) or
                                 in_array('email', $extrafields) or ($user->id == $USER->id)) {
                         $row->cells[1]->text .= get_string('email').get_string('labelsep', 'langconfig').html_writer::link("mailto:$user->email", $user->email) . '<br />';
-                    }
-                    foreach ($extrafields as $field) {
-		      if ( ($field === 'email') or ($field === 'lastaccess') ) {
+                      }
+
+
+                      foreach ($extrafields as $field) {
+		        if ( ($field === 'email') or ($field === 'lastaccess') ) {
                             // Skip email because it was displayed with different
                             // logic above (because this page is intended for
                             // students too)
                             continue;
-                        }
+                         }
                         $row->cells[1]->text .= get_user_field_name($field) .
                                 get_string('labelsep', 'langconfig') . s($user->{$field}) . '<br />';
-                    }
+                      }
 
+		   }
                    if ( has_capability('moodle/grade:edit', $context) ) {
                      if ( strlen($user->idnumber) == 5 ) {
+		       if ( substr($user->idnumber, 0, 3) == '000') {
+			 $break = '<br />';
+			 $usebccaddr = 'usebccstudents' . strtoupper(ltrim($user->username, 'a..z')) . '@student.ssis-suzhou.net';
+			 $row->cells[1]->text .= 'All Students: ' . '<a href="mailto:?bcc=' . $usebccaddr . '">' . $usebccaddr . '</a>' . $break;
+			 $usebccaddr = 'usebccparents' . strtoupper(ltrim($user->username, 'a..z')) . '@student.ssis-suzhou.net';
+			 $row->cells[1]->text .= 'All Parents: ' . '<a href="mailto:?bcc=' . $usebccaddr . '">' . $usebccaddr . '</a>' . $break;
+			 $teachersemail = 'teachers' . strtoupper(ltrim($user->username, 'a..z')) . '@student.ssis-suzhou.net';
+			 $row->cells[1]->text .= 'All Teachers: <a href="mailto:' . $teachersemail . '">' . $teachersemail . '<br />';
+		       } else {
                         $parent_email_address = $user->username . "PARENTS@student.ssis-suzhou.net";
                         $row->cells[1]->text .= "Parent's Email: " . '<a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a>'  . '<br />';
                         $teachers_email_address = $user->username . "TEACHERS@student.ssis-suzhou.net";
                         $row->cells[1]->text .= "All Teacher's Emails: " . '<a href="mailto:' . $teachers_email_address . '">' . $teachers_email_address . '</a>' . '<br />';
                         $hr_email_address = $user->username . "HR@student.ssis-suzhou.net";
                         $row->cells[1]->text .= "Homeroom Teacher's Email: " . '<a href="mailto:' . $hr_email_address . '">' . $hr_email_address . '</a>' . '<br />';
-                     }
+		     }
                    } else {
                    if ( (substr($USER->idnumber, -1) == 'P') and (substr($user->idnumber, -1) != 'P') ) {
                      $parent_email_address = $user->username . "PARENTS@student.ssis-suzhou.net";
                       $row->cells[1]->text .= "Parent's Email: " . '<a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a>' . '<br />';
                    }
                    }
-
-                    #if (($user->city or $user->country) and (!isset($hiddenfields['city']) or !isset($hiddenfields['country']))) {
-                    #    $row->cells[1]->text .= get_string('city').get_string('labelsep', 'langconfig');
-                    #    if ($user->city && !isset($hiddenfields['city'])) {
-                    #        $row->cells[1]->text .= $user->city;
-                    #    }
-                    #    if (!empty($countries[$user->country]) && !isset($hiddenfields['country'])) {
-                    #        if ($user->city && !isset($hiddenfields['city'])) {
-                    #            $row->cells[1]->text .= ', ';
-                    #        }
-                    #        $row->cells[1]->text .= $countries[$user->country];
-                    #    }
-                    #    $row->cells[1]->text .= '<br />';
-                    #}
-                    #if (!isset($hiddenfields['lastaccess'])) {
-                    #    if ($user->lastaccess) {
-                    #        $row->cells[1]->text .= get_string('lastaccess').get_string('labelsep', 'langconfig').userdate($user->lastaccess);
-                    #        $row->cells[1]->text .= '&nbsp; ('. format_time(time() - $user->lastaccess, $datestring) .')';
-                    #    } else {
-                    #        $row->cells[1]->text .= get_string('lastaccess').get_string('labelsep', 'langconfig').get_string('never');
-                    #    }
-                    #}
+		   }
+		   // ssis doesn't need or want city or country, code deleted here
 
                     $row->cells[1]->text .= $OUTPUT->container_end();
 
@@ -699,9 +647,7 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 
                     $links = array();
 
-                    #if ($CFG->bloglevel > 0) {
-                    #    $links[] = html_writer::link(new moodle_url('/blog/index.php?userid='.$user->id), get_string('blogs','blog'));
-                    #}
+		    // ssis doesn't need or want blogs, code deleted here
 
                     if (!empty($CFG->enablenotes) and (has_capability('moodle/notes:manage', $context) || has_capability('moodle/notes:view', $context))) {
                         $links[] = html_writer::link(new moodle_url('/notes/index.php?course=' . $course->id. '&user='.$user->id), get_string('notes','notes'));
@@ -724,7 +670,7 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
                     }
                     $table->data = array($row);
                     echo html_writer::table($table);
-                }
+	       }
 
             } else {
                 echo $OUTPUT->heading(get_string('nothingtodisplay'));
