@@ -135,6 +135,8 @@ class theme_nimble_core_renderer extends core_renderer {
 	        $this->teachinglearningnode = $node;
 	    }
 
+	    if ($a->name == 'Invisible') { continue; }
+
             $this->add_to_custom_menu($node, $a->categories);
 
             foreach ($a->courses as $course) {
