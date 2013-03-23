@@ -11,7 +11,7 @@ class theme_nimble_core_renderer extends core_renderer {
 	  }
 
         foreach ( $b->courses as $course ) {
-  	    if ($course && ! $this->user_courses[$course->id]) {
+	    if (! array_key_exists($course->id, $this->user_courses)) {
 	        unset($b->courses[$course->id]);
 	    }
         }
@@ -20,21 +20,17 @@ class theme_nimble_core_renderer extends core_renderer {
     }
 
     protected function ridof(&$branch) {
-        foreach ($branch as $b) {
-	    if ($b->categories) {
-	        $this->ridof($b->categories);
-	    }
-        }
-	
         for ($i = 0, $size = count($branch); $i < $size; $i++) {
-	    if ( $branch[$i] && ! $branch[$i]->courses && ! $branch[$i]->categories ) {
-	        unset($branch[$i]);
-	    }
+	  if ($branch[$i]->depth && $branch[$i]->depth == 1 && ! $branch[$i]->courses && ! $branch[$i]->categories) {
+	    unset($branch[$i]);
+	  }
+
         }
     }
 
     protected function howmany($branch) {
         $this_total = 0;
+	if (! $branch) { return 0; }
         foreach ($branch as $b) {
 	    if ($b->courses) {
 	        $this_total += count($b->courses);
@@ -47,6 +43,7 @@ class theme_nimble_core_renderer extends core_renderer {
     }
 
     protected function return_courses($branch) {
+      if (! $branch) { return $branch; }
         $these_courses = array();
 	foreach ($branch as $b) {
             if ($b->categories) {
@@ -69,8 +66,12 @@ class theme_nimble_core_renderer extends core_renderer {
         $teachinglearningbranchindex = 3;
 	$maximumnumber = 20;
 
-	$teachinglearningbranch = array($branch[$teachinglearningbranchindex]);
-        if ($this->howmany($teachinglearningbranch) <= 20) {
+	if (array_key_exists($teachinglearningbranchindex, $branch)) {
+	    $teachinglearningbranch = array($branch[$teachinglearningbranchindex]);
+	} else {
+	    $teachinglearningbranch = NULL;
+	}
+        if ($teachinglearningbranch && $this->howmany($teachinglearningbranch) <= 20) {
 	    $branch[$teachinglearningbranchindex]->courses = $this->return_courses($teachinglearningbranch);
 	    $branch[$teachinglearningbranchindex]->categories = array();
 	}
@@ -80,15 +81,12 @@ class theme_nimble_core_renderer extends core_renderer {
          $this->my_courses = get_course_category_tree();
 	 $this->all_courses = $this->my_courses;  // copies it
          $this->user_courses = enrol_get_my_courses('category', 'visible DESC, fullname ASC');
-	 
 	 $this->seek($this->my_courses);
 	 $this->ridof($this->my_courses);
 	 $this->spellout($this->my_courses);
      }
 
     protected function render_custom_menu(custom_menu $menu) {
-        // First check if the user is logged in. No point proceeding if they arn't
-
         if (isloggedin())
 	  if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) {
 	    $sort = 1000;
@@ -98,8 +96,11 @@ class theme_nimble_core_renderer extends core_renderer {
 	    }
 	  } else {
     	      $this->setup_courses();
+	      $this->teachinglearningnode = NULL;
 	      $this->add_to_custom_menu($menu, $this->my_courses);
-	      $this->teachinglearningnode->add('Browse ALL Courses', new moodle_url('/course/category.php', array('id' => 50)), 'Browse ALL Courses');
+	      if ($this->teachinglearningnode) {
+	          $this->teachinglearningnode->add('Browse ALL Courses', new moodle_url('/course/category.php', array('id' => 50)), 'Browse ALL Courses');
+	      }
           }
         return parent::render_custom_menu($menu);
     }
@@ -113,8 +114,6 @@ class theme_nimble_core_renderer extends core_renderer {
         // Add subcategories to the category node by recursivily calling this method.
         $subcategories = $category->categories;
         foreach ($subcategories as $subcategory) {
-            // We need to provide the category node and the subcategory to add
-	    //$node = $menu->add($subcategory->name, new moodle_url('/course/category.php', array('id' =>  $category->id)));
             $this->add_category_to_custom_menu_for_admins($node, $subcategory);
         }
 
