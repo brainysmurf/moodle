@@ -343,7 +343,10 @@
             $fullname = fullname($user, true);
 
             $row = array ();
-            $row[] = "<a href=\"../user/view.php?id=$user->id&amp;course=$site->id\">$fullname</a>";
+	    //ssis wants to be able to loginas easily.
+            //$row[] = "<a href=\"../user/view.php?id=$user->id&amp;course=$site->id\">$fullname</a>";
+	    $sesskey = sesskey();
+	    $row[] = "<a href=\"../course/loginas.php?user=$user->id&amp;sesskey=$sesskey\">$fullname</a>";
             foreach ($extracolumns as $field) {
                 $row[] = $user->{$field};
             }
