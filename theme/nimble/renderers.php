@@ -21,11 +21,13 @@ class theme_nimble_core_renderer extends core_renderer {
 
     protected function ridof(&$branch) {
         for ($i = 0, $size = count($branch); $i < $size; $i++) {
-	  if ($branch[$i]->depth && $branch[$i]->depth == 1 && ! $branch[$i]->courses && ! $branch[$i]->categories) {
-	    unset($branch[$i]);
-	  }
-
-        }
+	    if (isset($branch[$i]->categories) && ! empty($branch[$i]->categories)) {
+	        $this->ridof($branch[$i]->categories);
+	    }
+	    if (isset($branch[$i]->depth) && empty($branch[$i]->courses) && empty($branch[$i]->categories)) {
+	        unset($branch[$i]);
+            }
+	}
     }
 
     protected function howmany($branch) {
