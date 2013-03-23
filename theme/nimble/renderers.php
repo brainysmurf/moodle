@@ -11,7 +11,7 @@ class theme_nimble_core_renderer extends core_renderer {
 	  }
 
         foreach ( $b->courses as $course ) {
-  	    if ($course && ! $this->user_courses[$course->id]) {
+	    if ($course && ! in_array($course->id, $this->user_courses) {
 	        unset($b->courses[$course->id]);
 	    }
         }
