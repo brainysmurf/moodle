@@ -215,6 +215,11 @@ class tinymce_texteditor extends texteditor {
         // Remove temporary parameters.
         unset($params['moodle_config']);
 
+	// Added for mediacore
+	$params['plugins'] .= ",mediacoreinsert";
+	$params['theme_advanced_buttons3_add'] = ",|,mediacoreinsert";
+	// Done
+
         return $params;
     }
 
