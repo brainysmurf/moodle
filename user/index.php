@@ -67,9 +67,9 @@
     $rolenames = role_fix_names(get_profile_roles($context), $context, ROLENAME_ALIAS, true);
 
     // SSIS doesn't want parents in the list, remove them
-    if ( in_array('Parents', $rolenames) ) {
-      array_splice($rolenames, array_search('Parents', $rolenames));
-    }
+    //if ( in_array('Parents', $rolenames) ) {
+    //  array_splice($rolenames, array_search('Parents', $rolenames));
+    //}
 
     if ($isfrontpage) {
         $rolenames[0] = get_string('allsiteusers', 'role');
