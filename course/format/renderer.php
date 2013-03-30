@@ -173,7 +173,7 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
         $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
 
         if ($hasnamenotsecpg || $hasnamesecpg) {
-            $o.= $this->output->heading($this->section_title($section, $course), 3, 'sectionname');
+	     $o.= $this->output->heading($this->section_title($section, $course), 3, 'sectionname');
         }
 
         $o.= html_writer::start_tag('div', array('class' => 'summary'));
@@ -650,8 +650,8 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
         $sectionnavlinks = $this->get_nav_links($course, $modinfo->get_section_info_all(), $displaysection);
         $sectiontitle = '';
         $sectiontitle .= html_writer::start_tag('div', array('class' => 'section-navigation header headingblock'));
-        $sectiontitle .= html_writer::tag('span', $sectionnavlinks['previous'], array('class' => 'mdl-left'));
-        $sectiontitle .= html_writer::tag('span', $sectionnavlinks['next'], array('class' => 'mdl-right'));
+        //$sectiontitle .= html_writer::tag('span', $sectionnavlinks['previous'], array('class' => 'mdl-left'));
+        //$sectiontitle .= html_writer::tag('span', $sectionnavlinks['next'], array('class' => 'mdl-right'));
         // Title attributes
         $titleattr = 'mdl-align title';
         if (!$thissection->visible) {
