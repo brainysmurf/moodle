@@ -241,7 +241,7 @@ class core_course_renderer extends plugin_renderer_base {
         //});
 	//$frequently_used = array('label', 'page', 'assign', 'forum', 'url', 'file');
 	$activities = array_filter($modules, function($mod) {
-	    return in_array($mod->name, array('label', 'page', 'assign', 'forum', 'url', 'resource', 'folder', 'turnitin', 'etherpad'));
+	    return in_array($mod->name, array('questionnaire', 'label', 'page', 'assign', 'forum', 'url', 'resource', 'folder', 'turnitin', 'etherpad'));
 	  });
         if (count($activities)) {
             $formcontent .= $this->course_modchooser_title('activities');
@@ -253,7 +253,7 @@ class core_course_renderer extends plugin_renderer_base {
         //    return ($mod->archetype === MOD_ARCHETYPE_RESOURCE);
         //});
 	$resources = array_filter($modules, function($mod) {
-	    return ! in_array($mod->name, array('label', 'page', 'assign', 'forum', 'url', 'resource', 'folder', 'turnitin', 'etherpad'));
+	    return ! in_array($mod->name, array('questionnaire', 'label', 'page', 'assign', 'forum', 'url', 'resource', 'folder', 'turnitin', 'etherpad'));
 	  });
         if (count($resources)) {
             $formcontent .= $this->course_modchooser_title('resources');
