@@ -555,10 +555,6 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 	       echo '<a href="mailto:'.$emailaddr.'">'.$emailaddr.'</a><br /><br />';
                }
 
-	   else {
-	     echo '<p>Looking for class bulk emails? Use the \'Filter by classes\' feature above</p>';
-	     }
-
             if ($matchcount > 0) {
                 $usersprinted = array();
                 foreach ($userlist as $user) {
