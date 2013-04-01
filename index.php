@@ -31,6 +31,7 @@
     require_once('config.php');
     require_once($CFG->dirroot .'/course/lib.php');
     require_once($CFG->libdir .'/filelib.php');
+    require_once($CFG->dirroot .'/user/profile/lib.php');
 
     redirect_if_major_upgrade_required();
 
@@ -59,6 +60,25 @@
 
     if ($hassiteconfig && moodle_needs_upgrading()) {
         redirect($CFG->wwwroot .'/'. $CFG->admin .'/index.php');
+    }
+
+// Implement ssis's need to have the frontpage redirect
+
+    $user_info = profile_user_record($USER->id);
+    if ($user_info->isstudent) {
+        if ( in_array($user_info->grade, array('6', '7', '8')) ) {
+	    echo "In middle school";
+        } else if ( in_array($user_info->grade, array('10', '11', '12')) ) {
+	    echo "In high school";
+        } 
+    }
+
+    if ($user_info->isteacher) {
+	redirect($CFG->wwwroot . '/course/view.php?id=1386');
+    }
+
+    if ($user_info->isparent) {
+	echo "Is parent";
     }
 
     if (get_home_page() != HOMEPAGE_SITE) {
