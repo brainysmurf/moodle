@@ -547,10 +547,10 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 	    // For teachers, print out the class emails:
            if ( $currentgroup && has_capability('moodle/grade:edit', $context) ) {
 	       $groupname = groups_get_group_name($currentgroup);
-	       echo '<br /><b>Bulk Emails for This Class:</b><br />';
+	       echo '<br /><b>Bulk Email for All Students in this class:</b><br />';
 	       $emailaddr = $groupname.'@student.ssis-suzhou.net';
 	       echo '<a href="mailto:'.$emailaddr.'">'.$emailaddr.'</a><br />';
-               echo "<br /><b>Bulk Emails to parents for Entire Class:</b><br />";
+               echo "<br /><b>Bulk Email for All Parents who have children in this class:</b><br />";
 	       $emailaddr = $groupname.'PARENTS@student.ssis-suzhou.net';
 	       echo '<a href="mailto:'.$emailaddr.'">'.$emailaddr.'</a><br /><br />';
                }
