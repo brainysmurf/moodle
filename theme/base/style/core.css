@@ -70,7 +70,7 @@ a.dimmed_text:visited,
 .notifysuccess {color:#006600;}
 .reportlink {text-align:right;}
 a.autolink.glossary:hover {cursor: help;}
-/* Block which is hidden if javascript enabled, prevents fickering visible when JS from footer used! */
+/* Block which is hidden if javascript enabled, prevents flickering, visible when JS from footer used! */
 .collapsibleregioncaption {white-space: nowrap;}
 .collapsibleregioncaption img {vertical-align: middle;}
 .jsenabled .hiddenifjs {display: none;}
@@ -258,7 +258,9 @@ a.skip:active {position: static;display: block;}
 .dir-rtl .mform .helplink img { margin: 0 .45em 0 0; padding: 0;}
 .mform legend .helplink img { margin-right: .2em; }
 .dir-rtl .mform legend .helplink img { margin: 0 .45em 0 .2em; }
+.urlselect label,
 .singleselect label { margin-right: .3em; }
+.dir-rtl .urlselect label,
 .dir-rtl .singleselect label { margin-left: .3em; margin-right: 0; }
 
 input#id_externalurl {direction:ltr;}
