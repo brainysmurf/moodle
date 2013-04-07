@@ -65,11 +65,9 @@
 // Implement ssis's need to have the frontpage redirect
 
     $user_info = profile_user_record($USER->id);
-    if ($user_info->isstudent) {
-        if ( in_array($user_info->grade, array('6', '7', '8')) ) {
-	    echo "In middle school";
-        } else if ( in_array($user_info->grade, array('10', '11', '12')) ) {
-	    echo "In high school";
+    if ($USER->department) {
+	if ($user_front_page = $DB->get_record('course', array('idnumber'=>$USER->department))) {
+		redirect($CFG->wwwroot . '/course/view.php?id=' . $user_front_page->id);
         } 
     }
 
