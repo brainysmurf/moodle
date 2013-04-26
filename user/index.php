@@ -443,49 +443,54 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
         echo '</div>';
     }
 
-    if ($roleid > 0) {
-        $a = new stdClass();
-        $a->number = $totalcount;
-        $a->role = $rolenames[$roleid];
-        $heading = format_string(get_string('xuserswiththerole', 'role', $a));
+    //if ($roleid > 0) {
+    //    $a = new stdClass();
+    //   $a->number = $totalcount;
+    //    $a->role = $rolenames[$roleid];
+    //    $heading = format_string(get_string('xuserswiththerole', 'role', $a));
 
-        if ($currentgroup and $group) {
-            $a->group = $group->name;
-            $heading .= ' ' . format_string(get_string('ingroup', 'role', $a));
-        }
+   //     if ($currentgroup and $group) {
+   //         $a->group = $group->name;
+   //         $heading .= ' ' . format_string(get_string('ingroup', 'role', $a));
+   //    }
 
-        if ($accesssince) {
-            $a->timeperiod = $timeoptions[$accesssince];
-            $heading .= ' ' . format_string(get_string('inactiveformorethan', 'role', $a));
-        }
+   //     if ($accesssince) {
+   //         $a->timeperiod = $timeoptions[$accesssince];
+   //         $heading .= ' ' . format_string(get_string('inactiveformorethan', 'role', $a));
+   //     }
 
-        $heading .= ": $a->number";
+//        $heading .= ": $a->number";
 
-        if (user_can_assign($context, $roleid)) {
-            $headingurl = new moodle_url($CFG->wwwroot . '/' . $CFG->admin . '/roles/assign.php',
-                    array('roleid' => $roleid, 'contextid' => $context->id));
-            $heading .= $OUTPUT->action_icon($headingurl, new pix_icon('t/edit', get_string('edit')));
-	     }
-        echo $OUTPUT->heading($heading, 3);
-    } else {
-        if ($course->id != SITEID && has_capability('moodle/course:enrolreview', $context)) {
-            $editlink = $OUTPUT->action_icon(new moodle_url('/enrol/users.php', array('id' => $course->id)),
-                                             new pix_icon('t/edit', get_string('edit')));
-        } else {
-            $editlink = '';
-        }
-        if ($course->id == SITEID and $roleid < 0) {
-            $strallparticipants = get_string('allsiteusers', 'role');
-        } else {
-            $strallparticipants = get_string('allparticipants');
-        }
-        if ($matchcount < $totalcount) {
-            echo $OUTPUT->heading($strallparticipants.get_string('labelsep', 'langconfig').$matchcount.'/'.$totalcount . $editlink, 3);
-        } else {
-            echo $OUTPUT->heading($strallparticipants.get_string('labelsep', 'langconfig').$matchcount . $editlink, 3);
-        }
+//        if (user_can_assign($context, $roleid)) {
+  //          $headingurl = new moodle_url($CFG->wwwroot . '/' . $CFG->admin . '/roles/assign.php',
+    //                array('roleid' => $roleid, 'contextid' => $context->id));
+      //      $heading .= $OUTPUT->action_icon($headingurl, new pix_icon('t/edit', get_string('edit')));
+//	     }
+  //      echo $OUTPUT->heading($heading, 3);
+   // } else {
+     //   if ($course->id != SITEID && has_capability('moodle/course:enrolreview', $context)) {
+       //     $editlink = $OUTPUT->action_icon(new moodle_url('/enrol/users.php', array('id' => $course->id)),
+    //                                         new pix_icon('t/edit', get_string('edit')));
+   //     } else {
+  //          $editlink = '';
+  //      }
+  //      if ($course->id == SITEID and $roleid < 0) {
+  //          $strallparticipants = get_string('allsiteusers', 'role');
+  //      } else {
+  //          $strallparticipants = get_string('allparticipants');
+   //     }
+   //     if ($matchcount < $totalcount) {
+   //         echo $OUTPUT->heading($strallparticipants.get_string('labelsep', 'langconfig').$matchcount.'/'.$totalcount . $editlink, 3);
+ //       } else {
+  //          echo $OUTPUT->heading($strallparticipants.get_string('labelsep', 'langconfig').$matchcount . $editlink, 3);
+  //      }
+  //  }
+
+    if (has_capability('moodle/site:viewparticipants', $context)) {
+        echo '<form action="index.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id.'" />';
+        echo '<label for="search">' . get_string('search', 'search') . ' </label>';
+        echo '<input type="text" id="search" name="search" value="'.s($search).'" />&nbsp;<input type="submit" value="'.get_string('search').'" /></div></form>'."\n";
     }
-
 
     if ($bulkoperations) {
         echo '<form action="action_redir.php" method="post" id="participantsform">';
@@ -507,41 +512,41 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 
                 // Bar of first initials
 
-                echo '<div class="initialbar firstinitial">'.get_string('firstname').' : ';
-                if(!empty($firstinitial)) {
-                    echo '<a href="'.$baseurl->out().'&amp;sifirst=">'.$strall.'</a>';
-                } else {
-                    echo '<strong>'.$strall.'</strong>';
-                }
-                foreach ($alpha as $letter) {
-                    if ($letter == $firstinitial) {
-                        echo ' <strong>'.$letter.'</strong>';
-                    } else {
-                        echo ' <a href="'.$baseurl->out().'&amp;sifirst='.$letter.'">'.$letter.'</a>';
-                    }
-                }
-                echo '</div>';
+                //echo '<div class="initialbar firstinitial">'.get_string('firstname').' : ';
+                //if(!empty($firstinitial)) {
+                //    echo '<a href="'.$baseurl->out().'&amp;sifirst=">'.$strall.'</a>';
+                //} else {
+                //    echo '<strong>'.$strall.'</strong>';
+                //}
+                //foreach ($alpha as $letter) {
+                //    if ($letter == $firstinitial) {
+                 //       echo ' <strong>'.$letter.'</strong>';
+                //    } else {
+                //        echo ' <a href="'.$baseurl->out().'&amp;sifirst='.$letter.'">'.$letter.'</a>';
+                //    }
+               // }
+               // echo '</div>';
 
                 // Bar of last initials
 
-                echo '<div class="initialbar lastinitial">'.get_string('lastname').' : ';
-                if(!empty($lastinitial)) {
-                    echo '<a href="'.$baseurl->out().'&amp;silast=">'.$strall.'</a>';
-                } else {
-                    echo '<strong>'.$strall.'</strong>';
-                }
-                foreach ($alpha as $letter) {
-                    if ($letter == $lastinitial) {
-                        echo ' <strong>'.$letter.'</strong>';
-                    } else {
-                        echo ' <a href="'.$baseurl->out().'&amp;silast='.$letter.'">'.$letter.'</a>';
-                    }
-                }
-                echo '</div><br />';
+                //echo '<div class="initialbar lastinitial">'.get_string('lastname').' : ';
+                //if(!empty($lastinitial)) {
+                //    echo '<a href="'.$baseurl->out().'&amp;silast=">'.$strall.'</a>';
+                //} else {
+                //    echo '<strong>'.$strall.'</strong>';
+               // }
+                //foreach ($alpha as $letter) {
+                //    if ($letter == $lastinitial) {
+                //        echo ' <strong>'.$letter.'</strong>';
+               //     } else {
+               //         echo ' <a href="'.$baseurl->out().'&amp;silast='.$letter.'">'.$letter.'</a>';
+               //     }
+               // }
+               // echo '</div><br />';
 
-                $pagingbar = new paging_bar($matchcount, intval($table->get_page_start() / $perpage), $perpage, $baseurl);
-                $pagingbar->pagevar = 'spage';
-                echo $OUTPUT->render($pagingbar);
+                //$pagingbar = new paging_bar($matchcount, intval($table->get_page_start() / $perpage), $perpage, $baseurl);
+                //$pagingbar->pagevar = 'spage';
+                //echo $OUTPUT->render($pagingbar);
             }
 
 	    // For teachers, print out the class emails:
