@@ -32,6 +32,7 @@
     require_once($CFG->dirroot .'/course/lib.php');
     require_once($CFG->libdir .'/filelib.php');
     require_once($CFG->dirroot .'/user/profile/lib.php');
+    require_once("$CFG->libdir/externallib.php");
 
     redirect_if_major_upgrade_required();
 
@@ -64,19 +65,12 @@
 
 // Implement ssis's need to have the frontpage redirect
 
-    $user_info = profile_user_record($USER->id);
-    if ($USER->department) {
+    if (isset($USER->department) and $USER->department) {
 	if ($user_front_page = $DB->get_record('course', array('idnumber'=>$USER->department))) {
-		redirect($CFG->wwwroot . '/course/view.php?id=' . $user_front_page->id);
-        } 
-    }
-
-    if ($user_info->isteacher) {
-	redirect($CFG->wwwroot . '/course/view.php?id=1386');
-    }
-
-    if ($user_info->isparent) {
-	echo "Is parent";
+	  // Avoid a horrible permissions error, check if enrolled
+	  // This kills the database though...
+ 	  redirect($CFG->wwwroot . '/course/view.php?id=' . $user_front_page->id);
+	}
     }
 
     if (get_home_page() != HOMEPAGE_SITE) {
