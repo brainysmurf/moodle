@@ -31,6 +31,8 @@
     require_once('config.php');
     require_once($CFG->dirroot .'/course/lib.php');
     require_once($CFG->libdir .'/filelib.php');
+    require_once($CFG->dirroot .'/user/profile/lib.php');
+    require_once("$CFG->libdir/externallib.php");
 
     redirect_if_major_upgrade_required();
 
@@ -60,6 +62,16 @@
     if ($hassiteconfig && moodle_needs_upgrading()) {
         redirect($CFG->wwwroot .'/'. $CFG->admin .'/index.php');
     }
+
+// Implement ssis's need to have the frontpage redirect
+
+//    if (isset($USER->department) and $USER->department) {
+//	if ($user_front_page = $DB->get_record('course', array('idnumber'=>$USER->department))) {
+	  // Avoid a horrible permissions error, check if enrolled
+	  // This kills the database though...
+// 	  redirect($CFG->wwwroot . '/course/view.php?id=' . $user_front_page->id);
+//	}
+//    }
 
     if (get_home_page() != HOMEPAGE_SITE) {
         // Redirect logged-in users to My Moodle overview if required
