@@ -66,9 +66,9 @@
 
     $rolenames = role_fix_names(get_profile_roles($context), $context, ROLENAME_ALIAS, true);
     // SSIS doesn't want parents in the list, remove them
-    if ( in_array('Parents', $rolenames) ) {
-       array_splice($rolenames, array_search('Parents', $rolenames));
-    }
+    //if ( in_array('Parents', $rolenames) ) {
+    //   array_splice($rolenames, array_search('Parents', $rolenames));
+    //}
 
     if ($isfrontpage) {
         $rolenames[0] = get_string('allsiteusers', 'role');
@@ -78,9 +78,9 @@
 
     // make sure other roles may not be selected by any means
     // ssis needs this to be commented out, TODO: fix this
-    //if (empty($rolenames[$roleid])) {
-    //    print_error('noparticipants');
-    //}
+    if (empty($rolenames[$roleid])) {
+        print_error('noparticipants');
+    }
 
     // no roles to display yet?
     // frontpage course is an exception, on the front page course we should display all users
