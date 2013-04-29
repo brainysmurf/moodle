@@ -572,6 +572,9 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
                     if (in_array($user->id, $usersprinted)) { /// Prevent duplicates by r.hidden - MDL-13935
                         continue;
                     }
+
+		    if (substr($user->idnumber, -1) == 'P') { continue; }
+
                     $usersprinted[] = $user->id; /// Add new user to the array of users printed
 
                     context_instance_preload($user);
