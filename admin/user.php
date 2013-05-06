@@ -154,7 +154,7 @@
     $extracolumns = get_extra_user_fields($context);
     $columns = array_merge(array('firstname', 'lastname'), $extracolumns,
 			   //        array('city', 'country', 'lastaccess'));
-			   array('lastaccess'));
+			   array('lastlogin'));
 			   
     foreach ($columns as $column) {
         $string[$column] = get_user_field_name($column);
@@ -269,7 +269,7 @@
         //$table->align[] = 'left';
         //$table->head[] = $country;
         //$table->align[] = 'left';
-        $table->head[] = $lastaccess;
+        $table->head[] = $lastlogin;
         $table->align[] = 'left';
         $table->head[] = get_string('edit');
         $table->align[] = 'center';
