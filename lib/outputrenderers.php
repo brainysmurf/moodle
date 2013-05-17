@@ -624,14 +624,14 @@ class core_renderer extends renderer_base {
                 }
             }
         } else {
-            $loggedinas = get_string('loggedinnot', 'moodle');
+	  $loggedinas = get_string('loggedinnot', 'moodle');
             if (!$loginpage && $withlinks) {
                 $loggedinas .= " (<a href=\"$loginurl\">".get_string('login').'</a>)';
             }
         }
 
-        $loggedinas = '<div class="logininfo">'.$loggedinas.'</div>';
-	$loggedinas .= '<a href="http://dragonnet.ssis-suzhou.net"><img src="http://dragonnet.ssis-suzhou.net/pix/smallogono.gif" /></a>';
+        //$loggedinas = '<div class="logininfo">'.$loggedinas.'</div>';
+	//$loggedinas .= '<a href="http://dragonnet.ssis-suzhou.net"><img src="http://dragonnet.ssis-suzhou.net/pix/smallogono.gif" /></a>';
 
         if (isset($SESSION->justloggedin)) {
             unset($SESSION->justloggedin);
