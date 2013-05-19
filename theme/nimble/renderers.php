@@ -65,7 +65,7 @@ class theme_nimble_core_renderer extends core_renderer {
     }
 
     protected function spellout(&$branch) {
-        $teachinglearningbranchindex = 3;
+        $teachinglearningbranchindex = 1;
 	$maximumnumber = 20;
 
 	if (array_key_exists($teachinglearningbranchindex, $branch)) {

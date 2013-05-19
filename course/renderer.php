@@ -235,6 +235,7 @@ class core_course_renderer extends plugin_renderer_base {
         // Put all options into one tag 'alloptions' to allow us to handle scrolling
         $formcontent .= html_writer::start_tag('div', array('class' => 'alloptions'));
 
+	//<<<<<<< HEAD
          // Activities: ssis wants to use selected ones at the top
         //$activities = array_filter($modules, function($mod) {
         //    return ($mod->archetype !== MOD_ARCHETYPE_RESOURCE && $mod->archetype !== MOD_ARCHETYPE_SYSTEM);
@@ -243,11 +244,16 @@ class core_course_renderer extends plugin_renderer_base {
 	$activities = array_filter($modules, function($mod) {
 	    return in_array($mod->name, array('questionnaire', 'label', 'page', 'assign', 'forum', 'url', 'resource', 'folder', 'turnitin', 'etherpad'));
 	  });
+	//=======
+         // Activities
+	//        $activities = array_filter($modules, create_function('$mod', 'return ($mod->archetype !== MOD_ARCHETYPE_RESOURCE && $mod->archetype !== MOD_ARCHETYPE_SYSTEM);'));
+	//>>>>>>> upstream/MOODLE_24_STABLE
         if (count($activities)) {
             $formcontent .= $this->course_modchooser_title('activities');
             $formcontent .= $this->course_modchooser_module_types($activities);
         }
 
+	//<<<<<<< HEAD
         // Resources: ssis wants 'more' to be at the bottom
         //$resources = array_filter($modules, function($mod) {
         //    return ($mod->archetype === MOD_ARCHETYPE_RESOURCE);
@@ -255,6 +261,10 @@ class core_course_renderer extends plugin_renderer_base {
 	$resources = array_filter($modules, function($mod) {
 	    return ! in_array($mod->name, array('questionnaire', 'label', 'page', 'assign', 'forum', 'url', 'resource', 'folder', 'turnitin', 'etherpad'));
 	  });
+	//=======
+        // Resources
+        //$resources = array_filter($modules, create_function('$mod', 'return ($mod->archetype === MOD_ARCHETYPE_RESOURCE);'));
+	//>>>>>>> upstream/MOODLE_24_STABLE
         if (count($resources)) {
             $formcontent .= $this->course_modchooser_title('resources');
             $formcontent .= $this->course_modchooser_module_types($resources);
