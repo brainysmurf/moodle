@@ -65,17 +65,29 @@ class theme_nimble_core_renderer extends core_renderer {
     }
 
     protected function spellout(&$branch) {
-        $teachinglearningbranchindex = 1;
+        global $DB;
+        $results = $DB->get_records_sql('SELECT * FROM ssismdl_course_categories WHERE parent = ? ORDER BY sortorder', array('0'));
+
+	// First, need to get the index of the smart tab
+	$keys = array_keys($results);
+	$smart_tab_index = null;
+        for ($i = 0; $i < count($results); $i++) {
+	  $this_one = $results[$keys[$i]];
+	  if ($this_one->name == 'Teaching & Learning') {
+	      $smart_tab_index = $i;
+	  }
+        }
+	
 	$maximumnumber = 20;
 
-	if (array_key_exists($teachinglearningbranchindex, $branch)) {
-	    $teachinglearningbranch = array($branch[$teachinglearningbranchindex]);
+	if (isset($smart_tab_index) && array_key_exists($smart_tab_index, $branch)) {
+	    $teachinglearningbranch = array($branch[$smart_tab_index]);
 	} else {
 	    $teachinglearningbranch = NULL;
 	}
         if ($teachinglearningbranch && $this->howmany($teachinglearningbranch) <= 20) {
-	    $branch[$teachinglearningbranchindex]->courses = $this->return_courses($teachinglearningbranch);
-	    $branch[$teachinglearningbranchindex]->categories = array();
+	    $branch[$smart_tab_index]->courses = $this->return_courses($teachinglearningbranch);
+	    $branch[$smart_tab_index]->categories = array();
 	}
     }
 
