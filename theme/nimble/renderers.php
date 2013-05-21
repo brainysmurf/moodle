@@ -81,12 +81,12 @@ class theme_nimble_core_renderer extends core_renderer {
 	$maximumnumber = 20;
 
 	if (isset($smart_tab_index) && array_key_exists($smart_tab_index, $branch)) {
-	    $teachinglearningbranch = array($branch[$smart_tab_index]);
+	    $smart_tab_branch = array($branch[$smart_tab_index]);
 	} else {
-	    $teachinglearningbranch = NULL;
+	    $smart_tab_branch = NULL;
 	}
-        if ($teachinglearningbranch && $this->howmany($teachinglearningbranch) <= 20) {
-	    $branch[$smart_tab_index]->courses = $this->return_courses($teachinglearningbranch);
+        if ($smart_tab_branch && $this->howmany($smart_tab_branch) <= 20) {
+	    $branch[$smart_tab_index]->courses = $this->return_courses($smart_tab_branch);
 	    $branch[$smart_tab_index]->categories = array();
 	}
     }
