@@ -245,7 +245,8 @@ echo '</div>';
 
 echo html_writer::start_tag('dl', array('class'=>'list'));
 
-print_row("Instructions:", "Find teacher emails below.<br />At right, click on 'Messages' and 'Activity Reports' to view activity.");
+// We used to print "instructions", but couldn't figure out the pattern
+// echo html_writer::tag('p', "Instructions: Find teacher emails below.<br />At right, click on 'Messages' and 'Activity Reports' to view activity.");
 
 if (isset($identityfields['address']) && $user->address) {
     echo html_writer::tag('dt', get_string('address'));
