@@ -1502,8 +1502,8 @@ class bootstrap_renderer {
     public static function early_error_content($message, $moreinfourl, $link, $backtrace, $debuginfo = null) {
         global $CFG;
 
-        $content = '<div style="margin-top: 6em; margin-left:auto; margin-right:auto; color:#990000; text-align:center; font-size:large; border-width:1px;
-border-color:black; background-color:#ffffee; border-style:solid; border-radius: 20px; border-collapse: collapse;
+        $content = '<div style="font-family:Tahoma,sans-serif;margin-top: 6em; margin-left:auto; margin-right:auto; color:#4D63A3; text-align:center; font-size:large; border-width:5px;
+border-color:black; background-color:#eee; border-style:solid; border-color:#999; border-radius: 20px; border-collapse: collapse;
 width: 80%; -moz-border-radius: 20px; padding: 15px">
 ' . $message . '
 </div>';
