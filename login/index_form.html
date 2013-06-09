@@ -38,14 +38,15 @@ if (!empty($CFG->loginpasswordautocomplete)) {
         ?>
         <form action="<?php echo $CFG->httpswwwroot; ?>/login/index.php" method="post" id="login" <?php echo $autocomplete; ?> >
           <div class="loginform">
-            <div class="form-label"><label for="username"><?php print_string("username") ?></label></div>
+            <div class="form-label" style="30%"><label for="username"><icon style="margin-top:13px;" class="icon-user pull-right" />&nbsp;</label></div>
             <div class="form-input">
-              <input type="text" name="username" id="username" size="15" value="<?php p($frm->username) ?>" />
+              <input type="text" name="username" id="username" size="100" style="display:inline-block;font-size:1.5em;line-height:1.5em;width:300px;" value="<?php p($frm->username) ?>" />
             </div>
             <div class="clearer"><!-- --></div>
-            <div class="form-label"><label for="password"><?php print_string("password") ?></label></div>
+            <div class="form-label"><label for="password"><icon
+    style="margin-top:3px;" class="icon-key pull-right" />&nbsp;</label></div>
             <div class="form-input">
-              <input type="password" name="password" id="password" size="15" value="" <?php echo $autocomplete; ?> />
+              <input type="password" name="password" id="password" size="100" style="width:300px;" value="" <?php echo $autocomplete; ?> />
               <br /><input type="submit" id="loginbtn" value="<?php print_string("login") ?>" />
             </div>
           </div>
