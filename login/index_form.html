@@ -56,8 +56,10 @@ if (!empty($CFG->loginpasswordautocomplete)) {
               </div>
               <?php } ?>
           <div class="clearer"><!-- --></div>
-          <br /><button style="font-size:1em;"><a
-    href="forgot_password.php"><icon class="icon-frown" /> <?php print_string("forgotten") ?></a></button>
+        <div class="desc"><br />
+          <icon class="icon-frown" /> Forgotten your username or password?
+	</div>
+          <button style="font-family:Tahoma;font-size:1.5em;"><a href="forgot_password.php"><?php print_string("forgotten") ?></a></button>
 	  <div class="clearer"><!-- --></div>
 	  </form>
       </div>
@@ -71,7 +73,7 @@ if (!empty($CFG->loginpasswordautocomplete)) {
           <div class="guestform">
             <input type="hidden" name="username" value="guest" />
             <input type="hidden" name="password" value="guest" />
-            <input type="submit" style="font-size:1.5em;" value="<?php print_string("loginguest") ?>" />
+            <input type="submit" style="font-size:1.5em;cursor:pointer;color:#4D63A3;" value="<?php print_string("loginguest") ?>" />
           </div>
         </form>
       </div>

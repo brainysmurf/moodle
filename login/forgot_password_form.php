@@ -39,7 +39,7 @@ class login_forgot_password_form extends moodleform {
         $mform->addElement('text', 'username', get_string('username'));
         $mform->setType('username', PARAM_RAW);
 
-        $submitlabel = get_string('search');
+        $submitlabel = get_string('submit');
         $mform->addElement('submit', 'submitbuttonusername', $submitlabel);
 
         $mform->addElement('header', 'searchbyemail', get_string('searchbyemail'), '');
@@ -47,7 +47,7 @@ class login_forgot_password_form extends moodleform {
         $mform->addElement('text', 'email', get_string('email'));
         $mform->setType('email', PARAM_RAW);
 
-        $submitlabel = get_string('search');
+        $submitlabel = get_string('submit');
         $mform->addElement('submit', 'submitbuttonemail', $submitlabel);
     }
 
