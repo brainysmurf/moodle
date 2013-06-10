@@ -965,7 +965,7 @@ $string['loginstepsnone'] = '<p>Hi!</p>
 <p>All you need to do is make up a username and password and use it in the form on this page!</p>
 <p>If someone else has already chosen your username then you\'ll have to try again using a different username.</p>';
 $string['loginto'] = 'Login to {$a}';
-$string['loginusing'] = 'Login here using your provided information';
+$string['loginusing'] = 'Login here with your DragonNet username';
 $string['logout'] = 'Logout';
 $string['logoutconfirm'] = 'Do you really want to logout?';
 $string['logs'] = 'Logs';
@@ -1421,7 +1421,7 @@ $string['restoreuserinfofailed'] = 'The restore process has stopped because you 
 $string['restoreusersprecheck'] = 'Checking user data';
 $string['restoreusersprecheckerror'] = 'Some problems were detected when checking user data';
 $string['restricted'] = 'Restricted';
-$string['returningtosite'] = 'Welcome back to DragonNet';
+$string['returningtosite'] = 'Welcome back to DragonNet!';
 $string['returntomaincoursepage'] = 'Return to main course page';
 $string['returntooriginaluser'] = 'Return to {$a}';
 $string['revert'] = 'Revert';
@@ -1572,7 +1572,7 @@ $string['sizemb'] = 'MB';
 $string['skipped'] = 'Skipped';
 $string['skypeid'] = 'Skype ID';
 $string['socialheadline'] = 'Social forum - latest topics';
-$string['someallowguest'] = 'Some courses may allow guest access';
+$string['someallowguest'] = '<icon class="icon-question-sign" /> Were you directed here but you do not have a DragonNet login? Use guest access:';
 $string['someerrorswerefound'] = 'Some information was missing or incorrect. Look below for details.';
 $string['sortby'] = 'Sort by';
 $string['sortbyx'] = 'Sort by {$a} ascending';

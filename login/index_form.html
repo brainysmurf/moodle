@@ -22,8 +22,6 @@ if (!empty($CFG->loginpasswordautocomplete)) {
       <div class="subcontent loginsub">
         <div class="desc">
           <?php
-            print_string("loginusing");
-            echo '<br/>';
             //echo '('.get_string("cookiesenabled").')';
             //echo $OUTPUT->help_icon('cookiesenabled');
            ?>
@@ -58,7 +56,8 @@ if (!empty($CFG->loginpasswordautocomplete)) {
               </div>
               <?php } ?>
           <div class="clearer"><!-- --></div>
-          <br /><div class="forgetpass"><a href="forgot_password.php"><?php print_string("forgotten") ?></a></div>
+          <br /><button style="font-size:1em;"><a
+    href="forgot_password.php"><icon class="icon-frown" /> <?php print_string("forgotten") ?></a></button>
 	  <div class="clearer"><!-- --></div>
 	  </form>
       </div>
@@ -72,7 +71,7 @@ if (!empty($CFG->loginpasswordautocomplete)) {
           <div class="guestform">
             <input type="hidden" name="username" value="guest" />
             <input type="hidden" name="password" value="guest" />
-            <input type="submit" value="<?php print_string("loginguest") ?>" />
+            <input type="submit" style="font-size:1.5em;" value="<?php print_string("loginguest") ?>" />
           </div>
         </form>
       </div>
