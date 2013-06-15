@@ -36,16 +36,15 @@ if (!empty($CFG->loginpasswordautocomplete)) {
         ?>
         <form action="<?php echo $CFG->httpswwwroot; ?>/login/index.php" method="post" id="login" <?php echo $autocomplete; ?> >
           <div class="loginform">
-            <div class="form-label" style="30%"><label for="username"><icon style="margin-top:13px;" class="icon-user pull-right" />&nbsp;</label></div>
+            <div class="form-label"><label for="username"><icon style="margin-top:13px;" class="icon-user pull-right" />&nbsp;</label></div>
             <div class="form-input">
-              <input type="text" name="username" id="username" size="100" style="display:inline-block;font-size:1.5em;line-height:1.5em;width:300px;" value="<?php p($frm->username) ?>" />
+              <input type="text" name="username" id="username" size="100" style="display:inline-block;font-size:1.5em;line-height:1.5em;width:250px;" value="<?php p($frm->username) ?>" />
             </div>
             <div class="clearer"><!-- --></div>
-            <div class="form-label"><label for="password"><icon
-    style="margin-top:3px;" class="icon-key pull-right" />&nbsp;</label></div>
+            <div class="form-label"><label for="password"><icon style="margin-top:3px;" class="icon-key pull-right" />&nbsp;</label></div>
             <div class="form-input">
-              <input type="password" name="password" id="password" size="100" style="width:300px;" value="" <?php echo $autocomplete; ?> />
-              <br /><input type="submit" id="loginbtn" value="<?php print_string("login") ?>" />
+              <input type="password" name="password" id="password" size="100" style="width:250px;margin-top:3px;" value="" <?php echo $autocomplete; ?> />
+              <br /><input type="submit" style="font-size:1.5em;margin-top:3px;" id="loginbtn" value="<?php print_string("login") ?>" />
             </div>
           </div>
             <div class="clearer"><!-- --></div>
@@ -59,7 +58,7 @@ if (!empty($CFG->loginpasswordautocomplete)) {
         <div class="desc"><br />
           <icon class="icon-frown" /> Forgotten your password?
 	</div>
-          <button style="font-family:Tahoma;font-size:1.5em;"><a href="forgot_password.php"><?php print_string("forgotten") ?></a></button>
+          <button style="font-family:Tahoma;font-size:0.75em;"><a href="forgot_password.php"><?php print_string("forgotten") ?></a></button>
 	  <div class="clearer"><!-- --></div>
 	  </form>
       </div>
@@ -73,7 +72,7 @@ if (!empty($CFG->loginpasswordautocomplete)) {
           <div class="guestform">
             <input type="hidden" name="username" value="guest" />
             <input type="hidden" name="password" value="guest" />
-            <input type="submit" style="font-size:1.5em;cursor:pointer;color:#4D63A3;" value="<?php print_string("loginguest") ?>" />
+            <input type="submit" style="font-size:0.75em;cursor:pointer;color:#4D63A3;" value="<?php print_string("loginguest") ?>" />
           </div>
         </form>
       </div>
