@@ -486,11 +486,6 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
   //      }
   //  }
 
-    if (has_capability('moodle/site:viewparticipants', $context)) {
-        echo '<form action="index.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id.'" />';
-        echo '<label for="search">' . get_string('search', 'search') . ' </label>';
-        echo '<input type="text" id="search" name="search" value="'.s($search).'" />&nbsp;<input type="submit" value="'.get_string('search').'" /></div></form>'."\n";
-    }
 
 //if (has_capability('moodle/site:viewparticipants', $context)) {
         echo '<br /><center><form action="index.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id.'" />';
@@ -518,41 +513,41 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 
                 // Bar of first initials
 
-                //echo '<div class="initialbar firstinitial">'.get_string('firstname').' : ';
-                //if(!empty($firstinitial)) {
-                //    echo '<a href="'.$baseurl->out().'&amp;sifirst=">'.$strall.'</a>';
-                //} else {
-                //    echo '<strong>'.$strall.'</strong>';
-                //}
-                //foreach ($alpha as $letter) {
-                //    if ($letter == $firstinitial) {
-                 //       echo ' <strong>'.$letter.'</strong>';
-                //    } else {
-                //        echo ' <a href="'.$baseurl->out().'&amp;sifirst='.$letter.'">'.$letter.'</a>';
-                //    }
-               // }
-               // echo '</div>';
+                echo '<div class="initialbar firstinitial">'.get_string('firstname').' : ';
+                if(!empty($firstinitial)) {
+                    echo '<a href="'.$baseurl->out().'&amp;sifirst=">'.$strall.'</a>';
+                } else {
+                    echo '<strong>'.$strall.'</strong>';
+                }
+                foreach ($alpha as $letter) {
+                    if ($letter == $firstinitial) {
+                       echo ' <strong>'.$letter.'</strong>';
+                    } else {
+                        echo ' <a href="'.$baseurl->out().'&amp;sifirst='.$letter.'">'.$letter.'</a>';
+                    }
+                }
+                echo '</div>';
 
                 // Bar of last initials
 
-                //echo '<div class="initialbar lastinitial">'.get_string('lastname').' : ';
-                //if(!empty($lastinitial)) {
-                //    echo '<a href="'.$baseurl->out().'&amp;silast=">'.$strall.'</a>';
-                //} else {
-                //    echo '<strong>'.$strall.'</strong>';
-               // }
-                //foreach ($alpha as $letter) {
-                //    if ($letter == $lastinitial) {
-                //        echo ' <strong>'.$letter.'</strong>';
-               //     } else {
-               //         echo ' <a href="'.$baseurl->out().'&amp;silast='.$letter.'">'.$letter.'</a>';
-               //     }
-               // }
-               // echo '</div><br />';
+                echo '<div class="initialbar lastinitial">'.get_string('lastname').' : ';
+                if(!empty($lastinitial)) {
+                    echo '<a href="'.$baseurl->out().'&amp;silast=">'.$strall.'</a>';
+                } else {
+                    echo '<strong>'.$strall.'</strong>';
+                }
+               foreach ($alpha as $letter) {
+                    if ($letter == $lastinitial) {
+                        echo ' <strong>'.$letter.'</strong>';
+                    } else {
+                        echo ' <a href="'.$baseurl->out().'&amp;silast='.$letter.'">'.$letter.'</a>';
+                    }
+                }
+                echo '</div><br />';
 
-                //$pagingbar = new paging_bar($matchcount, intval($table->get_page_start() / $perpage), $perpage, $baseurl);
-                //$pagingbar->pagevar = 'spage';
-                //echo $OUTPUT->render($pagingbar);
+               $pagingbar = new paging_bar($matchcount, intval($table->get_page_start() / $perpage), $perpage, $baseurl);
+               $pagingbar->pagevar = 'spage';
+               echo $OUTPUT->render($pagingbar);
             }
 
 	    // For teachers, print out the class emails:
