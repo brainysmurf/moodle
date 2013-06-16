@@ -36,7 +36,7 @@ if (!empty($CFG->loginpasswordautocomplete)) {
         ?>
         <form action="<?php echo $CFG->httpswwwroot; ?>/login/index.php" method="post" id="login" <?php echo $autocomplete; ?> >
           <div class="loginform">
-            <div class="form-label"><label for="username"><icon style="margin-top:13px;" class="icon-user pull-right" />&nbsp;</label></div>
+            <div class="form-label"><label for="username"><icon style="margin-top:18px;" class="icon-user pull-right" />&nbsp;</label></div>
             <div class="form-input">
               <input type="text" name="username" id="username" size="100" style="display:inline-block;font-size:1.5em;line-height:1.5em;width:250px;" value="<?php p($frm->username) ?>" />
             </div>
@@ -44,39 +44,36 @@ if (!empty($CFG->loginpasswordautocomplete)) {
             <div class="form-label"><label for="password"><icon style="margin-top:3px;" class="icon-key pull-right" />&nbsp;</label></div>
             <div class="form-input">
               <input type="password" name="password" id="password" size="100" style="width:250px;margin-top:3px;" value="" <?php echo $autocomplete; ?> />
-              <br /><input type="submit" style="font-size:1.5em;margin-top:3px;" id="loginbtn" value="<?php print_string("login") ?>" />
-            </div>
-          </div>
-            <div class="clearer"><!-- --></div>
+              <br /><input type="submit"
+    style="font-size:1.2em;margin-top:3px;width:6em;" id="loginbtn" value="Login" />
+	      
               <?php if (isset($CFG->rememberusername) and $CFG->rememberusername == 2) { ?>
-              <div class="rememberpass">
-                  <br /><input type="checkbox" name="rememberusername" id="rememberusername" value="1" <?php if ($frm->username) {echo 'checked="checked"';} ?> />
-                  <label for="rememberusername"><?php print_string('rememberusername', 'admin') ?></label>
-              </div>
+                  <input type="checkbox" name="rememberusername" id="rememberusername" value="1" <?php if ($frm->username) {echo 'checked="checked"';} ?> />
+                  <label  for="rememberusername"><?php print_string('rememberusername', 'admin') ?></label>
               <?php } ?>
-          <div class="clearer"><!-- --></div>
-        <div class="desc"><br />
-          <icon class="icon-frown" /> Forgotten your password?
-	</div>
-          <button style="font-family:Tahoma;font-size:0.75em;"><a href="forgot_password.php"><?php print_string("forgotten") ?></a></button>
-	  <div class="clearer"><!-- --></div>
-	  </form>
-      </div>
+	</form>
 
 <?php if ($CFG->guestloginbutton and !isguestuser()) {  ?>
-      <div class="subcontent guestsub">
-        <div class="desc">
-          <?php print_string("someallowguest") ?>
-        </div>
+	      <p style="margin-top:20px;font-size:.75em;">Or, if you don't have a DragonNet account...</p>
         <form action="index.php" method="post" id="guestlogin">
           <div class="guestform">
             <input type="hidden" name="username" value="guest" />
             <input type="hidden" name="password" value="guest" />
-            <input type="submit" style="font-size:0.75em;cursor:pointer;color:#4D63A3;" value="<?php print_string("loginguest") ?>" />
+            <a target="_blank" href="http://sites.ssis-suzhou.net/helpdesk/2013/06/16/guest-access/"><span
+	      style="font-size:.75em;line-height:1em;vertical-align:middle;"><input type="submit"
+	      style="font-size:1em;width:15em;cursor:pointer;color:#4D63A3;margin-top:-3px;"
+	      value="<?php print_string("loginguest") ?>" />&nbsp;&nbsp;&nbsp;&nbsp;<icon
+	      class="icon-question-sign"></icon>&nbsp;"Guest" Info</span></a>
           </div>
         </form>
-      </div>
 <?php } ?>
+          <p style="margin-top:20px;font-size:.75em;">Forgotten your password?</p> 
+          <button style="font-family:Tahoma;font-size:0.75em;"><a href="forgot_password.php"><?php print_string("forgotten") ?></a></button>
+
+
+	  </div>
+	    
+          </div>
      </div>
 <?php if ($show_instructions) { ?>
     <div class="signuppanel">
