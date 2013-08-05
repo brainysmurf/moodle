@@ -675,14 +675,14 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
         echo $this->end_section_list();
 
         // Display section bottom navigation.
-        $sectionbottomnav = '';
-        $sectionbottomnav .= html_writer::start_tag('div', array('class' => 'section-navigation mdl-bottom'));
-        $sectionbottomnav .= html_writer::tag('span', $sectionnavlinks['previous'], array('class' => 'mdl-left'));
-        $sectionbottomnav .= html_writer::tag('span', $sectionnavlinks['next'], array('class' => 'mdl-right'));
-        $sectionbottomnav .= html_writer::tag('div', $this->section_nav_selection($course, $sections, $displaysection),
-            array('class' => 'mdl-align'));
-        $sectionbottomnav .= html_writer::end_tag('div');
-        echo $sectionbottomnav;
+        //$sectionbottomnav = '';
+        //$sectionbottomnav .= html_writer::start_tag('div', array('class' => 'section-navigation mdl-bottom'));
+        //$sectionbottomnav .= html_writer::tag('span', $sectionnavlinks['previous'], array('class' => 'mdl-left'));
+        //$sectionbottomnav .= html_writer::tag('span', $sectionnavlinks['next'], array('class' => 'mdl-right'));
+        //$sectionbottomnav .= html_writer::tag('div', $this->section_nav_selection($course, $sections, $displaysection),
+        //    array('class' => 'mdl-align'));
+        //$sectionbottomnav .= html_writer::end_tag('div');
+        //echo $sectionbottomnav;
 
         // Close single-section div.
         echo html_writer::end_tag('div');
