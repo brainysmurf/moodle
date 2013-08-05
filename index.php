@@ -32,7 +32,8 @@
     require_once($CFG->dirroot .'/course/lib.php');
     require_once($CFG->libdir .'/filelib.php');
     require_once($CFG->dirroot .'/user/profile/lib.php');
-    require_once("$CFG->libdir/externallib.php");
+    require_once("$CFG->libdir/externallib.php");  
+    require_once($CFG->dirroot .'/cohort/lib.php');
 
     redirect_if_major_upgrade_required();
 
@@ -63,14 +64,28 @@
         redirect($CFG->wwwroot .'/'. $CFG->admin .'/index.php');
     }
 
-// Implement ssis's need to have the frontpage redirect
+    // Implement ssis's need to have the frontpage redirect
 
-    if (isset($USER->department) and $USER->department) {
-	if ($user_front_page = $DB->get_record('course', array('idnumber'=>$USER->department))) {
-	  // Avoid a horrible permissions error, check if enrolled
-	  // This kills the database though...
- 	  redirect($CFG->wwwroot . '/course/view.php?id=' . $user_front_page->id);
-	}
+    //$elem_student_cohort = $DB->get_record('cohort', array('idnumber'=>'adminALL'))->id;
+    $ms_student_cohort = $DB->get_record('cohort', array('idnumber'=>'studentsMS'))->id;
+    $hs_student_cohort = $DB->get_record('cohort', array('idnumber'=>'studentsHS'))->id;
+    $sec_teacher_cohort = $DB->get_record('cohort', array('idnumber'=>'teachersSEC'))->id;
+    $elem_teacher_cohort = $DB->get_record('cohort', array('idnumber'=>'teachersELEM'))->id;
+    $support_staff_cohort = $DB->get_record('cohort', array('idnumber'=>'supportstaffALL'))->id;
+    $frontpage_course_id = 1395;  // used to be DragonNet Home (for Teachers)
+
+    if (cohort_is_member($support_staff_cohort, $USER->id)) {
+	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=6');
+    } else if (cohort_is_member($sec_teacher_cohort, $USER->id)) {
+	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=5');
+    } else if (cohort_is_member($elem_teacher_cohort, $USER->id)) {
+	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=4');
+    } else if (cohort_is_member($ms_student_cohort, $USER->id)) {
+	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=3');
+    } else if (cohort_is_member($hs_student_cohort, $USER->id)) {
+	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=2');
+    } else if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) {
+        redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=1');
     }
 
     if (get_home_page() != HOMEPAGE_SITE) {
