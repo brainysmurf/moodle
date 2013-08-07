@@ -73,7 +73,7 @@
     $elem_teacher_cohort = $DB->get_record('cohort', array('idnumber'=>'teachersELEM'))->id;
     $support_staff_cohort = $DB->get_record('cohort', array('idnumber'=>'supportstaffALL'))->id;
     $admin_cohort = $DB->get_record('cohort', array('idnumber'=>'adminALL'))->id;
-    $frontpage_course_id = 1395;  // used to be DragonNet Home (for Teachers)
+    $frontpage_course_id = 1395;  // DragonNet Frontpage
 
     if (cohort_is_member($admin_cohort, $USER->id)) {
 	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=7');
@@ -87,9 +87,9 @@
 	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=3');
     } else if (cohort_is_member($hs_student_cohort, $USER->id)) {
 	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=2');
-    } else if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) {
-        redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=1');
-    } 
+	//    } else if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) {
+        //redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=1');
+    }
 
     if (get_home_page() != HOMEPAGE_SITE) {
         // Redirect logged-in users to My Moodle overview if required
