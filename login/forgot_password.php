@@ -188,7 +188,8 @@ $PAGE->verify_https_required();
 /// DISPLAY FORM
 
 echo $OUTPUT->header();
-echo $OUTPUT->box(get_string('passwordforgotteninstructions2'), 'generalbox boxwidthnormal boxaligncenter');
+echo '<div style="margin:0 auto 0;margin-bottom:50px;width:300px;padding: 15px 10px 15px 20px; background-color: #fff; border-top: 2px solid #4D63A3; border-bottom: 2px solid #4D63A3;"><icon class="icon-hand-right pull-left icon-4x"></icon>'.get_string('passwordforgotteninstructions2').'</div>';
+//echo $OUTPUT->box(get_string('passwordforgotteninstructions2'), 'generalbox boxwidthnormal boxaligncenter');
 $mform->display();
 
 echo $OUTPUT->footer();
