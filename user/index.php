@@ -558,7 +558,7 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 	       echo '<a href="mailto:'.$emailaddr.'">'.$emailaddr.'</a><br />';
                echo "<br /><b>Bulk Email for All Parents who have a child in this class:</b><br />";
 	       $emailaddr = $groupname.'PARENTS@student.ssis-suzhou.net';
-	       echo '<a href="mailto:'.$emailaddr.'">'.$emailaddr.'</a><br /><br />';
+	       echo '<a href="mailto:?bcc='.$emailaddr.'">'.$emailaddr.'</a><br /><br />';
                }
 
             if ($matchcount > 0) {
