@@ -1,9 +1,4 @@
 <?php
-if ($show_instructions) {
-    $columns = 'twocolumns';
-} else {
-    $columns = 'onecolumn';
-}
 
 if (!empty($CFG->loginpasswordautocomplete)) {
     $autocomplete = 'autocomplete="off"';
@@ -11,14 +6,15 @@ if (!empty($CFG->loginpasswordautocomplete)) {
     $autocomplete = '';
 }
 ?>
-<div class="loginbox clearfix <?php echo $columns ?>">
+<div class="loginbox clearfix">
   <div class="loginpanel">
-<?php
-  if (($CFG->registerauth == 'email') || !empty($CFG->registerauth)) { ?>
-      <div class="skiplinks"><a class="skip" href="signup.php"><?php print_string("tocreatenewaccount"); ?></a></div>
-<?php
-  } ?>
     <h2><?php print_string("returningtosite") ?></h2>
+      <div style="margin:0 auto 0;width:300px;padding: 15px 10px 15px 20px; background-color:
+    #fff; border-top: 2px solid #4D63A3; border-bottom: 2px solid
+    #4D63A3;"><icon class="icon-hand-right pull-left
+    icon-4x"></icon>Remember, DragonNet passwords require a <strong>symbol character</strong>, such as
+    <strong>!@#</strong> or <strong>$</strong>.</div>
+
       <div class="subcontent loginsub">
         <div class="desc">
           <?php
@@ -30,13 +26,14 @@ if (!empty($CFG->loginpasswordautocomplete)) {
           if (!empty($errormsg)) {
               echo html_writer::start_tag('div', array('class' => 'loginerrors'));
               echo html_writer::link('#', $errormsg, array('id' => 'loginerrormessage', 'class' => 'accesshide'));
-              echo $OUTPUT->error_text($errormsg);
+	      echo $OUTPUT->error_text($errormsg);
               echo html_writer::end_tag('div');
           }
         ?>
           <div class="loginform">
         <form action="<?php echo $CFG->httpswwwroot; ?>/login/index.php" method="post" id="login" <?php echo $autocomplete; ?> >
-            <div class="form-label"><label for="username"><icon style="margin-top:18px;" class="icon-user pull-right"></icon>&nbsp;</label></div>
+            <div class="form-label"><label for="username"><icon
+        style="margin-top:18px;" class="icon-user pull-right"></icon>&nbsp;</label></div>
             <div class="form-input">
               <input type="text" name="username" id="username"
     size="100" placeholder="DragonNet Username"
@@ -44,7 +41,8 @@ if (!empty($CFG->loginpasswordautocomplete)) {
     value="<?php p($frm->username) ?>" autofocus />
             </div>
             <div class="clearer"><!-- --></div>
-            <div class="form-label"><label for="password"><icon style="margin-top:3px;" class="icon-key pull-right" />&nbsp;</label></div>
+            <div class="form-label"><label for="password"><icon
+        style="margin-top:5px;" class="icon-key pull-right" />&nbsp;</label></div>
             <div class="form-input">
               <input type="password" name="password" id="password" size="100" style="width:250px;margin-top:3px;" value="" <?php echo $autocomplete; ?> />
               <br /><input type="submit"
@@ -79,44 +77,3 @@ if (!empty($CFG->loginpasswordautocomplete)) {
    </div>	    
 </div>
 
-<?php if ($show_instructions) { ?>
-    <div class="signuppanel">
-      <h2><?php print_string("firsttime") ?></h2>
-      <div class="subcontent">
-<?php     if (is_enabled_auth('none')) { // instructions override the rest for security reasons
-              print_string("loginstepsnone");
-          } else if ($CFG->registerauth == 'email') {
-              if (!empty($CFG->auth_instructions)) {
-                  echo format_text($CFG->auth_instructions);
-              } else {
-                  print_string("loginsteps", "", "signup.php");
-              } ?>
-                 <div class="signupform">
-                   <form action="signup.php" method="get" id="signup">
-                   <div><input type="submit" value="<?php print_string("startsignup") ?>" /></div>
-                   </form>
-                 </div>
-<?php     } else if (!empty($CFG->registerauth)) {
-              echo format_text($CFG->auth_instructions); ?>
-              <div class="signupform">
-                <form action="signup.php" method="get" id="signup">
-                <div><input type="submit" value="<?php print_string("startsignup") ?>" /></div>
-                </form>
-              </div>
-<?php     } else {
-              echo format_text($CFG->auth_instructions);
-          } ?>
-      </div>
-    </div>
-<?php } ?>
-<?php if (!empty($potentialidps)) { ?>
-    <div class="subcontent potentialidps">
-        <h6><?php print_string('potentialidps', 'auth'); ?></h6>
-        <div class="potentialidplist">
-<?php foreach ($potentialidps as $idp) {
-    echo  '<div class="potentialidp"><a href="' . $idp['url']->out() . '" title="' . $idp['name'] . '">' . $OUTPUT->render($idp['icon'], $idp['name']) . $idp['name'] . '</a></div>';
-} ?>
-        </div>
-    </div>
-<?php } ?>
-</div>
