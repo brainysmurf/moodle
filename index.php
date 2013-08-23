@@ -78,7 +78,7 @@
     if (cohort_is_member($admin_cohort, $USER->id)) {
 	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=7');
     } else if (cohort_is_member($support_staff_cohort, $USER->id)) {
-	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=6');
+	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=8');
     } else if (cohort_is_member($sec_teacher_cohort, $USER->id)) {
 	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=5');
     } else if (cohort_is_member($elem_teacher_cohort, $USER->id)) {
