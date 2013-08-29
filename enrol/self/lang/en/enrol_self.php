@@ -37,7 +37,7 @@ $string['defaultrole_desc'] = 'Select role which should be assigned to users dur
 $string['enrolenddate'] = 'End date';
 $string['enrolenddate_help'] = 'If enabled, users can enrol themselves until this date only.';
 $string['enrolenddaterror'] = 'Enrolment end date cannot be earlier than start date';
-$string['enrolme'] = 'Enrol me';
+$string['enrolme'] = 'Join Activity';
 $string['enrolperiod'] = 'Enrolment duration';
 $string['enrolperiod_desc'] = 'Default length of time that the enrolment is valid. If set to zero, the enrolment duration will be unlimited by default.';
 $string['enrolperiod_help'] = 'Length of time that the enrolment is valid, starting with the moment the user enrols themselves. If disabled, the enrolment duration will be unlimited.';
@@ -71,7 +71,7 @@ $string['messageprovider:expiry_notification'] = 'Self enrolment expiry notifica
 $string['newenrols'] = 'Allow new enrolments';
 $string['newenrols_desc'] = 'Allow users to self enrol into new courses by default.';
 $string['newenrols_help'] = 'This setting determines whether a user can enrol into this course.';
-$string['nopassword'] = 'No enrolment key required.';
+$string['nopassword'] = 'Please just click on "Join Activity" to join.';
 $string['password'] = 'Enrolment key';
 $string['password_help'] = 'An enrolment key enables access to the course to be restricted to only those who know the key.
 
