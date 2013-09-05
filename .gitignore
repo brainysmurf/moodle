@@ -31,3 +31,5 @@ composer.phar
 composer.lock
 /vendor/
 /behat.yml
+
+theme/decaf/
