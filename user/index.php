@@ -550,6 +550,41 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
                echo $OUTPUT->render($pagingbar);
             }
 
+		//CSS for user details table
+		echo '<style type="text/css">
+				.userinfobox .username {
+					padding: 8px;
+					font-size: 16px;
+				}
+				table.userinfotable {
+					border-spacing:2px;
+					border-collapse:separate;
+					margin: 0;
+					width: 100%;
+				}
+				table.userinfotable td {
+					font-size:13px;
+					background:rgba(255,255,255,.6);
+				}
+					table.userinfotable td:first-child {
+						width:200px;
+						text-align: right;
+						font-weight:bold;
+						background:rgba(200,200,200,.6);
+					}
+				.userinfobox .links button {
+					display: block;
+					width: 100%;
+					margin-bottom:3px;
+				}
+					.userinfobox .links button a {
+						padding: 3px;
+						text-align: center;
+					}
+			</style>';
+		
+
+
 	    // For teachers, print out the class emails:
            if ( $currentgroup && has_capability('moodle/grade:edit', $context) ) {
 	       $groupname = groups_get_group_name($currentgroup);
@@ -597,55 +632,90 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
                     $row->cells[1]->attributes['class'] = 'content';
 
                     $row->cells[1]->text = $OUTPUT->container(fullname($user, has_capability('moodle/site:viewfullnames', $context)), 'username');
-                    $row->cells[1]->text .= $OUTPUT->container_start('info');
+                    
+                   	$row->cells[1]->text .= '<table class="userinfotable">';
 
-                    if (!empty($user->role)) {
-                        $row->cells[1]->text .= get_string('role').get_string('labelsep', 'langconfig').$user->role.'<br />';
-                    }
+	                    if (!empty($user->role)) {
+    	                    $row->cells[1]->text .= get_string('role').get_string('labelsep', 'langconfig').$user->role.'<br />';
+        	            }
 
-                    if ($user->maildisplay == 1 or ($user->maildisplay == 2 and ($course->id != SITEID) and !isguestuser()) or
+            	        if ($user->maildisplay == 1 or ($user->maildisplay == 2 and ($course->id != SITEID) and !isguestuser()) or
 			has_capability('moodle/course:viewhiddenuserfields', $context) or
-                                in_array('email', $extrafields) or ($user->id == $USER->id)) {
-                        $row->cells[1]->text .= get_string('email').get_string('labelsep', 'langconfig').html_writer::link("mailto:$user->email", $user->email) . '<br />';
+                                in_array('email', $extrafields) or ($user->id == $USER->id) ) {
+                                
+                                $row->cells[1]->text .= '<tr>
+                                		<td>'.get_string('email').'</td>
+                                		<td>'.html_writer::link("mailto:$user->email", $user->email).'</td>
+                                	</tr>';
+                        #$row->cells[1]->text .= get_string('email').get_string('labelsep', 'langconfig').html_writer::link("mailto:$user->email", $user->email) . '<br />';
 
 
-                    foreach ($extrafields as $field) {
-		        if ( ($field === 'idnumber') and !(has_capability('moodle/grade:edit', $context))) {
-			    // Don't show the PowerSchool ID if not an ssis teacher
-			    continue;
-		        }
+                    foreach ($extrafields as $field)
+                    {
+				        if ( ($field === 'idnumber') and !(has_capability('moodle/grade:edit', $context))) {
+						    // Don't show the PowerSchool ID if not an ssis teacher viewing the page
+						    continue;
+		    		    }
 
-		        if ( ($field === 'email') or ($field === 'lastaccess') ) {
+				        if ( ($field === 'email') or ($field === 'lastaccess') ) {
                             // Skip email because it was displayed with different
                             // logic above (because this page is intended for
                             // students too)
                             continue;
-                         }
-                        $row->cells[1]->text .= get_user_field_name($field) .
-                                get_string('labelsep', 'langconfig') . s($user->{$field}) . '<br />';
-                      }
+						}
+						
+						$row->cells[1]->text .= '<tr>
+                                		<td>'.get_user_field_name($field).'</td>
+                                		<td>'.s($user->{$field}).'</td>
+                                	</tr>';
+						
+                        /*$row->cells[1]->text .= get_user_field_name($field) .
+                                get_string('labelsep', 'langconfig') . s($user->{$field}) . '<br />';*/
+                                
+					}
 
 		   }
                    if ( has_capability('moodle/grade:edit', $context) ) {
                      if ( strpos($user->email, '@student.ssis-suzhou') != 0 ) {
 		       echo strpos($user->email, '@ssis-suzhou');
+		       
                         $parent_email_address = $user->username . "PARENTS@student.ssis-suzhou.net";
-                        $row->cells[1]->text .= "Parent's Email: " . '<a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a>'  . '<br />';
+                        $row->cells[1]->text .= '<tr>
+                                		<td>Parents Email</td>
+                                		<td><a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a></td>
+                                	</tr>';
+                        #$row->cells[1]->text .= "Parent's Email: " . '<a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a>'  . '<br />';
+                        
                         $teachers_email_address = $user->username . "TEACHERS@student.ssis-suzhou.net";
-                        $row->cells[1]->text .= "All Teacher's Emails: " . '<a href="mailto:' . $teachers_email_address . '">' . $teachers_email_address . '</a>' . '<br />';
+                        $row->cells[1]->text .= '<tr>
+                                		<td>All Teachers Email</td>
+                                		<td><a href="mailto:' . $teachers_email_address . '">' . $teachers_email_address . '</a></td>
+                                	</tr>';
+                        #$row->cells[1]->text .= "All Teacher's Emails: " . '<a href="mailto:' . $teachers_email_address . '">' . $teachers_email_address . '</a>' . '<br />';
+                        
                         $hr_email_address = $user->username . "HR@student.ssis-suzhou.net";
-                        $row->cells[1]->text .= "Homeroom Teacher's Email: " . '<a href="mailto:' . $hr_email_address . '">' . $hr_email_address . '</a>' . '<br />';
+						$row->cells[1]->text .= '<tr>
+                    		<td>Homeroom Teacher\'s Email</td>
+                    		<td><a href="mailto:' . $hr_email_address . '">' . $hr_email_address . '</a></td>
+                    	</tr>';
+                        #$row->cells[1]->text .= "Homeroom Teacher's Email: " . '<a href="mailto:' . $hr_email_address . '">' . $hr_email_address . '</a>' . '<br />';
 		     }
                    } else {
                    if ( (substr($USER->idnumber, -1) == 'P') and (substr($user->idnumber, -1) != 'P') ) {
-                     $parent_email_address = $user->username . "PARENTS@student.ssis-suzhou.net";
-                      $row->cells[1]->text .= "Parent's Email: " . '<a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a>' . '<br />';
+                   
+                     $parent_email_address = $user->username . "PARENTS@student.ssis-suzhou.net";  
+                      $row->cells[1]->text .= '<tr>
+                                		<td>Parents Email</td>
+                                		<td><a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a></td>
+                                	</tr>';
+                     #$row->cells[1]->text .= "Parent's Email: " . '<a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a>' . '<br />';
                    }
                    }
 		   
 		   // ssis doesn't need or want city or country, code deleted here
 
-                    $row->cells[1]->text .= $OUTPUT->container_end();
+					$row->cells[1]->text .= '</table>';
+                    #$row->cells[1]->text .= $OUTPUT->container_end();
 
                     $row->cells[2] = new html_table_cell();
                     $row->cells[2]->attributes['class'] = 'links';
@@ -660,14 +730,14 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
                     }
 
                     if (has_capability('moodle/site:viewreports', $context) or has_capability('moodle/user:viewuseractivitiesreport', $usercontext)) {
-                        $links[] = html_writer::link(new moodle_url('/course/user.php?id='. $course->id .'&user='. $user->id), get_string('activity'));
+                        $links[] = '<button>'.html_writer::link(new moodle_url('/course/user.php?id='. $course->id .'&user='. $user->id), get_string('activity')).'</button>';
                     }
 
                     if ($USER->id != $user->id && !session_is_loggedinas() && has_capability('moodle/user:loginas', $context) && !is_siteadmin($user->id)) {
-                        $links[] = html_writer::link(new moodle_url('/course/loginas.php?id='. $course->id .'&user='. $user->id .'&sesskey='. sesskey()), get_string('loginas'));
+                        $links[] = '<button>'.html_writer::link(new moodle_url('/course/loginas.php?id='. $course->id .'&user='. $user->id .'&sesskey='. sesskey()), get_string('loginas')).'</button>';
                     }
 
-                    $links[] = html_writer::link(new moodle_url('/user/view.php?id='. $user->id .'&course='. $course->id), get_string('fullprofile') . '...');
+                    $links[] = '<button>'.html_writer::link(new moodle_url('/user/view.php?id='. $user->id .'&course='. $course->id), get_string('fullprofile') . '...').'</button>';
 
                     $row->cells[2]->text .= implode('', $links);
 
