@@ -603,18 +603,18 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
                         $row->cells[1]->text .= get_string('role').get_string('labelsep', 'langconfig').$user->role.'<br />';
                     }
 
-		    if ( substr($user->idnumber, 0, 3) == '000' ) {
-		      // do nothing because ssis individuals with three leading zeroes gets a different print out
-		    } else {
-
-                      if ($user->maildisplay == 1 or ($user->maildisplay == 2 and ($course->id != SITEID) and !isguestuser()) or
-                                has_capability('moodle/course:viewhiddenuserfields', $context) or
+                    if ($user->maildisplay == 1 or ($user->maildisplay == 2 and ($course->id != SITEID) and !isguestuser()) or
+			has_capability('moodle/course:viewhiddenuserfields', $context) or
                                 in_array('email', $extrafields) or ($user->id == $USER->id)) {
                         $row->cells[1]->text .= get_string('email').get_string('labelsep', 'langconfig').html_writer::link("mailto:$user->email", $user->email) . '<br />';
-                      }
 
 
-                      foreach ($extrafields as $field) {
+                    foreach ($extrafields as $field) {
+		        if ( ($field === 'idnumber') and !(has_capability('moodle/grade:edit', $context))) {
+			    // Don't show the PowerSchool ID if not an ssis teacher
+			    continue;
+		        }
+
 		        if ( ($field === 'email') or ($field === 'lastaccess') ) {
                             // Skip email because it was displayed with different
                             // logic above (because this page is intended for
@@ -627,16 +627,8 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 
 		   }
                    if ( has_capability('moodle/grade:edit', $context) ) {
-                     if ( strlen($user->idnumber) == 5 ) {
-		       if ( substr($user->idnumber, 0, 3) == '000') {
-			 $break = '<br />';
-			 $usebccaddr = 'usebccstudents' . strtoupper(ltrim($user->username, 'a..z')) . '@student.ssis-suzhou.net';
-			 $row->cells[1]->text .= 'All Students: ' . '<a href="mailto:?bcc=' . $usebccaddr . '">' . $usebccaddr . '</a>' . $break;
-			 $usebccaddr = 'usebccparents' . strtoupper(ltrim($user->username, 'a..z')) . '@student.ssis-suzhou.net';
-			 $row->cells[1]->text .= 'All Parents: ' . '<a href="mailto:?bcc=' . $usebccaddr . '">' . $usebccaddr . '</a>' . $break;
-			 $teachersemail = 'teachers' . strtoupper(ltrim($user->username, 'a..z')) . '@student.ssis-suzhou.net';
-			 $row->cells[1]->text .= 'All Teachers: <a href="mailto:' . $teachersemail . '">' . $teachersemail . '<br />';
-		       } else {
+                     if ( strpos($user->email, '@student.ssis-suzhou') != 0 ) {
+		       echo strpos($user->email, '@ssis-suzhou');
                         $parent_email_address = $user->username . "PARENTS@student.ssis-suzhou.net";
                         $row->cells[1]->text .= "Parent's Email: " . '<a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a>'  . '<br />';
                         $teachers_email_address = $user->username . "TEACHERS@student.ssis-suzhou.net";
@@ -650,7 +642,7 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
                       $row->cells[1]->text .= "Parent's Email: " . '<a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a>' . '<br />';
                    }
                    }
-		   }
+		   
 		   // ssis doesn't need or want city or country, code deleted here
 
                     $row->cells[1]->text .= $OUTPUT->container_end();
