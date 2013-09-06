@@ -627,16 +627,8 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 
 		   }
                    if ( has_capability('moodle/grade:edit', $context) ) {
-                     if ( strlen($user->idnumber) == 5 ) {
-		       if ( substr($user->idnumber, 0, 3) == '000') {
-			 $break = '<br />';
-			 $usebccaddr = 'usebccstudents' . strtoupper(ltrim($user->username, 'a..z')) . '@student.ssis-suzhou.net';
-			 $row->cells[1]->text .= 'All Students: ' . '<a href="mailto:?bcc=' . $usebccaddr . '">' . $usebccaddr . '</a>' . $break;
-			 $usebccaddr = 'usebccparents' . strtoupper(ltrim($user->username, 'a..z')) . '@student.ssis-suzhou.net';
-			 $row->cells[1]->text .= 'All Parents: ' . '<a href="mailto:?bcc=' . $usebccaddr . '">' . $usebccaddr . '</a>' . $break;
-			 $teachersemail = 'teachers' . strtoupper(ltrim($user->username, 'a..z')) . '@student.ssis-suzhou.net';
-			 $row->cells[1]->text .= 'All Teachers: <a href="mailto:' . $teachersemail . '">' . $teachersemail . '<br />';
-		       } else {
+                     if ( strpos($user->email, '@student.ssis-suzhou') != 0 ) {
+		       echo strpos($user->email, '@ssis-suzhou');
                         $parent_email_address = $user->username . "PARENTS@student.ssis-suzhou.net";
                         $row->cells[1]->text .= "Parent's Email: " . '<a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a>'  . '<br />';
                         $teachers_email_address = $user->username . "TEACHERS@student.ssis-suzhou.net";
@@ -650,7 +642,7 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
                       $row->cells[1]->text .= "Parent's Email: " . '<a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a>' . '<br />';
                    }
                    }
-		   }
+		   
 		   // ssis doesn't need or want city or country, code deleted here
 
                     $row->cells[1]->text .= $OUTPUT->container_end();
