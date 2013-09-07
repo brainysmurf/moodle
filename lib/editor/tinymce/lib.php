@@ -219,8 +219,7 @@ class tinymce_texteditor extends texteditor {
 	// Added for mediacore
 	// TODO: Make this work anytime
 	//$params['plugins'] .= ",mediacoreinsert";
-	//$params['theme_advanced_buttons3_add'] = ",|,mediacoreinsert";
-	// Done
+	$params['theme_advanced_buttons3_add'] = ",|,mediacoreinsert";
 
         return $params;
     }
