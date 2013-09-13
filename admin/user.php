@@ -328,6 +328,14 @@
                     $buttons[] = html_writer::link(new moodle_url($securewwwroot.'/user/editadvanced.php', array('id'=>$user->id, 'course'=>$site->id)), html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/edit'), 'alt'=>$stredit, 'class'=>'iconsmall')), array('title'=>$stredit));
                 }
             }
+            
+            // reset password button
+            if (has_capability('moodle/user:update', $sitecontext)) {
+	            // prevent editing of admins by non-admins
+                if (is_siteadmin($USER) or !is_siteadmin($user)) {
+                	$buttons[] = html_writer::link(new moodle_url($securewwwroot.'/admin/user/reset_password.php', array('id'=>$user->id)), html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/lock'), 'alt'=>'Reset User\'s Password', 'class'=>'iconsmall')), array('title'=>'Reset User\'s Password'));
+                }
+            }
 
             // the last column - confirm or mnet info
             if (is_mnet_remote_user($user)) {
