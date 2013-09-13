@@ -8,6 +8,7 @@ require_once($CFG->libdir.'/adminlib.php');
 
 $userID = required_param('id', PARAM_INT);
 $confirm = optional_param('confirm', 0, PARAM_BOOL);
+$ref = optional_param('ref', '/admin/user.php' , PARAM_TEXT);
 
 require_login();
 admin_externalpage_setup('resetpassword'); //idk what this is
@@ -37,7 +38,7 @@ echo $OUTPUT->header();
             	echo $OUTPUT->heading('Password Changed Successfully');
             	
             	$subject = 'Your new DragonNet password';
-$body = "Dear user,
+$body = "Dear {$user->username},
 
 This is an automated message. No reply necessary.
 
@@ -52,7 +53,7 @@ Thank you and kind regards,
 SSIS DragonNet Admin Team";
             	
             	echo '<div class="singlebutton"><a href="mailto:'.$user->email.'?subject='.rawurlencode($subject).'&body='.rawurlencode($body).'"><button>Send Email to User</button></a></div>';
-            	echo '<div class="singlebutton"><a href="#" onclick="history.go(-2);"><button>Continue</button></div>';
+            	echo '<div class="singlebutton"><a href="'.$ref.'"><button>Continue</button></div>';
             }
             else
             {
@@ -65,8 +66,8 @@ SSIS DragonNet Admin Team";
 	{
 		//Show confirmation page
 		echo $OUTPUT->heading(get_string('confirmation', 'admin'));
-	    $formcontinue = new single_button(new moodle_url('reset_password.php', array('confirm' => 1, 'id'=>$userID)), get_string('yes'));
-	    $formcancel = new single_button(new moodle_url($_SERVER['HTTP_REFERER']), get_string('no'), 'get');
+	    $formcontinue = new single_button(new moodle_url('reset_password.php', array('confirm' => 1, 'id'=>$userID, 'ref'=>$ref)), get_string('yes'));
+	    $formcancel = new single_button(new moodle_url($ref), get_string('no'), 'get');
 	    echo $OUTPUT->confirm('Are you sure you want to reset <strong>'.$user->username.'</strong>\'s password?', $formcontinue, $formcancel);
 	}
 
