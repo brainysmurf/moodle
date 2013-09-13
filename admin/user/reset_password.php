@@ -11,18 +11,13 @@ $confirm = optional_param('confirm', 0, PARAM_BOOL);
 $ref = optional_param('ref', '/admin/user.php' , PARAM_TEXT);
 
 require_login();
-admin_externalpage_setup('resetpassword'); //idk what this is
+admin_externalpage_setup('resetpassword');
 require_capability('moodle/user:update', context_system::instance());
-
 
 //Get the user
 $user = $DB->get_record('user', array('id'=>$userID), '*', MUST_EXIST);
 
-#$return = $CFG->wwwroot.'/'.$CFG->admin.'/user/user_bulk.php';
-
 echo $OUTPUT->header();
-
-
 
 	if ( $confirm and confirm_sesskey() )
 	{		

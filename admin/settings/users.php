@@ -165,5 +165,7 @@ if ($hassiteconfig
     $ADMIN->add('roles', new admin_externalpage('checkpermissions', new lang_string('checkglobalpermissions', 'role'), "$CFG->wwwroot/$CFG->admin/roles/check.php?contextid=".$systemcontext->id, array('moodle/role:assign', 'moodle/role:safeoverride', 'moodle/role:override', 'moodle/role:manage')));
 
 	$ADMIN->add("users", new admin_externalpage('resetpassword', "Reset A User's Password", "$CFG->wwwroot/$CFG->admin/user/reset_password.php"));
+	
+	$ADMIN->add("users", new admin_externalpage('resetemailpassword', "Reset A User's Email Password", "$CFG->wwwroot/$CFG->admin/user/reset_email_password.php"));
 
 } // end of speedup
