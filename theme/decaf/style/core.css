@@ -440,6 +440,41 @@ body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questionca
 
 .dnet-row-right {}
 
+.userinfobox .username {
+    padding: 8px;
+    font-size: 16px;
+}
+
+table.userinfotable {
+    border-spacing:2px;
+    border-collapse:separate;
+    margin: 0;
+    width: 100%;
+}
+
+table.userinfotable td {
+    font-size:13px;
+    background:rgba(255,255,255,.6);
+}
+
+table.userinfotable td:first-child {
+    width:200px;
+    text-align: right;
+    font-weight:bold;
+    background:rgba(200,200,200,.6);
+}
+
+.userinfobox .links button {
+    display: block;
+    width: 100%;
+    margin-bottom:3px;
+}
+
+.userinfobox .links button a {
+    padding: 3px;
+    text-align: center;
+}
+
 .activity-one {
 color: #333;
 }
@@ -471,5 +506,8 @@ color: #333;
 		box-shadow:none;
 	}
 
+
+
 /** Custom CSS **/
 [[setting:customcss]]
+

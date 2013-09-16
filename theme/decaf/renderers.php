@@ -317,7 +317,7 @@ class theme_decaf_core_renderer extends core_renderer {
             </ul></div>';
         }
         if (!empty($CFG->additionalhtmlfooter)) {
-            $output .= "\n".$CFG->additionalhtmlfooter;
+	     $output .= "\n".$CFG->additionalhtmlfooter;
         }
         return $output;
     }
