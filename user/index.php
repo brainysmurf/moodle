@@ -550,41 +550,6 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
                echo $OUTPUT->render($pagingbar);
             }
 
-		//CSS for user details table
-		echo '<style type="text/css">
-				.userinfobox .username {
-					padding: 8px;
-					font-size: 16px;
-				}
-				table.userinfotable {
-					border-spacing:2px;
-					border-collapse:separate;
-					margin: 0;
-					width: 100%;
-				}
-				table.userinfotable td {
-					font-size:13px;
-					background:rgba(255,255,255,.6);
-				}
-					table.userinfotable td:first-child {
-						width:200px;
-						text-align: right;
-						font-weight:bold;
-						background:rgba(200,200,200,.6);
-					}
-				.userinfobox .links button {
-					display: block;
-					width: 100%;
-					margin-bottom:3px;
-				}
-					.userinfobox .links button a {
-						padding: 3px;
-						text-align: center;
-					}
-			</style>';
-		
-
-
 	    // For teachers, print out the class emails:
            if ( $currentgroup && has_capability('moodle/grade:edit', $context) ) {
 	       $groupname = groups_get_group_name($currentgroup);

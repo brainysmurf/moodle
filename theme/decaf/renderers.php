@@ -193,9 +193,6 @@ class theme_decaf_core_renderer extends core_renderer {
             }
         }
 
-        //$loggedinas = '<div class="logininfo">'.$loggedinas.'</div>';
-	//$loggedinas .= '<a href="http://dragonnet.ssis-suzhou.net"><img src="http://dragonnet.ssis-suzhou.net/pix/smallogono.gif" /></a>';
-
         if (isset($SESSION->justloggedin)) {
             unset($SESSION->justloggedin);
             if (!empty($CFG->displayloginfailures)) {
@@ -320,7 +317,7 @@ class theme_decaf_core_renderer extends core_renderer {
             </ul></div>';
         }
         if (!empty($CFG->additionalhtmlfooter)) {
-            $output .= "\n".$CFG->additionalhtmlfooter;
+	     $output .= "\n".$CFG->additionalhtmlfooter;
         }
         return $output;
     }
