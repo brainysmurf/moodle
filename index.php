@@ -89,7 +89,7 @@
     } else if (cohort_is_member($hs_student_cohort, $USER->id)) {
 	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=2');
     } else if (cohort_is_member($parents_cohort, $USER->id)) {
-        redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=10');
+        redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=6');
     }
 
     if (get_home_page() != HOMEPAGE_SITE) {
