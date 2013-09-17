@@ -56,7 +56,7 @@ WITH (
         if ( $ID = $DB->insert_record('user_email_password_reset', $row , false) )
         {
 			echo $OUTPUT->heading('Changes Saved');
-			echo '<p style="text-align:center;">It may take up to 10 minutes for changes to take effect.</p>';
+			echo '<p style="text-align:center;">It will take up to 5 minutes for changes to take effect.</p>';
            	echo '<div class="singlebutton"><a href="'.$ref.'"><button>Continue</button></div>';
 		}
 		else

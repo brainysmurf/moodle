@@ -33,16 +33,20 @@ echo $OUTPUT->header();
             	echo $OUTPUT->heading('Password Changed Successfully');
             	
             	$subject = 'Your new DragonNet password';
-$body = "Dear {$user->username},
+		if ( $user->firstname === "Parent" ) { $salutation = 'Parent'; } else { $salutation = $user->firstname . ' ' . $user->lastname; }
+$body = "Dear $salutation,
 
-This is an automated message. No reply necessary.
+As requested, the password for your SSIS DragonNet account has been reset. Your login details are as follows:
 
-The password for your SSIS DragonNet account has been reset. Your login details are as follows:
+You can login to DragonNet by going to SSIS homepage, or simply click here: http://dragonnet.ssis-suzhou.net/login
 
-Your username is: {$user->username}
-Your password: $newPassword
+Your username is:
+{$user->username}
 
-You can login at http://dragonnet.ssis-suzhou.net/login
+Your password:
+$newPassword
+
+You will be forced to change your password as soon as you log in. Remember, all DragonNet passwords must have a symbol character such as ! # or $
 
 Thank you and kind regards,
 SSIS DragonNet Admin Team";
