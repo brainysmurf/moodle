@@ -1,5 +1,9 @@
 <?php
 
+function theme_decaf_page_init(moodle_page $page) {
+    $page->requires->jquery();
+}
+
 /**
  * get_performance_output() override get_peformance_info()
  *  in moodlelib.php. Returns a string
@@ -95,7 +99,7 @@ function decaf_initialise_editbuttons(moodle_page $page) {
 function decaf_initialise_awesomebar(moodle_page $page) {
     // Ensure that navigation has been initialised properly, in case Navigation block is not visible in 2.4
     $page->navigation->initialise();
-    $page->requires->yui_module('moodle-theme_decaf-awesomebar', 'M.theme_decaf.initAwesomeBar');
+    #$page->requires->yui_module('moodle-theme_decaf-awesomebar', 'M.theme_decaf.initAwesomeBar');
 }
 
 function decaf_require_course_login($courseorid, $autologinguest = true, $cm = NULL, $setwantsurltome = true, $preventredirect = true) {
