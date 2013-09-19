@@ -182,7 +182,9 @@ $THEME->csspostprocess = 'decaf_process_css';
 // (gets included in the head)
 ////////////////////////////////////////////////////
 
-// $THEME->javascripts_footer
+$THEME->javascripts_footer = array(
+	'awesomebar-jquery'
+);
 
 ////////////////////////////////////////////////////
 // As above but will be included in the page footer.
