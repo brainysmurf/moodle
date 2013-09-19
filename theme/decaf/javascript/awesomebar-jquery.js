@@ -4,9 +4,9 @@
 	/*
 	*	Settings
 	*/
-	var menuCloseTime = 3000; //How long (in milliseconds) to keep menus open for after mouse leaves them
+	var menuCloseTime = 500; //How long (in milliseconds) to keep menus open for after mouse leaves them
 	var liHeight = 32; //How tall (in pixels) is each item in the menu
-	var menuSlideTime = 100; //How long (in milliseconds) to animate the sliding when scrolling a menu
+	var menuSlideTime = 1000; //How long (in milliseconds) to animate the sliding when scrolling a menu
 	var menuHoverScrollTime = 200; //When hovering over the more or less button in a collapsed menu, scroll 1 item every x milliseconds
 	
 	
