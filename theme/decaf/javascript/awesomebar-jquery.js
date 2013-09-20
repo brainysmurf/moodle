@@ -1,16 +1,18 @@
-//$(function()
-//{
+var iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
+
+$(function()
+{
 	
 	/*
 	*	Settings
 	*/
 	var menuCloseTime = 500; //How long (in milliseconds) to keep menus open for after mouse leaves them
 	var liHeight = 32; //How tall (in pixels) is each item in the menu
-	var menuSlideTime = 1000; //How long (in milliseconds) to animate the sliding when scrolling a menu
+//	var menuSlideTime = 1000; //How long (in milliseconds) to animate the sliding when scrolling a menu
 	var menuHoverScrollTime = 200; //When hovering over the more or less button in a collapsed menu, scroll 1 item every x milliseconds
 	
 	
-	
+	var touchEnabled = iOS || 'ontouchstart' in window || window.navigator.msPointerEnabled;
 	
 	/*
 	*	Keep menus open for longer
@@ -128,7 +130,7 @@
 			newOffset = currentOffset + howMany;
 		}
 		
-		maxToShowInThisMenu = maxMenuItems;
+		var maxToShowInThisMenu = maxMenuItems;
 		
 		var totalItems = parseInt($(menu).attr('data-total-items'));
 		
@@ -204,11 +206,13 @@
 	//Scroll on click
 	$(document).on('click','#awesomebar .scroll-down',function()
 	{	
+		if ( !$(this).is(':visible') ) { return false; }
 		scrollMenu( $(this).closest('ul') , +1 );
 	});
 	
 	$(document).on('click','#awesomebar .scroll-up',function()
 	{
+		if ( !$(this).is(':visible') ) { return false; }
 		scrollMenu( $(this).closest('ul') , -1 );
 	});
 	
@@ -217,11 +221,15 @@
 	var menuHoverScrollInterval;
 	function enableMenuScrollOnHover()
 	{
-		$('#awesomebar li.scroll-down, #awesomebar li.scroll-up').hover(function()
+		//On touch devices, hold on up/down buttons to scroll multiple items. On PCs, hover mouse over up/down buttons
+		var startEvent = touchEnabled ? 'touchstart' : 'mouseenter';
+		var stopEvent = touchEnabled ? 'touchend' : 'mouseleave';
+	
+		$('#awesomebar li.scroll-down, #awesomebar li.scroll-up').bind(startEvent,function()
 		{	
 			var btn = this;
 			menuHoverScrollInterval = setInterval(function(){ $(btn).click(); },menuHoverScrollTime);
-		},function()
+		}).bind(stopEvent,function()
 		{
 			clearInterval(menuHoverScrollInterval);
 		});
@@ -250,7 +258,7 @@
 	
 	function repositionChildMenu( menu )
 	{
-		info = getMenuInfo(menu);
+		var info = getMenuInfo(menu);
 		//if menu is too long to fit in the window
 		if ( info.cut )
 		{
@@ -295,4 +303,4 @@
 	}
 	
 		
-//});
+});
