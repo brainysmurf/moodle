@@ -52,3 +52,6 @@
 [submodule "question/type/gapselect"]
 	path = question/type/gapselect
 	url = https://github.com/moodleou/moodle-qtype_gapselect.git
+[submodule "lib/MathJax"]
+	path = lib/MathJax
+	url = https://github.com/mathjax/MathJax.git
