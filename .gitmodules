@@ -16,3 +16,6 @@
 [submodule "admin/tool/uploadcourse"]
 	path = admin/tool/uploadcourse
 	url = https://github.com/piersharding/moodle-tool_uploadcourse.git
+[submodule "blocks/mrbs"]
+	path = blocks/mrbs
+	url = https://github.com/arborrow/moodle-block_mrbs.git
