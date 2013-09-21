@@ -37,9 +37,6 @@
 [submodule "question/format/stack"]
 	path = question/format/stack
 	url = git://github.com/maths/moodle-qformat_stack.git
-[submodule "course/format/grid"]
-	path = course/format/grid
-	url = https://github.com/gjb2048/moodle-courseformat_grid.git
 [submodule "mod/brainpop"]
 	path = mod/brainpop
 	url = https://github.com/brainysmurf/brainpopmoodle.git
