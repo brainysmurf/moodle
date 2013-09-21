@@ -1,0 +1,3 @@
+[submodule "blocks/configurable_reports"]
+	path = blocks/configurable_reports
+	url = https://github.com/jleyva/moodle-block_configurablereports.git
