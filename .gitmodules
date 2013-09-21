@@ -19,3 +19,6 @@
 [submodule "blocks/mrbs"]
 	path = blocks/mrbs
 	url = https://github.com/arborrow/moodle-block_mrbs.git
+[submodule "font-awesome"]
+	path = font-awesome
+	url = https://github.com/FortAwesome/Font-Awesome.git
