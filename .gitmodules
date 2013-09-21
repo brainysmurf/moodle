@@ -10,3 +10,6 @@
 [submodule "blocks/attendance"]
 	path = blocks/attendance
 	url = https://github.com/danmarsden/moodle-block_attendance.git
+[submodule "mod/flashcard"]
+	path = mod/flashcard
+	url = https://github.com/tmuras/Moodle-Flashcard.git
