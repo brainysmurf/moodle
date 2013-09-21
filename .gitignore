@@ -33,6 +33,3 @@ composer.lock
 /behat.yml
 */yui/build/*/*-coverage.js
 /lib/yuilib/*/build/*/*-coverage.js
-/mod/brainpop
-lib/editor/tinymce/tiny_mce/3.5.8/plugins/mediacoreinsert/editor_plugin.js
-lib/editor/tinymce/tiny_mce/3.5.8/plugins/mediacoreinsert/mcore-icon.png
