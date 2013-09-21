@@ -40,3 +40,6 @@
 [submodule "course/format/grid"]
 	path = course/format/grid
 	url = https://github.com/gjb2048/moodle-courseformat_grid.git
+[submodule "mod/brainpop"]
+	path = mod/brainpop
+	url = https://github.com/brainysmurf/brainpopmoodle.git
