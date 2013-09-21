@@ -34,3 +34,6 @@
 [submodule "question/type/stack"]
 	path = question/type/stack
 	url = git://github.com/maths/moodle-qtype_stack.git
+[submodule "question/format/stack"]
+	path = question/format/stack
+	url = git://github.com/maths/moodle-qformat_stack.git
