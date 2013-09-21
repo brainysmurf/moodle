@@ -628,8 +628,6 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
                             // students too)
                             continue;
 						}
-
-					        echo $field;
 						
 					        if ($user->{$field} === "") {
 						    // don't print an empty row

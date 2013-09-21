@@ -264,6 +264,7 @@
         $table->attributes['class'] = 'admintable generaltable';
         $table->colclasses[] = 'leftalign';
         foreach ($extracolumns as $field) {
+	  if ($field == 'institution') { continue; }
             $table->head[] = ${$field};
             $table->colclasses[] = 'leftalign';
         }
@@ -375,6 +376,7 @@
 	    $sesskey = sesskey();
 	    $row[] = "<a href=\"../course/loginas.php?user=$user->id&amp;sesskey=$sesskey\">$fullname</a>";
             foreach ($extracolumns as $field) {
+	        if ($field == 'institution') { continue; }
                 $row[] = $user->{$field};
             }
 	    // remove city and country
