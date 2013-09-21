@@ -13,3 +13,6 @@
 [submodule "mod/flashcard"]
 	path = mod/flashcard
 	url = https://github.com/tmuras/Moodle-Flashcard.git
+[submodule "admin/tool/uploadcourse"]
+	path = admin/tool/uploadcourse
+	url = https://github.com/piersharding/moodle-tool_uploadcourse.git
