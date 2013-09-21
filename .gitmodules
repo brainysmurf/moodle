@@ -31,3 +31,6 @@
 [submodule "question/behaviour/adaptivemultipart"]
 	path = question/behaviour/adaptivemultipart
 	url = git://github.com/maths/moodle-qbehaviour_adaptivemultipart.git
+[submodule "question/type/stack"]
+	path = question/type/stack
+	url = git://github.com/maths/moodle-qtype_stack.git
