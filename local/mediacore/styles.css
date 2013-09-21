@@ -1,0 +1,21 @@
+.mcore-no-video-found-error {
+	width: 384px;
+	height: 89px;
+	padding: 8px !important;
+	background: #afb3b9;
+	-webkit-border-radius: 9px;
+	-moz--border-radius: 9px;
+	border-radius: 9px;
+}
+.mcore-no-video-found-error p {
+	display: table-cell;
+	width: 342px;
+	height: 47px;
+	padding: 20px;
+	text-align: center;
+	vertical-align: middle;
+	font-size: 15px;
+	color: #595f6b;
+	border: 1px solid #919499;
+	background: #fff;
+}

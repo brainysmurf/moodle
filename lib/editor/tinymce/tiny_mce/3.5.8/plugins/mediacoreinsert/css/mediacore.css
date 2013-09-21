@@ -1,0 +1,388 @@
+
+html, body { 
+	background: #FFF; 
+	margin: 0; 
+}
+.searchreset {
+	display: block;
+	float: right;
+}
+	
+#mcore-embed {	
+	
+	font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
+	-webkit-font-smoothing:subpixel-antialiased;
+	text-rendering:optimizeLegibility; font-size:13px;
+	color:#494949;
+}
+	
+	
+	
+#mcore-embed .mcore-header {
+	background:url(../images/header.png) repeat-x top center;
+	clear: both;
+	height:27px;
+	left: 0;
+	position:relative;
+	top: 0;
+	z-index:1002;
+	padding:10px 15px;
+}
+
+#mcore-embed .mcore-pagination {
+	float:right;
+}
+	
+#mcore-embed .mcore-header .mcore-btn {
+	height:28px;
+	display:inline-block;
+	background:url(../images/header-btn-left.png) no-repeat top left;
+	padding-left:4px;
+	text-indent: -9999px;
+}
+	
+#mcore-embed .mcore-header .mcore-btn span {
+	background:url(../images/header-btn-right.png) no-repeat top right;
+	height:28px;
+	display:block;
+	padding:0 12px 0 8px;
+}
+	
+#mcore-embed .mcore-header .mcore-pagination .mcore-prev {
+	background:url(../images/pagination.png) no-repeat top left;
+	width:31px;
+	height:28px;
+	cursor:pointer;
+	margin:0;
+	padding:0;
+}
+	
+#mcore-embed .mcore-header .mcore-pagination .mcore-next {
+	background:url(../images/pagination.png) no-repeat top right;
+	width:30px;
+	height:28px;
+	cursor:pointer;
+	margin:0 0 0 -4px;
+	padding:0;
+}
+	
+#mcore-embed .mcore-header .mcore-pagination .mcore-next.mcore-disabled {
+	background-position:100% -84px;
+	cursor:default;
+	pointer-events: none;
+}
+	
+#mcore-embed .mcore-header .mcore-pagination .mcore-prev.mcore-disabled {
+	background-position:0 -84px;
+	cursor:default;
+}
+	
+#mcore-embed .mcore-header .mcore-title {
+	font-size:18px;
+	font-weight:500;
+	color:#3c4d5a;
+	text-shadow:0 1px 0 #FFF;
+	padding-top:4px;
+}
+	
+#mcore-embed .mcore-close {
+	cursor:pointer;
+}
+	
+#mcore-embed .mcore-search {
+	background:url(../images/search-bg.png) repeat-x top;
+	
+	height:29px;
+	position:relative;
+	margin:-1px 0 0;
+	padding:9px 15px;
+}
+	
+#mcore-embed .mcore-search .mcore-search-field {
+	background:#fff url(../images/magnify-glass.png) no-repeat 12px 5px;
+	border-radius:15px;
+	float: left;
+	font-size:14px;
+	color:#989999;
+	font-weight:300;
+	height:27px;
+	line-height:25px;
+	border:1px solid #8e9197;
+	box-shadow:0 1px 0 #fff,inset 0 1px 0 #d5d5d5;
+	width:89%;
+	outline:none!important;
+	font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
+	padding:0 10px 0 35px;
+}
+	
+#mcore-embed .mcore-search .mcore-clear-search {
+	display: block;
+	width:18px;
+	height:18px;
+	position:absolute;
+	top:15px;
+	right:24px;
+	background:url(../images/clear-search.png) no-repeat 0 0;
+	cursor:pointer;
+	text-indent: -9990px;
+}
+	
+#mcore-embed .mcore-content {
+	background:#fff;
+	clear: both;
+	height:341px;
+	float:left;
+	width:100%;
+	overflow-y:scroll;
+}
+	
+#mcore-embed .mcore-message {
+	margin: 40px auto 0 auto;
+	text-align: center;
+	width: 250px;
+}
+	
+#mcore-embed .mcore-message h2 {
+	text-align:center;
+	font-size:25px;
+	color:#a3abb8;
+	line-height:25px;
+	margin-bottom:10px;
+}
+	
+#mcore-embed .mcore-message p {
+	text-align:center;
+	font-size:15px;
+	color:#afb6c3;
+	font-weight:300;
+}
+	
+#mcore-embed.zero-state .mcore-media,#mcore-embed .mcore-message {
+
+}
+	
+#mcore-embed.zero-state .mcore-content {
+	background:#fff url(../images/zero-state.png) no-repeat center 85px;
+}
+	
+#mcore-embed.connection-error .mcore-content {
+	background:#fff url(../images/error.png) no-repeat center 85px;
+}
+	
+#mcore-embed.zero-state .mcore-message,#mcore-embed.connection-error .mcore-message {
+	display:block;
+}
+	
+#mcore-embed .mcore-loading {
+	position:absolute;
+	top:50%;
+	width:80px;
+	height:80px;
+	left:50%;
+	display:none;
+	background:url(../images/spinner.gif) no-repeat center;
+	margin:-40px 0 0 -40px;
+}
+	
+	
+
+#mcore-embed .mcore-media {
+	height:56px;
+	border-bottom:1px solid #e8e8e8;
+	padding:12px 15px;
+}
+#mcore-embed .mcore-media a {	
+	border: 0 !important;
+	color:#3e8ae5;
+	display: block;
+	text-decoration: none;
+}
+#mcore-embed .mcore-media a img {	
+	border: 0 !important;
+}
+#mcore-embed .mcore-media .mcore-thumbnail {
+	border: 0;
+	float:left;
+	margin-right:15px;
+	position:relative;
+	cursor:pointer;
+	height:56px;
+	width:100px;
+}
+	
+#mcore-embed .mcore-media .mcore-thumbnail img {
+	width:100px;
+	height:56px;
+}
+	
+#mcore-embed .mcore-media .mcore-thumbnail .mcore-border {
+	position:absolute;
+	top:0;
+	left:0;
+	right:0;
+	bottom:0;
+	border:1px solid rgba(0,0,0,0.4);
+}
+	
+#mcore-embed .mcore-media .mcore-thumbnail .mcore-overlay {
+	position:absolute;
+	bottom:0;
+	left:0;
+	right:0;
+	height:15px;
+	background:rgba(0,0,0,0.55);
+	border-top:1px solid rgba(0,0,0,0.4);
+}
+	
+#mcore-embed .mcore-media .mcore-overlay .mcore-icon {
+	position:absolute;
+	width:17px;
+	height:12px;
+	background:url(../images/video-icon.png) no-repeat center;
+	left:5px;
+	top:1px;
+}
+	
+#mcore-embed .mcore-audio .mcore-overlay .mcore-icon {
+	background:url(../images/audio-icon.png) no-repeat center;
+}
+	
+#mcore-embed .mcore-media .mcore-length {
+	position:absolute;
+	color:#FFF;
+	line-height: 14px;
+	text-shadow:0 1px .9px #000;
+	font-size:11px;
+	font-weight:400;
+	right:5px;
+	top:0;
+}
+	
+#mcore-embed .mcore-media .mcore-info {
+	float:left;
+	width:190px;
+	margin-right:20px;
+}
+	
+#mcore-embed .mcore-media .mcore-info h3 {
+	width:210px;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipsis;
+	color:#3e8ae5;
+	font-size:17px;
+	line-height:24px;
+	cursor:pointer;
+	margin:6px 0 5px;
+}
+	
+#mcore-embed .mcore-media .mcore-info .mcore-date {
+	color:#858d9e;
+	font-size:13px;
+}
+	
+#mcore-embed .mcore-media .mcore-add-btn {
+	height:23px;
+	background:url(../images/add-btn-l.png) no-repeat 0 0;
+	display:inline-block;
+	cursor:pointer;
+	margin-top:10px;
+}
+	
+#mcore-embed .mcore-media .mcore-add-btn a {
+	display: block;
+	margin-left:4px;
+	height:23px;
+	background:url(../images/add-btn-r.png) no-repeat top right;
+	line-height:23px;
+	padding:0 10px 0 4px;
+}
+#mcore-embed .mcore-media .mcore-add-btn a {
+		color: #444;
+		text-decoration: none;
+}
+#mcore-embed .mcore-media .mcore-add-btn .mcore-icon {
+	display: inline-block;
+	height:8px;
+	width:10px;
+	background:url(../images/add-icon.png) no-repeat center;
+	margin:0;
+	padding:0;
+}
+	
+#mcore-embed .mcore-media .mcore-add-btn:active .mcore-icon {
+	background-position:center center;
+}
+	
+#mcore-embed .mcore-footer {
+	background:url(../images/footer-bg.png) repeat-x top;
+	height:35px;
+	border-radius:0 0 5px 5px;
+	-webkit-border-radius:0 0 5px 5px;
+	-moz-border-radius:0 0 5px 5px;
+	float:left;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width:100%;
+	text-align:center;
+	line-height:35px;
+	text-shadow:0 1px 0 #FFF;
+}
+	
+#mcore-embed .mcore-media.clicked .mcore-thumbnail,#mcore-embed .mcore-media.clicked .mcore-info h3,#mcore-embed .mcore-media.clicked .mcore-add-btn {
+	cursor:default;
+}
+	
+#mcore-embed .mcore-media.clicked .mcore-add-btn .mcore-icon {
+	background-position:center center;
+	opacity:.7;
+}
+	
+	.mcore-clearfix:after {
+	content:'';
+	display:block;
+	height:0;
+	clear:both;
+	visibility:hidden;
+}
+	
+	* html .mcore-clearfix {
+	height:1%;
+}
+	
+	:first-child+html .mcore-clearfix {
+	display:inline-block;
+}
+	
+
+#mcore-embed .mcore-media .mcore-add {
+	float:right;
+	position: relative;
+	z-index: 9000;
+}
+#mcore-embed .mcore-header .mcore-btn:hover,#mcore-embed .mcore-header .mcore-pagination .mcore-prev:hover {
+	background-position:0 -28px;
+}
+#mcore-embed .mcore-header .mcore-pagination .mcore-disabled:hover {
+	background-position:0 -84px;
+}
+#mcore-embed .mcore-header .mcore-btn:hover span,#mcore-embed .mcore-header .mcore-pagination .mcore-next:hover {
+	background-position:100% -28px;
+}
+	
+#mcore-embed .mcore-header .mcore-btn:active,#mcore-embed .mcore-header .mcore-pagination .mcore-prev:active {
+	background-position:0 -56px;
+}
+	
+#mcore-embed .mcore-header .mcore-btn:active span,#mcore-embed .mcore-header .mcore-pagination .mcore-next:active {
+	background-position:100% -56px;
+}
+	
+#mcore-embed .mcore-media .mcore-add-btn:active,#mcore-embed .mcore-media.clicked .mcore-add-btn {
+	background-position:0 -23px;
+}
+	
+#mcore-embed .mcore-media .mcore-add-btn:active span,#mcore-embed .mcore-media.clicked .mcore-add-btn span {
+	background-position:100% -23px;
+}
