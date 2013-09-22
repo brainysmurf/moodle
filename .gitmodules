@@ -52,3 +52,6 @@
 [submodule "lib/MathJax"]
 	path = lib/MathJax
 	url = https://github.com/mathjax/MathJax.git
+[submodule "mod/questionnaire"]
+	path = mod/questionnaire
+	url = https://github.com/remotelearner/moodle-mod_questionnaire.git
