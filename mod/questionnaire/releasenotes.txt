@@ -1,0 +1,15 @@
+Release Notes:
+
+Version 2.4.1 - Release date 20130519
+
+In accordance with current Moodle languages policy, all language folders other than English have been
+removed from the lang folder. All translations are now available from AMOS.
+
+
+Version 2.3.2 - Release date 20120820
+
+- CONTRIB-3696 added addinstance string to lang/en/questionnaire.php and lang/fr/questionnaire.php
+- CONTRIB-3797 : fixed typo
+- CONTRIB-3704 (one more compliance with Strict Standards fix !)
+- one more missing new stdClass() for strict compliance
+- CONTRIB-3864 - Added savepoints to all upgrade steps.
