@@ -962,7 +962,7 @@ class enrol_ldap_plugin extends enrol_plugin {
             $template->groupmodeforce = $courseconfig->groupmodeforce;
             $template->visible        = $courseconfig->visible;
             $template->lang           = $courseconfig->lang;
-            $template->groupmodeforce = $courseconfig->groupmodeforce;
+            $template->enablecompletion = $courseconfig->enablecompletion;
         }
         $course = $template;
 
@@ -988,6 +988,12 @@ class enrol_ldap_plugin extends enrol_plugin {
             $course->summary = '';
         } else {
             $course->summary = $course_ext[$this->get_config('course_summary')][0];
+        }
+
+        // Check if the shortname already exists if it does - skip course creation.
+        if ($DB->record_exists('course', array('shortname' => $course->shortname))) {
+            $trace->output(get_string('duplicateshortname', 'enrol_ldap', $course));
+            return false;
         }
 
         $newcourse = create_course($course);

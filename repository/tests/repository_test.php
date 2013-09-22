@@ -161,18 +161,12 @@ class repositorylib_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $coursecontext = context_course::instance($course->id);
         $roleid = create_role('A role', 'arole', 'A role', '');
-        set_role_contextlevels($roleid, array($syscontext->contextlevel, $coursecontext->contextlevel));
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
 
-        $plugintype = new repository_type('flickr_public');
-        $plugintype->create(true);
-        $params = array(
-            'name' => 'Flickr Public'
-        );
-
         // Instance on a site level.
-        $repoid = repository::static_function('flickr_public', 'create', 'flickr_public', 0, $syscontext, $params);
+        $this->getDataGenerator()->create_repository_type('flickr_public');
+        $repoid = $this->getDataGenerator()->create_repository('flickr_public')->id;
         $systemrepo = repository::get_repository_by_id($repoid, $syscontext);
 
         role_assign($roleid, $user->id, $syscontext->id);
@@ -197,7 +191,8 @@ class repositorylib_testcase extends advanced_testcase {
         // Instance on a course level.
         $this->getDataGenerator()->enrol_user($user->id, $course->id, $roleid);
 
-        $repoid = repository::static_function('flickr_public', 'create', 'flickr_public', 0, $coursecontext, $params);
+        $params = array('contextid' => $coursecontext->id);
+        $repoid = $this->getDataGenerator()->create_repository('flickr_public', $params)->id;
         $courserepo = repository::get_repository_by_id($repoid, $coursecontext);
 
         assign_capability('moodle/course:update', CAP_ALLOW, $roleid, $coursecontext, true);
@@ -225,16 +220,326 @@ class repositorylib_testcase extends advanced_testcase {
         accesslib_clear_all_caches_for_unit_testing();
 
         // Editing someone else's instance.
-        $repoid = repository::static_function('flickr_public', 'create', 'flickr_public', 0, $otherusercontext, $params);
+        $record = array('contextid' => $otherusercontext->id);
+        $repoid = $this->getDataGenerator()->create_repository('flickr_public', $record)->id;
         $userrepo = repository::get_repository_by_id($repoid, $syscontext);
         $this->assertFalse($userrepo->can_be_edited_by_user());
 
         // Editing my own instance.
         $usercontext = context_user::instance($user->id);
-        $repoid = repository::static_function('flickr_public', 'create', 'flickr_public', 0, $usercontext, $params);
+        $record = array('contextid' => $usercontext->id);
+        $repoid = $this->getDataGenerator()->create_repository('flickr_public', $record)->id;
         $userrepo = repository::get_repository_by_id($repoid, $syscontext);
         $this->assertTrue($userrepo->can_be_edited_by_user());
 
     }
 
+    public function test_check_capability() {
+        $this->resetAfterTest(true);
+
+        $syscontext = context_system::instance();
+        $course1 = $this->getDataGenerator()->create_course();
+        $course1context = context_course::instance($course1->id);
+        $course2 = $this->getDataGenerator()->create_course();
+        $course2context = context_course::instance($course2->id);
+
+        $forumdata = new stdClass();
+        $forumdata->course = $course1->id;
+        $forumc1 = $this->getDataGenerator()->create_module('forum', $forumdata);
+        $forumc1context = context_module::instance($forumc1->id);
+        $forumdata->course = $course2->id;
+        $forumc2 = $this->getDataGenerator()->create_module('forum', $forumdata);
+        $forumc2context = context_module::instance($forumc2->id);
+
+        $blockdata = new stdClass();
+        $blockdata->parentcontextid = $course1context->id;
+        $blockc1 = $this->getDataGenerator()->create_block('online_users', $blockdata);
+        $blockc1context = context_block::instance($blockc1->id);
+        $blockdata->parentcontextid = $course2context->id;
+        $blockc2 = $this->getDataGenerator()->create_block('online_users', $blockdata);
+        $blockc2context = context_block::instance($blockc2->id);
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $user1context = context_user::instance($user1->id);
+        $user2 = $this->getDataGenerator()->create_user();
+        $user2context = context_user::instance($user2->id);
+
+        // New role prohibiting Flickr Public access.
+        $roleid = create_role('No Flickr Public', 'noflickrpublic', 'No Flickr Public', '');
+        assign_capability('repository/flickr_public:view', CAP_PROHIBIT, $roleid, $syscontext, true);
+
+        // Disallow system access to Flickr Public to user 2.
+        role_assign($roleid, $user2->id, $syscontext->id);
+        accesslib_clear_all_caches_for_unit_testing();
+
+        // Enable repositories.
+        $this->getDataGenerator()->create_repository_type('flickr_public');
+        $this->getDataGenerator()->create_repository_type('dropbox');
+
+        // Instance on a site level.
+        $repoid = $this->getDataGenerator()->create_repository('flickr_public')->id;
+        $systemrepo = repository::get_repository_by_id($repoid, $syscontext);
+
+        // Check that everyone with right capability can view a site-wide repository.
+        $this->setUser($user1);
+        $this->assertTrue($systemrepo->check_capability());
+
+        // Without the capability, we cannot view a site-wide repository.
+        $this->setUser($user2);
+        $caughtexception = false;
+        try {
+            $systemrepo->check_capability();
+        } catch (repository_exception $e) {
+            $caughtexception = true;
+        }
+        $this->assertTrue($caughtexception);
+
+        // Instance on a course level.
+        $record = new stdClass();
+        $record->contextid = $course1context->id;
+        $courserepoid = $this->getDataGenerator()->create_repository('flickr_public', $record)->id;
+
+        // Within the course, I can view the repository.
+        $courserepo = repository::get_repository_by_id($courserepoid, $course1context);
+        $this->setUser($user1);
+        $this->assertTrue($courserepo->check_capability());
+        // But not without the capability.
+        $this->setUser($user2);
+        $caughtexception = false;
+        try {
+            $courserepo->check_capability();
+        } catch (repository_exception $e) {
+            $caughtexception = true;
+        }
+        $this->assertTrue($caughtexception);
+
+        // From another course I cannot, with or without the capability.
+        $courserepo = repository::get_repository_by_id($courserepoid, $course2context);
+        $this->setUser($user1);
+        $caughtexception = false;
+        try {
+            $courserepo->check_capability();
+        } catch (repository_exception $e) {
+            $caughtexception = true;
+        }
+        $this->assertTrue($caughtexception);
+        $this->setUser($user2);
+        $caughtexception = false;
+        try {
+            $courserepo->check_capability();
+        } catch (repository_exception $e) {
+            $caughtexception = true;
+        }
+        $this->assertTrue($caughtexception);
+
+        // From a module within the course, I can view the repository.
+        $courserepo = repository::get_repository_by_id($courserepoid, $forumc1context);
+        $this->setUser($user1);
+        $this->assertTrue($courserepo->check_capability());
+        // But not without the capability.
+        $this->setUser($user2);
+        $caughtexception = false;
+        try {
+            $courserepo->check_capability();
+        } catch (repository_exception $e) {
+            $caughtexception = true;
+        }
+        $this->assertTrue($caughtexception);
+
+        // From a module in the wrong course, I cannot view the repository.
+        $courserepo = repository::get_repository_by_id($courserepoid, $forumc2context);
+        $this->setUser($user1);
+        $caughtexception = false;
+        try {
+            $courserepo->check_capability();
+        } catch (repository_exception $e) {
+            $caughtexception = true;
+        }
+        $this->assertTrue($caughtexception);
+
+        // From a block within the course, I can view the repository.
+        $courserepo = repository::get_repository_by_id($courserepoid, $blockc1context);
+        $this->setUser($user1);
+        $this->assertTrue($courserepo->check_capability());
+        // But not without the capability.
+        $this->setUser($user2);
+        $caughtexception = false;
+        try {
+            $courserepo->check_capability();
+        } catch (repository_exception $e) {
+            $caughtexception = true;
+        }
+        $this->assertTrue($caughtexception);
+
+        // From a block in the wrong course, I cannot view the repository.
+        $courserepo = repository::get_repository_by_id($courserepoid, $blockc2context);
+        $this->setUser($user1);
+        $caughtexception = false;
+        try {
+            $courserepo->check_capability();
+        } catch (repository_exception $e) {
+            $caughtexception = true;
+        }
+        $this->assertTrue($caughtexception);
+
+        // Instance on a user level.
+        // Instance on a course level.
+        $record = new stdClass();
+        $record->contextid = $user1context->id;
+        $user1repoid = $this->getDataGenerator()->create_repository('flickr_public', $record)->id;
+        $record->contextid = $user2context->id;
+        $user2repoid = $this->getDataGenerator()->create_repository('flickr_public', $record)->id;
+
+        // Check that a user can see its own repository.
+        $userrepo = repository::get_repository_by_id($user1repoid, $syscontext);
+        $this->setUser($user1);
+        $this->assertTrue($userrepo->check_capability());
+        // But not without the capability.
+        $userrepo = repository::get_repository_by_id($user2repoid, $syscontext);
+        $this->setUser($user2);
+        $caughtexception = false;
+        try {
+            $userrepo->check_capability();
+        } catch (repository_exception $e) {
+            $caughtexception = true;
+        }
+        $this->assertTrue($caughtexception);
+
+        // Check that a user cannot see someone's repository.
+        $userrepo = repository::get_repository_by_id($user2repoid, $syscontext);
+        $this->setUser($user1);
+        $caughtexception = false;
+        try {
+            $userrepo->check_capability();
+        } catch (repository_exception $e) {
+            $caughtexception = true;
+        }
+        $this->assertTrue($caughtexception);
+        // Make sure the repo from user 2 was accessible.
+        role_unassign($roleid, $user2->id, $syscontext->id);
+        accesslib_clear_all_caches_for_unit_testing();
+        $this->setUser($user2);
+        $this->assertTrue($userrepo->check_capability());
+        role_assign($roleid, $user2->id, $syscontext->id);
+        accesslib_clear_all_caches_for_unit_testing();
+
+        // Check that a user can view SOME repositories when logged in as someone else.
+        $params = new stdClass();
+        $params->name = 'Dropbox';
+        $params->dropbox_key = 'key';
+        $params->dropbox_secret = 'secret';
+        $privaterepoid = $this->getDataGenerator()->create_repository('dropbox')->id;
+        $notprivaterepoid = $this->getDataGenerator()->create_repository('upload')->id;
+
+        $privaterepo = repository::get_repository_by_id($privaterepoid, $syscontext);
+        $notprivaterepo = repository::get_repository_by_id($notprivaterepoid, $syscontext);
+        $userrepo = repository::get_repository_by_id($user1repoid, $syscontext);
+
+        $this->setAdminUser();
+        session_loginas($user1->id, $syscontext);
+
+        // Logged in as, I cannot view a user instance.
+        $caughtexception = false;
+        try {
+            $userrepo->check_capability();
+        } catch (repository_exception $e) {
+            $caughtexception = true;
+        }
+        $this->assertTrue($caughtexception);
+
+        // Logged in as, I cannot view a private instance.
+        $caughtexception = false;
+        try {
+            $privaterepo->check_capability();
+        } catch (repository_exception $e) {
+            $caughtexception = true;
+        }
+        $this->assertTrue($caughtexception);
+
+        // Logged in as, I can view a non-private instance.
+        $this->assertTrue($notprivaterepo->check_capability());
+    }
+
+    function test_delete_all_for_context() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->create_repository_type('flickr_public');
+        $this->getDataGenerator()->create_repository_type('filesystem');
+        $coursecontext = context_course::instance($course->id);
+        $usercontext = context_user::instance($user->id);
+
+        // Creating course instances.
+        $repo = $this->getDataGenerator()->create_repository('flickr_public', array('contextid' => $coursecontext->id));
+        $courserepo1 = repository::get_repository_by_id($repo->id, $coursecontext);
+        $this->assertEquals(1, $DB->count_records('repository_instances', array('contextid' => $coursecontext->id)));
+
+        $repo = $this->getDataGenerator()->create_repository('filesystem', array('contextid' => $coursecontext->id));
+        $courserepo2 = repository::get_repository_by_id($repo->id, $coursecontext);
+        $this->assertEquals(2, $DB->count_records('repository_instances', array('contextid' => $coursecontext->id)));
+
+        // Creating user instances.
+        $repo = $this->getDataGenerator()->create_repository('flickr_public', array('contextid' => $usercontext->id));
+        $userrepo1 = repository::get_repository_by_id($repo->id, $usercontext);
+        $this->assertEquals(1, $DB->count_records('repository_instances', array('contextid' => $usercontext->id)));
+
+        $repo = $this->getDataGenerator()->create_repository('filesystem', array('contextid' => $usercontext->id));
+        $userrepo2 = repository::get_repository_by_id($repo->id, $usercontext);
+        $this->assertEquals(2, $DB->count_records('repository_instances', array('contextid' => $usercontext->id)));
+
+        // Simulation of course deletion.
+        repository::delete_all_for_context($coursecontext->id);
+        $this->assertEquals(0, $DB->count_records('repository_instances', array('contextid' => $coursecontext->id)));
+        $this->assertEquals(0, $DB->count_records('repository_instances', array('id' => $courserepo1->id)));
+        $this->assertEquals(0, $DB->count_records('repository_instances', array('id' => $courserepo2->id)));
+        $this->assertEquals(0, $DB->count_records('repository_instance_config', array('instanceid' => $courserepo1->id)));
+        $this->assertEquals(0, $DB->count_records('repository_instance_config', array('instanceid' => $courserepo2->id)));
+
+        // Simulation of user deletion.
+        repository::delete_all_for_context($usercontext->id);
+        $this->assertEquals(0, $DB->count_records('repository_instances', array('contextid' => $usercontext->id)));
+        $this->assertEquals(0, $DB->count_records('repository_instances', array('id' => $userrepo1->id)));
+        $this->assertEquals(0, $DB->count_records('repository_instances', array('id' => $userrepo2->id)));
+        $this->assertEquals(0, $DB->count_records('repository_instance_config', array('instanceid' => $userrepo1->id)));
+        $this->assertEquals(0, $DB->count_records('repository_instance_config', array('instanceid' => $userrepo2->id)));
+
+        // Checking deletion upon course context deletion.
+        $course = $this->getDataGenerator()->create_course();
+        $coursecontext = context_course::instance($course->id);
+        $repo = $this->getDataGenerator()->create_repository('flickr_public', array('contextid' => $coursecontext->id));
+        $courserepo = repository::get_repository_by_id($repo->id, $coursecontext);
+        $this->assertEquals(1, $DB->count_records('repository_instances', array('contextid' => $coursecontext->id)));
+        $coursecontext->delete();
+        $this->assertEquals(0, $DB->count_records('repository_instances', array('contextid' => $coursecontext->id)));
+
+        // Checking deletion upon user context deletion.
+        $user = $this->getDataGenerator()->create_user();
+        $usercontext = context_user::instance($user->id);
+        $repo = $this->getDataGenerator()->create_repository('flickr_public', array('contextid' => $usercontext->id));
+        $userrepo = repository::get_repository_by_id($repo->id, $usercontext);
+        $this->assertEquals(1, $DB->count_records('repository_instances', array('contextid' => $usercontext->id)));
+        $usercontext->delete();
+        $this->assertEquals(0, $DB->count_records('repository_instances', array('contextid' => $usercontext->id)));
+
+        // Checking deletion upon course deletion.
+        $course = $this->getDataGenerator()->create_course();
+        $coursecontext = context_course::instance($course->id);
+        $repo = $this->getDataGenerator()->create_repository('flickr_public', array('contextid' => $coursecontext->id));
+        $courserepo = repository::get_repository_by_id($repo->id, $coursecontext);
+        $this->assertEquals(1, $DB->count_records('repository_instances', array('contextid' => $coursecontext->id)));
+        delete_course($course, false);
+        $this->assertEquals(0, $DB->count_records('repository_instances', array('contextid' => $coursecontext->id)));
+
+        // Checking deletion upon user deletion.
+        $user = $this->getDataGenerator()->create_user();
+        $usercontext = context_user::instance($user->id);
+        $repo = $this->getDataGenerator()->create_repository('flickr_public', array('contextid' => $usercontext->id));
+        $userrepo = repository::get_repository_by_id($repo->id, $usercontext);
+        $this->assertEquals(1, $DB->count_records('repository_instances', array('contextid' => $usercontext->id)));
+        delete_user($user);
+        $this->assertEquals(0, $DB->count_records('repository_instances', array('contextid' => $usercontext->id)));
+    }
 }

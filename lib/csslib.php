@@ -228,7 +228,7 @@ function css_send_ie_css($themename, $rev, $etag, $slasharguments) {
         $css .= "\n@import url($relroot/styles.php?theme=$themename&rev=$rev&type=theme);";
     }
 
-    header('Etag: '.$etag);
+    header('Etag: "'.$etag.'"');
     header('Content-Disposition: inline; filename="styles.php"');
     header('Last-Modified: '. gmdate('D, d M Y H:i:s', time()) .' GMT');
     header('Expires: '. gmdate('D, d M Y H:i:s', time() + $lifetime) .' GMT');
@@ -254,7 +254,7 @@ function css_send_ie_css($themename, $rev, $etag, $slasharguments) {
 function css_send_cached_css($csspath, $etag) {
     $lifetime = 60*60*24*60; // 60 days only - the revision may get incremented quite often
 
-    header('Etag: '.$etag);
+    header('Etag: "'.$etag.'"');
     header('Content-Disposition: inline; filename="styles.php"');
     header('Last-Modified: '. gmdate('D, d M Y H:i:s', filemtime($csspath)) .' GMT');
     header('Expires: '. gmdate('D, d M Y H:i:s', time() + $lifetime) .' GMT');
@@ -312,7 +312,7 @@ function css_send_unmodified($lastmodified, $etag) {
     header('Expires: '. gmdate('D, d M Y H:i:s', time() + $lifetime) .' GMT');
     header('Cache-Control: public, max-age='.$lifetime);
     header('Content-Type: text/css; charset=utf-8');
-    header('Etag: '.$etag);
+    header('Etag: "'.$etag.'"');
     if ($lastmodified) {
         header('Last-Modified: '. gmdate('D, d M Y H:i:s', $lastmodified) .' GMT');
     }
@@ -345,6 +345,11 @@ function css_minify_css($files) {
         return '';
     }
 
+    // We do not really want any 304 here!
+    // There does not seem to be any better way to prevent them here.
+    unset($_SERVER['HTTP_IF_NONE_MATCH']);
+    unset($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+
     set_include_path($CFG->libdir . '/minify/lib' . PATH_SEPARATOR . get_include_path());
     require_once('Minify.php');
 
@@ -373,7 +378,7 @@ function css_minify_css($files) {
     $error = 'unknown';
     try {
         $result = Minify::serve('Files', $options);
-        if ($result['success']) {
+        if ($result['success'] and $result['statusCode'] == 200) {
             return $result['content'];
         }
     } catch (Exception $e) {

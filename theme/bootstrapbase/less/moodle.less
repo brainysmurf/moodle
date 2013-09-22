@@ -1,3 +1,6 @@
+// Import the bootstrap variables.
+@import "bootstrap/variables.less";
+
 // Old Moodle stuff from base theme.
 // Massive, needs broken up.
 @import "moodle/core";
@@ -14,6 +17,9 @@
 // Upstream Bootstrap.
 @import "bootstrap/bootstrap";
 
+// Override Bootstrap defaults.
+@import "moodle/bootstrapoverride";
+
 // Set image location.
 @iconSpritePath:          ~"[[pix:theme|glyphicons-halflings]]";
 @iconWhiteSpritePath:     ~"[[pix:theme|glyphicons-halflings-white]]";
@@ -21,8 +27,9 @@
 // Increase form label width.
 @horizontalComponentOffset: 200px;
 // On Wider screens.
-@horizontalComponentOffset768: 220px;
-@horizontalComponentOffset980: 265px;
+@horizontalComponentOffset980: 220px;
+@horizontalComponentOffset1200: 265px;
+
 
 // Roll back nameclashes.
 @import "moodle/undo";
@@ -38,6 +45,7 @@ body {
 @import "moodle/blocks";
 @import "moodle/forms";
 @import "moodle/modules";
+@import "moodle/reports";
 @import "moodle/backup-restore";
 @import "moodle/tables";
 @import "moodle/buttons";

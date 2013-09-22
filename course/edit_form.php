@@ -81,7 +81,7 @@ class course_edit_form extends moodleform {
                 $displaylist = coursecat::make_categories_list('moodle/course:create');
                 if (!isset($displaylist[$course->category])) {
                     //always keep current
-                    $displaylist[$course->category] = coursecat::get($course->category)->get_formatted_name();
+                    $displaylist[$course->category] = coursecat::get($course->category, MUST_EXIST, true)->get_formatted_name();
                 }
                 $mform->addElement('select', 'category', get_string('coursecategory'), $displaylist);
                 $mform->addHelpButton('category', 'coursecategory');
@@ -248,7 +248,7 @@ class course_edit_form extends moodleform {
         enrol_course_edit_form($mform, $course, $context);
 
 //--------------------------------------------------------------------------------
-        $mform->addElement('header','groups', get_string('groups', 'group'));
+        $mform->addElement('header','groups', get_string('groupsettingsheader', 'group'));
 
         $choices = array();
         $choices[NOGROUPS] = get_string('groupsnone', 'group');
@@ -326,19 +326,23 @@ class course_edit_form extends moodleform {
 
 /// perform some extra moodle validation
     function validation($data, $files) {
-        global $DB, $CFG;
+        global $DB;
 
         $errors = parent::validation($data, $files);
-        if ($foundcourses = $DB->get_records('course', array('shortname'=>$data['shortname']))) {
-            if (!empty($data['id'])) {
-                unset($foundcourses[$data['id']]);
+
+        // Add field validation check for duplicate shortname.
+        if ($course = $DB->get_record('course', array('shortname' => $data['shortname']), '*', IGNORE_MULTIPLE)) {
+            if (empty($data['id']) || $course->id != $data['id']) {
+                $errors['shortname'] = get_string('shortnametaken', '', $course->fullname);
             }
-            if (!empty($foundcourses)) {
-                foreach ($foundcourses as $foundcourse) {
-                    $foundcoursenames[] = $foundcourse->fullname;
+        }
+
+        // Add field validation check for duplicate idnumber.
+        if (!empty($data['idnumber']) && (empty($data['id']) || $this->course->idnumber != $data['idnumber'])) {
+            if ($course = $DB->get_record('course', array('idnumber' => $data['idnumber']), '*', IGNORE_MULTIPLE)) {
+                if (empty($data['id']) || $course->id != $data['id']) {
+                    $errors['idnumber'] = get_string('idnumbertaken', 'error');
                 }
-                $foundcoursenamestring = implode(',', $foundcoursenames);
-                $errors['shortname']= get_string('shortnametaken', '', $foundcoursenamestring);
             }
         }
 

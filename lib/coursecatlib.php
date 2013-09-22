@@ -48,7 +48,7 @@ class coursecat implements renderable, cacheable_object, IteratorAggregate {
         'descriptionformat' => null, // not cached
         'parent' => array('pa', 0),
         'sortorder' => array('so', 0),
-        'coursecount' => null, // not cached
+        'coursecount' => array('cc', 0),
         'visible' => array('vi', 1),
         'visibleold' => null, // not cached
         'timemodified' => null, // not cached
@@ -833,7 +833,7 @@ class coursecat implements renderable, cacheable_object, IteratorAggregate {
             $fields[] = 'c.summary';
             $fields[] = 'c.summaryformat';
         } else {
-            $fields[] = $DB->sql_substr('c.summary', 1, 1). ' hassummary';
+            $fields[] = $DB->sql_substr('c.summary', 1, 1). ' as hassummary';
         }
         $sql = "SELECT ". join(',', $fields). ", $ctxselect
                 FROM {course} c
@@ -1871,9 +1871,6 @@ class coursecat implements renderable, cacheable_object, IteratorAggregate {
         // Check if we cached the complete list of user-accessible category names ($baselist) or list of ids with requried cap ($thislist).
         $basecachekey = 'catlist';
         $baselist = $coursecatcache->get($basecachekey);
-        if ($baselist !== false) {
-            $baselist = false;
-        }
         $thislist = false;
         if (!empty($requiredcapability)) {
             $requiredcapability = (array)$requiredcapability;
@@ -1898,6 +1895,7 @@ class coursecat implements renderable, cacheable_object, IteratorAggregate {
             foreach ($rs as $record) {
                 // If the category's parent is not visible to the user, it is not visible as well.
                 if (!$record->parent || isset($baselist[$record->parent])) {
+                    context_helper::preload_from_record($record);
                     $context = context_coursecat::instance($record->id);
                     if (!$record->visible && !has_capability('moodle/category:viewhiddencategories', $context)) {
                         // No cap to view category, added to neither $baselist nor $thislist
@@ -1922,7 +1920,7 @@ class coursecat implements renderable, cacheable_object, IteratorAggregate {
         } else if ($thislist === false) {
             // We have $baselist cached but not $thislist. Simplier query is used to retrieve.
             $ctxselect = context_helper::get_preload_record_columns_sql('ctx');
-            $sql = "SELECT ctx.instanceid id, $ctxselect
+            $sql = "SELECT ctx.instanceid AS id, $ctxselect
                     FROM {context} ctx WHERE ctx.contextlevel = :contextcoursecat";
             $contexts = $DB->get_records_sql($sql, array('contextcoursecat' => CONTEXT_COURSECAT));
             $thislist = array();
@@ -2139,12 +2137,11 @@ class course_in_list implements IteratorAggregate {
     public function has_course_overviewfiles() {
         global $CFG;
         if (empty($CFG->courseoverviewfileslimit)) {
-            return 0;
+            return false;
         }
-        require_once($CFG->libdir. '/filestorage/file_storage.php');
         $fs = get_file_storage();
         $context = context_course::instance($this->id);
-        return $fs->is_area_empty($context->id, 'course', 'overviewfiles');
+        return !$fs->is_area_empty($context->id, 'course', 'overviewfiles');
     }
 
     /**

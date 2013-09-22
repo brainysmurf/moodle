@@ -384,7 +384,9 @@ $string['subscriptionmode_help'] = 'When a participant is subscribed to a forum 
 * Optional subscription - Participants can choose whether to be subscribed
 * Forced subscription - Everyone is subscribed and cannot unsubscribe
 * Auto subscription - Everyone is subscribed initially but can choose to unsubscribe at any time
-* Subscription disabled - Subscriptions are not allowed';
+* Subscription disabled - Subscriptions are not allowed
+
+Note: Any subscription mode changes will only affect users who enrol in the course in the future, and not existing users.';
 $string['subscriptionoptional'] = 'Optional subscription';
 $string['subscriptionforced'] = 'Forced subscription';
 $string['subscriptionauto'] = 'Auto subscription';
@@ -398,14 +400,14 @@ $string['tracking'] = 'Track';
 $string['trackingoff'] = 'Off';
 $string['trackingon'] = 'On';
 $string['trackingoptional'] = 'Optional';
-$string['trackingtype'] = 'Read tracking for this forum?';
-$string['trackingtype_help'] = 'If enabled, participants can track read and unread messages in the forum and in discussions.
+$string['trackingtype'] = 'Read tracking';
+$string['trackingtype_help'] = 'If enabled, participants can track read and unread posts in the forum and in discussions. There are three options:
 
-There are three options:
-
-* Optional - Participants can choose whether to turn tracking on or off
+* Optional - Participants can choose whether to turn tracking on or off via a link in the administration block
 * On - Tracking is always on
-* Off - Tracking is always off';
+* Off - Read and unread posts are not tracked
+
+Note: Forum tracking must also be enabled in the user\'s profile settings.';
 $string['unread'] = 'Unread';
 $string['unreadposts'] = 'Unread posts';
 $string['unreadpostsnumber'] = '{$a} unread posts';

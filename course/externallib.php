@@ -717,20 +717,14 @@ class core_course_external extends external_api {
                     require_capability('moodle/course:changefullname', $context);
                 }
 
-                // Check if the shortname already exist and user have capability.
+                // Check if the user can change shortname.
                 if (array_key_exists('shortname', $course) && ($oldcourse->shortname != $course['shortname'])) {
                     require_capability('moodle/course:changeshortname', $context);
-                    if ($DB->record_exists('course', array('shortname' => $course['shortname']))) {
-                        throw new moodle_exception('shortnametaken');
-                    }
                 }
 
-                // Check if the id number already exist and user have capability.
+                // Check if the user can change the idnumber.
                 if (array_key_exists('idnumber', $course) && ($oldcourse->idnumber != $course['idnumber'])) {
                     require_capability('moodle/course:changeidnumber', $context);
-                    if ($DB->record_exists('course', array('idnumber' => $course['idnumber']))) {
-                        throw new moodle_exception('idnumbertaken');
-                    }
                 }
 
                 // Check if user can change summary.
@@ -902,9 +896,9 @@ class core_course_external extends external_api {
                                             "users" (int) Include users (default to 0 that is equal to no),
                                             "role_assignments" (int) Include role assignments  (default to 0 that is equal to no),
                                             "comments" (int) Include user comments  (default to 0 that is equal to no),
-                                            "completion_information" (int) Include user course completion information  (default to 0 that is equal to no),
+                                            "userscompletion" (int) Include user course completion information  (default to 0 that is equal to no),
                                             "logs" (int) Include course logs  (default to 0 that is equal to no),
-                                            "histories" (int) Include histories  (default to 0 that is equal to no)'
+                                            "grade_histories" (int) Include histories  (default to 0 that is equal to no)'
                                             ),
                                 'value' => new external_value(PARAM_RAW, 'the value for the option 1 (yes) or 0 (no)'
                             )
@@ -966,9 +960,9 @@ class core_course_external extends external_api {
             'users' => 0,
             'role_assignments' => 0,
             'comments' => 0,
-            'completion_information' => 0,
+            'userscompletion' => 0,
             'logs' => 0,
-            'histories' => 0
+            'grade_histories' => 0
         );
 
         $backupsettings = array();
@@ -1166,7 +1160,7 @@ class core_course_external extends external_api {
         );
 
         if ($params['deletecontent'] !== 0 and $params['deletecontent'] !== 1) {
-            throw new moodle_exception('invalidextparam', 'webservice', '', $option['deletecontent']);
+            throw new moodle_exception('invalidextparam', 'webservice', '', $params['deletecontent']);
         }
 
         // Context validation.

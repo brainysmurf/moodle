@@ -909,20 +909,37 @@ function close_window($delay = 0, $reloadopener = false) {
  * @return string The link to user documentation for this current page
  */
 function page_doc_link($text='') {
-    global $CFG, $PAGE, $OUTPUT;
-
-    if (empty($CFG->docroot) || during_initial_install()) {
-        return '';
-    }
-    if (!has_capability('moodle/site:doclinks', $PAGE->context)) {
-        return '';
-    }
-
-    $path = $PAGE->docspath;
+    global $OUTPUT, $PAGE;
+    $path = page_get_doc_link_path($PAGE);
     if (!$path) {
         return '';
     }
     return $OUTPUT->doc_link($path, $text);
+}
+
+/**
+ * Returns the path to use when constructing a link to the docs.
+ *
+ * @since 2.5.1 2.6
+ * @global stdClass $CFG
+ * @param moodle_page $page
+ * @return string
+ */
+function page_get_doc_link_path(moodle_page $page) {
+    global $CFG;
+
+    if (empty($CFG->docroot) || during_initial_install()) {
+        return '';
+    }
+    if (!has_capability('moodle/site:doclinks', $page->context)) {
+        return '';
+    }
+
+    $path = $page->docspath;
+    if (!$path) {
+        return '';
+    }
+    return $path;
 }
 
 
@@ -1074,7 +1091,7 @@ function format_text($text, $format = FORMAT_MOODLE, $options = NULL, $courseid_
     }
 
     // Calculate best context
-    if (empty($CFG->version) or $CFG->version < 2010072800 or during_initial_install()) {
+    if (empty($CFG->version) or $CFG->version < 2013051400 or during_initial_install()) {
         // do not filter anything during installation or before upgrade completes
         $context = null;
 
@@ -1273,7 +1290,7 @@ function format_string($string, $striplinks = true, $options = NULL) {
     //We'll use a in-memory cache here to speed up repeated strings
     static $strcache = false;
 
-    if (empty($CFG->version) or $CFG->version < 2010072800 or during_initial_install()) {
+    if (empty($CFG->version) or $CFG->version < 2013051400 or during_initial_install()) {
         // do not filter anything during installation or before upgrade completes
         return $string = strip_tags($string);
     }
@@ -2577,19 +2594,20 @@ function redirect($url, $message='', $delay=-1) {
 function obfuscate_text($plaintext) {
 
     $i=0;
-    $length = strlen($plaintext);
+    $length = textlib::strlen($plaintext);
     $obfuscated='';
     $prev_obfuscated = false;
     while ($i < $length) {
-        $c = ord($plaintext{$i});
-        $numerical = ($c >= ord('0')) && ($c <= ord('9'));
+        $char = textlib::substr($plaintext, $i, 1);
+        $ord = textlib::utf8ord($char);
+        $numerical = ($ord >= ord('0')) && ($ord <= ord('9'));
         if ($prev_obfuscated and $numerical ) {
-            $obfuscated.='&#'.ord($plaintext{$i}).';';
+            $obfuscated.='&#'.$ord.';';
         } else if (rand(0,2)) {
-            $obfuscated.='&#'.ord($plaintext{$i}).';';
+            $obfuscated.='&#'.$ord.';';
             $prev_obfuscated = true;
         } else {
-            $obfuscated.=$plaintext{$i};
+            $obfuscated.=$char;
             $prev_obfuscated = false;
         }
       $i++;
@@ -2916,11 +2934,12 @@ class progress_bar {
         if (CLI_SCRIPT) {
             return; // temporary solution for cli scripts
         }
+        $widthplusborder = $this->width + 2;
         $htmlcode = <<<EOT
-        <div style="text-align:center;width:{$this->width}px;clear:both;padding:0;margin:0 auto;">
+        <div style="text-align:center;width:{$widthplusborder}px;clear:both;padding:0;margin:0 auto;">
             <h2 id="status_{$this->html_id}" style="text-align: center;margin:0 auto"></h2>
             <p id="time_{$this->html_id}"></p>
-            <div id="bar_{$this->html_id}" style="border-style:solid;border-width:1px;width:500px;height:50px;">
+            <div id="bar_{$this->html_id}" style="border-style:solid;border-width:1px;width:{$this->width}px;height:50px;">
                 <div id="progress_{$this->html_id}"
                 style="text-align:center;background:#FFCC66;width:4px;border:1px
                 solid gray;height:38px; padding-top:10px;">&nbsp;<span id="pt_{$this->html_id}"></span>
