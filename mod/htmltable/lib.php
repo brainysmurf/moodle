@@ -24,6 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+function htmltable_get_cache()
+{
+	return cache::make_from_params(cache_store::MODE_APPLICATION, 'mod_htmltable', 'htmltablecache');
+}
+
 /**
  * List of features supported in htmltable module
  * @param string $feature FEATURE_xx constant for requested feature
@@ -158,6 +163,9 @@ function htmltable_update_instance($data, $mform) {
         $data->content = file_save_draft_area_files($draftitemid, $context->id, 'mod_htmltable', 'content', 0, htmltable_get_editor_options($context), $data->content);
         $DB->update_record('htmltable', $data);
     }
+    
+   	$cache = htmltable_get_cache();
+   	$cache->delete('instance'.$data->instance);
 
     return true;
 }
@@ -177,6 +185,9 @@ function htmltable_delete_instance($id) {
     // note: all context files are deleted automatically
 
     $DB->delete_records('htmltable', array('id'=>$page->id));
+
+   	$cache = htmltable_get_cache();
+   	$cache->delete('instance'.$id);
 
     return true;
 }
@@ -580,9 +591,17 @@ function htmltable_cm_info_view( $instance )
 //id is the item id in the _course_modules table
 function htmltable_get_instance( $id )
 {
-	global $DB, $CFG;	
-	#$sql = 'SELECT '.$CFG->prefix.'htmltable.* FROM '.$CFG->prefix.'htmltable JOIN '.$CFG->prefix.'course_modules ON '.$CFG->prefix.'course_modules.instance = '.$CFG->prefix.'htmltable.id WHERE '.$CFG->prefix.'course_modules.id = \''.$id.'\'';
-	$sql = 'SELECT '.$CFG->prefix.'htmltable.* FROM '.$CFG->prefix.'htmltable WHERE id = \''.$id.'\'';
-	$row = $DB->get_record_sql($sql);
+   	$cache = htmltable_get_cache();
+	
+	if ( $row = $cache->get('instance'.$id) )
+	{
+		return $row;
+	}
+	
+	global $DB;
+	$row = $DB->get_record('htmltable',array('id'=>$id));
+	
+	$cache->set('instance'.$id,$row);
+	
 	return $row;
 }
