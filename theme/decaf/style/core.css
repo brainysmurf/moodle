@@ -500,12 +500,24 @@ table.userinfotable td {
     background:rgba(255,255,255,.6);
 }
 
+table.userinfotable tr.r0 td {
+	background:rgba(50,50,50,.02);
+}
+table.userinfotable tr.r1 td {
+	background:rgba(50,50,50,.04);
+}
+
 table.userinfotable td:first-child {
     width:200px;
     text-align: right;
     font-weight:bold;
-    background:rgba(200,200,200,.6);
+    background:rgba(200,200,200,.6) !important;
 }
+
+table.userinfotable tr:hover td {
+	background:rgba(50,50,50,.06);
+}
+
 
 .userinfobox .links button {
     display: block;
@@ -519,6 +531,9 @@ table.userinfotable td:first-child {
 }
 
 /* htmltable module */
+.userinfotable.htmltable p {
+	margin:0;
+}
 
 #htmltable_edittable_buttons {
 	text-align:center;

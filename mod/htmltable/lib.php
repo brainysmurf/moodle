@@ -516,3 +516,26 @@ function htmltable_dndupload_handle($uploadinfo) {
 
     return htmltable_add_instance($data, null);
 }
+
+//Change URLs in strings into anchor tags
+function htmltable_parse_urls( $text, $maxurl_len=50 , $target='_blank' )
+{
+	if ( preg_match_all('/((ht|f)tps?:\/\/([\w\.]+\.)?[\w-]+(\.[a-zA-Z]{2,4})?[^\s\r\n"\'<>]+)/si', $text, $urls) )
+	{
+		$offset1 = ceil(0.65 * $maxurl_len) - 2;
+		$offset2 = ceil(0.30 * $maxurl_len) - 1;
+
+		foreach (array_unique($urls[1]) as $url)
+		{
+			//Cut URLs that are too long
+			if ($maxurl_len && strlen($url) > $maxurl_len)
+			{
+				$urltext = substr($url, 0, $offset1) . '...' . substr($url, -$offset2);
+			}
+			else { $urltext = $url; }
+			
+			$text = str_replace($url, '<a href="'. $url .'" target="'. $target .'" title="'. $url .'">'. $urltext .'</a>', $text);
+		}
+	}
+	return $text;
+}
