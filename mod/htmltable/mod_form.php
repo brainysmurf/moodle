@@ -86,7 +86,7 @@ $tableHTML .= <<<EOT
 		var htmltable_removecol_button = '<a href="#" class="htmltable_removecol_button" title="Remove Column"><button><i class="icon-minus"></i></button></a><br/>';
 		
 		var htmltable_cols = currentTable ? currentTable[0].length : 2;
-		var htmltable_initial_rows = currentTable ? currentTable.length-2 : 5;
+		var htmltable_initial_rows = currentTable ? currentTable.length-2 : 1;
 		
 		function htmltable_addcol()
 		{
