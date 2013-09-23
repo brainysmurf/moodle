@@ -80,8 +80,8 @@ $tableHTML .= <<<EOT
 	
 	<script>
 
-		var htmltable_titleinput = '<input type="text" placeholder="Title" />';
-		var htmltable_datainput =  '<input type="text" placeholder="Data" />';	
+		var htmltable_titleinput = '<input type="text" placeholder="Title" tabindex="1" />';
+		var htmltable_datainput =  '<input type="text" placeholder="Data"  tabindex="1" />';	
 		var htmltable_removecol_button = '<a href="#" class="htmltable_removecol_button" title="Remove Column"><button><i class="icon-minus"></i></button></a><br/>';
 		
 		var htmltable_cols = currentTable ? currentTable[0].length : 2;
