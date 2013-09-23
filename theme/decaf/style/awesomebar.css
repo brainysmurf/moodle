@@ -57,7 +57,7 @@
 
 .decaf-awesome-bar ul.dropdown > li:hover > ul, .decaf-awesome-bar ul.dropdown > li.extended-hover > ul {left:0; top:100%;}
 /* This makes the link fully clickable within the li element */
-.decaf-awesome-bar a {display:inline-block;line-height:30px;width:100%;height:100%;}
+.decaf-awesome-bar a {display:block;line-height:30px;width:100%;height:100%;}
 
 body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Awesomebar */
 
