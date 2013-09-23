@@ -707,8 +707,11 @@ class theme_decaf_core_renderer extends core_renderer {
 	case 'i/switchrole': return html_writer::tag('i', '', array('class'=>'icon-user pull-left')); break;
 	case 'i/outcomes': return html_writer::tag('i', '', array('class'=>'icon-bar-chart pull-left')); break;
 	case 'i/grades': return html_writer::tag('i', '', array('class'=>'icon-legal pull-left')); break;
+	case 'i/enrolusers': return html_writer::tag('i', '', array('class'=>'icon-user pull-left')); break;
+	case 'i/assignroles': return html_writer::tag('i', '', array('class'=>'icon-user pull-left')); break;
 	case 'i/publish': return html_writer::tag('i', '', array('class'=>'icon-globe pull-left')); break;
 	case 'i/return': return html_writer::tag('i', '', array('class'=>'icon-rotate-left pull-left')); break;
+	case 'i/checkpermissions': return html_writer::tag('i', '', array('class'=>'icon-key pull-left')); break;
 
 	}
         return html_writer::empty_tag('img', $attributes);
@@ -752,21 +755,22 @@ class theme_decaf_core_renderer extends core_renderer {
 	    }
 
 	    // Now we need to process whether to conver to a link and whether to append a right caret
-            if ($menunode->get_url() !== null ) {
-	        $addcaret = '';
-	        if ($parent = $menunode->get_parent()) {   
-		    if (!($parent->get_text() === 'root')) {   // filter out roots, so top level is ignored
+	    $addcaret = '';
+		if ( $parent = $menunode->get_parent() )
+		{   
+		    if ( !($parent->get_text() === 'root') )
+		    {
+		    	// filter out roots, so top level is ignored
 		        $addcaret = html_writer::tag('i', '', array('class'=>'pull-right icon-caret-right'));
 		    }
-	        }
+		}	    
+	    
+            if ($menunode->get_url() !== null )
+            {
                 $content .= html_writer::link($menunode->get_url(), $icon.$menunode->get_text().$addcaret);
-            } else {
-	        $addcaret = '';
-	        if ($parent = $menunode->get_parent()) {
-		    if (!($parent->get_text() === 'root')) {   // filter out roots, so top level is ignored
-		        $addcaret = html_writer::tag('i', '', array('class'=>'pull-right icon-caret-right'));
-		    }
-	        }
+            }
+            else
+            {
                 $content .= $icon.$menunode->get_text().$addcaret;
             }
 
@@ -985,7 +989,7 @@ class theme_decaf_topsettings_renderer extends plugin_renderer_base {
 
             if($isbranch && !($item->parent->parent==null)) {
 	      // TODO: Have to do the ugly thing here and take out the last part of the </a> tag for it to work better
-	        $content = html_writer::tag('li', $content.'<i class="pull-right icon-caret-right"></i>');
+	        $content = html_writer::tag('li', '<i class="pull-right icon-caret-right"></i>'.$content);
             } else {
                 $content = html_writer::tag('li', $content);
             }
