@@ -138,7 +138,7 @@ your Questionnaire or in the text of relevant questions.';
 $string['misconfigured'] = 'Course is misconfigured';
 $string['missingquestion'] = 'Error, please answer question ';
 $string['missingquestions'] = 'Error, please answer questions: ';
-$string['modulename'] = 'Questionnaire';
+$string['modulename'] = 'Questionnaire / Survey';
 $string['modulename_help'] = 'The questionnaire module is like a suvey, it allows you to construct questions of many different types, for the purpose of gathering data from students.';
 $string['modulenameplural'] = 'Questionnaires';
 $string['move'] = 'Move this question';
