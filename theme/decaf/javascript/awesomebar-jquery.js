@@ -114,8 +114,8 @@ $(function()
 			{
 				var overflow = items - maxMenuItems;
 				$(this).children('.scroll-btn').remove();
-				$(this).prepend( $('<li class="scroll-up scroll-btn"><i class="icon-caret-up"></i> <span></span> previous items</li>').hide() );
-				$(this).append('<li class="scroll-btn scroll-down"><i class="icon-caret-down"></i> <span>'+overflow+'</span> more items</li>');
+				$(this).prepend( $('<li class="scroll-up scroll-btn"><i class="icon-caret-up"></i> <span>0 previous items</span></li>').hide() );
+				$(this).append('<li class="scroll-btn scroll-down"><i class="icon-caret-down"></i> <span>'+overflow+' more item'+(overflow==1?'':'s')+'</span></li>');
 				$(this).attr('data-offset',0);
 				$(this).attr('data-total-items',items);
 			}
@@ -173,7 +173,7 @@ $(function()
 		if ( newOffset > 0 )
 		{
 			//$(menu).children('.scroll-up').stop().slideDown(menuSlideTime).children('span').text(newOffset);
-			$(menu).children('.scroll-up').show().children('span').text(newOffset);
+			$(menu).children('.scroll-up').show().children('span').text(newOffset+' previous item'+(newOffset==1?'':'s'));
 		}
 		else
 		{
@@ -184,7 +184,7 @@ $(function()
 		if ( remainingItems>0 )
 		{
 			//$(menu).children('.scroll-down').stop().slideDown(menuSlideTime).children('span').text(remainingItems);
-			$(menu).children('.scroll-down').show().children('span').text(remainingItems);
+			$(menu).children('.scroll-down').show().children('span').text(remainingItems+' more item'+(remainingItems==1?'':'s'));
 		}
 		else
 		{
