@@ -91,47 +91,10 @@ if (!empty($options['printintro'])) {
     }
 }
 
-
-	$content = $page->content;
-	$content = json_decode($content);
-	
-	require_once $CFG->dirroot.'/lib/markdown.php';
-	
-	//Replace empty cells with &nbsp; so that they have some content and appear the right size
-	foreach ( $content as &$row )
-	{
-		foreach ( $row as &$value )
-		{
-			if ( !$value ) { $value = '&nbsp;'; }
-			$value = Markdown($value);
-		}
-	}
-	
-	//Add table content to arrays to display
-	$head = array();
-	$data = array();
-	foreach ( $content as $i => $row )
-	{
-		if ( $i == 0 )
-		{
-			$head = $row;
-		}
-		else
-		{
-			$data[] = $row;
-		}
-	}
-	
-	$table = new html_table();
-    $table->attributes['class'] = 'userinfotable htmltable';
-    $table->head = $head;
-    $table->width = '100%';
-    $table->data = $data;
-	
 	echo '<div class="generalbox">';
-		echo html_writer::table( $table );
+		echo htmltable_display_table($page->content);
 	echo '</div>';
-
+	
 $strlastmodified = get_string("lastmodified");
 echo "<div class=\"modified\">$strlastmodified: ".userdate($page->timemodified)."</div>";
 

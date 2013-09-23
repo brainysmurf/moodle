@@ -517,25 +517,72 @@ function htmltable_dndupload_handle($uploadinfo) {
     return htmltable_add_instance($data, null);
 }
 
-//Change URLs in strings into anchor tags
-function htmltable_parse_urls( $text, $maxurl_len=50 , $target='_blank' )
-{
-	if ( preg_match_all('/((ht|f)tps?:\/\/([\w\.]+\.)?[\w-]+(\.[a-zA-Z]{2,4})?[^\s\r\n"\'<>]+)/si', $text, $urls) )
-	{
-		$offset1 = ceil(0.65 * $maxurl_len) - 2;
-		$offset2 = ceil(0.30 * $maxurl_len) - 1;
 
-		foreach (array_unique($urls[1]) as $url)
+function htmltable_display_table($content)
+{	
+	global $CFG;
+	$content = json_decode($content);
+	
+	require_once $CFG->dirroot.'/lib/markdown.php';
+	
+	//Replace empty cells with &nbsp; so that they have some content and appear the right size
+	foreach ( $content as &$row )
+	{
+		foreach ( $row as &$value )
 		{
-			//Cut URLs that are too long
-			if ($maxurl_len && strlen($url) > $maxurl_len)
-			{
-				$urltext = substr($url, 0, $offset1) . '...' . substr($url, -$offset2);
-			}
-			else { $urltext = $url; }
-			
-			$text = str_replace($url, '<a href="'. $url .'" target="'. $target .'" title="'. $url .'">'. $urltext .'</a>', $text);
+			if ( !$value ) { $value = '&nbsp;'; }
+			$value = Markdown($value);
 		}
 	}
-	return $text;
+	
+	//Add table content to arrays to display
+	$head = array();
+	$data = array();
+	foreach ( $content as $i => $row )
+	{
+		if ( $i == 0 )
+		{
+			$head = $row;
+		}
+		else
+		{
+			$data[] = $row;
+		}
+	}
+	
+	$table = new html_table();
+    $table->attributes['class'] = 'userinfotable htmltable';
+    $table->head = $head;
+    $table->width = '100%';
+    $table->data = $data;
+	
+	return html_writer::table( $table );
+}
+
+
+//Called when displaying an instance in the course list
+function htmltable_cm_info_view( $instance )
+{
+	$row = htmltable_get_instance($instance->instance);
+	
+	#print_object($instance); die();
+	
+	global $CFG;
+    require_once("$CFG->libdir/resourcelib.php");
+	
+	//Show it inline?
+	if ( $row->display == RESOURCELIB_DISPLAY_EMBED )
+	{
+		$instance->set_content( htmltable_display_table($row->content) );
+	} 
+}
+
+//id is the item id in the _course_modules table
+function htmltable_get_instance( $id )
+{
+	global $DB, $CFG;	
+	#$sql = 'SELECT '.$CFG->prefix.'htmltable.* FROM '.$CFG->prefix.'htmltable JOIN '.$CFG->prefix.'course_modules ON '.$CFG->prefix.'course_modules.instance = '.$CFG->prefix.'htmltable.id WHERE '.$CFG->prefix.'course_modules.id = \''.$id.'\'';
+	$sql = 'SELECT '.$CFG->prefix.'htmltable.* FROM '.$CFG->prefix.'htmltable WHERE id = \''.$id.'\'';
+	$row = $DB->get_record_sql($sql);
+	return $row;
 }

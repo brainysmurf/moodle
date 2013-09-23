@@ -52,6 +52,7 @@ class mod_htmltable_mod_form extends moodleform_mod {
 
         //-------------------------------------------------------
         $mform->addElement('header', 'contentsection', get_string('contentheader', 'htmltable'));
+        $mform->setExpanded('contentsection');
         
 /*$tableEditButtons = '<div id="htmltable_edittable_buttons">
 		<a href="#" class="htmltable_addrow_button"><button><i class="icon-th-list"></i> Add another row</button></a>
@@ -229,6 +230,36 @@ EOT;
 	 	$mform->addElement('hidden', 'contentformat' , '1');
         $mform->addElement('html',$tableHTML);
         
+        $mform->addElement('html','<br/><div class="generalbox inset"><h4 class="advice"><i class="icon-lightbulb"></i> <strong>Tip:</strong> you can style your text like this:</h4>
+        <table class="styledtable">
+        	<tr>
+        		<th>Style</td>
+        		<th>Type This</td>
+        		<th>To Get This</td>
+        	</tr>
+        	<tr>
+        		<td style="width:140px;">Bold</td>
+        		<td>**bold**</td>
+        		<td style="width:200px;"><strong>bold</strong></td>
+        	</tr>
+        	<tr>
+        		<td>Italic</td>
+        		<td>*italic*</td>
+        		<td><em>italic</em></td>
+        	</tr>
+        	<tr>
+        		<td>Links (With your own text)</td>
+        		<td>[Text you want to appear](http://www.website-you-want-to-link-to.com)</td>
+        		<td><a href="http://www.website-you-want-to-link-to.com">Text you want to appear</a></td>
+        	</tr>
+        	<tr>
+        		<td>Links (Showing URL)</td>
+        		<td>&lt;http://www.google.com&gt;</td>
+        		<td><a href="http://www.google.com">http://www.google.com</a></td>
+        	</tr>
+        </table>      
+        </div>');
+        
         //-------------------------------------------------------
         $mform->addElement('header', 'appearancehdr', get_string('appearance'));
 
@@ -237,6 +268,22 @@ EOT;
         } else {
             $options = resourcelib_get_displayoptions(explode(',', $config->displayoptions));
         }
+        
+        //Change display options to user friendly labels
+        foreach ( $options as &$option )
+        {
+        	switch ( $option )
+        	{
+        		case 'Embed':
+        			$option = 'Show on course page';
+        		break;
+        		
+        		case 'Open':
+        			$option = 'Click to view';
+        		break;
+        	}
+        }
+        
         if (count($options) == 1) {
             $mform->addElement('hidden', 'display');
             $mform->setType('display', PARAM_INT);
