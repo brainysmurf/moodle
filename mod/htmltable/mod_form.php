@@ -58,6 +58,10 @@ class mod_htmltable_mod_form extends moodleform_mod {
 		<a href="#" class="htmltable_addcol_button"><button><i class="icon-th"></i> Add another column</button></a>
 	</div>';        */
 	
+$tableHTML = '<script>
+	var currentTable;
+</script>';
+	
 	
 //Editing an existing table?
 if ( $this->current && !is_null($this->current->content) )
