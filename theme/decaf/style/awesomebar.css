@@ -15,7 +15,7 @@
 #awesomebar ul#awesomeHomeMenu > li {display:block;}
 .decaf-awesome-bar ul, .decaf-awesome-bar li {list-style:none; margin:0; padding:0;}
 .decaf-awesome-bar > ul > li {float:left;min-width:fix-content;}
-.decaf-awesome-bar > ul > li > a {width:40px;}
+.decaf-awesome-bar > ul > li > a { width: auto; float: left; }
 
 .decaf-awesome-bar ul.dropdown ul {display:none; width:250px; z-index:598;}
 .decaf-awesome-bar ul.dropdown li {line-height:30px;height:30px;padding-left:10px;padding-right:10px;position:relative;}   
