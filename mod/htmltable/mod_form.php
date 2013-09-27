@@ -86,7 +86,7 @@ $tableHTML .= <<<EOT
 		var htmltable_removecol_button = '<a href="#" class="htmltable_removecol_button" title="Remove Column"><button><i class="icon-minus"></i></button></a><br/>';
 		
 		var htmltable_cols = currentTable ? currentTable[0].length : 2;
-		var htmltable_initial_rows = currentTable ? currentTable.length-2 : 1;
+		var htmltable_initial_rows = currentTable ? currentTable.length-1 : 1;
 		
 		function htmltable_addcol()
 		{
@@ -186,7 +186,7 @@ $tableHTML .= <<<EOT
 		function htmltable_export()
 		{
 			var table = [];
-			$('#htmltable_edittable tr').each(function()
+			$('#htmltable_edittable tr:not(.addrow)').each(function()
 			{
 				var row = [];
 				$(this).find('input').each(function()
@@ -209,14 +209,12 @@ $tableHTML .= <<<EOT
 		//Populate table with existing content
 		if ( currentTable )
 		{
-			$('#htmltable_edittable tr').each(function(rowNum)
+			$('#htmltable_edittable tr:not(.addrow)').each(function(rowNum)
 			{
 				var row = currentTable[rowNum];
-				console.log('row',rowNum);
 				
 				$(this).find('th input, td input').each(function(colNum)
 				{
-					console.log( 'col' , colNum, row[colNum] );
 					$(this).val( row[colNum] );
 				});
 			});

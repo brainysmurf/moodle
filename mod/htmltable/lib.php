@@ -536,21 +536,18 @@ function htmltable_display_table($content)
 	
 	require_once $CFG->dirroot.'/lib/markdown.php';
 	
-	//Replace empty cells with &nbsp; so that they have some content and appear the right size
-	foreach ( $content as &$row )
-	{
-		foreach ( $row as &$value )
-		{
-			if ( !$value ) { $value = '&nbsp;'; }
-			$value = Markdown($value);
-		}
-	}
-	
 	//Add table content to arrays to display
 	$head = array();
 	$data = array();
+	
 	foreach ( $content as $i => $row )
 	{
+		foreach ( $row as &$col )
+		{
+			if ( !$col ) { $col = '&nbsp;'; }
+			$col = Markdown($col);
+		} 
+	
 		if ( $i == 0 )
 		{
 			$head = $row;
