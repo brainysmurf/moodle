@@ -454,7 +454,8 @@ class core_course_renderer extends plugin_renderer_base {
             // The module chooser link
             $modchooser = html_writer::start_tag('div', array('class' => 'mdl-right'));
             $modchooser.= html_writer::start_tag('div', array('class' => 'section-modchooser'));
-            $icon = $this->output->pix_icon('t/add', '');
+            #$icon = $this->output->pix_icon('t/add', '');
+            $icon = '<i class="icon-plus"></i>';
             $span = html_writer::tag('span', $straddeither, array('class' => 'section-modchooser-text'));
             $modchooser .= html_writer::tag('span', $icon . $span, array('class' => 'section-modchooser-link'));
             $modchooser.= html_writer::end_tag('div');
