@@ -11,32 +11,7 @@ $(function()
 //	var menuSlideTime = 1000; //How long (in milliseconds) to animate the sliding when scrolling a menu
 	var menuHoverScrollTime = 200; //When hovering over the more or less button in a collapsed menu, scroll 1 item every x milliseconds
 	
-	
 	var touchEnabled = iOS || 'ontouchstart' in window || window.navigator.msPointerEnabled;
-	
-	
-function findIntersectors(targetSelector, intersectorsSelector) {
-    var intersectors = [];
-
-    var $target = $(targetSelector);
-    var tAxis = $target.offset();
-    var t_x = [tAxis.left, tAxis.left + $target.outerWidth()];
-    var t_y = [tAxis.top, tAxis.top + $target.outerHeight()];
-
-    $(intersectorsSelector).each(function() {
-          var $this = $(this);
-          var thisPos = $this.offset();
-          var i_x = [thisPos.left, thisPos.left + $this.outerWidth()]
-          var i_y = [thisPos.top, thisPos.top + $this.outerHeight()];
-
-          if ( t_x[0] < i_x[1] && t_x[1] > i_x[0] &&
-               t_y[0] < i_y[1] && t_y[1] > i_y[0]) {
-              intersectors.push($this);
-          }
-
-    });
-    return intersectors;
-}
 	
 	/*
 	*	Delayed menu showing and hiding
@@ -53,7 +28,7 @@ function findIntersectors(targetSelector, intersectorsSelector) {
 		//Show this menu after menuShowDelay
 		menuShowTimeout = setTimeout(function()
 		{
-			console.log('menuShowTimeout',$(li).text().substring(0,30));
+			//console.log('menuShowTimeout',$(li).text().substring(0,30));
 			
 			if ( $(li).closest('.openLeft').length < 1 )
 			{
@@ -101,19 +76,10 @@ function findIntersectors(targetSelector, intersectorsSelector) {
 			$(li).removeClass('hover').trigger('hide').find('.hover').removeClass('hover').trigger('hide');
 		},menuHideDelay);
 	});
+	
+	
+	
 		
-	
-	/*$('#awesomebar ul ul').on('mouseenter',function(e)
-	{
-		var ul = $(e.target).is('ul') ? e.target : $(e.target).closest('ul');
-		$(ul).removeClass('blurry');
-		e.stopPropagation();
-	}).on('mouseout',function(e)
-	{
-		$(this).addClass('blurry');
-		e.stopPropagation();
-	});*/
-	
 	/*
 	*	Calculate available screen space on page load and when window is resized
 	*/
