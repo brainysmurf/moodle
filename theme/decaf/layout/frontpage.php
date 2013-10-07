@@ -168,8 +168,8 @@ if (empty($PAGE->layout_options['noawesomebar'])) {  ?>
 <!-- END OF CONTENT -->
 
 <!-- START OF FOOTER -->
-
-<? /*
+ 
+<?php /*
     <div id="page-footer">
 		<div class="footnote"><?php echo $footnote; ?></div>
         <p class="helplink">
