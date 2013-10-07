@@ -169,6 +169,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) {  ?>
 
 <!-- START OF FOOTER -->
 
+<? /*
     <div id="page-footer">
 		<div class="footnote"><?php echo $footnote; ?></div>
         <p class="helplink">
@@ -180,7 +181,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) {  ?>
 			  //echo $OUTPUT->home_link();
         echo $OUTPUT->standard_footer_html();
         ?>
-    </div>
+    </div> */ ?>
 
 <!-- END OF FOOTER -->
 
