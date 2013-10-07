@@ -245,17 +245,17 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 	background:#EEE url([[pix:theme|bg-header]]) repeat-x scroll bottom center;
 	color:#555;
 	font-family:"Tahoma",sans-serif;
-	font-size:16px;
+	font-size:14px;
 	letter-spacing:-0.5px;
-	line-height:30px;
+	line-height:18px;
 	text-shadow:0 1px 0 #DDD;
-	padding:4px 10px;
+	padding:4px 12px;
 	margin:0;
 	text-transform:capitalize;
 }
 
 .block .block_action {margin-right:4px;}
-.block .header .block_action{ margin: 9px 5px 0 0; }
+.block .header .block_action{ margin: 4px 0px 0 0; }
 .block_with_controls .header .title {position:relative;padding-bottom:20px;}
 .block .commands { 
 	clear:both;
