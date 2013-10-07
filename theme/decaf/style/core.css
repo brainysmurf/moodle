@@ -148,7 +148,8 @@ body.editing ul.section>li {border-bottom: 1px dashed #808080; position:relative
 input[type=submit],
 button,
 .btn,
-.section-navigation a { 
+.section-navigation a,
+.addresourcemodchooser a { 
 text-transform:capitalize;
 padding: 2px 8px;
 text-align: center;
@@ -179,7 +180,8 @@ box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
 input[type=submit]:hover, button:hover,
 .btn:hover,
 .bs-nav a:hover,
-.section-navigation a:hover {
+.section-navigation a:hover,
+.addresourcemodchooser a:hover {
 background: rgb(244,244,244);
 background: -moz-linear-gradient(top,  rgba(244,244,244,1) 0%, rgba(216,216,216,1) 100%);
 background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(244,244,244,1)), color-stop(100%,rgba(216,216,216,1)));
@@ -194,7 +196,8 @@ input[type=submit]:active,
 button:active,
 .btn:active,
 .btn.selected,
-.section-navigation a:active {
+.section-navigation a:active,
+.addresourcemodchooser a:active {
 background: rgb(227,227,227);
 background: -moz-linear-gradient(top,  rgba(227,227,227,1) 0%, rgba(249,249,249,1) 100%);
 background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(227,227,227,1)), color-stop(100%,rgba(249,249,249,1)));
@@ -205,6 +208,15 @@ background: linear-gradient(to bottom,  rgba(227,227,227,1) 0%,rgba(249,249,249,
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e3e3e3', endColorstr='#f9f9f9',GradientType=0 );
 }
 
+.addresourcemodchooser a {
+	opacity:.9 !important;
+	font-size: 13px;
+	padding: 4px 7px;
+	top: 7px;
+	position: relative;
+}
+	.addresourcemodchooser i { margin-right:4px; }
+	
 /* Make 2.3 activity chooser sit on top of modules in sections */
 div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 
