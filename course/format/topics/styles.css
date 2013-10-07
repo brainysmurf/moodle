@@ -7,3 +7,22 @@
 .course-content ul.topics li.section .right {width:40px;text-align:center;padding: 6px 0;}
 .course-content ul.topics li.section .right img.icon { padding: 0 0 4px 0;}
 .course-content ul.topics li.section .left .section-handle img.icon { padding:0; vertical-align: baseline; }
+
+.course-content ul.topics li.section .content {
+	margin:0 15px;
+	padding:0;
+}
+
+.course-content h3.sectionname {
+	font-size:20px;
+}
+
+.course-content ul.section li.activity {
+	margin-bottom:5px;
+	background: rgba(255,255,255,.9);
+	padding:5px 10px;
+	line-height:27px;
+} 
+	.course-content ul.section li.activity:nth-child(even) {
+		background: rgba(245,245,245,.9);
+	}

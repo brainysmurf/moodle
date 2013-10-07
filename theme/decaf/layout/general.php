@@ -163,37 +163,28 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 <!-- END OF HEADER -->
 <div id="page-content-wrapper" class="clearfix">
     <div id="page-content">
-        <div id="region-main-box">
-            <div id="region-post-box">
+    
+		
+		<div id="centerCol" class="<?=(!$hassidepost&&!$hassidepre?'fullWidth':'')?>">
+		
+	        <div class="region-content">
+	            <?php echo $coursecontentheader; ?>
+	            <?php echo method_exists($OUTPUT, "main_content")?$OUTPUT->main_content():core_renderer::MAIN_CONTENT_TOKEN ?>
+	            <?php echo $coursecontentfooter; ?>
+	        </div>
             
-                <div id="region-main-wrap">
-                    <div id="region-main">
-                        <div class="region-content">
-                            <?php echo $coursecontentheader; ?>
-                            <?php echo method_exists($OUTPUT, "main_content")?$OUTPUT->main_content():core_renderer::MAIN_CONTENT_TOKEN ?>
-                            <?php echo $coursecontentfooter; ?>
-                        </div>
-                    </div>
-                </div>
-                
-                <?php if ($hassidepre) { ?>
-                <div id="region-pre" class="block-region">
-                    <div class="region-content">
-                        <?php echo $blocks_side_pre ?>
-                    </div>
-                </div>
-                <?php } ?>
-                
-                <?php if ($hassidepost) { ?>
-                <div id="region-post" class="block-region">
-                    <div class="region-content">
-                        <?php echo $blocks_side_post ?>
-                    </div>
-                </div>
-                <?php } ?>
-                
-            </div>
-        </div>
+		</div>
+		
+    	<?php if ( $hassidepre || $hassidepost ) { ?>
+    	<div id="rightCol" class="block-region">
+    		<div class="region-content">
+    			 <?php echo $blocks_side_pre ?>
+    			 <?php echo $blocks_side_post ?>
+    		</div>
+    	</div>
+    	<?php } ?>
+    	
+
     </div>
 </div>
 
@@ -203,13 +194,15 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
     <?php } ?>
     <?php if ($hasfooter) { ?>
     <div id="page-footer" class="clearfix">
-		<div class="footnote"><?php echo $footnote; ?></div>
-        <p class="helplink"><?php echo page_doc_link(get_string('moodledocslink')) ?></p>
+    	<p><a href="#"><i class="icon-arrow-up"></i> Go back to the top of the page</a></p>
+		<p class="footnote"><?php echo $footnote; ?></p>
+		<? /*<p><?php echo page_doc_link(get_string('moodledocslink')) ?></p>*/ ?>
         <?php
        //echo $OUTPUT->login_info();
        //echo $OUTPUT->home_link();
         echo $OUTPUT->standard_footer_html();
         ?>
+        <p><a href="http://www.ssis-suzhou.net"><i class="icon-home"></i> Suzhou Singapore International School</a></p>
     </div>
     <?php } ?>
 </div>
