@@ -196,13 +196,12 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
     <div id="page-footer" class="clearfix">
     	<p><a href="#"><i class="icon-arrow-up"></i> Go back to the top of the page</a></p>
 		<p class="footnote"><?php echo $footnote; ?></p>
-		<? /*<p><?php echo page_doc_link(get_string('moodledocslink')) ?></p>*/ ?>
+		<p><?php echo page_doc_link(get_string('moodledocslink')) ?></p>
         <?php
        //echo $OUTPUT->login_info();
        //echo $OUTPUT->home_link();
         echo $OUTPUT->standard_footer_html();
         ?>
-        <p><a href="http://www.ssis-suzhou.net"><i class="icon-home"></i> Suzhou Singapore International School</a></p>
     </div>
     <?php } ?>
 </div>

@@ -71,7 +71,7 @@ class theme_decaf_core_renderer extends core_renderer {
         // Iterate the navarray and display each node
         $itemcount = count($items);
         $separator = get_separator();
-	$home = html_writer::tag('a', 'DragonNet Home', array('href'=>$CFG->wwwroot));
+	$home = html_writer::tag('a', '<i DragonNet Home', array('href'=>$CFG->wwwroot));
 	$htmlblocks[] = html_writer::tag('li', $home);
         for ($i=0;$i < $itemcount;$i++) {
             $item = $items[$i];
@@ -885,7 +885,7 @@ class theme_decaf_core_renderer extends core_renderer {
      * @param tabtree $tabtree
      * @return string
      */
-    function render_tabtree(tabtree $tabtree) {
+   /* function render_tabtree(tabtree $tabtree) {
         if (empty($tabtree->subtree)) {
             return '';
         }
@@ -898,7 +898,7 @@ class theme_decaf_core_renderer extends core_renderer {
                 html_writer::tag('div', ' ', array('class' => 'clearer'));
                 
         return $str;
-    }
+    } */
 
     /**
      * Renders tabobject (part of tabtree)
@@ -911,7 +911,7 @@ class theme_decaf_core_renderer extends core_renderer {
      * @param tabobject $tabobject
      * @return string HTML fragment
      */
-    function render_tabobject(tabobject $tabobject) {
+   /* function render_tabobject(tabobject $tabobject) {
         $str = '';
 
         // Print name of the current tab.
@@ -953,16 +953,6 @@ class theme_decaf_core_renderer extends core_renderer {
         foreach ($tabobject->subtree as $tab)
         {
             $liclass = '';
-            /*if (!$cnt) {
-                $liclass .= ' first';
-            }
-            if ($cnt == count($tabobject->subtree) - 1) {
-                $liclass .= ' last';
-            }
-            if ((empty($tab->subtree)) && (!empty($tab->selected))) {
-                $liclass .= ' onerow';
-            }*/
-
             if ($tab->selected)
             {
                 $liclass .= ' here selected active';
@@ -977,7 +967,7 @@ class theme_decaf_core_renderer extends core_renderer {
         $str .= html_writer::end_tag('ul');
 
         return $str;
-    }
+    } */
 
 }
 

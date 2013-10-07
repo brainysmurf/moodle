@@ -16,13 +16,3 @@
 .course-content h3.sectionname {
 	font-size:20px;
 }
-
-.course-content ul.section li.activity {
-	margin-bottom:5px;
-	background: rgba(255,255,255,.9);
-	padding:5px 10px;
-	line-height:27px;
-} 
-	.course-content ul.section li.activity:nth-child(even) {
-		background: rgba(245,245,245,.9);
-	}
