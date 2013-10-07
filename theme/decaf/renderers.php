@@ -71,7 +71,7 @@ class theme_decaf_core_renderer extends core_renderer {
         // Iterate the navarray and display each node
         $itemcount = count($items);
         $separator = get_separator();
-	$home = html_writer::tag('a', '<i DragonNet Home', array('href'=>$CFG->wwwroot));
+	$home = html_writer::tag('a', '<i class="icon-home"></i> DragonNet Home', array('href'=>$CFG->wwwroot));
 	$htmlblocks[] = html_writer::tag('li', $home);
         for ($i=0;$i < $itemcount;$i++) {
             $item = $items[$i];
