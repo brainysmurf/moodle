@@ -1,12 +1,12 @@
 var iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
 
 $(function()
-{
-	
+{	
 	/*
 	*	Settings
 	*/
-	var menuCloseTime = 500; //How long (in milliseconds) to keep menus open for after mouse leaves them
+	var menuShowDelay = 150; //How long (in milliseconds) to wait before showing a menu
+	var menuHideDelay = 500; //How long (in milliseconds) to keep menus open for after mouse leaves them
 	var liHeight = 32; //How tall (in pixels) is each item in the menu
 //	var menuSlideTime = 1000; //How long (in milliseconds) to animate the sliding when scrolling a menu
 	var menuHoverScrollTime = 200; //When hovering over the more or less button in a collapsed menu, scroll 1 item every x milliseconds
@@ -14,31 +14,105 @@ $(function()
 	
 	var touchEnabled = iOS || 'ontouchstart' in window || window.navigator.msPointerEnabled;
 	
+	
+function findIntersectors(targetSelector, intersectorsSelector) {
+    var intersectors = [];
+
+    var $target = $(targetSelector);
+    var tAxis = $target.offset();
+    var t_x = [tAxis.left, tAxis.left + $target.outerWidth()];
+    var t_y = [tAxis.top, tAxis.top + $target.outerHeight()];
+
+    $(intersectorsSelector).each(function() {
+          var $this = $(this);
+          var thisPos = $this.offset();
+          var i_x = [thisPos.left, thisPos.left + $this.outerWidth()]
+          var i_y = [thisPos.top, thisPos.top + $this.outerHeight()];
+
+          if ( t_x[0] < i_x[1] && t_x[1] > i_x[0] &&
+               t_y[0] < i_y[1] && t_y[1] > i_y[0]) {
+              intersectors.push($this);
+          }
+
+    });
+    return intersectors;
+}
+	
 	/*
-	*	Keep menus open for longer
+	*	Delayed menu showing and hiding
 	*/
-	var menuCloseTimeout;
-	$('#awesomebar li').on('mouseenter',function()
+	var menuShowTimeout;
+	var menuHideTimeout;
+	$('#awesomebar li').on('mouseenter',function(e)
 	{
 		//Begin hover
-		$('#awesomebar li.extended-hover').removeClass('extended-hover'); //Close other menus
-		$(this).addClass('extended-hover'); //Keep this menu open
-		$(this).parents('li').addClass('extended-hover'); //Keep the parents of this menu open
-
-		//Stop the timer to automatically close
-		clearTimeout(menuCloseTimeout);
+		clearTimeout(menuShowTimeout);
+		clearTimeout(menuHideTimeout);
+		var li = this;
+		
+		//Show this menu after menuShowDelay
+		menuShowTimeout = setTimeout(function()
+		{
+			console.log('menuShowTimeout',$(li).text().substring(0,30));
+			
+			if ( $(li).closest('.openLeft').length < 1 )
+			{
+				$('#awesomebar .blurry').removeClass('blurry');
+			}
+			$('#awesomebar li.hover').removeClass('hover').trigger('hide'); //Close other open menus
+			$(li).addClass('hover').trigger('show'); //Keep this menu open
+			$(li).parents('li').addClass('hover').trigger('show'); //Keep the parents of this menu open
+			
+			//Move submenus so they aren't cut off
+			$(li).children('ul').each(function()
+			{
+				repositionChildMenu(this);
+				if ( $(this).hasClass('openLeft') )
+				{
+					//Select all this menus parent menus, except the first one and the horizontal awesomebar, and make them blurry
+					var i = 0;
+					$(this).parents('ul:not(#awesomebar > ul)').each(function()
+					{
+						i++;
+						if ( i != 1 )
+						{
+							$(this).addClass('blurry');
+						}
+					});
+				}
+			});	
+			
+		},menuShowDelay);
+		
+		e.stopPropagation();
+		
 	}).on('mouseleave',function()
 	{
-		//End hover - start the timer to automatically close
-		menuCloseTimeout = setTimeout(function()
+		//End hover
+		clearTimeout(menuShowTimeout);
+		clearTimeout(menuHideTimeout);
+		var li = this;
+		
+		//Hide this menu and its children after menuHideDelay
+		menuHideTimeout = setTimeout(function()
 		{
-			$('#awesomebar li.extended-hover').removeClass('extended-hover');
-		},menuCloseTime);
+			//console.log('menuHideTimeout',$(li).text().substring(0,30));
+			
+			$(li).removeClass('hover').trigger('hide').find('.hover').removeClass('hover').trigger('hide');
+		},menuHideDelay);
 	});
+		
 	
-	
-	
-	
+	/*$('#awesomebar ul ul').on('mouseenter',function(e)
+	{
+		var ul = $(e.target).is('ul') ? e.target : $(e.target).closest('ul');
+		$(ul).removeClass('blurry');
+		e.stopPropagation();
+	}).on('mouseout',function(e)
+	{
+		$(this).addClass('blurry');
+		e.stopPropagation();
+	});*/
 	
 	/*
 	*	Calculate available screen space on page load and when window is resized
@@ -69,6 +143,7 @@ $(function()
 		
 		//Put submenus back to default so they can be respotiioned corretly when next opened
 		$('#awesomebar li li ul').css('top','-1px');
+		$('#awesomebar .openLeft').removeClass('openLeft');
 		
 		//Reposition submenus that were already open
 		$('#awesomebar li li ul:visible').each(function()
@@ -241,20 +316,9 @@ $(function()
 	
 	/*
 	*	When hovering over a list item, reposition its submenuto fit it on the screen better.
-	*	By this point, menus that are too long to fit no matter where they are will have already been turned into scrolly ones
+	*	Adjust the 'top' to move it up if it's too long
+	*	To do: if it goes off the right of the screen, move it to the left
 	*/
-	
-	$('#awesomebar li li').each(function() //Select all submenus (not initial dropdowns)
-	{
-		$(this).mouseover(function(e)
-		{
-			e.stopPropagation();
-			$(this).children('ul').each(function()
-			{
-				repositionChildMenu(this);
-			});	
-		});
-	});	
 	
 	function repositionChildMenu( menu )
 	{
@@ -278,14 +342,19 @@ $(function()
 
 				$(menu).css('top','-'+shiftTop+'px');
 			}			
-		}			
+		}
+		
+		if ( info.cutHorizontal )
+		{
+			$(menu).addClass('openLeft');
+		}
 	}
 	
 	function getMenuInfo( menu )
 	{
 		var info = {};
 		
-		//Size
+		//Vertical Size
 		info.height = $(menu).height();
 		info.top = $(menu).offset().top - $(document).scrollTop() - awesomebarHeight; //Awkward because the awesomebar is position:fixed
 		info.bottom = info.top + info.height;
@@ -298,6 +367,11 @@ $(function()
 		info.items = $(menu).children('li').length,
 		info.visibleItems = Math.floor( info.visibleHeight / liHeight );
 		info.hiddenItem = info.items - info.visibleitems;
+		
+		//Horizontal Size
+		info.width = $(menu).width();
+		info.left = $(menu).offset().left;
+		info.cutHorizontal = info.left + info.width > $(window).width();
 		
 		return info;
 	}
