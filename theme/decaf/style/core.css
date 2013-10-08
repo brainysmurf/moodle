@@ -12,7 +12,7 @@ a:active {outline: none;}
 .singleselect option {text-align:left;}
 /* Header
 ------------------------- */
-#page-header-wrapper{margin:0 0 0 50px;}
+#page-header-wrapper{margin:0 0 0 48px;}
 #page-header{float:none;background:#4D63A3 url([[pix:theme|bg-header]]) repeat-x scroll center bottom;margin-right:0;position:relative;min-height:150px;}
 #page-header .sitelogo {float:left;margin:0.75em 0;}
 #page-header .headermain{padding-top:30px;color:#D4D4D4;font-size:2.5em;font-weight:700;letter-spacing:-1px;text-decoration:none;text-transform:none;text-shadow:4px 2px 0 #414141;margin:0.9em 30px 0.9em 0px;-webkit-font-smoothing: antialised;}
@@ -65,8 +65,8 @@ a:active {outline: none;}
 
 /* Breadcrumb
 --------------------------- */
-.navbar{font-size:.9em;background-color:#F0F0F0;border-bottom:1px solid #DDD;margin:0;padding:0 10px;}
-.navbar .breadcrumb{font-size:1em;padding:6px;}
+.navbar{font-size:.9em;background-color:#F0F0F0;border-bottom:1px solid #DDD;margin:0;padding:0 10px 0 0;}
+.navbar .breadcrumb{font-size:1em;padding:6px 10px;}
 .breadcrumb a,a:link,a:active{color:#4B609F;}
 .sep{background:url([[pix:theme|breadcrumb_arrow]]) no-repeat scroll 100% 50%;margin-right:5px;padding:0.98em 7px;}
 /* Calendar
@@ -81,6 +81,32 @@ a:active {outline: none;}
 
 .course-content div.single-section .tabtree .tabrow0 li { display:inline-block; }
 
+.tabtree {
+	padding-bottom:9px;
+	border-bottom: 1px solid #DDD;
+	margin-bottom:12px !important;
+}
+
+.tabtree .tabrow0 {
+	margin:0;
+}
+	.tabtree .tabrow0 li {
+		margin-right: 5px;
+		margin-bottom: 5px;
+	}
+		.tabtree .tabrow0 li:last-child {
+			margin-right:0;
+		}
+		.tabtree .tabrow0 li a {
+			margin:0;
+			border-width:2px !important;
+			display:block;
+			line-height: normal;
+			padding: 7px 8px;
+		}
+		.tabtree .tabrow2.empty {
+			display:none !important;
+		}
 
 /* User
 --------------------------- */
@@ -98,7 +124,7 @@ a:active {outline: none;}
 
 #centerCol {
 	width:75%;
-	padding-right:8px;
+	padding-right:13px;
 	float:left;
 	/*background:rgba(255,0,0,.2);*/
 }
@@ -108,7 +134,7 @@ a:active {outline: none;}
 	}
 #rightCol {
 	width:25%;
-	padding-left:7px;
+	padding-left:12px;
 	float:left;
 	/*background:rgba(0,255,0,.2);*/
 }
@@ -118,10 +144,8 @@ a:active {outline: none;}
 	}
 
 #page {top:25px;}
-#page-content-wrapper { margin:15px; }
-	#page-content .region-content {
-		padding:0;
-	}
+#page-content-wrapper { margin:25px 50px; }
+#page-content .region-content { padding:0; }
 
 #region-pre {background:transparent url([[pix:theme|main-divider]]) repeat-y scroll right center;}
 #region-post{background:transparent url([[pix:theme|main-divider]]) repeat-y scroll left center;}
@@ -533,6 +557,14 @@ margin-left: 2px; }
 }
 
 
+.course-content .section li.activity {
+	padding-left:0;
+}
+
+.course-content .section .activity img.activityicon {
+	margin-left:0;
+}
+
 #intro, #pageintro { background:#f7f7f7; }
 
 /* Forum
@@ -548,6 +580,7 @@ margin-left: 2px; }
 --------------------------*/
 .path-mod-assignment #dates table .c0 { background:#f5f5f5; }
 #page-mod-assignment-submissions #region-main .header .commands a img {height:11px; width:11px; border:0px none; padding:0;}
+
 
 /* Folder
 --------------------------*/
