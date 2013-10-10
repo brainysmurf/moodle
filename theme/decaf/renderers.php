@@ -15,6 +15,7 @@ class theme_decaf_core_renderer extends core_renderer {
 
     public function header() {
       if ((!(strpos($this->page->heading, '-&gt')===False)) & ($this->page->cm)) {
+	// FIXME: PHP message: PHP Notice:  Object of class cm_info could not be converted to int
 	  $this->page->set_heading($this->page->cm->name);
       }
       return parent::header();
