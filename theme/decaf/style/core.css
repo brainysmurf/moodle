@@ -68,7 +68,7 @@ a:active {outline: none;}
 --------------------------- */
 .navbar{font-size:.9em;background-color:#F0F0F0;border-bottom:1px solid #DDD;margin:0;padding:0 10px;}
 .navbar .breadcrumb{font-size:1em;padding:6px;}
-.breadcrumb a,a:link,a:active{color:#4B609F;}
+.breadcrumb a,a:link,a:active{color:#1F66CC;}
 .sep{background:url([[pix:theme|breadcrumb_arrow]]) no-repeat scroll 100% 50%;margin-right:5px;padding:0.98em 7px;}
 /* Calendar
 --------------------------- */
