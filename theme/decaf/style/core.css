@@ -6,7 +6,7 @@ body,h1,h2,h3,h4,h5,h6,p,ul,ol,dl,input,textarea{font-family:"Tahoma",Arial, Hel
 h1,h2,h3,h4,h5,h6,p{text-shadow:0 1px 0 #FFF;}
 body input{font-family:"Tahoma",Arial,Helvetica,sans-serif;}
 select,input,button,textarea{font-size:0.9em;}
-a:link,a:visited {color: #4B609F;}
+a:link,a:visited {color: #1F66CC;}
 a:hover,a:active {color: #251c17;}
 a img {border: none;}
 a:active {outline: none;}
