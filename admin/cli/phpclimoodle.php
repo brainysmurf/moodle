@@ -53,7 +53,7 @@ class moodlephp
 
       if( ! ($cohort = $DB->get_record_select( 'cohort', 'idnumber = ?', array($cohortidnumber) )) ) {
 	//$cohortID = $this->create_cohort($idnumber, $cohortidnumber, '');
-	return "-1 Cohort does not exit";
+	return "-1 Cohort does not exist";
       }
 
       $cohortID= $cohort->id;
