@@ -13,14 +13,16 @@ class theme_decaf_core_renderer extends core_renderer {
 	}
 
 
-    public function header() {
-      if ( strpos($this->page->heading, '-&gt') !== false && $this->page->cm)
-      {
-		// FIXME: PHP message: PHP Notice:  Object of class cm_info could not be converted to int
-		$this->page->set_heading($this->page->cm->name);
-      }
-      return parent::header();
-    }
+	public function header()
+	{
+		//Change page heading when on an activity inside a "->"course
+		if ( strpos($this->page->heading, '-&gt') !== false && $this->page->cm)
+		{
+			$this->page->set_heading($this->page->cm->name);
+		}
+		
+		return parent::header();
+	}
 
     public function navbuttons() {
         global $CFG;
