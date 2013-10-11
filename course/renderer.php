@@ -450,31 +450,44 @@ class core_course_renderer extends plugin_renderer_base {
 
         if (course_ajax_enabled($course) && $course->id == $this->page->course->id) {
             // modchooser can be added only for the current course set on the page!
-            $straddeither = get_string('addresourceoractivity');
-            // The module chooser link
-            $modchooser = html_writer::start_tag('div', array('class' => 'mdl-right'));
-            $modchooser.= html_writer::start_tag('div', array('class' => 'section-modchooser'));
-            #$icon = $this->output->pix_icon('t/add', '');
-            $icon = '<i class="icon-plus"></i>';
-            $span = html_writer::tag('span', $straddeither, array('class' => 'section-modchooser-text'));
-            $modchooser .= html_writer::tag('span', $icon . $span, array('class' => 'section-modchooser-link'));
-            $modchooser.= html_writer::end_tag('div');
-            $modchooser.= html_writer::end_tag('div');
+
+            // The 'add something to this course' button
+            $mod_chooser_button = $this->course_section_add_cm_button();
 
             // Wrap the normal output in a noscript div
             $usemodchooser = get_user_preferences('usemodchooser', $CFG->modchooserdefault);
             if ($usemodchooser) {
                 $output = html_writer::tag('div', $output, array('class' => 'hiddenifjs addresourcedropdown'));
-                $modchooser = html_writer::tag('div', $modchooser, array('class' => 'visibleifjs addresourcemodchooser'));
+                $modchooser = html_writer::tag('div', $mod_chooser_button, array('class' => 'visibleifjs'));
             } else {
                 // If the module chooser is disabled, we need to ensure that the dropdowns are shown even if javascript is disabled
                 $output = html_writer::tag('div', $output, array('class' => 'show addresourcedropdown'));
-                $modchooser = html_writer::tag('div', $modchooser, array('class' => 'hide addresourcemodchooser'));
+                $modchooser = html_writer::tag('div', $mod_chooser_button, array('class' => 'hide'));
             }
             $output = $this->course_modchooser($modules, $course) . $modchooser . $output;
         }
 
         return $output;
+    }
+    
+    /**
+    * Renders just a button to just show the add resource dialog, instead of creating the whole dialog as course_section_add_cm_control does
+    */
+    function course_section_add_cm_button()
+    {
+	    $text = get_string('addresourceoractivity');
+	    // The module chooser link
+	    $btn = html_writer::start_tag('div', array('class' => 'addresourcemodchooser mdl-right'));
+	    	$btn.= html_writer::start_tag('div', array('class' => 'section-modchooser'));
+	    	
+	        		$icon = '<i class="icon-plus"></i>';
+	    		    $text_span = html_writer::tag('span', $text, array('class' => 'section-modchooser-text'));
+		        $btn .= html_writer::tag('span', $icon . $text_span, array('class' => 'section-modchooser-link'));
+		        
+	        $btn .= html_writer::end_tag('div');
+	    $btn .= html_writer::end_tag('div');
+	    
+	    return $btn;
     }
 
     /**

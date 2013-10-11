@@ -60,7 +60,9 @@ YUI.add('moodle-course-modchooser', function(Y) {
                 this._setup_for_section(section);
             }, this);
         },
-        _setup_for_section : function(section, sectionid) {
+        
+        /*_setup_for_section : function(section, sectionid) {
+        	alert('_setup_for_section');
             var chooserspan = section.one(CSS.SECTIONMODCHOOSER);
             if (!chooserspan) {
                 return;
@@ -71,7 +73,33 @@ YUI.add('moodle-course-modchooser', function(Y) {
             });
             chooserspan.insertBefore(chooserlink);
             chooserlink.on('click', this.display_mod_chooser, this);
+        },*/
+        
+        //Renders the 'add something to this course' link as a button
+        //Tweaked to support multiple buttons
+		_setup_for_section : function(section, sectionid) {
+
+            var chooserspans = section.all(CSS.SECTIONMODCHOOSER);
+            if ( chooserspans.size() < 1) {
+                return;
+            }
+            
+            var t = this;
+            chooserspans.each(function(chooserspan){
+            
+            	//We're taking each span and wrapping an anchor around it, to make it open the chooser when clicked
+
+            	var chooserlink = Y.Node.create("<a href='#' />");
+	            chooserspan.get('children').each(function(node) {
+	                chooserlink.appendChild(node);
+	            });
+	            chooserspan.insertBefore(chooserlink);
+	            chooserlink.on('click', t.display_mod_chooser, t);
+	            
+            });
         },
+        
+        
         /**
          * Display the module chooser
          *
@@ -94,9 +122,10 @@ YUI.add('moodle-course-modchooser', function(Y) {
             this.display_chooser(e);
         },
         toggle_mod_chooser : function(e) {
+        	//This might be broken - Oct 11th 2013
+        	
             // Get the add section link
             var modchooserlinks = Y.all('div.addresourcemodchooser');
-
             // Get the dropdowns
             var dropdowns = Y.all('div.addresourcedropdown');
 
@@ -106,7 +135,8 @@ YUI.add('moodle-course-modchooser', function(Y) {
             }
 
             // We need to update the text and link
-            var togglelink = Y.one('.block_settings #settingsnav .type_course .modchoosertoggle a');
+            //var togglelink = Y.one('.block_settings #settingsnav .type_course .modchoosertoggle a');
+			var togglelinks = Y.all('.block_settings #settingsnav .type_course .modchoosertoggle a');
 
             // The actual text is in the last child
             var toggletext = togglelink.get('lastChild');
@@ -123,7 +153,8 @@ YUI.add('moodle-course-modchooser', function(Y) {
                     .addClass('visibleifjs')
                     .removeClass('hiddenifjs');
                 toggletext.set('data', M.util.get_string('modchooserenable', 'moodle'));
-                togglelink.set('href', togglelink.get('href').replace('off', 'on'));
+                //togglelink.set('href', togglelink.get('href').replace('off', 'on'));
+                togglelinks.set('href', togglelink.get('href').replace('off', 'on'));
             } else {
                 // The modchooser is currently not visible, show it
                 usemodchooser = 1;
@@ -134,7 +165,8 @@ YUI.add('moodle-course-modchooser', function(Y) {
                     .removeClass('visibleifjs')
                     .addClass('hiddenifjs');
                 toggletext.set('data', M.util.get_string('modchooserdisable', 'moodle'));
-                togglelink.set('href', togglelink.get('href').replace('on', 'off'));
+                //togglelink.set('href', togglelink.get('href').replace('on', 'off'));
+                togglelinks.set('href', togglelink.get('href').replace('off', 'on'));
             }
 
             M.util.set_user_preference('usemodchooser', usemodchooser);

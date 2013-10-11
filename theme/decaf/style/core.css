@@ -613,7 +613,8 @@ top: -1px;
 margin-left: 2px; }
 
 .section-navigation {
-	height: 20px;
+	height: 25px;
+	padding:0 !important;
 	overflow: visible;
 	margin-bottom:0 !important;
 }
