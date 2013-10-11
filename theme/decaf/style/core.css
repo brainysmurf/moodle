@@ -10,6 +10,12 @@ a:hover,a:active {color: #251c17;}
 a img {border: none;}
 a:active {outline: none;}
 .singleselect option {text-align:left;}
+	.singleselect select {
+		-webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		box-sizing: border-box;
+		width:100%;
+	}
 /* Header
 ------------------------- */
 #page-header-wrapper{
