@@ -751,7 +751,7 @@ class core_renderer extends renderer_base {
                 break;
         }
         $output .= $this->notification($message, 'redirectmessage');
-        $output .= '<div class="continuebutton">(<a href="'. $encodedurl .'">'. get_string('continue') .'</a>)</div>';
+        $output .= '<div class="continuebutton"><a href="'. $encodedurl .'" class="btn">'. get_string('continue') .'</a></div>';
         if ($debugdisableredirect) {
             $output .= '<p><strong>Error output, so disabling automatic redirect.</strong></p>';
         }

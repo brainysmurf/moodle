@@ -21,7 +21,7 @@ $THEME->parents = array('canvas','base');
 ////////////////////////////////////////////////////
 
 
-$THEME->sheets = array('awesomebar', 'core', 'autohide' , 'bootstrap-navbar');
+$THEME->sheets = array('awesomebar', 'core', 'autohide');
 
 ////////////////////////////////////////////////////
 // Name of the stylesheet(s) you've including in 
