@@ -169,6 +169,12 @@
 		background-color:#333;
 		color:#BDBDBD;
 	}
+		#awesomebar li {
+			-webkit-transition: background 0.2s ease-in-out;
+			-moz-transition: background 0.2s ease-in-out;
+			-o-transition: background 0.2s ease-in-out;
+			transition: background 0.2s ease-in-out;
+		}
 
 	#awesomebar li:hover,
 	#awesomebar li.hover {
