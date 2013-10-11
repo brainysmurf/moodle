@@ -286,11 +286,14 @@ class format_onetopic_renderer extends format_section_renderer_base {
             $completioninfo = new completion_info($course);
             echo $completioninfo->display_help_icon();
 
-			//Additional add button above list
-			$activity_count = count(explode(',',$thissection->_sequence));
-			if ( $activity_count >= 5 )
+			if ( $PAGE->user_is_editing() )
 			{
-				echo $this->courserenderer->course_section_add_cm_button();
+				//Additional add button above list
+				$activity_count = count(explode(',',$thissection->_sequence));
+				if ( $activity_count >= 5 )
+				{
+					echo $this->courserenderer->course_section_add_cm_button();
+				}
 			}
 			
 	        echo $this->courserenderer->course_section_cm_list($course, $thissection, $displaysection);
