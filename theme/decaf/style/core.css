@@ -5,7 +5,7 @@ h1,h2,h3,h4,h5,h6,p{text-shadow:0 1px 0 #FFF;}
 p:last-child { margin-bottom:0; }
 body input{font-family:"Tahoma",Arial,Helvetica,sans-serif;}
 select,input,button,textarea{font-size:0.9em;}
-a:link,a:visited {color: #1F66CC;}
+a:link,a:visited {color: #005FA0;}
 a:hover,a:active {color: #251c17;}
 a img {border: none;}
 a:active {outline: none;}
@@ -15,7 +15,7 @@ a:active {outline: none;}
 #page-header-wrapper{margin:0 0 0 48px;}
 #page-header{
 	float:none;
-	background:#1662A3 url([[pix:theme|bg-header]]) repeat-x scroll center bottom;
+	background:#005FA0 url([[pix:theme|bg-header]]) repeat-x scroll center bottom;
 	margin-right:0;
 	position:relative;
 	min-height:150px;
@@ -73,7 +73,7 @@ a:active {outline: none;}
 --------------------------- */
 .navbar{font-size:.9em;background-color:#F0F0F0;border-bottom:1px solid #DDD;margin:0;padding:0 10px 0 0;}
 .navbar .breadcrumb{font-size:1em;padding:6px 10px;}
-.breadcrumb a,a:link,a:active{color:#1662A3;}
+/*.breadcrumb a,a:link,a:active{color:#005FA0;}*/
 .sep{background:url([[pix:theme|breadcrumb_arrow]]) no-repeat scroll 100% 50%;margin-right:5px;padding:0.98em 7px;}
 /* Calendar
 --------------------------- */
@@ -105,10 +105,17 @@ a:active {outline: none;}
 		}
 		.tabtree .tabrow0 li a {
 			margin:0;
-			border-width:2px !important;
+			/*border-width:2px !important;*/
 			display:block;
 			line-height: normal;
 			padding: 7px 8px;
+			border: 1px solid #D4D4D4 !important;
+			-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+			-moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+			box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+			border-radius: 3px;
+			-webkit-border-radius: 3px;
+			-moz-border-radius: 3px;
 		}
 		.tabtree .tabrow2.empty {
 			display:none !important;
@@ -279,13 +286,13 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 	letter-spacing:-0.5px;
 	line-height:18px;
 	text-shadow:0 1px 0 #DDD;
-	padding:4px 12px;
+	padding:7px 12px;
 	margin:0;
 	text-transform:capitalize;
 }
 
 .block .block_action {margin-right:4px;}
-.block .header .block_action{ margin: 4px 0px 0 0; }
+.block .header .block_action{ margin: 6px 6px 0 0; }
 .block_with_controls .header .title {position:relative;padding-bottom:20px;}
 .block .commands { 
 	clear:both;
@@ -294,7 +301,8 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 	top:auto;
 	bottom:0px;
 }
-.block .content{ padding:0; margin:10px; }
+.block .content{ padding:0; margin:12px; }
+	.block.block_html .content .no-overflow { padding:0; }
 .block .content .buttons{margin-top:2px;}
 .block_login label{font-size:0.85em;display:block;}
 .block_login .fld input{width:95%;margin:1px 0 5px;padding:2px;}
@@ -407,8 +415,8 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 			line-height: 22px;
 			padding: 15px;
 			background-color:#fff;
-			border-top: 2px solid #1662A3; 
-			border-bottom: 2px solid #1662A3;
+			border-top: 2px solid #005FA0; 
+			border-bottom: 2px solid #005FA0;
 		}
 			.login-reminder icon { margin-top: -4px; }
 	
@@ -520,7 +528,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 #back-to-top a.arrow {
 	padding: 5px 10px;
 	font-size: 36px;
-	color: #1662A3;
+	color: #005FA0;
 	background: #EEE;
 	border: 1px solid #CCC;
 	border-bottom: 1px solid #AAA;
@@ -638,7 +646,7 @@ body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questionca
 	font-family:"Tahoma",sans-serif;
 	font-size:1.5em;
 	line-height:1.5em;
-	color:#1662A3;
+	color:#005FA0;
 	height:3em;
 	width:10em;
 	margin-bottom:10px;
@@ -661,13 +669,13 @@ body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questionca
     margin-bottom:10px;
     padding: 15px 20px;
     background-color: #fff; 
-	border-top: 2px solid #1662A3; 
-	border-bottom: 2px solid #1662A3;
+	border-top: 2px solid #005FA0; 
+	border-bottom: 2px solid #005FA0;
 }
 
-.global-alert {margin-left:150px;margin-right:150px;padding: 15px 20px 15px 20px; background-color: #fff; border-top: 2px solid #1662A3; border-bottom: 2px solid #1662A3;}
+.global-alert {margin-left:150px;margin-right:150px;padding: 15px 20px 15px 20px; background-color: #fff; border-top: 2px solid #005FA0; border-bottom: 2px solid #005FA0;}
 
-.dnet-row {margin-left:150px;margin-right:150px;padding: 15px 20px 15px 45px; background-color: #fff; border-top: 2px solid #1662A3; border-bottom: 2px solid #1662A3;}
+.dnet-row {margin-left:150px;margin-right:150px;padding: 15px 20px 15px 45px; background-color: #fff; border-top: 2px solid #005FA0; border-bottom: 2px solid #005FA0;}
 
 .dnet-row-left {font-weight:bold;}
 
