@@ -458,7 +458,7 @@ class core_course_renderer extends plugin_renderer_base {
             $usemodchooser = get_user_preferences('usemodchooser', $CFG->modchooserdefault);
             if ($usemodchooser) {
                 $output = html_writer::tag('div', $output, array('class' => 'hiddenifjs addresourcedropdown'));
-                $modchooser = html_writer::tag('div', $mod_chooser_button, array('class' => 'visibleifjs'));
+                $modchooser = html_writer::tag('div', $mod_chooser_button, array('class' => 'bottomaddresourcemodchooser visibleifjs'));
             } else {
                 // If the module chooser is disabled, we need to ensure that the dropdowns are shown even if javascript is disabled
                 $output = html_writer::tag('div', $output, array('class' => 'show addresourcedropdown'));

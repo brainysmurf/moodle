@@ -101,8 +101,10 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
         if ($section->section != 0) {
             $controls = $this->section_edit_controls($course, $section, $onsectionpage);
             if (!empty($controls)) {
-                $o = implode('<br />', $controls);
+               #$o = implode('<br />', $controls);
+               $o = implode('', $controls);
             }
+            
         }
 
         return $o;
@@ -462,9 +464,9 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
                 )
             );
 
-            $o.= html_writer::start_tag('div', array('class' => 'clipboard'));
-            $o.= strip_tags(get_string('activityclipboard', '', $USER->activitycopyname));
-            $o.= ' ('.html_writer::link($url, get_string('cancel')).')';
+            $o.= html_writer::start_tag('div', array('class' => 'clipboard global-alert'));
+    	        $o.= get_string('activityclipboard', '', strip_tags($USER->activitycopyname));
+	            $o.= ' '.html_writer::tag('a' , get_string('cancel') , array('href'=>$url, 'class'=>'btn'));
             $o.= html_writer::end_tag('div');
         }
 

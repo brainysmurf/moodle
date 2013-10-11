@@ -89,12 +89,13 @@ YUI.add('moodle-course-dragdrop', function(Y) {
                         cssleft.setStyle('cursor', 'move');
                         cssleft.appendChild(this.get_drag_handle(title, CSS.SECTIONHANDLE, 'icon', true));
 
-                        if (moveup) {
+						//Keep the buttons as an option
+                        /*if (moveup) {
                             moveup.remove();
                         }
                         if (movedown) {
                             movedown.remove();
-                        }
+                        }*/
                     }
                 }
             }, this);
@@ -317,7 +318,9 @@ YUI.add('moodle-course-dragdrop', function(Y) {
                 // Replace move icons
                 var move = resourcesnode.one('a.'+CSS.EDITINGMOVE);
                 if (move) {
-                    move.replace(this.resourcedraghandle.cloneNode(true));
+                    //move.replace(this.resourcedraghandle.cloneNode(true));
+                    //Add, don't replace
+                    resourcesnode.insert(this.resourcedraghandle.cloneNode(true) , move)
                 }
             }, this);
         },

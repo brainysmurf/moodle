@@ -218,6 +218,7 @@ body.editing ul.section>li {border-bottom: 1px dashed #808080; position:relative
 input[type=submit],
 button,
 .btn,
+a.btn,
 .section-navigation a,
 .addresourcemodchooser a { 
 text-transform:capitalize;
@@ -249,6 +250,7 @@ box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
 
 input[type=submit]:hover, button:hover,
 .btn:hover,
+a.btn:hover,
 .bs-nav a:hover,
 .section-navigation a:hover,
 .addresourcemodchooser a:hover {
@@ -265,6 +267,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f4f4f4', end
 input[type=submit]:active,
 button:active,
 .btn:active,
+a.btn:active,
 .btn.selected,
 .section-navigation a:active,
 .addresourcemodchooser a:active {
@@ -278,12 +281,18 @@ background: linear-gradient(to bottom,  rgba(227,227,227,1) 0%,rgba(249,249,249,
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e3e3e3', endColorstr='#f9f9f9',GradientType=0 );
 }
 
+.addresourcemodchooser {
+	margin: 0 0 10px 0;
+}
+.bottomaddresourcemodchooser .addresourcemodchooser {
+	margin:10px 0 0 0;
+}
+
 .addresourcemodchooser a {
 	opacity:.9 !important;
 	font-size: 13px;
 	padding: 4px 7px;
-	top: 7px;
-	position: relative;
+	display:inline-block;
 }
 	.addresourcemodchooser i { margin-right:4px; }
 	
@@ -597,8 +606,27 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 /* Course
 ---------------------------*/
 .course-content ul.topics li.section .left{display:none;padding-left:0px;font-size:2em;}
-.course-content ul.topics li.section{background:transparent url([[pix:theme|topic-bg-bottom]]) repeat-x scroll bottom center;margin:0 0 30px;padding:0 0 30px;}
+.course-content ul.topics li.section{background:transparent url([[pix:theme|topic-bg-bottom]]) repeat-x scroll bottom center;margin:0 0 30px;padding:0 0 30px; clear:both;}
 .course-content ul.weeks li.section{background:transparent url([[pix:theme|topic-bg-bottom]]) repeat-x scroll bottom center;margin:0;padding:0 0 30px;}
+
+	.course-content ul.topics li.section .right,
+	.course-content ul.weeks li.section .right {
+		width:auto;
+		margin:0;
+		padding:0;
+	}
+		.course-content ul.weeks li.section .right {
+			margin: 10px 0 0 0;
+		}
+		
+		.course-content ul.topics li.section .right a,
+		.course-content ul.weeks li.section .right a {
+			margin:0 5px;
+		}
+
+	.course-content ul.topics li.section .content {
+		clear:both;
+	}
 .section-navigation.headingblock span.mdl-left, .section-navigation.headingblock span.mdl-right {font-size:0.7em;margin-top:0.3em;}
 
 .dir-ltr .section-navigation span.mdl-left a:before { content: '\00AB';
@@ -717,6 +745,10 @@ body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questionca
 }
 
 .global-alert {margin-left:150px;margin-right:150px;padding: 15px 20px 15px 20px; background-color: #fff; border-top: 2px solid #005FA0; border-bottom: 2px solid #005FA0;}
+
+	.global-alert.clipboard {
+		margin:0 0 25px;
+	}
 
 .dnet-row {margin-left:150px;margin-right:150px;padding: 15px 20px 15px 45px; background-color: #fff; border-top: 2px solid #005FA0; border-bottom: 2px solid #005FA0;}
 
