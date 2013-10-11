@@ -74,21 +74,6 @@ echo $OUTPUT->doctype() ?>
     <title><?php echo $PAGE->title ?></title>
     <link rel="shortcut icon" href="<?php echo $OUTPUT->pix_url('favicon', 'theme')?>" />
     <?php echo $OUTPUT->standard_head_html() ?>
-    <script type="text/javascript">
-    YUI().use('node', function(Y) {
-        window.thisisy = Y;
-    	Y.one(window).on('scroll', function(e) {
-    	    var node = Y.one('#back-to-top');
-
-    	    if (Y.one('window').get('docScrollY') > Y.one('#page-content-wrapper').getY()) {
-    		    node.setStyle('display', 'block');
-    	    } else {
-    		    node.setStyle('display', 'none');
-    	    }
-    	});
-
-    });
-    </script>
 </head>
 
 <body id="<?php p($PAGE->bodyid) ?>" class="<?php p($PAGE->bodyclasses.' '.join(' ', $bodyclasses)) ?>">
@@ -210,5 +195,20 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
     <a class="arrow" href="#">▲</a> 
     <a class="text" href="#">Back to Top</a> 
 </div>
+<script type="text/javascript">
+YUI().use('node', function(Y) {
+    window.thisisy = Y;
+	Y.one(window).on('scroll', function(e) {
+	    var node = Y.one('#back-to-top');
+
+	    if (Y.one('window').get('docScrollY') > Y.one('#page-content-wrapper').getY()) {
+		    node.setStyle('display', 'block');
+	    } else {
+		    node.setStyle('display', 'none');
+	    }
+	});
+
+});
+</script>
 </body>
 </html>
