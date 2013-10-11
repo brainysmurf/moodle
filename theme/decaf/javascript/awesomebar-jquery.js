@@ -12,7 +12,7 @@ $(function()
 	var menuHoverScrollTime = 200; //When hovering over the more or less button in a collapsed menu, scroll 1 item every x milliseconds
 	
 	var touchEnabled = iOS || 'ontouchstart' in window || window.navigator.msPointerEnabled;
-	
+
 	/*
 	*	Delayed menu showing and hiding
 	*/

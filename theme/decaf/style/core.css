@@ -14,7 +14,7 @@ a:active {outline: none;}
 ------------------------- */
 #page-header-wrapper{
 	margin:0;
-	padding: 51px 30px 51px 48px;
+	padding: 49px 30px 51px 48px;
 }
 #page-header{
 	float:none;
@@ -105,7 +105,7 @@ a:active {outline: none;}
 
 /* Tabs
 --------------------------- */
-.tabtree .tabrow0 li.here a {background:#fff url([[pix:theme|gradient-sb]]) repeat-x 0 0;}
+.tabtree .tabrow0 li.here a {background:#fff;}
 .tabtree .tabrow0 .tabrow1 li a{background:none !important;}
 
 .course-content div.single-section .tabtree .tabrow0 li { display:inline-block; }
@@ -129,7 +129,7 @@ a:active {outline: none;}
 		.tabtree .tabrow0 li a {
 			margin:0;
 			display:block;
-			line-height: normal;
+			line-height: 16px;
 			padding: 7px 8px;
 			border: 1px solid #D4D4D4 !important;
 			-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);

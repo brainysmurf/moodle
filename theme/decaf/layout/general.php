@@ -94,7 +94,7 @@ echo $OUTPUT->doctype() ?>
 <body id="<?php p($PAGE->bodyid) ?>" class="<?php p($PAGE->bodyclasses.' '.join(' ', $bodyclasses)) ?>">
 <?php echo $OUTPUT->standard_top_of_body_html();
 if (empty($PAGE->layout_options['noawesomebar'])) { ?>
-    <div id="awesomebar" class="decaf-awesome-bar">
+	<div id="awesomebar" class="decaf-awesome-bar">
         <?php
             if( $this->page->pagelayout != 'maintenance' // Don't show awesomebar if site is being upgraded
                 && !(get_user_preferences('auth_forcepasswordchange') && !session_is_loggedinas()) // Don't show it when forcibly changing password either
