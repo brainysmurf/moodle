@@ -14,7 +14,7 @@ a:active {outline: none;}
 /* Header
 ------------------------- */
 #page-header-wrapper{margin:0 0 0 50px;}
-#page-header{float:none;background:#1F66CC url([[pix:theme|bg-header]]) repeat-x scroll center bottom;margin-right:0;position:relative;min-height:150px;}
+#page-header{float:none;background:#1662A3 url([[pix:theme|bg-header]]) repeat-x scroll center bottom;margin-right:0;position:relative;min-height:150px;}
 #page-header .sitelogo {float:left;margin:0.75em 0;}
 #page-header .headermain{padding-top:30px;color:#D4D4D4;font-size:2.5em;font-weight:700;letter-spacing:-1px;text-decoration:none;text-transform:none;text-shadow:4px 2px 0 #414141;margin:0.9em 30px 0.9em 0px;-webkit-font-smoothing: antialised;}
 #page-header .headermenu {width:235px;}
@@ -68,7 +68,7 @@ a:active {outline: none;}
 --------------------------- */
 .navbar{font-size:.9em;background-color:#F0F0F0;border-bottom:1px solid #DDD;margin:0;padding:0 10px;}
 .navbar .breadcrumb{font-size:1em;padding:6px;}
-.breadcrumb a,a:link,a:active{color:#1F66CC;}
+.breadcrumb a,a:link,a:active{color:#1662A3;}
 .sep{background:url([[pix:theme|breadcrumb_arrow]]) no-repeat scroll 100% 50%;margin-right:5px;padding:0.98em 7px;}
 /* Calendar
 --------------------------- */
@@ -279,8 +279,8 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 			line-height: 22px;
 			padding: 15px;
 			background-color:#fff;
-			border-top: 2px solid #1F66CC; 
-			border-bottom: 2px solid #1F66CC;
+			border-top: 2px solid #1662A3; 
+			border-bottom: 2px solid #1662A3;
 		}
 			.login-reminder icon { margin-top: -4px; }
 	
@@ -372,7 +372,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 #page-footer .logininfo{margin:1em 0;}
 
 #back-to-top {position: fixed;bottom: 32px;right: 40px;text-align: center;cursor: pointer;opacity: .5;filter:alpha(opacity=50);display:none;}
-#back-to-top a.arrow {padding: 5px 10px;font-size: 36px;color: #1F66CC;background: #EEE;border: 1px solid #CCC;border-bottom: 1px solid #AAA;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;}
+#back-to-top a.arrow {padding: 5px 10px;font-size: 36px;color: #1662A3;background: #EEE;border: 1px solid #CCC;border-bottom: 1px solid #AAA;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;}
 #back-to-top a.text {display: block;background: white;visibility: hidden;position: relative;top: 10px;}
 #back-to-top a {text-decoration: none;border: 0;outline: none;}
 /* PerformanceInfo
@@ -456,7 +456,7 @@ body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questionca
 	font-family:"Tahoma",sans-serif;
 	font-size:1.5em;
 	line-height:1.5em;
-	color:#1F66CC;
+	color:#1662A3;
 	height:3em;
 	width:10em;
 	margin-bottom:10px;
@@ -479,13 +479,13 @@ body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questionca
     margin-bottom:10px;
     padding: 15px 20px 15px 20px; 
     background-color: #fff; 
-    border-top: 2px solid #1F66CC; 
-    border-bottom: 2px solid #1F66CC;
+    border-top: 2px solid #1662A3; 
+    border-bottom: 2px solid #1662A3;
 }
 
-.global-alert {margin-left:150px;margin-right:150px;padding: 15px 20px 15px 20px; background-color: #fff; border-top: 2px solid #1F66CC; border-bottom: 2px solid #1F66CC;}
+.global-alert {margin-left:150px;margin-right:150px;padding: 15px 20px 15px 20px; background-color: #fff; border-top: 2px solid #1662A3; border-bottom: 2px solid #1662A3;}
 
-.dnet-row {margin-left:150px;margin-right:150px;padding: 15px 20px 15px 45px; background-color: #fff; border-top: 2px solid #1F66CC; border-bottom: 2px solid #1F66CC;}
+.dnet-row {margin-left:150px;margin-right:150px;padding: 15px 20px 15px 45px; background-color: #fff; border-top: 2px solid #1662A3; border-bottom: 2px solid #1662A3;}
 
 .dnet-row-left {font-weight:bold;}
 
