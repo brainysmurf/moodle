@@ -142,6 +142,7 @@ a:active {outline: none;}
 		}
 			.tabtree .tabrow0 li.here a {
 				font-size:12px;
+				border-color: #A0A0A0 !important;
 			}
 		.tabtree .tabrow2.empty {
 			display:none !important;
