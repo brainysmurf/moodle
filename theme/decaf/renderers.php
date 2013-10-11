@@ -1016,10 +1016,6 @@ class theme_decaf_topsettings_renderer extends plugin_renderer_base {
 	return $content;
     }
 
-
-
-
-
 }
 
 ?>
