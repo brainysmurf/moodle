@@ -550,7 +550,16 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 		
 #page-footer .logininfo{margin:1em 0;}
 
-#back-to-top {position: fixed;bottom: 32px;right: 40px;text-align: center;cursor: pointer;opacity: .5;filter:alpha(opacity=50);display:none;}
+#back-to-top {
+	position: fixed;
+	bottom: 14px;
+	right: 25px;
+	text-align: center;
+	cursor: pointer;
+	opacity: .5;
+	filter:alpha(opacity=50);
+	display:none;
+}
 #back-to-top a.arrow {
 	padding: 5px 10px;
 	font-size: 36px;
