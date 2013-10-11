@@ -15,7 +15,7 @@ class theme_decaf_core_renderer extends core_renderer {
 
 	public function header()
 	{
-		//Change page heading when on an activity inside a "->"course
+		//Change page heading when on an activity inside a "->" course
 		if ( strpos($this->page->heading, '-&gt') !== false && $this->page->cm)
 		{
 			$this->page->set_heading($this->page->cm->name);
