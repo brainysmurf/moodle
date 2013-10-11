@@ -238,7 +238,8 @@
         $PAGE->set_button($buttons);
     }
 
-    $PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+    #$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+    $PAGE->set_title($course->fullname);
     $PAGE->set_heading($course->fullname);
     echo $OUTPUT->header();
 

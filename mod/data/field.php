@@ -247,7 +247,8 @@ foreach ($plugins as $plugin=>$fulldir){
     $menufield[$plugin] = get_string('pluginname', 'datafield_'.$plugin);    //get from language files
 }
 asort($menufield);    //sort in alphabetical order
-$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+#$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+$PAGE->set_title($course->fullname);
 $PAGE->set_heading($course->fullname);
 
 $PAGE->set_pagetype('mod-data-field-' . $newtype);

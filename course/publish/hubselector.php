@@ -35,7 +35,8 @@ require_login($course);
 
 $PAGE->set_url('/course/publish/hubselector.php', array('id' => $course->id));
 $PAGE->set_pagelayout('course');
-$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+#$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+$PAGE->set_title($course->fullname);
 $PAGE->set_heading($course->fullname);
 
 $registrationmanager = new registration_manager();
