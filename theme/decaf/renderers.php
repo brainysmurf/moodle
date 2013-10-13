@@ -14,7 +14,7 @@ class theme_decaf_core_renderer extends core_renderer {
 
 
     public function header() {
-      if ((!(strpos($this->page->heading, '-&gt')===False)) & ($this->page->cm)) {
+      if ((!(strpos($this->page->heading, '-&gt')===False)) && ($this->page->cm)) {
 	  $this->page->set_heading($this->page->cm->name);
       }
       return parent::header();
