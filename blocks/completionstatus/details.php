@@ -78,7 +78,8 @@ $title = format_string($course->fullname) . ': ' . $page;
 $PAGE->navbar->add($page);
 $PAGE->set_pagelayout('standard');
 $PAGE->set_url('/blocks/completionstatus/details.php', array('course' => $course->id, 'user' => $user->id));
-$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+#$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+$PAGE->set_title($course->fullname);
 $PAGE->set_heading($title);
 echo $OUTPUT->header();
 

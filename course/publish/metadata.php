@@ -46,7 +46,8 @@ require_login($course);
 //page settings
 $PAGE->set_url('/course/publish/metadata.php', array('id' => $course->id));
 $PAGE->set_pagelayout('course');
-$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+#$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+$PAGE->set_title($course->fullname);
 $PAGE->set_heading($course->fullname);
 
 //check that the PHP xmlrpc extension is enabled

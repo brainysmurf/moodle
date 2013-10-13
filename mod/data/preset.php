@@ -49,7 +49,8 @@ $context = context_module::instance($cm->id, MUST_EXIST);
 require_login($course, false, $cm);
 require_capability('mod/data:managetemplates', $context);
 $PAGE->set_url(new moodle_url('/mod/data/preset.php', array('d'=>$data->id)));
-$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+#$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+$PAGE->set_title($course->fullname);
 $PAGE->set_heading($course->fullname);
 
 // fill in missing properties needed for updating of instance

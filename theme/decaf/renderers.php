@@ -4,21 +4,25 @@ class theme_decaf_core_renderer extends core_renderer {
 
     protected $really_editing = false;
 
-	private $cache;
+   private $cache;
 
-	function __construct( moodle_page $page, $target )
+   function __construct( moodle_page $page, $target )
 	{
 		$this->cache = cache::make_from_params(cache_store::MODE_SESSION, 'theme_decaf', 'decafcache');
 		parent::__construct( $page , $target );
 	}
 
 
-    public function header() {
-      if ((!(strpos($this->page->heading, '-&gt')===False)) && ($this->page->cm)) {
-	  $this->page->set_heading($this->page->cm->name);
-      }
-      return parent::header();
-    }
+    public function header()
+	{
+		//Change page heading when on an activity inside a "->" course
+		if ( strpos($this->page->heading, '-&gt') !== false && $this->page->cm)
+		{
+			$this->page->set_heading($this->page->cm->name);
+		}
+		
+		return parent::header();
+	}
 
     public function navbuttons() {
         global $CFG;
@@ -71,7 +75,7 @@ class theme_decaf_core_renderer extends core_renderer {
         // Iterate the navarray and display each node
         $itemcount = count($items);
         $separator = get_separator();
-	$home = html_writer::tag('a', 'Home', array('href'=>$CFG->wwwroot));
+	$home = html_writer::tag('a', '<i class="icon-home"></i> Home', array('href'=>$CFG->wwwroot));
 	$htmlblocks[] = html_writer::tag('li', $home);
         for ($i=0;$i < $itemcount;$i++) {
             $item = $items[$i];

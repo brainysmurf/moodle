@@ -74,27 +74,12 @@ echo $OUTPUT->doctype() ?>
     <title><?php echo $PAGE->title ?></title>
     <link rel="shortcut icon" href="<?php echo $OUTPUT->pix_url('favicon', 'theme')?>" />
     <?php echo $OUTPUT->standard_head_html() ?>
-    <script type="text/javascript">
-    YUI().use('node', function(Y) {
-        window.thisisy = Y;
-    	Y.one(window).on('scroll', function(e) {
-    	    var node = Y.one('#back-to-top');
-
-    	    if (Y.one('window').get('docScrollY') > Y.one('#page-content-wrapper').getY()) {
-    		    node.setStyle('display', 'block');
-    	    } else {
-    		    node.setStyle('display', 'none');
-    	    }
-    	});
-
-    });
-    </script>
 </head>
 
 <body id="<?php p($PAGE->bodyid) ?>" class="<?php p($PAGE->bodyclasses.' '.join(' ', $bodyclasses)) ?>">
 <?php echo $OUTPUT->standard_top_of_body_html();
 if (empty($PAGE->layout_options['noawesomebar'])) { ?>
-    <div id="awesomebar" class="decaf-awesome-bar">
+	<div id="awesomebar" class="decaf-awesome-bar">
         <?php
             if( $this->page->pagelayout != 'maintenance' // Don't show awesomebar if site is being upgraded
                 && !(get_user_preferences('auth_forcepasswordchange') && !session_is_loggedinas()) // Don't show it when forcibly changing password either
@@ -163,37 +148,28 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 <!-- END OF HEADER -->
 <div id="page-content-wrapper" class="clearfix">
     <div id="page-content">
-        <div id="region-main-box">
-            <div id="region-post-box">
+    
+		
+		<div id="centerCol" class="<?=(!$hassidepost&&!$hassidepre?'fullWidth':'')?>">
+		
+	        <div class="region-content">
+	            <?php echo $coursecontentheader; ?>
+	            <?php echo method_exists($OUTPUT, "main_content")?$OUTPUT->main_content():core_renderer::MAIN_CONTENT_TOKEN ?>
+	            <?php echo $coursecontentfooter; ?>
+	        </div>
             
-                <div id="region-main-wrap">
-                    <div id="region-main">
-                        <div class="region-content">
-                            <?php echo $coursecontentheader; ?>
-                            <?php echo method_exists($OUTPUT, "main_content")?$OUTPUT->main_content():core_renderer::MAIN_CONTENT_TOKEN ?>
-                            <?php echo $coursecontentfooter; ?>
-                        </div>
-                    </div>
-                </div>
-                
-                <?php if ($hassidepre) { ?>
-                <div id="region-pre" class="block-region">
-                    <div class="region-content">
-                        <?php echo $blocks_side_pre ?>
-                    </div>
-                </div>
-                <?php } ?>
-                
-                <?php if ($hassidepost) { ?>
-                <div id="region-post" class="block-region">
-                    <div class="region-content">
-                        <?php echo $blocks_side_post ?>
-                    </div>
-                </div>
-                <?php } ?>
-                
-            </div>
-        </div>
+		</div>
+		
+    	<?php if ( $hassidepre || $hassidepost ) { ?>
+    	<div id="rightCol" class="block-region">
+    		<div class="region-content">
+    			 <?php echo $blocks_side_pre ?>
+    			 <?php echo $blocks_side_post ?>
+    		</div>
+    	</div>
+    	<?php } ?>
+    	
+
     </div>
 </div>
 
@@ -203,8 +179,9 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
     <?php } ?>
     <?php if ($hasfooter) { ?>
     <div id="page-footer" class="clearfix">
-		<div class="footnote"><?php echo $footnote; ?></div>
-        <p class="helplink"><?php echo page_doc_link(get_string('moodledocslink')) ?></p>
+    	<p><a href="#"><i class="icon-arrow-up"></i> Go back to the top of the page</a></p>
+		<p class="footnote"><?php echo $footnote; ?></p>
+		<p><?php echo page_doc_link(get_string('moodledocslink')) ?></p>
         <?php
        //echo $OUTPUT->login_info();
        //echo $OUTPUT->home_link();
@@ -218,5 +195,20 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
     <a class="arrow" href="#">▲</a> 
     <a class="text" href="#">Back to Top</a> 
 </div>
+<script type="text/javascript">
+YUI().use('node', function(Y) {
+    window.thisisy = Y;
+	Y.one(window).on('scroll', function(e) {
+	    var node = Y.one('#back-to-top');
+
+	    if (Y.one('window').get('docScrollY') > Y.one('#page-content-wrapper').getY()) {
+		    node.setStyle('display', 'block');
+	    } else {
+		    node.setStyle('display', 'none');
+	    }
+	});
+
+});
+</script>
 </body>
 </html>

@@ -61,21 +61,6 @@ echo $OUTPUT->doctype() ?>
     <link rel="shortcut icon" href="<?php echo $OUTPUT->pix_url('favicon', 'theme')?>" />
     <meta name="description" content="<?php echo strip_tags(format_text($SITE->summary, FORMAT_HTML)) ?>" />
     <?php echo $OUTPUT->standard_head_html() ?>
-    <script type="text/javascript">
-    YUI().use('node', function(Y) {
-        window.thisisy = Y;
-    	Y.one(window).on('scroll', function(e) {
-    	    var node = Y.one('#back-to-top');
-
-    	    if (Y.one('window').get('docScrollY') > Y.one('#page-content-wrapper').getY()) {
-    		    node.setStyle('display', 'block');
-    	    } else {
-    		    node.setStyle('display', 'none');
-    	    }
-    	});
-
-    });
-    </script>
 </head>
 <body id="<?php p($PAGE->bodyid) ?>" class="<?php p($PAGE->bodyclasses.' '.join(' ', $bodyclasses)) ?>">
 <?php echo $OUTPUT->standard_top_of_body_html();
@@ -168,7 +153,8 @@ if (empty($PAGE->layout_options['noawesomebar'])) {  ?>
 <!-- END OF CONTENT -->
 
 <!-- START OF FOOTER -->
-
+ 
+<?php /*
     <div id="page-footer">
 		<div class="footnote"><?php echo $footnote; ?></div>
         <p class="helplink">
@@ -180,7 +166,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) {  ?>
 			  //echo $OUTPUT->home_link();
         echo $OUTPUT->standard_footer_html();
         ?>
-    </div>
+    </div> */ ?>
 
 <!-- END OF FOOTER -->
 
@@ -190,5 +176,20 @@ if (empty($PAGE->layout_options['noawesomebar'])) {  ?>
     <a class="arrow" href="#">▲</a> 
     <a class="text" href="#">Back to Top</a> 
 </div>
+<script type="text/javascript">
+YUI().use('node', function(Y) {
+    window.thisisy = Y;
+	Y.one(window).on('scroll', function(e) {
+	    var node = Y.one('#back-to-top');
+
+	    if (Y.one('window').get('docScrollY') > Y.one('#page-content-wrapper').getY()) {
+		    node.setStyle('display', 'block');
+	    } else {
+		    node.setStyle('display', 'none');
+	    }
+	});
+
+});
+</script>
 </body>
 </html>

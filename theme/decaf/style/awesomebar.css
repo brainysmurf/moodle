@@ -14,6 +14,7 @@
 	z-index:999;
 	border-bottom: 1px solid #1a1a1a; 
 }
+
 	#awesomebar ul#awesomeHomeMenu > li { display:block; }
 
 	/* Reset menu styles */
@@ -168,6 +169,12 @@
 		background-color:#333;
 		color:#BDBDBD;
 	}
+		#awesomebar li {
+			-webkit-transition: background 0.2s ease-in-out;
+			-moz-transition: background 0.2s ease-in-out;
+			-o-transition: background 0.2s ease-in-out;
+			transition: background 0.2s ease-in-out;
+		}
 
 	#awesomebar li:hover,
 	#awesomebar li.hover {
@@ -180,9 +187,14 @@
 		border-style:solid;
 		border-width:1px;
 	}
-
+		
 /* z-index overrides to prevent other things sitting on top of Awesomebar */
 .filepicker-filelist .filepicker-container, .filemanager.fm-noitems .fm-empty-container {z-index:300;}
 
 /* z-index boosts to push overlays above the custom menu (if separate) - but not the Awesomebar */
 .user-enroller-panel {z-index:998;}
+
+/* Safari hover on scroll bug fix */
+#awesomebar > ul { margin-left:1px; }
+#awesomebar > ul > li:first-child { border-left:0; }
+#awesomebar ul.dropdown > li.hover > ul { left:-1px; }

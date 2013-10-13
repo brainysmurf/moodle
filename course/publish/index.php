@@ -42,7 +42,8 @@ $shortname = format_string($course->shortname, true, array('context' => $context
 
 $PAGE->set_url('/course/publish/index.php', array('id' => $course->id));
 $PAGE->set_pagelayout('course');
-$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+#$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+$PAGE->set_title($course->fullname);
 $PAGE->set_heading($course->fullname);
 
 //check that the PHP xmlrpc extension is enabled
