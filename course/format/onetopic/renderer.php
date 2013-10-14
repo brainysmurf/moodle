@@ -327,12 +327,20 @@ class format_onetopic_renderer extends format_section_renderer_base {
                     $tabtext = s($sectionname);
                     
                		//'Delete this section' button
-					if ( $section>0 && $section==$displaysection && $PAGE->user_is_editing() && has_capability('moodle/course:update', $context) )
+					if ( $section==$displaysection && $PAGE->user_is_editing() && has_capability('moodle/course:update', $context) )
 					{
+					  if ( $section === 0 ) {
+					    $url = new moodle_url('#');
+					    $title = "Cannot Delete";
+					    $icon = '<i class="icon-ban-circle"></i>';
+					  } else {
 						$url = new moodle_url('/course/delete_section.php',
 							array('courseid' => $course->id, 'section' => $displaysection, 'sesskey' => sesskey()) 
 						);
-						$tabtext .= '<a class="btn delete_section" href="'.$url.'" title="Delete This Tab"><i class="icon-trash"></i> Delete</a>';
+						$title = "Delete Tab";
+						$icon = '<i class="icon-trash"></i>';
+					  } 
+					$tabtext .= '<a class="btn delete_section" href="'.$url.'" title="'.$title.'">'.$icon.' '.$title.'</a>';
 					}
         
                     
