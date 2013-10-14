@@ -433,8 +433,9 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 	clear: both;
 	float: none;
 	position: static;
-	margin-top: 12px;
-	height:17px;
+	margin-top: 2px;
+	max-height:17px;
+	height:auto;
 }
 .decaf_with_edit_buttons.jsenabled .block .header .commands .icon img {margin-left:0px; margin-right:4px;}
 
