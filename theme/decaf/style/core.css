@@ -120,8 +120,8 @@ a:active {outline: none;}
 
 /* Tabs
 --------------------------- */
-.tabtree .tabrow0 li.here a {background:#fff;}
-.tabtree .tabrow0 .tabrow1 li a{background:none !important;}
+.tabtree .tabrow0 li.here a, .tabtree .tabrow0 li.here span {background:#fff;}
+.tabtree .tabrow0 .tabrow1 li a, .tabtree .tabrow0 .tabrow1 li span {background:none !important;}
 .tabtree .tabrow0 li { display:inline-block; }
 
 .tabtree {
@@ -140,7 +140,8 @@ a:active {outline: none;}
 		.tabtree .tabrow0 li:last-child {
 			margin-right:0;
 		}
-		.tabtree .tabrow0 li a {
+		.tabtree .tabrow0 li a,
+		.tabtree .tabrow0 li span {
 			margin:0;
 			display:block;
 			line-height: 16px;
@@ -153,13 +154,27 @@ a:active {outline: none;}
 			-webkit-border-radius: 3px;
 			-moz-border-radius: 3px;
 			font-size:13px;
+			white-space: nowrap;
 		}
-			.tabtree .tabrow0 li.here a {
+			.tabtree .tabrow0 li.here > a,
+			.tabtree .tabrow0 li.here > span {
 				font-size:12px;
 				border-color: #A0A0A0 !important;
+				padding: 0 8px;
+				line-height: 30px;
 			}
 		.tabtree .tabrow2.empty {
 			display:none !important;
+		}
+		
+		.tabtree .tabrow0 li.here a.btn {
+			display:inline-block;
+			font-weight:normal;
+			margin: 0;
+			font-size: 11px;
+			position: relative;
+			top: -2px;
+			right:-4px;
 		}
 
 /* User
@@ -227,6 +242,7 @@ input[type=submit],
 button,
 .btn,
 a.btn,
+.tabtree .tabrow0 li a.btn,
 .section-navigation a,
 .addresourcemodchooser a { 
 text-transform:capitalize;
@@ -259,6 +275,7 @@ box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
 input[type=submit]:hover, button:hover,
 .btn:hover,
 a.btn:hover,
+.tabtree .tabrow0 li a.btn:hover,
 .bs-nav a:hover,
 .section-navigation a:hover,
 .addresourcemodchooser a:hover {
@@ -276,6 +293,7 @@ input[type=submit]:active,
 button:active,
 .btn:active,
 a.btn:active,
+.tabtree .tabrow0 li a.btn:active,
 .btn.selected,
 .section-navigation a:active,
 .addresourcemodchooser a:active {
@@ -757,8 +775,8 @@ body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questionca
 .local-alert,
 .global-alert,
 .dnet-row {
-    margin-left:50px;
-    margin-right:50px;
+    margin-left:100px;
+    margin-right:100px;
     margin-bottom:10px;
     padding: 15px 20px;
     background-color: #fff; 

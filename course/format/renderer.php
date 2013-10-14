@@ -466,6 +466,7 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
 
             $o.= html_writer::start_tag('div', array('class' => 'clipboard global-alert'));
     	        $o.= get_string('activityclipboard', '', strip_tags($USER->activitycopyname));
+    	        $o .= ' (From '.get_section_name($course, $USER->activitycopysectionreturn).')';
 	            $o.= ' '.html_writer::tag('a' , get_string('cancel') , array('href'=>$url, 'class'=>'btn'));
             $o.= html_writer::end_tag('div');
         }
