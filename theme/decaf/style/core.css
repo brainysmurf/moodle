@@ -5,7 +5,7 @@ h1,h2,h3,h4,h5,h6,p{text-shadow:0 1px 0 #FFF;}
 p:last-child { margin-bottom:0; }
 body input{font-family:"Tahoma",Arial,Helvetica,sans-serif;}
 select,input,button,textarea{font-size:0.9em;}
-a:link,a:visited {color: #005FA0;}
+a:link,a:visited {color: #1662A3;}
 a:hover,a:active {color: #251c17;}
 a img {border: none;}
 a:active {outline: none;}
@@ -24,7 +24,7 @@ a:active {outline: none;}
 }
 #page-header{
 	float:none;
-	background:#005FA0 url([[pix:theme|header-bg]]) repeat; /* url([[pix:theme|bg-header]]) repeat-x scroll center bottom; */
+	background:#1662A3 url([[pix:theme|header-bg]]) repeat; /* url([[pix:theme|bg-header]]) repeat-x scroll center bottom; */
 	margin-right:0;
 	position:relative;
 	min-height:144px;
@@ -102,7 +102,7 @@ a:active {outline: none;}
 	padding:0 10px 0 0;
 }
 .navbar .breadcrumb{font-size:1em;padding:6px 10px;}
-/*.breadcrumb a,a:link,a:active{color:#005FA0;}*/
+/*.breadcrumb a,a:link,a:active{color:#1662A3;}*/
 .sep{background:url([[pix:theme|breadcrumb_arrow]]) no-repeat scroll 100% 50%;margin-right:5px;padding:0.98em 7px;}
 /* Calendar
 --------------------------- */
@@ -457,8 +457,8 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 			line-height: 22px;
 			padding: 15px;
 			background-color:#fff;
-			border-top: 2px solid #005FA0; 
-			border-bottom: 2px solid #005FA0;
+			border-top: 2px solid #1662A3; 
+			border-bottom: 2px solid #1662A3;
 		}
 			.login-reminder icon { margin-top: -4px; }
 	
@@ -579,7 +579,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 #back-to-top a.arrow {
 	padding: 5px 10px;
 	font-size: 36px;
-	color: #005FA0;
+	color: #1662A3;
 	background: #EEE;
 	border: 1px solid #CCC;
 	border-bottom: 1px solid #AAA;
@@ -717,7 +717,7 @@ body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questionca
 	font-family:"Tahoma",sans-serif;
 	font-size:1.5em;
 	line-height:1.5em;
-	color:#005FA0;
+	color:#1662A3;
 	height:3em;
 	width: 10em;
 	margin-bottom:5px;
@@ -743,8 +743,8 @@ body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questionca
     margin-bottom:10px;
     padding: 15px 20px;
     background-color: #fff; 
-	border-top: 2px solid #005FA0; 
-	border-bottom: 2px solid #005FA0;
+	border-top: 2px solid #1662A3; 
+	border-bottom: 2px solid #1662A3;
 }
 	.section .local-alert {
 		margin-top:10px;
