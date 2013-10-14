@@ -126,7 +126,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) {  ?>
 		</div>
 		
 		<?php if ( $hassidepre || $hassidepost ) { ?>
-    	<div id="rightCol" class="block-region">
+    	<div id="side-post" class="block-region">
     		<div class="region-content">
     			 <?php
     			 	echo $blocks_side_pre;
