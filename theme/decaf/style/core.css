@@ -47,6 +47,16 @@ a:active {outline: none;}
 }
 #page-header .headermenu {width:235px;}
 #page-header .headermenu a:hover{color:#C30;}
+
+	/* On frontpage, grow the blue header to be the height of the header + breadcrumbs on normal pages */
+	#page-site-index #page-header {
+		min-height:176px;
+	}
+		#page-site-index #page-header-wrapper {
+			padding: 61px 30px 64px 48px;  /* Vertically center the page title */
+		}
+			#page-site-index #page-header-wrapper .headermain{ font-size: 3em; }
+			
 /* Header Profile
 -------------------------- */
 #header-profileoptions ul{margin-right:4px;}
