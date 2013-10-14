@@ -150,7 +150,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
     <div id="page-content">
     
 		
-		<div id="centerCol" class="<?=(!$hassidepost&&!$hassidepre?'fullWidth':'')?>">
+		<div id="centerCol" class="<?php if (!$hassidepost&&!$hassidepre) { echo 'fullWidth'; } ?>">
 		
 	        <div class="region-content">
 	            <?php echo $coursecontentheader; ?>
@@ -160,7 +160,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
             
 		</div>
 		
-    	<?php if ( $hassidepre || $hassidepost ) { ?>
+  <?php if ( $hassidepre || $hassidepost ) { ?>
     	<div id="rightCol" class="block-region">
     		<div class="region-content">
     			 <?php echo $blocks_side_pre ?>
