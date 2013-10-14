@@ -52,50 +52,57 @@ $THEME->layouts = array(
     // Standard layout with blocks, this is recommended for most pages with general information
     'standard' => array(
         'file' => 'general.php',
-        'regions' => array('side-pre', 'side-post'),
+        #'regions' => array('side-pre', 'side-post'),
+        'regions' => array('side-post'),
         'defaultregion' => 'side-post',
     ),
     // Main course page
     'course' => array(
         'file' => 'general.php',
-        'regions' => array('side-pre', 'side-post'),
+        #'regions' => array('side-pre', 'side-post'),
+        'regions' => array('side-post'),
         'defaultregion' => 'side-post',
         'options' => array('langmenu'=>true),
     ),
     'coursecategory' => array(
         'file' => 'general.php',
-        'regions' => array('side-pre', 'side-post'),
+        #'regions' => array('side-pre', 'side-post'),
+        'regions' => array('side-post'),
         'defaultregion' => 'side-post',
     ),
     // part of course, typical for modules - default page layout if $cm specified in require_login()
     'incourse' => array(
         'file' => 'general.php',
-        'regions' => array('side-pre', 'side-post'),
+        #'regions' => array('side-pre', 'side-post'),
+        'regions' => array('side-post'),
         'defaultregion' => 'side-post',
     ),
     // The site home page.
     'frontpage' => array(
         'file' => 'frontpage.php',
-        'regions' => array('side-pre', 'side-post'),
+        #'regions' => array('side-pre', 'side-post'),
+        'regions' => array('side-post'),
         'defaultregion' => 'side-post',
     ),
     // Server administration scripts.
     'admin' => array(
         'file' => 'general.php',
-        'regions' => array('side-pre'),
-        'defaultregion' => 'side-pre',
+        'regions' => array('side-post'),
+        'defaultregion' => 'side-post',
     ),
     // My dashboard page
     'mydashboard' => array(
         'file' => 'general.php',
-        'regions' => array('side-pre', 'side-post'),
+        #'regions' => array('side-pre', 'side-post'),
+        'regions' => array('side-post'),
         'defaultregion' => 'side-post',
         'options' => array('langmenu'=>true),
     ),
     // My public page
     'mypublic' => array(
         'file' => 'general.php',
-        'regions' => array('side-pre', 'side-post'),
+        #'regions' => array('side-pre', 'side-post'),
+        'regions' => array('side-post'),
         'defaultregion' => 'side-post',
     ),
     'login' => array(
@@ -145,8 +152,8 @@ $THEME->layouts = array(
     // The pagelayout used for reports
     'report' => array(
         'file' => 'general.php',
-        'regions' => array('side-pre'),
-        'defaultregion' => 'side-pre',
+        'regions' => array('side-post'),
+        'defaultregion' => 'side-post',
     ),  
 );
 
