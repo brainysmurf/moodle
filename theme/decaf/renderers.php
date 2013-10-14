@@ -4,16 +4,16 @@ class theme_decaf_core_renderer extends core_renderer {
 
     protected $really_editing = false;
 
-	private $cache;
+   private $cache;
 
-	function __construct( moodle_page $page, $target )
+   function __construct( moodle_page $page, $target )
 	{
 		$this->cache = cache::make_from_params(cache_store::MODE_SESSION, 'theme_decaf', 'decafcache');
 		parent::__construct( $page , $target );
 	}
 
 
-	public function header()
+    public function header()
 	{
 		//Change page heading when on an activity inside a "->" course
 		if ( strpos($this->page->heading, '-&gt') !== false && $this->page->cm)

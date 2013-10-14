@@ -6,7 +6,7 @@ p:last-child { margin-bottom:0; }
 body input{font-family:"Tahoma",Arial,Helvetica,sans-serif;}
 select,input,button,textarea{font-size:0.9em;}
 a:link,a:visited {color: #1662A3;}
-a:hover,a:active {color: #251c17;}
+a:hover,a:active {color: #1662A3;}
 a img {border: none;}
 a:active {outline: none;}
 .singleselect option {text-align:left;}
