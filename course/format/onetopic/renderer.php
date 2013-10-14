@@ -158,7 +158,7 @@ class format_onetopic_renderer extends format_section_renderer_base {
      * @param int $displaysection The section number in the course which is being displayed
      */
     public function print_single_section_page($course, $sections, $mods, $modnames, $modnamesused, $displaysection) {
-        global $PAGE;
+        global $PAGE, $USER;
         
         $real_course_display = $course->realcoursedisplay;
         $modinfo = get_fast_modinfo($course);
@@ -172,7 +172,15 @@ class format_onetopic_renderer extends format_section_renderer_base {
 
         if (!isset($sections[$displaysection])) {
             // This section doesn't exist
-            print_error('unknowncoursesection', 'error', null, $course->fullname);
+            if ( $displaysection > 0 )
+            {
+            	$USER->display[$course->id] = 0;
+            	redirect('view.php?id='.$course->id);
+            }
+            else
+            {
+            	print_error('unknowncoursesection', 'error', null, $course->fullname);
+            }
             return;
         }
 
@@ -196,8 +204,75 @@ class format_onetopic_renderer extends format_section_renderer_base {
         // Start single-section div
         echo html_writer::start_tag('div', array('class' => 'single-section'));
 
-        //Init custom tabs
+		// Title with section navigation links.
+        $sectionnavlinks = $this->get_nav_links($course, $sections, $displaysection);
+        $sectiontitle = '';
 
+		//Tabs
+        if ( !$course->hidetabsbar )
+        {
+        	$tabs = $this->get_section_tabs( $course, $sections, $displaysection , $context );
+        	if ( count($tabs) > 0 )
+        	{
+            	$sectiontitle .= print_tabs(array($tabs), "tab_topic_" . $displaysection, NULL, NULL, true);
+            }
+        }  
+              
+        echo $sectiontitle;
+
+        if (!$sections[$displaysection]->visible && !$canviewhidden) {
+            if (!$course->hiddensections) {
+                echo $this->start_section_list();
+                echo $this->section_hidden($displaysection);
+                echo $this->end_section_list();
+            }
+            // Can't view this section.
+        }
+        else {
+
+            // Now the list of sections..
+            echo $this->start_section_list();
+
+            // The requested section page.
+            $thissection = $sections[$displaysection];
+            echo $this->section_header($thissection, $course, true);
+            // Show completion help icon.
+            $completioninfo = new completion_info($course);
+            echo $completioninfo->display_help_icon();
+
+			if ( $PAGE->user_is_editing() )
+			{
+				//Additional add button above list
+				$activity_count = count(explode(',',$thissection->_sequence));
+				if ( $activity_count >= 5 )
+				{
+					echo $this->courserenderer->course_section_add_cm_button();
+				}
+			}
+			
+	        echo $this->courserenderer->course_section_cm_list($course, $thissection, $displaysection);
+	        echo $this->courserenderer->course_section_add_cm_control($course, $displaysection, $displaysection);
+            echo $this->section_footer();
+            echo $this->end_section_list();
+        }
+
+        // Display section bottom navigation.
+        $sectionbottomnav = '';
+        $sectionbottomnav .= html_writer::start_tag('div', array('class' => 'section-navigation mdl-bottom'));
+        $sectionbottomnav .= html_writer::tag('span', $sectionnavlinks['previous'], array('class' => 'mdl-left'));
+        $sectionbottomnav .= html_writer::tag('span', $sectionnavlinks['next'], array('class' => 'mdl-right'));
+        $sectionbottomnav .= html_writer::end_tag('div');
+        echo $sectionbottomnav;
+
+        // close single-section div.
+        echo html_writer::end_tag('div');
+    }
+    
+    function get_section_tabs($course, $sections , $displaysection , $context )
+    {
+    	global $PAGE;
+    	
+ 		//Init custom tabs
         $section = 0;
 
         $sectionmenu = array();
@@ -248,69 +323,39 @@ class format_onetopic_renderer extends format_section_renderer_base {
                     } else {
                         $url = course_get_url($course, $section);
                     }
-                    $tabs[] = new tabobject("tab_topic_" . $section, $url,
-                    '<font style="white-space:nowrap">' . s($sectionname) . "</font>", s($sectionname));
+                    
+                    $tabtext = s($sectionname);
+                    
+               		//'Delete this section' button
+					if ( $section>0 && $section==$displaysection && $PAGE->user_is_editing() && has_capability('moodle/course:update', $context) )
+					{
+						$strdeletesection = get_string('deletesection');
+						$url = new moodle_url('/course/delete_section.php',
+							array('courseid' => $course->id, 'section' => $displaysection, 'sesskey' => sesskey()) 
+						);
+						$tabtext .= '<a class="btn delete_section" href="'.$url.'" title="'.get_string('deletethissection').'"><i class="icon-trash"></i> Delete</a>';
+					}
+        
+                    
+                    $tabs[] = new tabobject( 'tab_topic_'.$section, $url, $tabtext, s($sectionname) );
                 }
             }
             $section++;
         }
 
-        // Title with section navigation links.
-        $sectionnavlinks = $this->get_nav_links($course, $sections, $displaysection);
-        $sectiontitle = '';
+		//Add 'new section' button
+		if ( $PAGE->user_is_editing() && has_capability('moodle/course:update', $context) )
+		{
+            // Increase number of sections.
+            $url = new moodle_url('/course/changenumsections.php',
+                array('courseid' => $course->id,
+                      'increase' => true,
+                      'sesskey' => sesskey()));
+          		
+			$tabs[] = new tabobject('tab_add' , $url , '<i class="icon-plus"></i> Add A Section' , 'Add A Section');
+		}
 
-
-        if (!$course->hidetabsbar && count($tabs) > 0) {
-            $sectiontitle .= print_tabs(array($tabs), "tab_topic_" . $displaysection, NULL, NULL, true);
-        }        
-        
-        echo $sectiontitle;
-
-        if (!$sections[$displaysection]->visible && !$canviewhidden) {
-            if (!$course->hiddensections) {
-                echo $this->start_section_list();
-                echo $this->section_hidden($displaysection);
-                echo $this->end_section_list();
-            }
-            // Can't view this section.
-        }
-        else {
-
-            // Now the list of sections..
-            echo $this->start_section_list();
-
-            // The requested section page.
-            $thissection = $sections[$displaysection];
-            echo $this->section_header($thissection, $course, true);
-            // Show completion help icon.
-            $completioninfo = new completion_info($course);
-            echo $completioninfo->display_help_icon();
-
-			if ( $PAGE->user_is_editing() )
-			{
-				//Additional add button above list
-				$activity_count = count(explode(',',$thissection->_sequence));
-				if ( $activity_count >= 5 )
-				{
-					echo $this->courserenderer->course_section_add_cm_button();
-				}
-			}
-			
-	        echo $this->courserenderer->course_section_cm_list($course, $thissection, $displaysection);
-	        echo $this->courserenderer->course_section_add_cm_control($course, $displaysection, $displaysection);
-            echo $this->section_footer();
-            echo $this->end_section_list();
-        }
-
-        // Display section bottom navigation.
-        $sectionbottomnav = '';
-        $sectionbottomnav .= html_writer::start_tag('div', array('class' => 'section-navigation mdl-bottom'));
-        $sectionbottomnav .= html_writer::tag('span', $sectionnavlinks['previous'], array('class' => 'mdl-left'));
-        $sectionbottomnav .= html_writer::tag('span', $sectionnavlinks['next'], array('class' => 'mdl-right'));
-        $sectionbottomnav .= html_writer::end_tag('div');
-        echo $sectionbottomnav;
-
-        // close single-section div.
-        echo html_writer::end_tag('div');
+       return $tabs;
     }
+    
 }

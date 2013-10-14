@@ -192,7 +192,7 @@ if ((!empty($movetosection) or !empty($moveto)) and confirm_sesskey()) {
     unset($USER->activitycopyname);
     unset($USER->activitycopysectionreturn);
 
-    redirect(course_get_url($course, $section->section, array('sr' => $sectionreturn)));
+    redirect(course_get_url($course, $section->section));  #, array('sr' => $sectionreturn)));
 
 } else if (!empty($indent) and confirm_sesskey()) {
     $id = required_param('id', PARAM_INT);

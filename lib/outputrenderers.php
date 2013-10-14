@@ -3001,15 +3001,16 @@ EOD;
         if ($tabobject instanceof tabtree) {
             // No name for tabtree root.
         } else if ($tabobject->inactive || $tabobject->activated || ($tabobject->selected && !$tabobject->linkedwhenselected)) {
+            $str .= html_writer::tag('span', $tabobject->text);
             // Tab name without a link. The <a> tag is used for styling.
-            $str .= html_writer::tag('a', html_writer::span($tabobject->text), array('class' => 'nolink'));
+            //$str .= html_writer::tag('a', html_writer::span($tabobject->text), array('class' => 'nolink'));
         } else {
             // Tab name with a link.
             if (!($tabobject->link instanceof moodle_url)) {
                 // backward compartibility when link was passed as quoted string
                 $str .= "<a href=\"$tabobject->link\" title=\"$tabobject->title\"><span>$tabobject->text</span></a>";
             } else {
-                $str .= html_writer::link($tabobject->link, html_writer::span($tabobject->text), array('title' => $tabobject->title));
+                $str .= html_writer::link($tabobject->link, $tabobject->text, array('title' => $tabobject->title));
             }
         }
 
