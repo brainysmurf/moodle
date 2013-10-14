@@ -151,7 +151,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
     
 		<div id="centerCol" class="<?php if (!$hassidepost&&!$hassidepre) { echo 'fullWidth'; } ?>">
 	        <div class="region-content">
-	            <?
+	            <?php
 	            	echo $coursecontentheader;
 	            	echo method_exists($OUTPUT, "main_content")?$OUTPUT->main_content():core_renderer::MAIN_CONTENT_TOKEN;
 	            	echo $coursecontentfooter;
