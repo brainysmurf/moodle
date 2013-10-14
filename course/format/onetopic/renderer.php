@@ -218,17 +218,6 @@ class format_onetopic_renderer extends format_section_renderer_base {
             }
         }  
               
-		//'Delete this section' button
-		echo '<pre>'.print_r($thissection,true).'</pre>';
-		if ($displaysection > 0 && $PAGE->user_is_editing() && has_capability('moodle/course:update', $context) )
-		{
-			$strdeletethissection = get_string('deletethissection');
-			$url = new moodle_url('/course/delete_section.php',
-				array('courseid' => $course->id, 'section' => $displaysection, 'sesskey' => sesskey()) 
-			);
-			echo '<a class="btn delete_section" href="'.$url.'" title="'.$strdeletethissection.'"><i class="icon-trash"></i> '.$strdeletethissection.'</a>';
-		}
-        
         echo $sectiontitle;
 
         if (!$sections[$displaysection]->visible && !$canviewhidden) {
@@ -334,8 +323,21 @@ class format_onetopic_renderer extends format_section_renderer_base {
                     } else {
                         $url = course_get_url($course, $section);
                     }
-                    $tabs[] = new tabobject("tab_topic_" . $section, $url,
-                    '<font style="white-space:nowrap">' . s($sectionname) . "</font>", s($sectionname));
+                    
+                    $tabtext = s($sectionname);
+                    
+               		//'Delete this section' button
+					if ( $section>0 && $section==$displaysection && $PAGE->user_is_editing() && has_capability('moodle/course:update', $context) )
+					{
+						$strdeletesection = get_string('deletesection');
+						$url = new moodle_url('/course/delete_section.php',
+							array('courseid' => $course->id, 'section' => $displaysection, 'sesskey' => sesskey()) 
+						);
+						$tabtext .= '<a class="btn delete_section" href="'.$url.'" title="'.get_string('deletethissection').'"><i class="icon-trash"></i> '.$strdeletesection.'</a>';
+					}
+        
+                    
+                    $tabs[] = new tabobject( 'tab_topic_'.$section, $url, $tabtext, s($sectionname) );
                 }
             }
             $section++;
