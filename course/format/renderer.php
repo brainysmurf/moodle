@@ -453,7 +453,6 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
      */
     protected function course_activity_clipboard($course, $sectionno = null) {
         global $USER;
-
         $o = '';
         // If currently moving a file then show the current clipboard.
         if (ismoving($course->id)) {
