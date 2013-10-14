@@ -162,7 +162,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 		<?php if ( $hassidepre || $hassidepost ) { ?>
     	<div id="rightCol" class="block-region">
     		<div class="region-content">
-    			 <?
+    			 <?php
     			 	echo $blocks_side_pre;
 					echo $blocks_side_post;
 				?>
