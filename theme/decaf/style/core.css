@@ -24,7 +24,7 @@ a:active {outline: none;}
 }
 #page-header{
 	float:none;
-	background:#1662A3 url([[pix:theme|header-bg]]) repeat; /* url([[pix:theme|bg-header]]) repeat-x scroll center bottom; */
+	background:#1662A3 url([[pix:theme|bg-header]]) repeat-x scroll center bottom;
 	margin-right:0;
 	position:relative;
 	min-height:144px;
@@ -46,7 +46,6 @@ a:active {outline: none;}
 }
 #page-header .headermenu {width:235px;}
 #page-header .headermenu a:hover{color:#C30;}
-#page-site-index .headermain{ font-size: 3em; margin: 20px 0; }
 /* Header Profile
 -------------------------- */
 #header-profileoptions ul{margin-right:4px;}
