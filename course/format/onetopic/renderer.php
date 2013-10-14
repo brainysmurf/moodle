@@ -196,8 +196,10 @@ class format_onetopic_renderer extends format_section_renderer_base {
         // Start single-section div
         echo html_writer::start_tag('div', array('class' => 'single-section'));
 
-        //Init custom tabs
 
+		// BEGIN TAB BAR
+		
+        //Init custom tabs
         $section = 0;
 
         $sectionmenu = array();
@@ -255,6 +257,18 @@ class format_onetopic_renderer extends format_section_renderer_base {
             $section++;
         }
 
+		//Add 'new section' button
+		if ( $PAGE->user_is_editing() && has_capability('moodle/course:update', $context) )
+		{
+            // Increase number of sections.
+            $url = new moodle_url('/course/changenumsections.php',
+                array('courseid' => $course->id,
+                      'increase' => true,
+                      'sesskey' => sesskey()));
+          		
+			$tabs[] = new tabobject('tab_add' , $url , '<i class="icon-plus"></i> Add A Section' , 'Add A Section');
+		}
+
         // Title with section navigation links.
         $sectionnavlinks = $this->get_nav_links($course, $sections, $displaysection);
         $sectiontitle = '';
@@ -262,7 +276,19 @@ class format_onetopic_renderer extends format_section_renderer_base {
 
         if (!$course->hidetabsbar && count($tabs) > 0) {
             $sectiontitle .= print_tabs(array($tabs), "tab_topic_" . $displaysection, NULL, NULL, true);
-        }        
+        }  
+        
+        // END TAB BAR
+              
+		//'Delete this section' button
+		if ($section > 0 && $PAGE->user_is_editing() && has_capability('moodle/course:update', $context) )
+		{
+			$strdeletethissection = get_string('deletethissection');
+			$url = new moodle_url('/course/delete_section.php',
+				array('courseid' => $course->id, 'sectionid' => $section->id, 'sesskey' => sesskey()) 
+			);
+			echo '<a class="delete_section" href="'.$url.'" title="'.$strdeletethissection.'"><i class="icon-trash"></i> '.$strdeletethissection.'</a>';
+		}
         
         echo $sectiontitle;
 
