@@ -333,7 +333,7 @@ class format_onetopic_renderer extends format_section_renderer_base {
 						$url = new moodle_url('/course/delete_section.php',
 							array('courseid' => $course->id, 'section' => $displaysection, 'sesskey' => sesskey()) 
 						);
-						$tabtext .= '<a class="btn delete_section" href="'.$url.'" title="'.get_string('deletethissection').'"><i class="icon-trash"></i> '.$strdeletesection.'</a>';
+						$tabtext .= '<a class="btn delete_section" href="'.$url.'" title="'.get_string('deletethissection').'"><i class="icon-trash"></i> Delete</a>';
 					}
         
                     
