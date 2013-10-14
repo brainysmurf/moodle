@@ -329,11 +329,10 @@ class format_onetopic_renderer extends format_section_renderer_base {
                		//'Delete this section' button
 					if ( $section>0 && $section==$displaysection && $PAGE->user_is_editing() && has_capability('moodle/course:update', $context) )
 					{
-						$strdeletesection = get_string('deletesection');
 						$url = new moodle_url('/course/delete_section.php',
 							array('courseid' => $course->id, 'section' => $displaysection, 'sesskey' => sesskey()) 
 						);
-						$tabtext .= '<a class="btn delete_section" href="'.$url.'" title="'.get_string('deletethissection').'"><i class="icon-trash"></i> Delete</a>';
+						$tabtext .= '<a class="btn delete_section" href="'.$url.'" title="Delete This Tab"><i class="icon-trash"></i> Delete</a>';
 					}
         
                     
@@ -352,7 +351,7 @@ class format_onetopic_renderer extends format_section_renderer_base {
                       'increase' => true,
                       'sesskey' => sesskey()));
           		
-			$tabs[] = new tabobject('tab_add' , $url , '<i class="icon-plus"></i> Add A Section' , 'Add A Section');
+			$tabs[] = new tabobject('tab_add' , $url , '<i class="icon-plus"></i> Add A Tab' , 'Add A Tab');
 		}
 
        return $tabs;
