@@ -1313,6 +1313,7 @@ function course_create_sections_if_missing($courseorid, $sections) {
             $cw = new stdClass();
             $cw->course   = $courseorid;
             $cw->section  = $sectionnum;
+            $cw->name = 'Topic '.$sectionnum;
             $cw->summary  = '';
             $cw->summaryformat = FORMAT_HTML;
             $cw->sequence = '';
@@ -3216,54 +3217,71 @@ function compare_activities_by_time_asc($a, $b) {
     return ($a->timestamp < $b->timestamp) ? -1 : 1;
 }
 
-function delete_section($courseid, $section) {
+function delete_section($courseid, $sectionid) {
     global $CFG, $DB;
 
-    if (!$DB->record_exists('course', array('id'=> $courseid))) {
-            print_error('Invalid course');
+	//Get the course
+    if ( !$DB->record_exists('course', array('id'=> $courseid)) )
+    {
+		print_error('Invalid course');
     }
-    if (is_numeric($section)) {
-        if (!$section = $DB->get_record('course_sections', array('course' => $courseid, 'section' => $section))) {
-            print_error('Section not found');
-        }
-    } else if ( $section->section == 0) {
-        print_error("Course section 0 (main) could not be deleted");
+    
+    //Get the section
+    $section = $DB->get_record("course_sections", array("id" => $sectionid));
+    if ( !$section )
+    {
+    	print_error('Section not found');
+    }
+    else if ( $section->course != $courseid )
+    {
+    	print_error('That section does not belong to that course');
+    }
+        
+    if ( $section->section == 0 )
+    {
+		print_error("Course section 0 (main) could not be deleted");
     }
 
-    // delete all modules if they exist
-    if (!empty($section->sequence) ) {
+    //Remove activities/resources from this section
+    if ( !empty($section->sequence) )
+    {
         $modids = split(',', $section->sequence);
-        foreach($modids AS $modid) {
-            if ($cm = $DB->get_record("course_modules", array("id" => $modid))) {
-                if ($modulename = $DB->get_field('modules', 'name', array('id' => $cm->module))) {
-
+        foreach($modids AS $modid)
+        {
+            if ( $cm = $DB->get_record("course_modules", array("id" => $modid)) )
+            {
+                if ($modulename = $DB->get_field('modules', 'name', array('id' => $cm->module)))
+                {
+                	//Call the delete method specific to this module
                     $modlib = "{$CFG->dirroot}/mod/{$modulename}/lib.php";
-                    if (file_exists($modlib)) {
+                    if ( file_exists($modlib) )
+                    {
                         include_once($modlib);
                         $deleteinstancefunction = $modulename."_delete_instance";
                         $deleteinstancefunction($cm->instance);
                     }
                 }
                 delete_course_module($modid);
-            }
+			}
         }
     }
-    // remove the section and update the course.numsections and sections order
-    if (!$DB->delete_records("course_sections", array("id" => $section->id))) {
+    
+    //Remove the section from the DB
+    if ( !$DB->delete_records("course_sections", array("id" => $section->id)) )
+    {
         print_error("Could not delete Course section");
     }
 
+	//Update the section orders (-1 from the sections that came after the deleted one)
     $DB->execute("UPDATE {$CFG->prefix}course_sections
                      SET section = section - 1
                    WHERE course = {$courseid}
                      AND section > {$section->section}");
-
-    $DB->execute("UPDATE {$CFG->prefix}course
-                     SET numsections = numsections - 1
-                   WHERE id = {$courseid}");
-
+                     
+	//Reduce numsections of the course by 1 
+    $DB->execute("UPDATE {$CFG->prefix}course_format_options SET value = CAST(coalesce(value, '0') AS integer) - 1 WHERE courseid = {$courseid} AND name = 'numsections' ");
 
     rebuild_course_cache($courseid);
 
-    add_to_log($courseid, "course", "deletesection", "deletesection.php?id=$section->id", "$section->section");
+    add_to_log($courseid, "course", "deletesection", "delete_section.php?id=$section->id", "$section->section");
 }
