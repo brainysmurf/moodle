@@ -22,12 +22,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['currentsection'] = 'This topic';
+$string['currentsection'] = 'This tab';
 $string['sectionname'] = 'Topic';
-$string['pluginname'] = 'Onetopic format';
-$string['page-course-view-topics'] = 'Any course main page in onetopic format';
-$string['page-course-view-topics-x'] = 'Any course page in onetopic format';
-$string['hidefromothers'] = 'Hide topic';
-$string['showfromothers'] = 'Show topic';
+$string['pluginname'] = 'Tab (onetopic) format';
+$string['page-course-view-topics'] = 'Any course main page in tab (onetopic) format';
+$string['page-course-view-topics-x'] = 'Any course page in tab (onetopic) format';
+$string['hidefromothers'] = 'Hide tab';
+$string['showfromothers'] = 'Show tab';
 $string['hidetabsbar'] = 'Hide tabs bar';
 $string['hidetabsbar_help'] = 'Hide tabs bar in the course page. The navigation is with the sections navbar.';
