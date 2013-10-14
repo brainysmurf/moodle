@@ -118,35 +118,24 @@ if (empty($PAGE->layout_options['noawesomebar'])) {  ?>
 
 <div id="page-content-wrapper" class="clearfix">
     <div id="page-content">
-        <div id="region-main-box">
-            <div id="region-post-box">
-            
-                <div id="region-main-wrap">
-                    <div id="region-main">
-                        <div class="region-content">
-                            <?php echo method_exists($OUTPUT, "main_content")?$OUTPUT->main_content():core_renderer::MAIN_CONTENT_TOKEN ?>
-                        </div>
-                    </div>
-                </div>
-                
-                <?php if ($hassidepre) { ?>
-                <div id="region-pre" class="block-region">
-                    <div class="region-content">
-                        <?php echo $blocks_side_pre ?>
-                    </div>
-                </div>
-                <?php } ?>
-                
-                <?php if ($hassidepost) { ?>
-                <div id="region-post" class="block-region">
-                    <div class="region-content">
-                        <?php echo $blocks_side_post ?>
-                    </div>
-                </div>
-                <?php } ?>
-                
-            </div>
-        </div>
+    
+		<div id="centerCol" class="<?php if (!$hassidepost&&!$hassidepre) { echo 'fullWidth'; } ?>">
+	        <div class="region-content">
+				<?php echo method_exists($OUTPUT, "main_content")?$OUTPUT->main_content():core_renderer::MAIN_CONTENT_TOKEN ?>
+	        </div>
+		</div>
+		
+		<?php if ( $hassidepre || $hassidepost ) { ?>
+    	<div id="rightCol" class="block-region">
+    		<div class="region-content">
+    			 <?
+    			 	echo $blocks_side_pre;
+					echo $blocks_side_post;
+				?>
+    		</div>
+    	</div>
+    	<?php } ?>
+    	
     </div>
 </div>
 
