@@ -20,11 +20,12 @@ a:active {outline: none;}
 ------------------------- */
 #page-header-wrapper{
 	margin:0;
-	padding: 49px 30px 51px 48px;
+	padding: 49px 30px 53px 48px; /* Vertically center the page title */
 }
 #page-header{
 	float:none;
-	background:#1662A3 url([[pix:theme|bg-header]]) repeat-x scroll center bottom;
+	background:#1662A3; /* url([[pix:theme|bg-header]]) repeat-x scroll center bottom;*/
+	border-bottom:1px solid #cbcbcb;
 	margin-right:0;
 	position:relative;
 	min-height:144px;
@@ -95,7 +96,6 @@ a:active {outline: none;}
 .navbar{
 	font-size:.9em;
 	background-color:#F0F0F0;
-	border-top:1px solid #DDD;
 	border-bottom:1px solid #DDD;
 	margin:0;
 	padding:0 10px 0 0;
