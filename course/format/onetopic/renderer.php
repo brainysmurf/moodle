@@ -326,18 +326,20 @@ class format_onetopic_renderer extends format_section_renderer_base {
                     
                     $tabtext = s($sectionname);
                     
-               		//'Delete this section' button
+		                        //'Delete this section' button
+		                        // You can add text ($title), but if a tab has a very short name it doesn't look great
+		                        // icon is probably enough anyway
 					if ( $section==$displaysection && $PAGE->user_is_editing() && has_capability('moodle/course:update', $context) )
 					{
 					  if ( $section === 0 ) {
 					    $url = new moodle_url('#');
-					    $title = "Cannot Delete";
+					    $title = "";
 					    $icon = '<i class="icon-ban-circle"></i>';
 					  } else {
 						$url = new moodle_url('/course/delete_section.php',
 							array('courseid' => $course->id, 'section' => $displaysection, 'sesskey' => sesskey()) 
 						);
-						$title = "Delete Tab";
+						$title = "";
 						$icon = '<i class="icon-trash"></i>';
 					  } 
 					$tabtext .= '<a class="btn delete_section" href="'.$url.'" title="'.$title.'">'.$icon.' '.$title.'</a>';
