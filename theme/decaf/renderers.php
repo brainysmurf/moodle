@@ -581,7 +581,6 @@ class theme_decaf_core_renderer extends core_renderer {
 		    				if ( !($roles===null) )
 		    				{
 						        $role = $roles[5];
-							print_object($role);
 						        if ($role) {
 						            $url = new moodle_url('/course/switchrole.php', array('id'=>$courseid, 'sesskey'=>sesskey(), 'switchrole'=>5, 'returnurl'=>$this->page->url->out_as_local_url(false)));
 						            $content .= html_writer::start_tag('li');
