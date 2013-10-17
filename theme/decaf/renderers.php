@@ -557,7 +557,7 @@ class theme_decaf_core_renderer extends core_renderer {
 			$loggedIn = isloggedin();
 
 			// Beginning of SSIS's special user menu
-	        $content .=  html_writer::start_tag('li');
+			$content .=  html_writer::start_tag('li');
 
 				$loginIcon = html_writer::tag('i', '', array('class'=>'icon-'.($loggedIn?'user':'signin').' pull-left'));
 				$content .= $loginIcon.$this->login_info();
@@ -580,13 +580,12 @@ class theme_decaf_core_renderer extends core_renderer {
 				            $roles = get_switchable_roles($context);
 		    				if ( !($roles===null) )
 		    				{
-						        $role = array_filter($roles, "students");
+						        $role = $roles[5];
+							print_object($role);
 						        if ($role) {
-						            $role = array_keys($role);
-						            $role = $role[0];
-						            $url = new moodle_url('/course/switchrole.php', array('id'=>$courseid, 'sesskey'=>sesskey(), 'switchrole'=>$role, 'returnurl'=>$this->page->url->out_as_local_url(false)));
+						            $url = new moodle_url('/course/switchrole.php', array('id'=>$courseid, 'sesskey'=>sesskey(), 'switchrole'=>5, 'returnurl'=>$this->page->url->out_as_local_url(false)));
 						            $content .= html_writer::start_tag('li');
-						            $content .= html_writer::tag('a', html_writer::tag('i', '', array('class'=>'icon-user pull-left')).'Become Student', array('href'=>$url));
+						            $content .= html_writer::tag('a', html_writer::tag('i', '', array('class'=>'icon-user pull-left')).'Become '.$role, array('href'=>$url));
 						            $content .= html_writer::end_tag('li');
 						            $content .= html_writer::empty_tag('hr');
 						        }//if $role
