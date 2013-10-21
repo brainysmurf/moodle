@@ -862,6 +862,30 @@ color: #333;
 		-moz-box-shadow:none;
 		box-shadow:none;
 	}
+	
+	/* Icons page */
+	ul.iconList {
+		float:left;
+		width:33%;
+		list-style:none;
+		margin:0;
+		padding:0;
+	}
+		ul.iconList li {
+			display:block;
+			font-size:15px;
+			background:rgba(255,255,255,0.5);
+			margin-bottom:3px;
+			margin-right:3px;
+			padding:5px 10px;
+		}
+			ul.iconList li:nth-child(even) {
+				background:rgba(255,255,255,0.75);
+			}
+		ul.iconList li span {
+			vertical-align: middle;
+			margin-right:5px;
+		}
 
 /** Custom CSS **/
 [[setting:customcss]]
