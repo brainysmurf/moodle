@@ -238,75 +238,6 @@ ul.section li.label {padding-bottom:5px !important;}
 ul.section .activity .contentafterlink p {margin:0 0 1em;}
 body.editing ul.section>li {border-bottom: 1px dashed #808080; position:relative;}
 
-input[type=submit],
-button,
-.btn,
-a.btn,
-.tabtree .tabrow0 li a.btn,
-.section-navigation a,
-.addresourcemodchooser a { 
-text-transform:capitalize;
-padding: 2px 8px;
-text-align: center;
-vertical-align: middle;
-white-space: nowrap;
-cursor: default;
-outline: none;
-font-family: "Tahoma",sans-serif;
-color: black;
-border: 1px solid #BBB;
-border-radius: 3px;
--webkit-border-radius: 3px;
--moz-border-radius: 3px;
-border-top-color: #CCC;border-bottom-color: #A0A0A0; cursor:pointer;
-background: rgb(249,249,249);
-background: -moz-linear-gradient(top,  rgba(249,249,249,1) 0%, rgba(227,227,227,1) 100%);
-background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(249,249,249,1)), color-stop(100%,rgba(227,227,227,1)));
-background: -webkit-linear-gradient(top,  rgba(249,249,249,1) 0%,rgba(227,227,227,1) 100%);
-background: -o-linear-gradient(top,  rgba(249,249,249,1) 0%,rgba(227,227,227,1) 100%);
-background: -ms-linear-gradient(top,  rgba(249,249,249,1) 0%,rgba(227,227,227,1) 100%);
-background: linear-gradient(to bottom,  rgba(249,249,249,1) 0%,rgba(227,227,227,1) 100%);
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9f9f9', endColorstr='#e3e3e3',GradientType=0 );
--webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
--moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-}
-
-input[type=submit]:hover, button:hover,
-.btn:hover,
-a.btn:hover,
-.tabtree .tabrow0 li a.btn:hover,
-.bs-nav a:hover,
-.section-navigation a:hover,
-.addresourcemodchooser a:hover {
-background: rgb(244,244,244);
-background: -moz-linear-gradient(top,  rgba(244,244,244,1) 0%, rgba(216,216,216,1) 100%);
-background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(244,244,244,1)), color-stop(100%,rgba(216,216,216,1)));
-background: -webkit-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(216,216,216,1) 100%);
-background: -o-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(216,216,216,1) 100%);
-background: -ms-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(216,216,216,1) 100%);
-background: linear-gradient(to bottom,  rgba(244,244,244,1) 0%,rgba(216,216,216,1) 100%);
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f4f4f4', endColorstr='#d8d8d8',GradientType=0 );
-}
-
-input[type=submit]:active,
-button:active,
-.btn:active,
-a.btn:active,
-.tabtree .tabrow0 li a.btn:active,
-.btn.selected,
-.section-navigation a:active,
-.addresourcemodchooser a:active {
-background: rgb(227,227,227);
-background: -moz-linear-gradient(top,  rgba(227,227,227,1) 0%, rgba(249,249,249,1) 100%);
-background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(227,227,227,1)), color-stop(100%,rgba(249,249,249,1)));
-background: -webkit-linear-gradient(top,  rgba(227,227,227,1) 0%,rgba(249,249,249,1) 100%);
-background: -o-linear-gradient(top,  rgba(227,227,227,1) 0%,rgba(249,249,249,1) 100%);
-background: -ms-linear-gradient(top,  rgba(227,227,227,1) 0%,rgba(249,249,249,1) 100%);
-background: linear-gradient(to bottom,  rgba(227,227,227,1) 0%,rgba(249,249,249,1) 100%);
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e3e3e3', endColorstr='#f9f9f9',GradientType=0 );
-}
-
 .addresourcemodchooser {
 	margin: 0 0 10px 0;
 }
@@ -321,6 +252,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e3e3e3', end
 	display:inline-block;
 }
 	.addresourcemodchooser i { margin-right:4px; }
+	
 	
 /* Make 2.3 activity chooser sit on top of modules in sections */
 div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
@@ -748,31 +680,6 @@ body.pagelayout-report #page-content #region-main .region-content {
 table#categoryquestions .iconcol {width:21px;}
 body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questioncategories .commands > img.iconsmall {display:none;}
 
-.dnet-btn,
-.dnet-btn-wide,
-.dnet-btn-x2,
-.dnet-btn-x4 {
-	font-family:"Tahoma",sans-serif;
-	font-size:1.5em;
-	line-height:1.5em;
-	color:#1662A3;
-	height:3em;
-	width: 10em;
-	margin-bottom:5px;
-	margin-top:5px;
-	margin-right:10px;
-	cursor:pointer;
-	-moz-border-radius:10px;
-	-webkit-border-radius:10px;
-	-khtml-border-radius:10px;
-	border-radius:10px;
-	border-color:#ddd #fff #fff #ddd;
-	background-color:#eee;
-}
-	.dnet-btn-wide { width:100%; }
-	.dnet-btn-x2 { width:20em; }
-	.dnet-btn-x4 { width:30em;}
-
 .local-alert,
 .global-alert,
 .dnet-row {
@@ -955,6 +862,30 @@ color: #333;
 		-moz-box-shadow:none;
 		box-shadow:none;
 	}
+	
+	/* Icons page */
+	ul.iconList {
+		float:left;
+		width:33%;
+		list-style:none;
+		margin:0;
+		padding:0;
+	}
+		ul.iconList li {
+			display:block;
+			font-size:15px;
+			background:rgba(255,255,255,0.5);
+			margin-bottom:3px;
+			margin-right:3px;
+			padding:5px 10px;
+		}
+			ul.iconList li:nth-child(even) {
+				background:rgba(255,255,255,0.75);
+			}
+		ul.iconList li span {
+			vertical-align: middle;
+			margin-right:5px;
+		}
 
 /** Custom CSS **/
 [[setting:customcss]]

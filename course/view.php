@@ -50,6 +50,8 @@
     // Prevent caching of this page to stop confusion when changing page after making AJAX changes
     $PAGE->set_cacheable(false);
 
+	//rebuild_course_cache($course->id); Uncomment for debugging
+
     preload_course_contexts($course->id);
     $context = context_course::instance($course->id, MUST_EXIST);
 

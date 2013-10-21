@@ -121,6 +121,9 @@ class tinymce_texteditor extends texteditor {
         $strdate        = get_string('strftimedaydate');
         $lang           = current_language();
         $contentcss     = $PAGE->theme->editor_css_url()->out(false);
+        
+        //Make font awesome work in editor
+        $contentcss .= ',/font-awesome/css/font-awesome.min.css';
 
         $context = empty($options['context']) ? context_system::instance() : $options['context'];
 
@@ -216,10 +219,21 @@ class tinymce_texteditor extends texteditor {
         // Remove temporary parameters.
         unset($params['moodle_config']);
 
-	// Added for mediacore
-	// TODO: Make this work anytime
-	$params['plugins'] .= ",mediacoreinsert";
-	$params['theme_advanced_buttons3_add'] = ",|,mediacoreinsert";
+		//Mediacore plugin
+		// TODO: Make this work anytime
+		
+		//Probably better to comment out this 'if' in production.
+		if ( $_SERVER['SERVER_NAME'] != 'dragonnet.local' ) {
+			$params['plugins'] .= ",mediacoreinsert";
+			$params['theme_advanced_buttons3_add'] = ",|,mediacoreinsert";
+		}
+	
+		//Buttons plugin 
+		$params['plugins'] .= ',buttons';
+		
+			//This should probalbly be set in the Site Admin > plugins > text editors > tiny mce > general, but that doesn't sync. So sticking it here
+			//(Same for mediacore above, but that has more issues)
+		$params['theme_advanced_buttons3'] .= ",|,addbuttons";
 
         return $params;
     }
