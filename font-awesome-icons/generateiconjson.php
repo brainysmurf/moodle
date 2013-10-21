@@ -1,28 +1,33 @@
 <?php
 
-//Prints out all the icons from fontawesome as an array
+	//Prints out all the icons from fontawesome as an array
 
-//Can only be run from command line
-if ( php_sapi_name() !== 'cli' ) { die(); }
+	//Can only be run from command line
+	if ( php_sapi_name() !== 'cli' ) { die(); }
 
-$pattern = '/\.(icon-(?:\w+(?:-)?)+):before\s+{\s*content:\s*"(.+)";\s+}/';
-$subject = file_get_contents('../font-awesome/css/font-awesome.css');
+	$pattern = '/\.(icon-(?:\w+(?:-)?)+):before\s+{\s*content:\s*"(.+)";\s+}/';
+	$subject = file_get_contents('../font-awesome/css/font-awesome.css');
 
-preg_match_all($pattern, $subject, $matches, PREG_SET_ORDER);
+	preg_match_all($pattern, $subject, $matches, PREG_SET_ORDER);
 
-$icons = array();
+	$icons = array();
 
-foreach($matches as $match){
-    $icons[$match[1]] = stripslashes($match[2]);
-    #$icons[] = $match[1];
-}
+	foreach($matches as $match)
+	{
+    	$icons[$match[1]] = stripslashes($match[2]);
+	}
 
-#$icons = var_export($icons, TRUE);
-#$icons = stripslashes($icons);
 
-#print_r($icons);
+	//Sort alpabetically
+	function iconcompare($a, $b)
+	{
+		$a = str_replace('icon-','',$a);
+		$b = str_replace('icon-','',$b);
+		return strcmp($a,$b);
+	}
+	uksort($icons,'iconcompare');
 
-//JSON so it can be copied to javascript
-file_put_contents('icons.json', json_encode($icons) );
 
+	//Output to json file
+	file_put_contents('icons.json', json_encode($icons) );
 ?>
