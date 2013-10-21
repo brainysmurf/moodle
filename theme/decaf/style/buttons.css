@@ -103,7 +103,6 @@ ul.buttons {
 	margin:auto;
 	padding:0;
 	max-width:1000px;
-	margin-bottom:20px; /* testing */
 }
 	ul.buttons:after { /* clearfix */
 		content: ".";
@@ -194,7 +193,6 @@ ul.buttons {
 
 /* buttons inside the tinymce editor */
 #tinymce ul.buttons {
-	background:#efefef;
 	cursor:pointer;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
@@ -203,8 +201,5 @@ ul.buttons {
 	-ms-user-select: none;
 	user-select: none;
 }
-	#tinymce ul.buttons > * { pointer-events:none; } /*disable hover effect in the editor */
+	#tinymce ul.buttons * { pointer-events:none; } /*disable hover effect in the editor */
 	 
-	#tinymce ul.buttons:hover {
-		opacity:.9;
-	}
