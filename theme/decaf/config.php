@@ -21,7 +21,7 @@ $THEME->parents = array('canvas','base');
 ////////////////////////////////////////////////////
 
 
-$THEME->sheets = array('awesomebar', 'core', 'autohide');
+$THEME->sheets = array('awesomebar', 'core', 'autohide','buttons');
 
 ////////////////////////////////////////////////////
 // Name of the stylesheet(s) you've including in 
@@ -36,7 +36,7 @@ $THEME->enable_dock = true;
 ////////////////////////////////////////////////////
 
 
-$THEME->editor_sheets = array('editor');
+$THEME->editor_sheets = array('editor','buttons');
 
 ////////////////////////////////////////////////////
 // An array of stylesheets to include within the 

@@ -1,0 +1,29 @@
+#buttonList {
+	list-style:none;
+	margin:0 2px;
+	padding:0;
+}
+	#buttonList li {
+		display:block;
+		white-space:nowrap;
+		margin-bottom:3px;
+	}
+		#buttonList li input,
+		#buttonList li select {
+			width:39%;
+			margin-right:2px;
+			padding:3px;
+			height:23px;
+			-moz-box-sizing: border-box;
+			-webkit-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+			#buttonList li input.url {
+				width:45%;
+			}
+			#buttonList li select {
+				width:20%;
+			}
+			#buttonList li input.text {
+				width:35%;
+			}
