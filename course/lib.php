@@ -1313,7 +1313,8 @@ function course_create_sections_if_missing($courseorid, $sections) {
             $cw = new stdClass();
             $cw->course   = $courseorid;
             $cw->section  = $sectionnum;
-            $cw->name = 'Topic '.$sectionnum;
+            #$cw->name = 'Topic '.$sectionnum;
+            $cw->name = 'New Section';
             $cw->summary  = '';
             $cw->summaryformat = FORMAT_HTML;
             $cw->sequence = '';
@@ -3267,19 +3268,32 @@ function delete_section($courseid, $sectionid) {
     }
     
     //Remove the section from the DB
-    if ( !$DB->delete_records("course_sections", array("id" => $section->id)) )
+	if ( !$DB->delete_records("course_sections", array("id" => $section->id)) )
     {
         print_error("Could not delete Course section");
     }
 
 	//Update the section orders (-1 from the sections that came after the deleted one)
-    $DB->execute("UPDATE {$CFG->prefix}course_sections
+   /* $DB->execute("UPDATE {$CFG->prefix}course_sections
                      SET section = section - 1
                    WHERE course = {$courseid}
-                     AND section > {$section->section}");
+                     AND section > {$section->section}");*/
+    /* ^That had a problem if the sections were in the wrong order in the db                 
+    	e.g. 3 5 4
+    	3 becomes 2
+    	then 5 becomes 4. but 4 already existed at that point and so was a duplicate.
+    	
+    	So we'll do it one by one to make sure they're updated in the correct order
+    */
+    
+    $rows = $DB->get_records_sql("SELECT * FROM {$CFG->prefix}course_sections WHERE course = ? AND section > ? ORDER BY section ASC", array($courseid,$section->section));
+    foreach ( $rows as $row )
+    {
+    	$DB->execute("UPDATE {$CFG->prefix}course_sections SET section = section - 1 WHERE course = {$courseid} AND section = {$row->section}");
+    }
                      
 	//Reduce numsections of the course by 1 
-    $DB->execute("UPDATE {$CFG->prefix}course_format_options SET value = CAST(coalesce(value, '0') AS integer) - 1 WHERE courseid = {$courseid} AND name = 'numsections' ");
+	$DB->execute("UPDATE {$CFG->prefix}course_format_options SET value = CAST(coalesce(value, '0') AS integer) - 1 WHERE courseid = {$courseid} AND name = 'numsections' ");
 
     rebuild_course_cache($courseid);
 
