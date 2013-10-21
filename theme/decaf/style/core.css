@@ -137,6 +137,7 @@ a:active {outline: none;}
 		margin-right: 2px;
 		margin-bottom: 2px;
 	}
+	
 		.tabtree .tabrow0 li:last-child {
 			margin-right:0;
 		}
@@ -176,6 +177,45 @@ a:active {outline: none;}
 			top: -2px;
 			right:-4px;
 		}
+		
+		/* Moving tabs */
+		.tabtree .tabrow0.ui-sortable a,
+		.tabtree .tabrow0.ui-sortable span {
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			cursor: move;
+		}
+		.tabtree .tabrow0 li.sortable-placeholder {
+			border:1px #333 dashed;
+			background: #fff;
+			visibility: visible !important;
+			height:29px !important;
+			border-radius: 3px;
+			-webkit-border-radius: 3px;
+			-moz-border-radius: 3px;
+			margin: 0 3px -10px 2px;
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+		
+		#reorderSectionsButton {
+			margin-right:5px;
+			font-size:11px;
+		}
+		
+		#reorderSectionsAlert .icon-move {
+			font-size: 35px;
+		}
+			#reorderSectionsAlert .small {
+				font-size:12px;
+			}
+		
+		
 
 /* User
 --------------------------- */

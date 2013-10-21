@@ -236,7 +236,18 @@
     // what to do, even though the link also appears in the course admin block.  It also
     // means you can back out of a situation where you removed the admin block. :)
     if ($PAGE->user_allowed_editing()) {
-        $buttons = $OUTPUT->edit_button($PAGE->url);
+
+		$buttons = '';
+
+		if ( $PAGE->user_is_editing() && $course->format == 'onetopic' )
+		{
+        	//Button for reordering tabs
+	        $buttons .= html_writer::tag('a', 'Rearrange Sections' , array('id'=>'reorderSectionsButton' , 'class'=>'btn' , 'href'=>'#'));
+	        $PAGE->requires->js( new moodle_url($CFG->wwwroot . '/course/js/reorder-onetopic.js') );
+		}
+        
+        $buttons .= $OUTPUT->edit_button($PAGE->url);
+
         $PAGE->set_button($buttons);
     }
 
@@ -244,6 +255,9 @@
     $PAGE->set_title($course->fullname);
     $PAGE->set_heading($course->fullname);
     echo $OUTPUT->header();
+
+	//Set courseID variable in javascript
+	echo html_writer::tag('script', 'var courseID = '.$course->id.';');
 
     if ($completion->is_enabled() && ajaxenabled()) {
         // This value tracks whether there has been a dynamic change to the page.
