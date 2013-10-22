@@ -69,7 +69,7 @@
 
     // Implement ssis's need to have the frontpage redirect
 
-    //$elem_student_cohort = $DB->get_record('cohort', array('idnumber'=>'adminALL'))->id;
+    $elem_student_cohort = $DB->get_record('cohort', array('idnumber'=>'studentsELEM'))->id;
     $ms_student_cohort = $DB->get_record('cohort', array('idnumber'=>'studentsMS'))->id;
     $hs_student_cohort = $DB->get_record('cohort', array('idnumber'=>'studentsHS'))->id;
     $sec_teacher_cohort = $DB->get_record('cohort', array('idnumber'=>'teachersSEC'))->id;
@@ -91,6 +91,9 @@
 	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=3');
     } else if (cohort_is_member($hs_student_cohort, $USER->id)) {
 	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=2');
+    } else if (cohort_is_member($elem_student_cohort, $USER->id)) {
+        redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=10');
+    }
     } else if (cohort_is_member($parents_cohort, $USER->id)) {
         redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=6');
     }
