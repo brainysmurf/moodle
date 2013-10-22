@@ -93,7 +93,6 @@
 	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=2');
     } else if (cohort_is_member($elem_student_cohort, $USER->id)) {
         redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=10');
-    }
     } else if (cohort_is_member($parents_cohort, $USER->id)) {
         redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=6');
     }
