@@ -880,6 +880,91 @@ class theme_decaf_core_renderer extends core_renderer {
         }
         return $output;
     }
+    
+    
+    // !Tabs
+    
+    /**
+     * Renders tabtree
+     *
+     * @param tabtree $tabtree
+     * @return string
+     */
+    protected function render_tabtree(tabtree $tabtree)
+	{
+		if ( empty($tabtree->subtree) ) { return ''; }
+
+        $str = html_writer::start_tag('div', array('class' => 'tabs'));
+	        #$str .= $this->render_tabobject($tabtree);
+	        $str .= $this->render_tabs($tabtree->subtree);
+	        
+	        $rendered = $this->render_tabs($tabtree->subtree);
+	        
+	        foreach ( $rendered as $ul )
+	        {
+	        	echo $ul['ul'];
+	        	if ( !emprty($ul['subtrees']) )
+	        	{
+	        		foreach ( $ul['subtrees'] as $subtree )
+	        		{
+	        			echo $subtree;
+	        		}
+	        	}
+	        }
+	        
+		$str .= html_writer::end_tag('div');
+		
+		$str .= html_writer::tag('div', ' ', array('class' => 'clearer'));
+		
+        return $str;
+    }
+
+	protected function render_tabs($tabobject , $depth=0 )
+	{
+		$subtrees = array();
+		
+		$ulclass= $depth > 0 ? 'additional-tabs' : '';
+
+		$ul = '<ul class="'.$ulclass.'">';
+		foreach ( $tabobject as $tab )
+		{
+			$ul .= '<li>';
+			
+				if ( $tab->selected || $tab->activated )
+				{
+					$ul .= html_writer::tag('span', $tab->text , array('class'=>'selected'));
+				}
+				else if ( !($tab->link instanceof moodle_url) )
+	            {
+	                // backward compartibility when link was passed as quoted string
+	                $ul .= '<a href="'.$tabobject->link.'" title="'.$tabobject->title.'">'.$tabobject->text.'</a>';
+	            }
+	            else
+	            {
+	            	//Tab links
+					$ul .= html_writer::link($tab->link, $tab->text, array('title' => $tab->title));
+	            }
+	            
+	            if ( !empty($tab->subtree) )
+	            {
+	            	$subtrees[] = $tab->subtree;
+	            }
+		
+			$ul .= '</li>';
+
+		}
+		$ul .= '</ul>';
+		
+		if ( count($subtrees) > 0 )
+		{
+			foreach ( $subtrees as $subtree )
+			{
+				$ul .= $this->render_tabs($subtree , $depth+1 );
+			}
+		}
+		
+		return $ul;
+	}     
 
 }
 

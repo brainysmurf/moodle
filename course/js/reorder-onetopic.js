@@ -7,9 +7,9 @@ $(function(){
 	function enableReordering()
 	{
 		$('#reorderSectionsButton').addClass('selected');
-		$('.tabtree .tabrow0').before('<div id="reorderSectionsAlert" class="local-alert"><i class="icon-move pull-left"></i> Drag and drop tabs (sections) to rearrange them. Your changes will be saved automatically.<br/><span class="small"><strong>Note:</strong> the first section cannot be moved.</span></div>');
-		$('.tabtree .tabrow0').sortable({
-			items: 'li:not(:last-child):not(:first-child)',
+		$('.tabs').prepend('<div id="reorderSectionsAlert" class="local-alert"><i class="icon-move pull-left"></i> Drag and drop tabs (sections) to rearrange them. Your changes will be saved automatically.<br/><span class="small"><strong>Note:</strong> the first section cannot be moved.</span></div>');
+		$('.tabs > ul').sortable({
+			items: 'li:not(:last-child):not(:first-child)', //skip section 0, and the add tab button
 			scroll: false ,
 			placeholder: 'sortable-placeholder' ,
 			forcePlaceholderSize: true ,
@@ -24,7 +24,6 @@ $(function(){
 			update: function(event, ui) {
 				var oldPos = parseInt( $(this).attr('data-oldindex') );
 				var newPos = ui.item.index();
-				console.log('oldPos',oldPos,'newPos',newPos);
 				moveSection( oldPos , newPos );
 			}
 			
@@ -33,7 +32,7 @@ $(function(){
 
 	function moveSection( oldPos , newPos )
 	{
-		$('.tabtree .tabrow0').sortable('disable');
+		$('.tabs > ul').sortable('disable');
 		$('#reorderSectionsAlert .small').html('<i class="icon-spinner"></i> Saving...');
 		$.post('/course/ajax/move_section.php' , {courseid: courseID , oldPos:oldPos , newPos:newPos} , function(res)
 		{
@@ -43,7 +42,7 @@ $(function(){
 			}
 			else if ( res.success )
 			{
-				$('.tabtree .tabrow0').sortable('enable');
+				$('.tabs > ul').sortable('enable');
 				$('#reorderSectionsAlert .small').html('<i class="icon-ok"></i> Changes saved');
 			}
 		});
@@ -53,7 +52,7 @@ $(function(){
 	{
 		$('#reorderSectionsButton').removeClass('selected');
 		$('#reorderSectionsAlert').slideUp(function(){ $(this).remove(); });
-		$('.tabtree .tabrow0').sortable('destroy');
+		$('.tabs > ul').sortable('destroy');
 	}
 	
 	$(document).on('click','#reorderSectionsButton',function()

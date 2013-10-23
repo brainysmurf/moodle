@@ -119,31 +119,32 @@ a:active {outline: none;}
 
 /* Tabs
 --------------------------- */
-.tabtree .tabrow0 li.here a, .tabtree .tabrow0 li.here span {background:#fff;}
-.tabtree .tabrow0 .tabrow1 li a, .tabtree .tabrow0 .tabrow1 li span {background:none !important;}
-.tabtree .tabrow0 li { display:inline-block; }
 
-.tabtree {
+.tabs {
 	padding-bottom:9px;
 	border-bottom: 1px solid #DDD;
 	margin-bottom:12px !important;
 }
 
-.tabtree .tabrow0 {
+.tabs ul {
+	list-style:none;
+	text-align: center;
+	padding:0;
 	margin:0;
 }
-	.tabtree .tabrow0 li {
+	.tabs ul li {
 		margin-right: 2px;
 		margin-bottom: 2px;
+		display:inline-block;
 	}
-	
-		.tabtree .tabrow0 li:last-child {
+		.tabs ul li:last-child {
 			margin-right:0;
 		}
-		.tabtree .tabrow0 li a,
-		.tabtree .tabrow0 li span {
+		.tabs ul li > a,
+		.tabs ul li > span {
+			background: #F7F7F7;
 			margin:0;
-			display:block;
+			display:inline-block;
 			line-height: 16px;
 			padding: 7px 8px;
 			border: 1px solid #D4D4D4 !important;
@@ -155,19 +156,17 @@ a:active {outline: none;}
 			-moz-border-radius: 3px;
 			font-size:13px;
 			white-space: nowrap;
+			text-align:center;
 		}
-			.tabtree .tabrow0 li.here > a,
-			.tabtree .tabrow0 li.here > span {
+			.tabs ul li > span.selected {
+				font-weight:bold;
+				background:#fff;
 				font-size:12px;
 				border-color: #A0A0A0 !important;
-				padding: 0 8px;
-				line-height: 30px;
 			}
-		.tabtree .tabrow2.empty {
-			display:none !important;
-		}
-		
-		.tabtree .tabrow0 li.here a.btn {
+			
+		/* Delete section button */
+		.tabs ul li span.selected a.btn {
 			display:inline-block;
 			font-weight:normal;
 			margin: 0;
@@ -175,11 +174,29 @@ a:active {outline: none;}
 			position: relative;
 			top: -2px;
 			right:-4px;
+			height: 16px;
+			line-height: 15px;
 		}
 		
+		
+		/* Subtabs */
+	
+		.tabs ul.additional-tabs {
+			margin-top:10px;
+		}
+	
+		.tabs ul.additional-tabs li a,
+		.tabs ul.additional-tabs li span {
+			font-size:10px;
+			padding:5px 6px;
+		}
+			.tabs ul.additonal-tabs li > span.selected {
+				font-size:11px;
+			}
+		
 		/* Moving tabs */
-		.tabtree .tabrow0.ui-sortable a,
-		.tabtree .tabrow0.ui-sortable span {
+		.tabs ul.ui-sortable a,
+		.tabs ul.ui-sortable span {
 			-webkit-touch-callout: none;
 			-webkit-user-select: none;
 			-khtml-user-select: none;
@@ -188,7 +205,7 @@ a:active {outline: none;}
 			user-select: none;
 			cursor: move;
 		}
-		.tabtree .tabrow0 li.sortable-placeholder {
+		.tabs ul li.sortable-placeholder {
 			border:1px #333 dashed;
 			background: #fff;
 			visibility: visible !important;
