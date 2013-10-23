@@ -890,7 +890,7 @@ class theme_decaf_core_renderer extends core_renderer {
      * @param tabtree $tabtree
      * @return string
      */
-    protected function render_tabtree(tabtree $tabtree)
+   protected function render_tabtree(tabtree $tabtree)
 	{
 		if ( empty($tabtree->subtree) ) { return ''; }
 
@@ -917,7 +917,7 @@ class theme_decaf_core_renderer extends core_renderer {
 		$str .= html_writer::tag('div', ' ', array('class' => 'clearer'));
 		
         return $str;
-    }
+    } 
 
 	protected function render_tabs($tabobject , $depth=0 )
 	{
@@ -936,8 +936,8 @@ class theme_decaf_core_renderer extends core_renderer {
 				}
 				else if ( !($tab->link instanceof moodle_url) )
 	            {
-	                // backward compartibility when link was passed as quoted string
-	                $ul .= '<a href="'.$tabobject->link.'" title="'.$tabobject->title.'">'.$tabobject->text.'</a>';
+	                // backward compartibility when link was set as a string instead of an object
+	                $ul .= '<a href="'.$tab->link.'" title="'.$tab->title.'">'.$tab->text.'</a>';
 	            }
 	            else
 	            {
