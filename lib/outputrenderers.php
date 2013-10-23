@@ -3016,7 +3016,7 @@ EOD;
 
         if (empty($tabobject->subtree)) {
             if ($tabobject->selected) {
-                $str .= html_writer::tag('div', '&nbsp;', array('class' => 'tabrow'. ($tabobject->level + 1). ' empty'));
+                #$str .= html_writer::tag('div', '&nbsp;', array('class' => 'tabrow'. ($tabobject->level + 1). ' empty'));
             }
             return $str;
         }
