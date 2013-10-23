@@ -953,6 +953,25 @@ color: #333;
 		font-weight: bold;
 		font-size: 12px;
 	}
+	
+	/* Pagination */
+	.paging {
+		text-align:center;
+		font-weight:bold;
+		margin:0 0 15px 0;
+	}
+		.paging > span {
+			position: relative;
+			top: 1px;
+			margin-right: 5px;
+		}
+		.paging .btn { 
+			font-weight:normal;
+			margin:0 2px;
+		}
+		.paging .btn.selected {
+			background:#fff;
+		}
 
 /** Custom CSS **/
 [[setting:customcss]]

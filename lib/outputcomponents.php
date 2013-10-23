@@ -2295,7 +2295,7 @@ class paging_bar implements renderable {
             $pagenum = $this->page - 1;
 
             if ($this->page > 0) {
-                $this->previouslink = html_writer::link(new moodle_url($this->baseurl, array($this->pagevar=>$pagenum)), get_string('previous'), array('class'=>'previous'));
+                $this->previouslink = html_writer::link(new moodle_url($this->baseurl, array($this->pagevar=>$pagenum)), get_string('previous'), array('class'=>'previous btn'));
             }
 
             if ($this->perpage > 0) {
@@ -2307,7 +2307,7 @@ class paging_bar implements renderable {
             if ($this->page > round(($this->maxdisplay/3)*2)) {
                 $currpage = $this->page - round($this->maxdisplay/3);
 
-                $this->firstlink = html_writer::link(new moodle_url($this->baseurl, array($this->pagevar=>0)), '1', array('class'=>'first'));
+                $this->firstlink = html_writer::link(new moodle_url($this->baseurl, array($this->pagevar=>0)), '1', array('class'=>'first btn'));
             } else {
                 $currpage = 0;
             }
@@ -2318,9 +2318,11 @@ class paging_bar implements renderable {
                 $displaypage = $currpage + 1;
 
                 if ($this->page == $currpage) {
-                    $this->pagelinks[] = $displaypage;
+                	$pagelink = html_writer::link(new moodle_url($this->baseurl, array($this->pagevar=>$currpage)), $displaypage , array('class'=>'btn selected'));
+                    $this->pagelinks[] = $pagelink;
+                    #$this->pagelinks[] = $displaypage;
                 } else {
-                    $pagelink = html_writer::link(new moodle_url($this->baseurl, array($this->pagevar=>$currpage)), $displaypage);
+                    $pagelink = html_writer::link(new moodle_url($this->baseurl, array($this->pagevar=>$currpage)), $displaypage , array('class'=>'btn'));
                     $this->pagelinks[] = $pagelink;
                 }
 
@@ -2330,13 +2332,13 @@ class paging_bar implements renderable {
 
             if ($currpage < $lastpage) {
                 $lastpageactual = $lastpage - 1;
-                $this->lastlink = html_writer::link(new moodle_url($this->baseurl, array($this->pagevar=>$lastpageactual)), $lastpage, array('class'=>'last'));
+                $this->lastlink = html_writer::link(new moodle_url($this->baseurl, array($this->pagevar=>$lastpageactual)), $lastpage, array('class'=>'last btn'));
             }
 
             $pagenum = $this->page + 1;
 
             if ($pagenum != $displaypage) {
-                $this->nextlink = html_writer::link(new moodle_url($this->baseurl, array($this->pagevar=>$pagenum)), get_string('next'), array('class'=>'next'));
+                $this->nextlink = html_writer::link(new moodle_url($this->baseurl, array($this->pagevar=>$pagenum)), get_string('next'), array('class'=>'next btn'));
             }
         }
     }
