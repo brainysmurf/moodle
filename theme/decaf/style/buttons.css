@@ -1,0 +1,205 @@
+input[type=submit],
+button,
+.btn,
+a.btn,
+.tabtree .tabrow0 li a.btn,
+.section-navigation a,
+.addresourcemodchooser a { 
+text-transform:capitalize;
+padding: 2px 8px;
+text-align: center;
+vertical-align: middle;
+white-space: nowrap;
+cursor: default;
+outline: none;
+font-family: "Tahoma",sans-serif;
+color: black;
+border: 1px solid #BBB;
+border-radius: 3px;
+-webkit-border-radius: 3px;
+-moz-border-radius: 3px;
+border-top-color: #CCC;border-bottom-color: #A0A0A0; cursor:pointer;
+background: rgb(249,249,249);
+background: -moz-linear-gradient(top,  rgba(249,249,249,1) 0%, rgba(227,227,227,1) 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(249,249,249,1)), color-stop(100%,rgba(227,227,227,1)));
+background: -webkit-linear-gradient(top,  rgba(249,249,249,1) 0%,rgba(227,227,227,1) 100%);
+background: -o-linear-gradient(top,  rgba(249,249,249,1) 0%,rgba(227,227,227,1) 100%);
+background: -ms-linear-gradient(top,  rgba(249,249,249,1) 0%,rgba(227,227,227,1) 100%);
+background: linear-gradient(to bottom,  rgba(249,249,249,1) 0%,rgba(227,227,227,1) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9f9f9', endColorstr='#e3e3e3',GradientType=0 );
+-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+-moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+}
+
+input[type=submit]:hover, button:hover,
+.btn:hover,
+a.btn:hover,
+.tabtree .tabrow0 li a.btn:hover,
+.bs-nav a:hover,
+.section-navigation a:hover,
+.addresourcemodchooser a:hover {
+background: rgb(244,244,244);
+background: -moz-linear-gradient(top,  rgba(244,244,244,1) 0%, rgba(216,216,216,1) 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(244,244,244,1)), color-stop(100%,rgba(216,216,216,1)));
+background: -webkit-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(216,216,216,1) 100%);
+background: -o-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(216,216,216,1) 100%);
+background: -ms-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(216,216,216,1) 100%);
+background: linear-gradient(to bottom,  rgba(244,244,244,1) 0%,rgba(216,216,216,1) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f4f4f4', endColorstr='#d8d8d8',GradientType=0 );
+}
+
+input[type=submit]:active,
+button:active,
+.btn:active,
+a.btn:active,
+.tabtree .tabrow0 li a.btn:active,
+.btn.selected,
+.section-navigation a:active,
+.addresourcemodchooser a:active {
+background: rgb(227,227,227);
+background: -moz-linear-gradient(top,  rgba(227,227,227,1) 0%, rgba(249,249,249,1) 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(227,227,227,1)), color-stop(100%,rgba(249,249,249,1)));
+background: -webkit-linear-gradient(top,  rgba(227,227,227,1) 0%,rgba(249,249,249,1) 100%);
+background: -o-linear-gradient(top,  rgba(227,227,227,1) 0%,rgba(249,249,249,1) 100%);
+background: -ms-linear-gradient(top,  rgba(227,227,227,1) 0%,rgba(249,249,249,1) 100%);
+background: linear-gradient(to bottom,  rgba(227,227,227,1) 0%,rgba(249,249,249,1) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e3e3e3', endColorstr='#f9f9f9',GradientType=0 );
+}
+
+
+/* Frontpage buttons (kept here for comaptibility - should use the new ul.buttons below instead) */
+
+.dnet-btn,
+.dnet-btn-wide,
+.dnet-btn-x2,
+.dnet-btn-x4 {
+	font-family:"Tahoma",sans-serif;
+	font-size:1.5em;
+	line-height:1.5em;
+	color:#1662A3;
+	height:3em;
+	width: 10em;
+	margin-bottom:5px;
+	margin-top:5px;
+	margin-right:10px;
+	cursor:pointer;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	-khtml-border-radius:10px;
+	border-radius:10px;
+	border-color:#ddd #fff #fff #ddd;
+	background-color:#eee;
+}
+	.dnet-btn-wide { width:100%; }
+	.dnet-btn-x2 { width:20em; }
+	.dnet-btn-x4 { width:30em;}
+
+
+/* Buttons generated from tinymce plugin */
+
+ul.buttons {
+	list-style: none;
+	margin:auto;
+	padding:0;
+	max-width:1000px;
+}
+	ul.buttons:after { /* clearfix */
+		content: ".";
+		display: block;
+		clear: both;
+		visibility: hidden;
+		line-height: 0;
+		height: 0;
+	}
+	ul.buttons li {
+		width:33%;
+		-webkit-box-sizing:border-box;
+		-moz-box-sizing:border-box;
+		box-sizing:border-box;
+		padding:5px;
+		text-align:center;
+		float:left;
+	}
+	
+		/*
+			This stuff sets the left/right padding depending on which 'column' the li is in to make everything line up perfectly.
+			It also makes it so if there's one and only button, it's 100% wide. if there's only 2 buttons each is 50% wide
+			And normally, in the 3 column layout the middle column is made 34% wide
+		*/
+	
+		/* Remove left padding on buttons on left */
+		ul.buttons li:nth-child(3n+1) /* item #1then every 3rd item from that */
+		{ 
+			padding-left:0;
+		}
+		
+		/* Remove right padding on buttons on the right */
+		ul.buttons li:last-child:nth-child(1), /*last item, but it's also the first item*/
+		ul.buttons li:last-child:nth-child(2), /*last item, but it's also the second item*/
+		ul.buttons li:nth-child(3n+3) /* item #3 then every 3rd item from that*/
+		{
+			padding-right:0;
+		}
+		
+		/* Middle button is 34% wide to make it an even 100% */
+		ul.buttons li:nth-child(3n+2) {
+			width:34%;
+		}
+		
+		/* First and only button - make it 100% wide */
+		ul.buttons li:first-child:last-child {
+			width:100%;
+		}
+		
+		/* Two buttons (1/2) - make it 50% wide */
+		ul.buttons li:first-child:nth-last-child(2) {
+			width:50%;
+		}
+		
+		/* Two buttons (2/2) - make it 50% wide */
+		ul.buttons li:nth-child(2):last-child {
+			width:50%;
+		}
+		
+		/* k done */
+		
+	
+		ul.buttons a.btn,
+		ul.buttons span.btn {
+			margin:0;
+			-moz-border-radius:10px;
+			-webkit-border-radius:10px;
+			-khtml-border-radius:10px;
+			border-radius:10px;
+			border-color:#ddd #fff #fff #ddd;
+			background-color:#eee;	
+			font-size:1.5em;
+			line-height:2em;
+			width:100%;
+			-webkit-box-sizing:border-box;
+			-moz-box-sizing:border-box;
+			box-sizing:border-box;
+			padding:10px;
+			display: block;
+		}
+			ul.buttons a.btn {
+				color:#1662A3;
+			}
+
+	.btn.noclick {
+		cursor: default;
+	}
+
+/* buttons inside the tinymce editor */
+#tinymce ul.buttons {
+	cursor:pointer;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+	#tinymce ul.buttons * { pointer-events:none; } /*disable hover effect in the editor */
+	 

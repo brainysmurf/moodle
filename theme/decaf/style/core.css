@@ -14,17 +14,17 @@ a:active {outline: none;}
 		-webkit-box-sizing: border-box;
 		-moz-box-sizing: border-box;
 		box-sizing: border-box;
-		width:100%;
 	}
 /* Header
 ------------------------- */
 #page-header-wrapper{
 	margin:0;
-	padding: 49px 30px 51px 48px;
+	padding: 49px 30px 53px 48px; /* Vertically center the page title */
 }
 #page-header{
 	float:none;
-	background:#005FA0 url([[pix:theme|header-bg]]) repeat; /* url([[pix:theme|bg-header]]) repeat-x scroll center bottom; */
+	background:#1662A3; /* url([[pix:theme|bg-header]]) repeat-x scroll center bottom;*/
+	border-bottom:1px solid #cbcbcb;
 	margin-right:0;
 	position:relative;
 	min-height:144px;
@@ -46,7 +46,16 @@ a:active {outline: none;}
 }
 #page-header .headermenu {width:235px;}
 #page-header .headermenu a:hover{color:#C30;}
-#page-site-index .headermain{ font-size: 3em; margin: 20px 0; }
+
+	/* On frontpage, grow the blue header to be the height of the header + breadcrumbs on normal pages */
+	#page-site-index #page-header {
+		min-height:176px;
+	}
+		#page-site-index #page-header-wrapper {
+			padding: 61px 30px 64px 48px;  /* Vertically center the page title */
+		}
+			#page-site-index #page-header-wrapper .headermain{ font-size: 3em; }
+			
 /* Header Profile
 -------------------------- */
 #header-profileoptions ul{margin-right:4px;}
@@ -96,13 +105,12 @@ a:active {outline: none;}
 .navbar{
 	font-size:.9em;
 	background-color:#F0F0F0;
-	border-top:1px solid #DDD;
 	border-bottom:1px solid #DDD;
 	margin:0;
 	padding:0 10px 0 0;
 }
 .navbar .breadcrumb{font-size:1em;padding:6px 10px;}
-/*.breadcrumb a,a:link,a:active{color:#005FA0;}*/
+/*.breadcrumb a,a:link,a:active{color:#1662A3;}*/
 .sep{background:url([[pix:theme|breadcrumb_arrow]]) no-repeat scroll 100% 50%;margin-right:5px;padding:0.98em 7px;}
 /* Calendar
 --------------------------- */
@@ -111,10 +119,9 @@ a:active {outline: none;}
 
 /* Tabs
 --------------------------- */
-.tabtree .tabrow0 li.here a {background:#fff;}
-.tabtree .tabrow0 .tabrow1 li a{background:none !important;}
-
-.course-content div.single-section .tabtree .tabrow0 li { display:inline-block; }
+.tabtree .tabrow0 li.here a, .tabtree .tabrow0 li.here span {background:#fff;}
+.tabtree .tabrow0 .tabrow1 li a, .tabtree .tabrow0 .tabrow1 li span {background:none !important;}
+.tabtree .tabrow0 li { display:inline-block; }
 
 .tabtree {
 	padding-bottom:9px;
@@ -129,10 +136,12 @@ a:active {outline: none;}
 		margin-right: 2px;
 		margin-bottom: 2px;
 	}
+	
 		.tabtree .tabrow0 li:last-child {
 			margin-right:0;
 		}
-		.tabtree .tabrow0 li a {
+		.tabtree .tabrow0 li a,
+		.tabtree .tabrow0 li span {
 			margin:0;
 			display:block;
 			line-height: 16px;
@@ -145,14 +154,67 @@ a:active {outline: none;}
 			-webkit-border-radius: 3px;
 			-moz-border-radius: 3px;
 			font-size:13px;
+			white-space: nowrap;
 		}
-			.tabtree .tabrow0 li.here a {
+			.tabtree .tabrow0 li.here > a,
+			.tabtree .tabrow0 li.here > span {
 				font-size:12px;
 				border-color: #A0A0A0 !important;
+				padding: 0 8px;
+				line-height: 30px;
 			}
 		.tabtree .tabrow2.empty {
 			display:none !important;
 		}
+		
+		.tabtree .tabrow0 li.here a.btn {
+			display:inline-block;
+			font-weight:normal;
+			margin: 0;
+			font-size: 11px;
+			position: relative;
+			top: -2px;
+			right:-4px;
+		}
+		
+		/* Moving tabs */
+		.tabtree .tabrow0.ui-sortable a,
+		.tabtree .tabrow0.ui-sortable span {
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			cursor: move;
+		}
+		.tabtree .tabrow0 li.sortable-placeholder {
+			border:1px #333 dashed;
+			background: #fff;
+			visibility: visible !important;
+			height:29px !important;
+			border-radius: 3px;
+			-webkit-border-radius: 3px;
+			-moz-border-radius: 3px;
+			margin: 0 3px -10px 2px;
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+		
+		#reorderSectionsButton {
+			margin-right:5px;
+			font-size:11px;
+		}
+		
+		#reorderSectionsAlert .icon-move {
+			font-size: 35px;
+		}
+			#reorderSectionsAlert .small {
+				font-size:12px;
+			}
+		
+		
 
 /* User
 --------------------------- */
@@ -162,7 +224,7 @@ a:active {outline: none;}
 --------------------------- */
 
 #centerCol,
-#rightCol {
+#side-post {
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
@@ -178,7 +240,7 @@ a:active {outline: none;}
 		width:auto;
 		float:none;
 	}
-#rightCol {
+#side-post {
 	width:25%;
 	padding-left:12px;
 	float:left;
@@ -200,8 +262,8 @@ a:active {outline: none;}
 /* YUI messes with IE unless we go overboard here */
 img.iconsmall, .commands a img {height:15px; margin:2px; width:15px; border: 0px solid #808080; padding:1px; -webkit-border-radius:5px;-moz-border-radius: 5px;border-radius:5px; }
 img.iconlarge {width:16px;height:16px;margin:6px 4px 2px 4px;} /* Our icons are only 16x16, so we don't want to stretch them */
-ul.section .commands,
-.block_with_controls .commands {position:absolute; top:0px; right:0px;}
+ul.section .commands
+/*, .block_with_controls .commands*/ {position:absolute; top:0px; right:0px;}
 .block .content .commands {position:relative;}
 ul.section li {clear:right;}
 ul.section li div {min-height:23px;}
@@ -214,72 +276,6 @@ ul.section li.label {padding-bottom:5px !important;}
 .course-content .section .activity .contentafterlink {margin-left:26px;margin-top:0;}
 ul.section .activity .contentafterlink p {margin:0 0 1em;}
 body.editing ul.section>li {border-bottom: 1px dashed #808080; position:relative;}
-
-input[type=submit],
-button,
-.btn,
-a.btn,
-.section-navigation a,
-.addresourcemodchooser a { 
-text-transform:capitalize;
-padding: 2px 8px;
-text-align: center;
-vertical-align: middle;
-white-space: nowrap;
-cursor: default;
-outline: none;
-font-family: "Tahoma",sans-serif;
-color: black;
-border: 1px solid #BBB;
-border-radius: 3px;
--webkit-border-radius: 3px;
--moz-border-radius: 3px;
-border-top-color: #CCC;border-bottom-color: #A0A0A0; cursor:pointer;
-background: rgb(249,249,249);
-background: -moz-linear-gradient(top,  rgba(249,249,249,1) 0%, rgba(227,227,227,1) 100%);
-background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(249,249,249,1)), color-stop(100%,rgba(227,227,227,1)));
-background: -webkit-linear-gradient(top,  rgba(249,249,249,1) 0%,rgba(227,227,227,1) 100%);
-background: -o-linear-gradient(top,  rgba(249,249,249,1) 0%,rgba(227,227,227,1) 100%);
-background: -ms-linear-gradient(top,  rgba(249,249,249,1) 0%,rgba(227,227,227,1) 100%);
-background: linear-gradient(to bottom,  rgba(249,249,249,1) 0%,rgba(227,227,227,1) 100%);
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9f9f9', endColorstr='#e3e3e3',GradientType=0 );
--webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
--moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-}
-
-input[type=submit]:hover, button:hover,
-.btn:hover,
-a.btn:hover,
-.bs-nav a:hover,
-.section-navigation a:hover,
-.addresourcemodchooser a:hover {
-background: rgb(244,244,244);
-background: -moz-linear-gradient(top,  rgba(244,244,244,1) 0%, rgba(216,216,216,1) 100%);
-background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(244,244,244,1)), color-stop(100%,rgba(216,216,216,1)));
-background: -webkit-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(216,216,216,1) 100%);
-background: -o-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(216,216,216,1) 100%);
-background: -ms-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(216,216,216,1) 100%);
-background: linear-gradient(to bottom,  rgba(244,244,244,1) 0%,rgba(216,216,216,1) 100%);
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f4f4f4', endColorstr='#d8d8d8',GradientType=0 );
-}
-
-input[type=submit]:active,
-button:active,
-.btn:active,
-a.btn:active,
-.btn.selected,
-.section-navigation a:active,
-.addresourcemodchooser a:active {
-background: rgb(227,227,227);
-background: -moz-linear-gradient(top,  rgba(227,227,227,1) 0%, rgba(249,249,249,1) 100%);
-background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(227,227,227,1)), color-stop(100%,rgba(249,249,249,1)));
-background: -webkit-linear-gradient(top,  rgba(227,227,227,1) 0%,rgba(249,249,249,1) 100%);
-background: -o-linear-gradient(top,  rgba(227,227,227,1) 0%,rgba(249,249,249,1) 100%);
-background: -ms-linear-gradient(top,  rgba(227,227,227,1) 0%,rgba(249,249,249,1) 100%);
-background: linear-gradient(to bottom,  rgba(227,227,227,1) 0%,rgba(249,249,249,1) 100%);
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e3e3e3', endColorstr='#f9f9f9',GradientType=0 );
-}
 
 .addresourcemodchooser {
 	margin: 0 0 10px 0;
@@ -296,6 +292,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e3e3e3', end
 }
 	.addresourcemodchooser i { margin-right:4px; }
 	
+	
 /* Make 2.3 activity chooser sit on top of modules in sections */
 div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 
@@ -303,7 +300,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 --------------------------- */
 .block {border-style:none;}
 
-#rightCol .block {
+#side-post .block {
 	background: #FFF;
 	padding: 0;
 	margin: 0 0 15px 0;
@@ -335,7 +332,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 
 .block .block_action {margin-right:4px;}
 .block .header .block_action{ margin: 6px 6px 0 0; }
-.block_with_controls .header .title {position:relative;padding-bottom:20px;}
+.block_with_controls .header .title {position:relative;}
 .block .commands { 
 	clear:both;
 	height:auto;
@@ -401,7 +398,19 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 .decaf_with_edit_buttons.jsenabled .block_with_controls .decaf-editbutton {margin-left:4px;}
 .decaf_with_edit_buttons.jsenabled .block_with_controls .commands {height:auto; bottom:auto;}
 .decaf_with_edit_buttons.jsenabled .block_with_controls .commands a span {padding-top:3px;}
+
+.block .header .commands {
+	text-align: center;
+	clear: both;
+	float: none;
+	position: static;
+	margin-top: 2px;
+	max-height:17px;
+	height:auto;
+}
 .decaf_with_edit_buttons.jsenabled .block .header .commands .icon img {margin-left:0px; margin-right:4px;}
+
+
 .decaf_with_edit_buttons.jsenabled .block .header .decaf-editbutton-wrap {z-index:4;}
 .decaf_with_edit_buttons.jsenabled .block {min-height:125px;}
 .decaf_with_edit_buttons.jsenabled .block .commands {display:none;}
@@ -457,8 +466,8 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 			line-height: 22px;
 			padding: 15px;
 			background-color:#fff;
-			border-top: 2px solid #005FA0; 
-			border-bottom: 2px solid #005FA0;
+			border-top: 2px solid #1662A3; 
+			border-bottom: 2px solid #1662A3;
 		}
 			.login-reminder icon { margin-top: -4px; }
 	
@@ -579,7 +588,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 #back-to-top a.arrow {
 	padding: 5px 10px;
 	font-size: 36px;
-	color: #005FA0;
+	color: #1662A3;
 	background: #EEE;
 	border: 1px solid #CCC;
 	border-bottom: 1px solid #AAA;
@@ -710,48 +719,23 @@ body.pagelayout-report #page-content #region-main .region-content {
 table#categoryquestions .iconcol {width:21px;}
 body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questioncategories .commands > img.iconsmall {display:none;}
 
-.dnet-btn,
-.dnet-btn-wide,
-.dnet-btn-x2,
-.dnet-btn-x4 {
-	font-family:"Tahoma",sans-serif;
-	font-size:1.5em;
-	line-height:1.5em;
-	color:#005FA0;
-	height:3em;
-	width: 10em;
-	margin-bottom:5px;
-	margin-top:5px;
-	margin-right:10px;
-	cursor:pointer;
-	-moz-border-radius:10px;
-	-webkit-border-radius:10px;
-	-khtml-border-radius:10px;
-	border-radius:10px;
-	border-color:#ddd #fff #fff #ddd;
-	background-color:#eee;
-}
-	.dnet-btn-wide { width:100%; }
-	.dnet-btn-x2 { width:20em; }
-	.dnet-btn-x4 { width:30em;}
-
 .local-alert,
 .global-alert,
 .dnet-row {
-    margin-left:50px;
-    margin-right:50px;
+    margin-left:100px;
+    margin-right:100px;
     margin-bottom:10px;
     padding: 15px 20px;
     background-color: #fff; 
-	border-top: 2px solid #005FA0; 
-	border-bottom: 2px solid #005FA0;
+	border-top: 2px solid #1662A3; 
+	border-bottom: 2px solid #1662A3;
 }
 	.section .local-alert {
 		margin-top:10px;
 	}
 
 	.global-alert.clipboard {
-		margin:0 0 25px;
+		margin:0 100px 25px;
 	}
 
 	.dnet-row-left {font-weight:bold;}
@@ -917,6 +901,30 @@ color: #333;
 		-moz-box-shadow:none;
 		box-shadow:none;
 	}
+	
+	/* Icons page */
+	ul.iconList {
+		float:left;
+		width:33%;
+		list-style:none;
+		margin:0;
+		padding:0;
+	}
+		ul.iconList li {
+			display:block;
+			font-size:15px;
+			background:rgba(255,255,255,0.5);
+			margin-bottom:3px;
+			margin-right:3px;
+			padding:5px 10px;
+		}
+			ul.iconList li:nth-child(even) {
+				background:rgba(255,255,255,0.75);
+			}
+		ul.iconList li span {
+			vertical-align: middle;
+			margin-right:5px;
+		}
 
 /** Custom CSS **/
 [[setting:customcss]]

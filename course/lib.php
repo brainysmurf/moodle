@@ -1313,6 +1313,8 @@ function course_create_sections_if_missing($courseorid, $sections) {
             $cw = new stdClass();
             $cw->course   = $courseorid;
             $cw->section  = $sectionnum;
+            #$cw->name = 'Topic '.$sectionnum;
+            $cw->name = 'New Section';
             $cw->summary  = '';
             $cw->summaryformat = FORMAT_HTML;
             $cw->sequence = '';
@@ -3214,4 +3216,86 @@ function compare_activities_by_time_asc($a, $b) {
         return 0;
     }
     return ($a->timestamp < $b->timestamp) ? -1 : 1;
+}
+
+function delete_section($courseid, $sectionid) {
+    global $CFG, $DB;
+
+	//Get the course
+    if ( !$DB->record_exists('course', array('id'=> $courseid)) )
+    {
+		print_error('Invalid course');
+    }
+    
+    //Get the section
+    $section = $DB->get_record("course_sections", array("id" => $sectionid));
+    if ( !$section )
+    {
+    	print_error('Section not found');
+    }
+    else if ( $section->course != $courseid )
+    {
+    	print_error('That section does not belong to that course');
+    }
+        
+    if ( $section->section == 0 )
+    {
+		print_error("Course section 0 (main) could not be deleted");
+    }
+
+    //Remove activities/resources from this section
+    if ( !empty($section->sequence) )
+    {
+        $modids = split(',', $section->sequence);
+        foreach($modids AS $modid)
+        {
+            if ( $cm = $DB->get_record("course_modules", array("id" => $modid)) )
+            {
+                if ($modulename = $DB->get_field('modules', 'name', array('id' => $cm->module)))
+                {
+                	//Call the delete method specific to this module
+                    $modlib = "{$CFG->dirroot}/mod/{$modulename}/lib.php";
+                    if ( file_exists($modlib) )
+                    {
+                        include_once($modlib);
+                        $deleteinstancefunction = $modulename."_delete_instance";
+                        $deleteinstancefunction($cm->instance);
+                    }
+                }
+                delete_course_module($modid);
+			}
+        }
+    }
+    
+    //Remove the section from the DB
+	if ( !$DB->delete_records("course_sections", array("id" => $section->id)) )
+    {
+        print_error("Could not delete Course section");
+    }
+
+	//Update the section orders (-1 from the sections that came after the deleted one)
+   /* $DB->execute("UPDATE {$CFG->prefix}course_sections
+                     SET section = section - 1
+                   WHERE course = {$courseid}
+                     AND section > {$section->section}");*/
+    /* ^That had a problem if the sections were in the wrong order in the db                 
+    	e.g. 3 5 4
+    	3 becomes 2
+    	then 5 becomes 4. but 4 already existed at that point and so was a duplicate.
+    	
+    	So we'll do it one by one to make sure they're updated in the correct order
+    */
+    
+    $rows = $DB->get_records_sql("SELECT * FROM {$CFG->prefix}course_sections WHERE course = ? AND section > ? ORDER BY section ASC", array($courseid,$section->section));
+    foreach ( $rows as $row )
+    {
+    	$DB->execute("UPDATE {$CFG->prefix}course_sections SET section = section - 1 WHERE course = {$courseid} AND section = {$row->section}");
+    }
+                     
+	//Reduce numsections of the course by 1 
+	$DB->execute("UPDATE {$CFG->prefix}course_format_options SET value = CAST(coalesce(value, '0') AS integer) - 1 WHERE courseid = {$courseid} AND name = 'numsections' ");
+
+    rebuild_course_cache($courseid);
+
+    add_to_log($courseid, "course", "deletesection", "delete_section.php?id=$section->id", "$section->section");
 }

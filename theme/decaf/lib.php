@@ -2,6 +2,8 @@
 
 function theme_decaf_page_init(moodle_page $page) {
     $page->requires->jquery();
+	$page->requires->jquery_plugin('ui');
+	$page->requires->jquery_plugin('ui-css');
 }
 
 /**

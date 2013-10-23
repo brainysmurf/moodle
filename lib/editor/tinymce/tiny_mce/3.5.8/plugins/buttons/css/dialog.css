@@ -1,0 +1,46 @@
+#buttonList {
+	list-style:none;
+	margin:0 2px;
+	padding:0;
+}
+	#buttonList li {
+		display:block;
+		white-space:nowrap;
+		margin-bottom:3px;
+	}
+		#buttonList li input,
+		#buttonList li select {
+			width:39%;
+			padding:3px;
+			height:23px;
+			-moz-box-sizing: border-box;
+			-webkit-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+			#buttonList li input.url {
+				width:221px;
+				margin-right:10px;
+			}
+			#buttonList li select {
+				width:110px;
+				margin-right:2px;
+			}
+			#buttonList li .iconPreview {
+				width:13px;
+				display:inline-block;
+			}
+				#buttonList li .iconPreview span {
+					font-size:13px;
+				}
+			#buttonList li input.text {
+				width:152px;
+				margin-left:10px;
+			}
+			#buttonList li .updateButton {
+				float:none;
+				margin-left:10px;
+			}
+			
+			#buttonList li input.error {
+				border:1px #A00 solid;
+			}

@@ -49,15 +49,26 @@ if (isset($courseformatoptions['numsections'])) {
         $courseformatoptions['numsections']--;
     }
 
-    // Don't go less than 0, intentionally redirect silently (for the case of
-    // double clicks).
+    // Don't go less than 0, intentionally redirect silently (for the case of double clicks).
     if ($courseformatoptions['numsections'] >= 0) {
         course_get_format($course)->update_course_format_options(
                 array('numsections' => $courseformatoptions['numsections']));
+		
+		//Create new sections
+		course_create_sections_if_missing($course, range(0,$courseformatoptions['numsections']));
     }
 }
 
-$url = course_get_url($course);
-$url->set_anchor('changenumsections');
+if ( $increase )
+{
+	//Go to new section afterwards
+	$url = '/course/view.php?id='.$course->id.'&section='.$courseformatoptions['numsections'];
+}
+else
+{
+	$url = course_get_url($course);
+	$url->set_anchor('changenumsections');
+}
+
 // Redirect to where we were..
 redirect($url);

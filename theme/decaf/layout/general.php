@@ -149,26 +149,26 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 <div id="page-content-wrapper" class="clearfix">
     <div id="page-content">
     
-		
-		<div id="centerCol" class="<?=(!$hassidepost&&!$hassidepre?'fullWidth':'')?>">
-		
+		<div id="centerCol" class="<?php if (!$hassidepost&&!$hassidepre) { echo 'fullWidth'; } ?>">
 	        <div class="region-content">
-	            <?php echo $coursecontentheader; ?>
-	            <?php echo method_exists($OUTPUT, "main_content")?$OUTPUT->main_content():core_renderer::MAIN_CONTENT_TOKEN ?>
-	            <?php echo $coursecontentfooter; ?>
+	            <?php
+	            	echo $coursecontentheader;
+	            	echo method_exists($OUTPUT, "main_content")?$OUTPUT->main_content():core_renderer::MAIN_CONTENT_TOKEN;
+	            	echo $coursecontentfooter;
+	            ?>
 	        </div>
-            
 		</div>
 		
-    	<?php if ( $hassidepre || $hassidepost ) { ?>
-    	<div id="rightCol" class="block-region">
+		<?php if ( $hassidepre || $hassidepost ) { ?>
+    	<div id="side-post" class="block-region">
     		<div class="region-content">
-    			 <?php echo $blocks_side_pre ?>
-    			 <?php echo $blocks_side_post ?>
+    			 <?php
+    			 	echo $blocks_side_pre;
+					echo $blocks_side_post;
+				?>
     		</div>
     	</div>
     	<?php } ?>
-    	
 
     </div>
 </div>
