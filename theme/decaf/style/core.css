@@ -159,10 +159,11 @@ a:active {outline: none;}
 			text-align:center;
 		}
 			.tabs ul li > span.selected {
-				font-weight:bold;
-				background:#fff;
+				font-weight:normal;
+				background:#1E5897;
 				font-size:12px;
-				border-color: #A0A0A0 !important;
+				color: #FFF;
+				border-color: #1E5897 !important;
 			}
 			
 		/* Delete section button */
