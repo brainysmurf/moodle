@@ -289,7 +289,7 @@ function cohort_get_cohorts($contextid, $page = 0, $perpage = 25, $search = '') 
     return array('totalcohorts' => $totalcohorts, 'cohorts' => $cohorts, 'allcohorts'=>$allcohorts);
 }
 
-function cohorts_get_frontage_cohorts()
+function cohorts_get_all_ids()
 {
 	global $COHORT_CACHE;
 	
@@ -302,12 +302,9 @@ function cohorts_get_frontage_cohorts()
 	
 	$cohort_ids = array();
 	
-	//Get all cohorts at once
-	$get_cohorts = array('studentsELEM','studentsMS','studentsHS','teachersSEC','teachersELEM','supportstaffALL','adminALL','parentsALL');
-	
-	//Get the id for all the cohorts with idnumbers in the get_cohorts array
-	$cohorts = $DB->get_records_list('cohort', 'idnumber', $get_cohorts , null , 'id,idnumber' );
-	foreach ( $cohorts as $cohort )
+	//Get the id and idnumber for all cohorts
+	$result = $DB->get_records('cohort',null,'id,idnumber');
+	foreach( $result as $cohort )
 	{
 		$cohort_ids[ $cohort->idnumber ] = $cohort->id;
 	}

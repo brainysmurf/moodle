@@ -70,7 +70,7 @@
     // Implement ssis's need to have the frontpage redirect
     
     //Get necessary cohort ids
-	$cohort_ids = cohorts_get_frontage_cohorts();
+	$cohort_ids = cohorts_get_all_ids();
 	
 	$redirect_url = $CFG->wwwroot . '/course/view.php?id=1395&section=';
 	
