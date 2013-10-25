@@ -531,6 +531,8 @@ class theme_decaf_core_renderer extends core_renderer {
         }
 
     }
+    
+    // !SSIS Awesomebar
 
     /**
      * Renders a custom menu object (located in outputcomponents.php)
@@ -543,9 +545,10 @@ class theme_decaf_core_renderer extends core_renderer {
      */
     protected function render_custom_menu( custom_menu $menu )
     {
-        global $CFG;
-		global $USER;
-
+        global $CFG, $USER;
+	
+		$loggedIn = isloggedin();
+	
         // If the menu has no children return an empty string
         if ( !$menu->has_children() )
         {
@@ -554,90 +557,169 @@ class theme_decaf_core_renderer extends core_renderer {
 
         $content = html_writer::start_tag('ul', array('class'=>'dropdown dropdown-horizontal'));
 
-			$loggedIn = isloggedin();
-
-			// Beginning of SSIS's special user menu
-			$content .=  html_writer::start_tag('li');
-
-				$loginIcon = html_writer::tag('i', '', array('class'=>'icon-'.($loggedIn?'user':'signin').' pull-left'));
-				$content .= $loginIcon.$this->login_info();
+			// Login Button / User Menu
+			$content .= $this->render_user_menu_item($loggedIn);
+			
+			if ( $loggedIn )
+			{
+				//Navigate
+				#$content .= $this->render_navigate_menu_item();
 				
-				//User dropdown
-				if ( $loggedIn)
-				{
-				    $content .= html_writer::start_tag('ul');
-				    if ( isguestuser() )
-				    {
-				        // Any special items for guest users??
-				    }
-				    else
-				    {
-			  	        $courseid = $this->page->course->id;
-	        			$context = context_course::instance($courseid);
-
-				        if (has_capability('moodle/role:switchroles', $context))
-				        {
-				            $roles = get_switchable_roles($context);
-		    				if ( !($roles===null) )
-		    				{
-						        $role = $roles[5];
-						        if ($role) {
-						            $url = new moodle_url('/course/switchrole.php', array('id'=>$courseid, 'sesskey'=>sesskey(), 'switchrole'=>5, 'returnurl'=>$this->page->url->out_as_local_url(false)));
-						            $content .= html_writer::start_tag('li');
-						            $content .= html_writer::tag('a', html_writer::tag('i', '', array('class'=>'icon-user pull-left')).'Become '.$role, array('href'=>$url));
-						            $content .= html_writer::end_tag('li');
-						            $content .= html_writer::empty_tag('hr');
-						        }//if $role
-						    } // if !$roles
-    	        		}
-    	        		else if ( is_role_switched($this->page->course->id) )
-    	        		{
-						    $content .= html_writer::start_tag('li');
-						    $icon = html_writer::tag('i', '', array('class'=>'icon-user pull-left'));
-						    $url = new moodle_url('/course/switchrole.php', array('id'=>$courseid, 'sesskey'=>sesskey(), 'switchrole'=>0, 'returnurl'=>$this->page->url->out_as_local_url(false)));
+				//Activites / Curriculum / Parents / Teaching & Learning (Course Categories)
+				$content .= $this->render_categories_menu_items();
 				
-						    $content .= html_writer::tag('a', $icon.'Return to normal', array('href'=>$url));
-						    $content .= html_writer::end_tag('li');
+				if ( has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM)) )
+			    {
+			    	//Admin Menu Item
+			    	
+			    }
+					
+			   		
+			   /* if ( has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM)) )
+			    {
+			        if (!($this->page->course->id === '1266'))
+			        {
+			            foreach ($this->my_courses as $category)
+			            {
+			                $this->add_category_to_custom_menu_for_admins($menu, $category);
+			            }
+			        }
+			    }
+			    else
+			    {
+			        $this->teachinglearningnode = NULL;
+			        $this->add_to_custom_menu($menu, '', $this->my_courses);
+			        if ($this->teachinglearningnode)
+			        {
+				   		$this->teachinglearningnode->add('Browse DragonNet Classes', new moodle_url('/course/category.php', array('id' => 50)), 'Browse ALL Courses');
+					} // if this->teachinglearningnode
+				
+					// TODO: Add a Teaching & Learning mneu item and add "Browse ALL Courses" to that!
+					
+				} // if has_capability */
+		
+		           
+				//Render child menus			    
+	            foreach ($menu->get_children() as $item)
+	            {
+	                $content .= $this->render_custom_menu_item($item);
+	            }
+		            
+			} // isloggedin
 
-						    $content .= html_writer::empty_tag('hr');
-				        } // if is_role_switched
+        $content .= html_writer::end_tag('ul'); // end whole thing
 
-			// All these are common to all users except Guest
-	        $content .= html_writer::start_tag('li');
-	        $content .= html_writer::tag('a', html_writer::tag('i', '', array('class'=>'icon-edit pull-left')).'Edit Profile', array('href'=>"$CFG->wwwroot/user/edit.php?id=$USER->id&course=1"));
-	        $content .= html_writer::end_tag('li');
+        // Close the open tags
+        return $content;
+    }
 
-	        $content .= html_writer::start_tag('li');
-	        $content .= html_writer::tag('a', html_writer::tag('i', '', array('class'=>'icon-edit pull-left')).'Change password', array('href'=>"$CFG->wwwroot/login/change_password.php?id=1"));
-	        $content .= html_writer::end_tag('li');
 
-	        $content .= html_writer::empty_tag('hr');
-
-	        $content .= html_writer::start_tag('li');
-	        $content .= html_writer::tag('a', html_writer::tag('i', '', array('class'=>'icon-anchor pull-left')).'My DragonNet', array('href'=>"$CFG->wwwroot/my"));
-	        $content .= html_writer::end_tag('li');
-
-	        $content .= html_writer::start_tag('li');
-	        $content .= html_writer::tag('a', html_writer::tag('i', '', array('class'=>'icon-home pull-left')).'Home (Front Page)', array('href'=>$CFG->wwwroot));
-	        $content .= html_writer::end_tag('li');
-
-	        $content .= html_writer::empty_tag('hr');
-	    }  // end else 
-
-	    $content .= html_writer::start_tag('li');
-	    $content .= html_writer::tag('a', html_writer::tag('i', '', array('class'=>'icon-signout pull-left')).'Logout', array('href'=>$CFG->wwwroot.'/login/logout.php?sesskey='.sesskey()));
-	    $content .= html_writer::end_tag('li');
-
-	    $content .= html_writer::end_tag('ul');
-	} // end if isloggedin
-
-	$content .= html_writer::end_tag('li');
-
-	// End of SSIS's special user menu
-
-	if ( $loggedIn )
+	private function render_user_menu_item( $loggedIn=false )
 	{
-	    if ( isguestuser() )
+		$loggedIn = isloggedin();
+
+		$content = '';
+
+		// Beginning of SSIS's special user menu
+		$content .=  html_writer::start_tag('li');
+
+			//Icon
+			$loginIcon = html_writer::tag('i', '', array('class'=>'icon-'.($loggedIn?'user':'signin').' pull-left'));
+
+			//Username or login link
+			$content .= $loginIcon.$this->login_info();
+				
+			//User dropdown
+			if ( $loggedIn )
+			{
+				$content .= html_writer::start_tag('ul');
+				
+				if ( isguestuser() )
+				{
+					// Any special items for guest users??
+				}
+			    else
+			    {
+			    	//Items for regular logged in users
+			    	
+		  	        $courseid = $this->page->course->id;
+        			$context = context_course::instance($courseid);
+
+			        if ( is_role_switched($courseid) )
+	        		{
+	        			//Role is switched - show 'Return to normal' button
+	        			
+						$content .= html_writer::start_tag('li');
+							$icon = html_writer::tag('i', '', array('class'=>'icon-user pull-left'));
+						    $url = new moodle_url('/course/switchrole.php', array('id'=>$courseid, 'sesskey'=>sesskey(), 'switchrole'=>0, 'returnurl'=>$this->page->url->out_as_local_url(false)));		
+						    $content .= html_writer::tag('a', $icon.'Return to normal', array('href'=>$url));
+					    $content .= html_writer::end_tag('li');
+
+					    $content .= html_writer::empty_tag('hr');
+			        }
+			        else if ( has_capability('moodle/role:switchroles', $context) )
+			        {
+			        	//Become Student button
+			        	
+			            $roles = get_switchable_roles($context);
+	    				if ( count($roles) > 0 && $role = $roles[5] )
+	    				{
+				            $content .= html_writer::start_tag('li');
+				            	$icon = html_writer::tag('i', '', array('class'=>'icon-user pull-left'));
+   								$url = new moodle_url('/course/switchrole.php', array('id'=>$courseid, 'sesskey'=>sesskey(), 'switchrole'=>5, 'returnurl'=>$this->page->url->out_as_local_url(false)));
+				            	$content .= html_writer::tag('a', $icon.'Become '.$role, array('href'=>$url));
+				            $content .= html_writer::end_tag('li');
+				            
+				            $content .= html_writer::empty_tag('hr');
+					    }
+	        		}
+
+					//Edit Profile
+			        $content .= html_writer::start_tag('li');
+			        	$content .= html_writer::tag('a', html_writer::tag('i', '', array('class'=>'icon-edit pull-left')).'Edit Profile', array('href'=>"/user/edit.php?id=$USER->id&course=1"));
+			        $content .= html_writer::end_tag('li');
+
+					//Change Password
+			        $content .= html_writer::start_tag('li');
+	    			    $content .= html_writer::tag('a', html_writer::tag('i', '', array('class'=>'icon-edit pull-left')).'Change password', array('href'=>"/login/change_password.php?id=1"));
+			        $content .= html_writer::end_tag('li');
+
+	        		$content .= html_writer::empty_tag('hr');
+
+					//My DragonNet
+			        $content .= html_writer::start_tag('li');
+	    			    $content .= html_writer::tag('a', html_writer::tag('i', '', array('class'=>'icon-anchor pull-left')).'My DragonNet', array('href'=>"/my"));
+			        $content .= html_writer::end_tag('li');
+
+					//Home
+	    		    $content .= html_writer::start_tag('li');
+				        $content .= html_writer::tag('a', html_writer::tag('i', '', array('class'=>'icon-home pull-left')).'Home (Front Page)', array('href'=>'/'));
+	        		$content .= html_writer::end_tag('li');
+
+			        $content .= html_writer::empty_tag('hr');
+			        
+	    		} //end if not guest user
+
+
+				//Logout
+				$content .= html_writer::start_tag('li');
+					$content .= html_writer::tag('a', html_writer::tag('i', '', array('class'=>'icon-signout pull-left')).'Logout', array('href'=>'/login/logout.php?sesskey='.sesskey()));
+			    $content .= html_writer::end_tag('li');
+	
+				//End dropdown
+		    	$content .= html_writer::end_tag('ul');
+	    	
+			} // end if isloggedin
+	
+		$content .= html_writer::end_tag('li');
+		// End of SSIS's special user menu
+
+		return $content;
+	}
+
+	private function render_categories_menu_items()
+	{
+		 if ( isguestuser() )
 	    {
 	        // Courses are defined programatically for guest users
 	        // Assumes that courses are already set up for guest access, otherwise will fail
@@ -649,42 +731,8 @@ class theme_decaf_core_renderer extends core_renderer {
 	        $this->setup_courses();
 	    }
 
-	    if ( has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM)) )
-	    {
-	        if (!($this->page->course->id === '1266'))
-	        {
-	            foreach ($this->my_courses as $category)
-	            {
-	                $this->add_category_to_custom_menu_for_admins($menu, $category);
-	            }
-	        }
-	    }
-	    else
-	    {
-	        $this->teachinglearningnode = NULL;
-	        $this->add_to_custom_menu($menu, '', $this->my_courses);
-	        if ($this->teachinglearningnode)
-	        {
-		   		$this->teachinglearningnode->add('Browse DragonNet Classes', new moodle_url('/course/category.php', array('id' => 50)), 'Browse ALL Courses');
-			} // if this->teachinglearningnode
-		
-			// TODO: Add a Teaching & Learning mneu item and add "Browse ALL Courses" to that!
-			
-		} // if has_capability
+	}
 
-            // Render each child
-	    
-            foreach ($menu->get_children() as $item)
-            {
-                $content .= $this->render_custom_menu_item($item);
-            }
-	} // isloggedin
-
-        $content .= html_writer::end_tag('ul'); // end whole thing
-
-        // Close the open tags
-        return $content;
-    }
 
     /**
      * Renders a pix_icon widget and returns the HTML to display it.
@@ -853,6 +901,8 @@ class theme_decaf_core_renderer extends core_renderer {
         return $content;
     }
 
+	// !Blocks
+
     /**
      * blocks_for_region() overrides core_renderer::blocks_for_region()
      *  in moodlelib.php. Returns a string
@@ -980,20 +1030,17 @@ class theme_decaf_topsettings_renderer extends plugin_renderer_base {
     }
 
     public function settings_search_box() {
-	return '';
+		return '';
     }
 
     public function navigation_tree(global_navigation $navigation) {
-        global $CFG;
-	global $USER;
-
-	//include_once($CFG->dirroot.'/calendar/lib.php');
-	//$days_ahead = 30;
-	//$cal_items = calendar_get_upcoming($this->user_courses, true, $USER->id, $days_ahead);
-
-	//$content .= html_writer::end_tag('ul');
-	
         return '';
+        global $CFG;
+		global $USER;
+		//include_once($CFG->dirroot.'/calendar/lib.php');
+		//$days_ahead = 30;
+		//$cal_items = calendar_get_upcoming($this->user_courses, true, $USER->id, $days_ahead);	
+		//$content .= html_writer::end_tag('ul');
     }
 
     protected function navigation_node(navigation_node $node, $attrs=array()) {
