@@ -513,37 +513,41 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 
                 // Bar of first initials
 
-                echo '<div class="initialbar firstinitial">'.get_string('firstname').' : ';
+                echo '<div class="initialbar firstinitial paging"><span>'.get_string('firstname').':</span>';
                 if(!empty($firstinitial)) {
-                    echo '<a href="'.$baseurl->out().'&amp;sifirst=">'.$strall.'</a>';
+                    echo '<a class="btn" href="'.$baseurl->out().'&amp;sifirst=">'.$strall.'</a>';
                 } else {
-                    echo '<strong>'.$strall.'</strong>';
+                	echo '<a class="btn selected" href="'.$baseurl->out().'&amp;sifirst=">'.$strall.'</a>';
+                    #echo '<strong>'.$strall.'</strong>';
                 }
                 foreach ($alpha as $letter) {
                     if ($letter == $firstinitial) {
-                       echo ' <strong>'.$letter.'</strong>';
+                       #echo '<strong>'.$letter.'</strong>';
+                        echo '<a class="btn selected" href="'.$baseurl->out().'&amp;sifirst='.$letter.'">'.$letter.'</a>';
                     } else {
-                        echo ' <a href="'.$baseurl->out().'&amp;sifirst='.$letter.'">'.$letter.'</a>';
+                        echo '<a class="btn" href="'.$baseurl->out().'&amp;sifirst='.$letter.'">'.$letter.'</a>';
                     }
                 }
                 echo '</div>';
 
                 // Bar of last initials
 
-                echo '<div class="initialbar lastinitial">'.get_string('lastname').' : ';
+                echo '<div class="initialbar lastinitial paging"><span>'.get_string('lastname').':</span>';
                 if(!empty($lastinitial)) {
-                    echo '<a href="'.$baseurl->out().'&amp;silast=">'.$strall.'</a>';
+                    echo '<a class="btn" href="'.$baseurl->out().'&amp;silast=">'.$strall.'</a>';
                 } else {
-                    echo '<strong>'.$strall.'</strong>';
+                    echo '<a class="btn selected" href="'.$baseurl->out().'&amp;silast=">'.$strall.'</a>';
+                   # echo '<strong>'.$strall.'</strong>';
                 }
                foreach ($alpha as $letter) {
                     if ($letter == $lastinitial) {
-                        echo ' <strong>'.$letter.'</strong>';
+                        #echo ' <strong>'.$letter.'</strong>';
+                        echo '<a class="btn selected" href="'.$baseurl->out().'&amp;silast='.$letter.'">'.$letter.'</a>';
                     } else {
-                        echo ' <a href="'.$baseurl->out().'&amp;silast='.$letter.'">'.$letter.'</a>';
+                        echo '<a class="btn" href="'.$baseurl->out().'&amp;silast='.$letter.'">'.$letter.'</a>';
                     }
                 }
-                echo '</div><br />';
+                echo '</div>';
 
                $pagingbar = new paging_bar($matchcount, intval($table->get_page_start() / $perpage), $perpage, $baseurl);
                $pagingbar->pagevar = 'spage';

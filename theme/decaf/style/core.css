@@ -766,6 +766,17 @@ h4.advice {
 	font-weight:normal;
 }
 
+.userinfobox {
+	background: #F6F6F6;
+	border: 1px solid #D4D4D4;
+	-webkit-border-radius: 3px;
+	-moz-webkit-border-radius: 3px;
+	border-radius: 3px;
+	-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+	-moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+}
+
 .userinfobox .username {
     padding: 8px;
     font-size: 16px;
@@ -970,7 +981,8 @@ color: #333;
 		}
 		.paging .btn { 
 			font-weight:normal;
-			margin:0 2px;
+			margin:0 1px;
+			font-size:13px;
 		}
 		.paging .btn.selected {
 			background:#fff;
