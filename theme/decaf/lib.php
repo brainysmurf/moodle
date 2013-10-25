@@ -703,7 +703,7 @@ class decaf_expand_navigation extends global_navigation {
      * @param stdClass $category
      * @param navigation_node $parent
      */
-    protected function add_category(stdClass $category, navigation_node $parent) {
+	protected function add_category(stdClass $category, navigation_node $parent, $nodetype = self::TYPE_CATEGORY) {
         if ($parent->find($category->id, self::TYPE_CATEGORY)) {
             return;
         }
