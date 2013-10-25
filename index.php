@@ -68,34 +68,45 @@
     }
 
     // Implement ssis's need to have the frontpage redirect
-
-    $elem_student_cohort = $DB->get_record('cohort', array('idnumber'=>'studentsELEM'))->id;
-    $ms_student_cohort = $DB->get_record('cohort', array('idnumber'=>'studentsMS'))->id;
-    $hs_student_cohort = $DB->get_record('cohort', array('idnumber'=>'studentsHS'))->id;
-    $sec_teacher_cohort = $DB->get_record('cohort', array('idnumber'=>'teachersSEC'))->id;
-    $elem_teacher_cohort = $DB->get_record('cohort', array('idnumber'=>'teachersELEM'))->id;
-    $support_staff_cohort = $DB->get_record('cohort', array('idnumber'=>'supportstaffALL'))->id;
-    $admin_cohort = $DB->get_record('cohort', array('idnumber'=>'adminALL'))->id;
-    $parents_cohort = $DB->get_record('cohort', array('idnumber'=>'parentsALL'))->id;
-    $frontpage_course_id = 1395;  // DragonNet Frontpage
-
-    if (cohort_is_member($admin_cohort, $USER->id)) {
-	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=7');
-    } else if (cohort_is_member($support_staff_cohort, $USER->id)) {
-	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=8');
-    } else if (cohort_is_member($sec_teacher_cohort, $USER->id)) {
-	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=5');
-    } else if (cohort_is_member($elem_teacher_cohort, $USER->id)) {
-	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=4');
-    } else if (cohort_is_member($ms_student_cohort, $USER->id)) {
-	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=3');
-    } else if (cohort_is_member($hs_student_cohort, $USER->id)) {
-	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=2');
-    } else if (cohort_is_member($elem_student_cohort, $USER->id)) {
-        redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=10');
-    } else if (cohort_is_member($parents_cohort, $USER->id)) {
-        redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=6');
+    
+    //Get necessary cohort ids
+	$cohort_ids = cohorts_get_all_ids();
+	
+	$redirect_url = $CFG->wwwroot . '/course/view.php?id=1395&section=';
+	
+    if ( $SESSION->userIsParent ) #cohort_is_member($parents_cohort, $USER->id) )
+    {
+        redirect( $redirect_url.'6' );
     }
+    else if ( cohort_is_member($cohort_ids['studentsHS'], $USER->id) )
+    {
+		redirect( $redirect_url.'2' );
+    }
+	else if ( cohort_is_member($cohort_ids['studentsMS'], $USER->id) )
+	{
+		redirect( $redirect_url.'3' );
+    }
+    else if ( cohort_is_member($cohort_ids['studentsELEM'], $USER->id) )
+    {
+        redirect( $redirect_url.'10' );
+    }
+    else if ( cohort_is_member($cohort_ids['teachersSEC'], $USER->id) )
+	{
+		redirect( $redirect_url.'5' );
+    }
+    else if ( cohort_is_member($cohort_ids['teachersELEM'], $USER->id) )
+    {
+		redirect( $redirect_url.'4' );
+    }
+    else if ( cohort_is_member($cohort_ids['supportstaffALL'], $USER->id) )
+    {
+		redirect( $redirect_url.'8' );
+    }
+    else if ( cohort_is_member($cohort_ids['adminALL'], $USER->id) )
+    {
+		redirect( $redirect_url.'7' );
+    }
+
 
     if (get_home_page() != HOMEPAGE_SITE) {
         // Redirect logged-in users to My Moodle overview if required

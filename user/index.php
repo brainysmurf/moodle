@@ -554,16 +554,20 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
                echo $OUTPUT->render($pagingbar);
             }
 
-	    // For teachers, print out the class emails:
-           if ( $currentgroup && has_capability('moodle/grade:edit', $context) ) {
-	       $groupname = groups_get_group_name($currentgroup);
-	       echo '<br /><b>Bulk Email for All Students in this class:</b><br />';
-	       $emailaddr = $groupname.'@student.ssis-suzhou.net';
-	       echo '<a href="mailto:'.$emailaddr.'">'.$emailaddr.'</a><br />';
-               echo "<br /><b>Bulk Email for All Parents who have a child in this class:</b><br />";
-	       $emailaddr = $groupname.'PARENTS@student.ssis-suzhou.net';
-	       echo '<a href="mailto:?bcc='.$emailaddr.'">'.$emailaddr.'</a><br /><br />';
-               }
+			// For teachers, print out the class emails:
+			if ( $currentgroup && $SESSION->userIsTeacher )
+			{
+		       	$groupname = groups_get_group_name($currentgroup);
+				echo '<br /><b>Bulk Email for All Students in this class:</b><br />';
+				
+				$emailaddr = $groupname.'@student.ssis-suzhou.net';
+				echo '<a href="mailto:'.$emailaddr.'">'.$emailaddr.'</a><br />';
+				
+				echo "<br /><b>Bulk Email for All Parents who have a child in this class:</b><br />";
+				$emailaddr = $groupname.'PARENTS@student.ssis-suzhou.net';
+
+				echo '<a href="mailto:?bcc='.$emailaddr.'">'.$emailaddr.'</a><br /><br />';
+			}
 
             if ($matchcount > 0) {
                 $usersprinted = array();
@@ -621,8 +625,9 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 
                     foreach ($extrafields as $field)
                     {
-				        if ( ($field === 'idnumber') and !(has_capability('moodle/grade:edit', $context))) {
-						    // Don't show the PowerSchool ID if not an ssis teacher viewing the page
+				        if ( ($field === 'idnumber') and !$SESSION->userIsTeacher )
+				        {
+							// Don't show the PowerSchool ID if not an ssis teacher viewing the page
 						    continue;
 		    		    }
 
@@ -648,9 +653,12 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 					}
 
 		   }
-                   if ( has_capability('moodle/grade:edit', $context) ) {
+
+                   if ( $SESSION->userIsTeacher ) {
+                   
                      if ( strpos($user->email, '@student.ssis-suzhou') != 0 ) {
-		       echo strpos($user->email, '@ssis-suzhou');
+
+						echo strpos($user->email, '@ssis-suzhou');
 		       
                         $parent_email_address = $user->username . "PARENTS@student.ssis-suzhou.net";
                         $row->cells[1]->text .= '<tr>
@@ -698,7 +706,7 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 
 		    // ssis doesn't need or want blogs, code deleted here
 
-                    if (!empty($CFG->enablenotes) and (has_capability('moodle/notes:manage', $context) || has_capability('moodle/notes:view', $context))) {
+					if (!empty($CFG->enablenotes) and (has_capability('moodle/notes:manage', $context) || has_capability('moodle/notes:view', $context))) {
                         $links[] = html_writer::link(new moodle_url('/notes/index.php?course=' . $course->id. '&user='.$user->id), get_string('notes','notes'));
                     }
 
