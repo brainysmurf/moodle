@@ -4351,6 +4351,13 @@ function complete_user_login($user) {
             print_error('nopasswordchangeforced', 'auth');
         }
     }
+    
+    //Check if user is parent
+    global $SESSION, $DB;
+	require_once($CFG->dirroot .'/cohort/lib.php');
+	$parents_cohort = $DB->get_record('cohort', array('idnumber'=>'parentsALL'))->id;
+	$SESSION->userIsParent = cohort_is_member($parents_cohort, $USER->id);
+    
     return $USER;
 }
 
