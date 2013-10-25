@@ -56,19 +56,32 @@ $course->coursedisplay = COURSE_DISPLAY_MULTIPAGE;
 
 $renderer = $PAGE->get_renderer('format_onetopic');
 
-$section = optional_param('section', -1, PARAM_INT);
+$sectionnum = optional_param('section', -1, PARAM_INT);
+$sectionid = optional_param('sectionid', -1, PARAM_INT);
 
-if (isset($section) && $section >= 0) {
-     $USER->display[$course->id] = $section;
-     $displaysection = $section;
+if ( isset($sectionnum) && $sectionnum >= 0 )
+{
+	#$USER->display[$course->id] = $section;
+	$displaysection = $sectionnum;
 } 
-else {
-    if (isset($USER->display[$course->id])) {
+else if ( isset($sectionid) && $sectionid > 0 )
+{
+	// $section is set in /course/view.php:42 if a sectionid was given in the url
+	$displaysection = $section['section'];
+}
+else
+{
+	//This takes the user back to the last section they viewed if there was no section number in the url
+    /*if (isset($USER->display[$course->id]))
+    {
         $displaysection = $USER->display[$course->id];
-    } else {
-        $USER->display[$course->id] = 0;
-        $displaysection = 0;
     }
+	else
+	{
+		$USER->display[$course->id] = 0;
+		$displaysection = 0;
+	}*/
+	$displaysection = 0;
 }
 
 $renderer->print_single_section_page($course, null, null, null, null, $displaysection);

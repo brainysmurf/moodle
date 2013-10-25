@@ -125,7 +125,10 @@ class format_onetopic_renderer extends format_section_renderer_base {
                 }
                 $previouslink = html_writer::tag('span', $this->output->larrow(), array('class' => 'larrow'));
                 $previouslink .= get_section_name($course, $sections[$back]);
-                $links['previous'] = html_writer::link(course_get_url($course, $back), $previouslink, $params);
+                
+                $sectionid = $sections[$back]->id;
+                $url = new moodle_url('/course/view.php', array('id' => $course->id , 'sectionid' => $sectionid));
+                $links['previous'] = html_writer::link($url, $previouslink, $params);
             }
             $back--;
         }
@@ -139,7 +142,10 @@ class format_onetopic_renderer extends format_section_renderer_base {
                 }
                 $nextlink = get_section_name($course, $sections[$forward]);
                 $nextlink .= html_writer::tag('span', $this->output->rarrow(), array('class' => 'rarrow'));
-                $links['next'] = html_writer::link(course_get_url($course, $forward), $nextlink, $params);
+                
+				$sectionid = $sections[$forward]->id;
+                $url = new moodle_url('/course/view.php', array('id' => $course->id , 'sectionid' => $sectionid));
+                $links['next'] = html_writer::link($url, $nextlink, $params);
             }
             $forward++;
         }
@@ -311,17 +317,18 @@ class format_onetopic_renderer extends format_section_renderer_base {
                             $displaysection = $default_topic;
                         }
                     }
-
-                    $sectionname = get_section_name($course, $thissection);
+	
+					$sectionname = $thissection->name;
+					$sectionid = $thissection->id;
 
                     if ($displaysection != $section) {
                         $sectionmenu[$section] = $sectionname;
                     }
 
                     if ($section == 0) {
-                        $url = new moodle_url('/course/view.php', array('id' => $course->id, 'section' => 0));
+                        $url = new moodle_url('/course/view.php', array('id' => $course->id));
                     } else {
-                        $url = course_get_url($course, $section);
+                        $url = new moodle_url('/course/view.php', array('id' => $course->id , 'sectionid' => $sectionid));
                     }
                     
                     $tabtext = s($sectionname);
