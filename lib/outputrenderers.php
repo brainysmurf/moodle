@@ -2504,26 +2504,27 @@ EOD;
         $pagingbar->prepare($this, $this->page, $this->target);
 
         if ($pagingbar->totalcount > $pagingbar->perpage) {
-            $output .= get_string('page') . ':';
+            
+            $output .= html_writer::tag('span', get_string('page').':' );
 
             if (!empty($pagingbar->previouslink)) {
-                $output .= '&#160;(' . $pagingbar->previouslink . ')&#160;';
+                $output .= $pagingbar->previouslink;
             }
 
             if (!empty($pagingbar->firstlink)) {
-                $output .= '&#160;' . $pagingbar->firstlink . '&#160;...';
+                $output .= $pagingbar->firstlink;
             }
 
             foreach ($pagingbar->pagelinks as $link) {
-                $output .= "&#160;&#160;$link";
+                $output .= $link;
             }
 
             if (!empty($pagingbar->lastlink)) {
-                $output .= '&#160;...' . $pagingbar->lastlink . '&#160;';
+                $output .= $pagingbar->lastlink;
             }
 
             if (!empty($pagingbar->nextlink)) {
-                $output .= '&#160;&#160;(' . $pagingbar->nextlink . ')';
+                $output .= $pagingbar->nextlink;
             }
         }
 
