@@ -24,6 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+global $COHORT_CACHE;
 $COHORT_CACHE = cache::make_from_params(cache_store::MODE_APPLICATION, 'cohorts', 'cohorts');
 
 //Remove all items from the cohort cache
@@ -301,8 +302,8 @@ function cohort_get_cohorts($contextid, $page = 0, $perpage = 25, $search = '') 
 function cohorts_get_all_ids()
 {
 	global $COHORT_CACHE;
-	
-	if ( $cohort_ids = $COHORT_CACHE->get('frontpage_ids') )
+
+	if ( $cohort_ids = $COHORT_CACHE->get('all_ids') )
 	{
 		return $cohort_ids;
 	}
@@ -318,7 +319,7 @@ function cohorts_get_all_ids()
 		$cohort_ids[ $cohort->idnumber ] = $cohort->id;
 	}
 	
-	$COHORT_CACHE->set('frontpage_ids',$cohort_ids);
+	$COHORT_CACHE->set('all_ids',$cohort_ids);
 	
 	return $cohort_ids;
 }
