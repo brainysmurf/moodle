@@ -24,6 +24,15 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$COHORT_CACHE = cache::make_from_params(cache_store::MODE_APPLICATION, 'cohorts', 'cohorts');
+
+//Remove all items from the cohort cache
+function cohort_clear_cache()
+{
+	global $COHORT_CACHE;
+	$COHORT_CACHE->purge();
+}
+
 /**
  * Add new cohort.
  *
@@ -56,6 +65,7 @@ function cohort_add_cohort($cohort) {
     }
 
     $cohort->id = $DB->insert_record('cohort', $cohort);
+	cohort_clear_cache();
 
     events_trigger('cohort_added', $cohort);
 
@@ -75,6 +85,7 @@ function cohort_update_cohort($cohort) {
     }
     $cohort->timemodified = time();
     $DB->update_record('cohort', $cohort);
+	cohort_clear_cache();
 
     events_trigger('cohort_updated', $cohort);
 }
@@ -93,6 +104,7 @@ function cohort_delete_cohort($cohort) {
 
     $DB->delete_records('cohort_members', array('cohortid'=>$cohort->id));
     $DB->delete_records('cohort', array('id'=>$cohort->id));
+	cohort_clear_cache();
 
     events_trigger('cohort_deleted', $cohort);
 }
@@ -121,6 +133,8 @@ function cohort_delete_category($category) {
     }
 
     $DB->execute($sql, $params);
+    
+	cohort_clear_cache();
 }
 
 /**
@@ -130,7 +144,7 @@ function cohort_delete_category($category) {
  * @return void
  */
 function cohort_add_member($cohortid, $userid) {
-    global $DB;
+    global $DB, $COHORT_CACHE;
     if ($DB->record_exists('cohort_members', array('cohortid'=>$cohortid, 'userid'=>$userid))) {
         // No duplicates!
         return;
@@ -140,7 +154,10 @@ function cohort_add_member($cohortid, $userid) {
     $record->userid    = $userid;
     $record->timeadded = time();
     $DB->insert_record('cohort_members', $record);
-
+    
+	#cohort_clear_cache(); //Clear everything
+	$COHORT_CACHE->delete("cohort_is_member,$cohortid,$userid"); //Just clear cohort_is_member
+	
     events_trigger('cohort_member_added', (object)array('cohortid'=>$cohortid, 'userid'=>$userid));
 }
 
@@ -151,9 +168,12 @@ function cohort_add_member($cohortid, $userid) {
  * @return void
  */
 function cohort_remove_member($cohortid, $userid) {
-    global $DB;
+    global $DB, $COHORT_CACHE;
     $DB->delete_records('cohort_members', array('cohortid'=>$cohortid, 'userid'=>$userid));
-
+	
+	#cohort_clear_cache(); //Clear everything
+	$COHORT_CACHE->delete("cohort_is_member,$cohortid,$userid"); //Just clear cohort_is_member
+	
     events_trigger('cohort_member_removed', (object)array('cohortid'=>$cohortid, 'userid'=>$userid));
 }
 
@@ -164,9 +184,22 @@ function cohort_remove_member($cohortid, $userid) {
  * @return bool
  */
 function cohort_is_member($cohortid, $userid) {
+	if ( !$cohortid || !$userid ) { return false; }
+	
+	global $COHORT_CACHE;
+    
+    $cacheKey = "cohort_is_member,$cohortid,$userid";
+    if ( $result = $COHORT_CACHE->get($cacheKey) )
+    {
+    	return $result == -1 ? false : true;
+    }
+
     global $DB;
 
-    return $DB->record_exists('cohort_members', array('cohortid'=>$cohortid, 'userid'=>$userid));
+    $result = $DB->record_exists('cohort_members', array('cohortid'=>$cohortid, 'userid'=>$userid));
+    
+    $COHORT_CACHE->set($cacheKey, ($result?1:'-1') );
+    return $result;
 }
 
 /**
@@ -255,3 +288,32 @@ function cohort_get_cohorts($contextid, $page = 0, $perpage = 25, $search = '') 
 
     return array('totalcohorts' => $totalcohorts, 'cohorts' => $cohorts, 'allcohorts'=>$allcohorts);
 }
+
+function cohorts_get_frontage_cohorts()
+{
+	global $COHORT_CACHE;
+	
+	if ( $cohort_ids = $COHORT_CACHE->get('frontpage_ids') )
+	{
+		return $cohort_ids;
+	}
+	
+	global $DB;
+	
+	$cohort_ids = array();
+	
+	//Get all cohorts at once
+	$get_cohorts = array('studentsELEM','studentsMS','studentsHS','teachersSEC','teachersELEM','supportstaffALL','adminALL','parentsALL');
+	
+	//Get the id for all the cohorts with idnumbers in the get_cohorts array
+	$cohorts = $DB->get_records_list('cohort', 'idnumber', $get_cohorts , null , 'id,idnumber' );
+	foreach ( $cohorts as $cohort )
+	{
+		$cohort_ids[ $cohort->idnumber ] = $cohort->id;
+	}
+	
+	$COHORT_CACHE->set('frontpage_ids',$cohort_ids);
+	
+	return $cohort_ids;
+}
+	
