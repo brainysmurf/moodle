@@ -750,7 +750,7 @@ class core_renderer extends renderer_base {
                 throw new coding_exception('You cannot redirect after the entire page has been generated');
                 break;
         }
-        $output .= $this->notification($message, 'redirectmessage');
+        $output .= $this->notification($message, 'redirectmessage generalbox');
         $output .= '<div class="continuebutton"><a href="'. $encodedurl .'" class="btn">'. get_string('continue') .'</a></div>';
         if ($debugdisableredirect) {
             $output .= '<p><strong>Error output, so disabling automatic redirect.</strong></p>';
