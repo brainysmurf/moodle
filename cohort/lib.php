@@ -202,6 +202,15 @@ function cohort_is_member($cohortid, $userid) {
     return $result;
 }
 
+//Checks if a user is enrolled in a cohort (like cohort_is_member) but takes a cohort idnumber (e.g. students6) instead of 76
+function cohort_is_member_by_idnumber($cohortidnumber, $userid) {
+	
+	$cohort_ids = cohorts_get_all_ids();
+	if ( !$cohort_ids[$cohortidnumber] ) { return false; }
+	
+	return cohort_is_member($cohort_ids[$cohortidnumber], $userid);
+}
+
 /**
  * Returns list of cohorts from course parent contexts.
  *
