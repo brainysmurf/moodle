@@ -108,6 +108,7 @@ class moodlephp
       $firstname = $args[2];
       $lastname = $args[3];
       $idnumber = $args[4];
+      $auth = $args[5];
 
       if( $this->user_does_exist(array($username)) )
 	{
@@ -118,7 +119,7 @@ class moodlephp
 
       try
 	{
-	  $user = create_user_record( $username, "changeme" );  // changeme forces password reset 
+	  $user = create_user_record( $username, "changeme", $auth=$auth );  // changeme forces password reset 
 	}
 
       catch( Exception $e )
