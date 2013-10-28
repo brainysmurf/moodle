@@ -214,7 +214,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', end
 			right:-4px;
 			height: 16px;
 			line-height: 15px;
+			cursor: pointer;
 		}
+			.tabs .delete_section.hide {
+				display: none !important;
+			}
 		
 		
 		/* Subtabs */
