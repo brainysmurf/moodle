@@ -103,18 +103,21 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 <?php if ($hasheading || $hasnavbar) { ?>
 
    <?php
-	   	$headerbgs = array(
+	   	$headerPhotos = array(
 	   		'header-0.jpg',
 	   		'header-1.jpg',
 	   		'header-2.jpg',
 	   		'header-3.jpg',
 	   		'header-4.jpg'
 	   	);
-	   	$headernum = isset($_GET['header']) ? $_GET['header'] : rand(0,4);
-	   	$headerbg = '/theme/decaf/pix/'.$headerbgs[ $headernum ];
+	   	global $SESSION;
+	   	if ( isset($_GET['header']) ) { $headerPhoto = $_GET['header']; }
+	   	else if ( isset($SESSION) && isset($SESSION->headerPhoto) ) { $headerPhoto = $SESSION->headerPhoto; }
+	   	else { $headerPhoto = rand(0,4); }
+	   	$headerBg = '/theme/decaf/pix/'.$headerPhotos[ $headerPhoto ];
    ?>   
 
-    <div id="page-header" style="background-image:url(<?php echo $headerbg; ?>);">
+    <div id="page-header" style="background-image:url(<?php echo $headerBg; ?>);">
     	<div id="page-header-gradient"></div>
 		<div id="page-header-wrapper">
 	        
