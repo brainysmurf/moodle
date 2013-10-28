@@ -4354,11 +4354,13 @@ function complete_user_login($user) {
     
     //Check if user is parent
     global $SESSION;
-    
 	require_once($CFG->dirroot .'/cohort/lib.php');
 	$SESSION->userIsParent = cohort_is_member_by_idnumber('parentsALL', $USER->id);
 	$SESSION->userIsTeacher = cohort_is_member_by_idnumber('teachersALL', $USER->id);
 	$SESSION->userIsStudent = cohort_is_member_by_idnumber('studentsALL', $USER->id);
+    
+    //Pick a photo for the header and keep it for the session
+    $SESSION->headerPhoto = rand(0,4);
     
     return $USER;
 }

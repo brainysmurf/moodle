@@ -78,6 +78,13 @@ class block_html extends block_base {
             $this->content->text = '';
         }
 
+		/*
+		 *  Show user profile fields
+		 *  To show them in the HTMl block write it as {{USER:fieldname}}
+		 */
+		require_once($CFG->dirroot.'/user/profile/lib.php');
+		$this->content->text = parse_user_fields_in_text($this->content->text);
+
         unset($filteropt); // memory footprint
 
         return $this->content;
