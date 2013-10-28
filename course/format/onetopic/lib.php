@@ -59,7 +59,8 @@ class format_onetopic extends format_base {
             return format_string($section->name, true,
                     array('context' => context_course::instance($this->courseid)));
         } else {
-            return get_string('sectionname', 'format_onetopic') . ' ' . $section->section;
+			return 'Unnamed Section';
+            #return get_string('sectionname', 'format_onetopic') . ' ' . $section->section;
         }
     }
 

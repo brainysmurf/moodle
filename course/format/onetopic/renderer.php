@@ -318,7 +318,8 @@ class format_onetopic_renderer extends format_section_renderer_base {
                         }
                     }
 	
-					$sectionname = $thissection->name;
+					//$sectionname = $thissection->name;
+					$sectionname = get_section_name($course, $thissection->section);
 					$sectionid = $thissection->id;
 
                     if ($displaysection != $section) {
