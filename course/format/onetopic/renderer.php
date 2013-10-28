@@ -353,7 +353,7 @@ class format_onetopic_renderer extends format_section_renderer_base {
 							$label = '';
 							$icon = '<i class="icon-trash"></i>';
 						} 
-						$tabtext .= '<a class="btn delete_section" href="'.$url.'" title="'.$title.'">'.$icon.' '.$label.'</a>';
+						$tabtext .= '<a class="btn delete_section hide" href="'.$url.'" title="'.$title.'">'.$icon.' '.$label.'</a>';
 					}
         
                     

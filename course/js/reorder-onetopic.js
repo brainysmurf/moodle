@@ -6,6 +6,9 @@ $(function(){
 
 	function enableReordering()
 	{
+		//Show delete buttons
+		$('.tabs .delete_section').removeClass('hide');
+		
 		$('#reorderSectionsButton').addClass('selected');
 		$('.tabs').prepend('<div id="reorderSectionsAlert" class="local-alert"><i class="icon-move pull-left"></i> Drag and drop tabs (sections) to rearrange them. Your changes will be saved automatically.<br/><span class="small"><strong>Note:</strong> the first section cannot be moved.</span></div>');
 		$('.tabs > ul').sortable({
@@ -53,6 +56,8 @@ $(function(){
 		$('#reorderSectionsButton').removeClass('selected');
 		$('#reorderSectionsAlert').slideUp(function(){ $(this).remove(); });
 		$('.tabs > ul').sortable('destroy');
+		//Hide delete buttons
+		$('.tabs .delete_section').addClass('hide');
 	}
 	
 	$(document).on('click','#reorderSectionsButton',function()
