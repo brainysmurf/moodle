@@ -17,18 +17,42 @@ a:active {outline: none;}
 	}
 /* Header
 ------------------------- */
-#page-header-wrapper{
-	margin:0;
-	padding: 49px 30px 53px 48px; /* Vertically center the page title */
-}
 #page-header{
 	float:none;
-	background:#1662A3; /* url([[pix:theme|bg-header]]) repeat-x scroll center bottom;*/
+	background:#1662A3;
+	background-position:center right;
+	background-repeat: no-repeat;
 	border-bottom:1px solid #cbcbcb;
 	margin-right:0;
 	position:relative;
 	min-height:144px;
 }
+
+#page-header-wrapper{
+	margin:0;
+	padding: 49px 30px 53px 48px; /* Vertically center the page title */	
+}
+
+	#page-header-gradient {
+		position: absolute;
+		top:0;
+		bottom:0;
+		right:0;
+		width:800px;
+background: -moz-linear-gradient(left,  rgba(22,98,163,1) 0%, rgba(22,98,163,0.7) 10%, rgba(22,98,163,0) 33%, rgba(22,98,163,0) 100%);
+background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(22,98,163,1)), color-stop(10%,rgba(22,98,163,0.7)), color-stop(33%,rgba(22,98,163,0)), color-stop(100%,rgba(22,98,163,0)));
+background: -webkit-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+background: -o-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+background: -ms-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+background: linear-gradient(to right,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', endColorstr='#001662a3',GradientType=1 );
+
+
+
+
+
+	}
+
 #page-header .sitelogo {float:left;margin:0.75em 0;}
 #page-header .headermain{
 	float:none;
