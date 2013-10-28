@@ -134,6 +134,18 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', end
 	padding:0 10px 0 0;
 }
 .navbar .breadcrumb{font-size:1em;padding:6px 10px;}
+
+#coursesearchnavbar label {
+	position: relative;
+	top: 2px;
+}
+#coursesearchnavbar #navsearchbox {
+	margin-right: 4px;
+	position: relative;
+	top: 1px;
+	height: 14px;
+}
+
 /*.breadcrumb a,a:link,a:active{color:#1662A3;}*/
 .sep{background:url([[pix:theme|breadcrumb_arrow]]) no-repeat scroll 100% 50%;margin-right:5px;padding:0.98em 7px;}
 /* Calendar
