@@ -23,7 +23,8 @@ if (empty($PAGE->layout_options['noawesomebar'])) {
     $awesome_settings = $topsettings->settings_tree($this->page->settingsnav);
 }
 
-$custommenu = $OUTPUT->custom_menu();
+$custommenu = $OUTPUT->custom_menu(); //comes from decaf/renderers.php render_custom_menu()
+
 $hascustommenu = (empty($PAGE->layout_options['nocustommenu']) && !empty($custommenu));
 
 $courseheader = $coursecontentheader = $coursecontentfooter = $coursefooter = '';
@@ -81,17 +82,25 @@ echo $OUTPUT->doctype() ?>
 if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 	<div id="awesomebar" class="decaf-awesome-bar">
         <?php
-            if( $this->page->pagelayout != 'maintenance' // Don't show awesomebar if site is being upgraded
-                && !(get_user_preferences('auth_forcepasswordchange') && !session_is_loggedinas()) // Don't show it when forcibly changing password either
-              ) {
-                echo $awesome_nav;
-                if ($hascustommenu && !empty($PAGE->theme->settings->custommenuinawesomebar) && empty($PAGE->theme->settings->custommenuafterawesomebar)) {
+            if ( 
+            	$this->page->pagelayout != 'maintenance' // Don't show awesomebar if site is being upgraded
+                && 
+                !(get_user_preferences('auth_forcepasswordchange') && !session_is_loggedinas()) // Don't show it when forcibly changing password either
+              )
+              {
+                if ($hascustommenu && !empty($PAGE->theme->settings->custommenuinawesomebar) && empty($PAGE->theme->settings->custommenuafterawesomebar))
+                {
                     echo $custommenu;
                 }
+                
+                //Course administration menu
                 echo $awesome_settings;
-                if ($hascustommenu && !empty($PAGE->theme->settings->custommenuinawesomebar) && !empty($PAGE->theme->settings->custommenuafterawesomebar)) {
+                
+                if ($hascustommenu && !empty($PAGE->theme->settings->custommenuinawesomebar) && !empty($PAGE->theme->settings->custommenuafterawesomebar))
+                {
                     echo $custommenu;
                 }
+                
                 echo $topsettings->settings_search_box();
             }
         ?>
