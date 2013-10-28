@@ -1018,9 +1018,11 @@ color: #333;
 			font-weight:normal;
 			margin:0 1px;
 			font-size:13px;
+			border: 0px;
 		}
 		.paging .btn.selected {
-			background:#fff;
+			background:#1662A3;
+			color: #fff;
 		}
 
 /** Custom CSS **/
