@@ -1106,6 +1106,17 @@ a:hover,a:active {color: #D45A10;}
 	font-size:2.5em;
 	line-height:normal;
 }
+.local-alert,
+.global-alert,
+.dnet-row {
+    margin-left:100px;
+    margin-right:100px;
+    margin-bottom:10px;
+    padding: 15px 20px;
+    background-color: #fff;
+    border-top: 2px solid #D45A10; 
+    border-bottom: 2px solid #D45A10;
+}
 /** Custom CSS **/
 [[setting:customcss]]
 
