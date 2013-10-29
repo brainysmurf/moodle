@@ -5,7 +5,7 @@
  * @version		2013-10-07 08:57
  * @Copyright   GNU GENERAL PUBLIC LICENSE Version 3.0
  */
- 
+
 /* Awesomebar - workings and structure */
 #awesomebar { 
 	position:fixed;
@@ -109,7 +109,7 @@
 		#awesomebar li.scroll-up:hover,
 		#awesomebar li.scroll-down:hover {
 			cursor:pointer !important;
-			background-color:#595959;
+			background-color:#060606;
 		}
 		
 		#awesomebar li.scroll-down {
@@ -150,9 +150,12 @@
 	/* !Awesomebar appearance */
 
 	#awesomebar a:visited,
-	#awesomebar a:hover,
 	#awesomebar a:link {
 		color:#D45A10;
+	}
+
+	#awesomebar a:hover {
+		color:#FAF955;
 	}
 
 	#awesomebar hr { 
@@ -178,8 +181,9 @@
 
 	#awesomebar li:hover,
 	#awesomebar li.hover {
-		background-color:#595959 !important;
+		background-color:#060606 !important;
 		cursor:default;
+		color: #FAF955;
 	}
 
 	#awesomebar li {
