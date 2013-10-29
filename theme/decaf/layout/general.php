@@ -104,17 +104,19 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 
    <?php
 	   	$headerPhotos = array(
+				      /*
 	   		'header-0.jpg',
 	   		'header-1.jpg',
 	   		'header-2.jpg',
 	   		'header-3.jpg',
-	   		'header-4.jpg'
+	   		'header-4.jpg', */
+			'header-5.jpg'
 	   	);
 	   	global $SESSION;
 	   	if ( isset($_GET['header']) ) { $headerPhoto = $_GET['header']; }
 	   	else if ( isset($SESSION) && isset($SESSION->headerPhoto) ) { $headerPhoto = $SESSION->headerPhoto; }
 	   	else { $headerPhoto = rand(0,4); }
-	   	$headerBg = '/theme/decaf/pix/'.$headerPhotos[ $headerPhoto ];
+                $headerBg = '/theme/decaf/pix/header-5.jpg';  //.$headerPhotos[1];
    ?>   
 
     <div id="page-header" style="background-image:url(<?php echo $headerBg; ?>);">

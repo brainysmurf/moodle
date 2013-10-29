@@ -152,7 +152,7 @@
 	#awesomebar a:visited,
 	#awesomebar a:hover,
 	#awesomebar a:link {
-		color:#BDBDBD;
+		color:#D45A10;
 	}
 
 	#awesomebar hr { 
@@ -166,8 +166,8 @@
 	
 	#awesomebar,
 	#awesomebar li {
-		background-color:#333;
-		color:#BDBDBD;
+		background-color:#060606;
+		color:#D45A10;
 	}
 		#awesomebar li {
 			-webkit-transition: background 0.2s ease-in-out;
