@@ -59,8 +59,6 @@ $renderer = $PAGE->get_renderer('format_onetopic');
 $sectionnum = optional_param('section', -1, PARAM_INT);
 $sectionid = optional_param('sectionid', -1, PARAM_INT);
 
-echo $sectionid;
-
 if ( isset($sectionnum) && $sectionnum >= 0 )
 {
         //$USER->display[$course->id] = $section;
