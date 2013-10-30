@@ -59,15 +59,19 @@ $renderer = $PAGE->get_renderer('format_onetopic');
 $sectionnum = optional_param('section', -1, PARAM_INT);
 $sectionid = optional_param('sectionid', -1, PARAM_INT);
 
+echo $sectionid;
+
 if ( isset($sectionnum) && $sectionnum >= 0 )
 {
-	#$USER->display[$course->id] = $section;
+        //$USER->display[$course->id] = $section;
 	$displaysection = $sectionnum;
 } 
 else if ( isset($sectionid) && $sectionid > 0 )
 {
 	// $section is set in /course/view.php:42 if a sectionid was given in the url
-	$displaysection = $section['section'];
+	//$displaysection = $section['section'];  
+        // section is already an integer...
+	$displaysection = $section;  
 }
 else
 {

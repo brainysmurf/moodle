@@ -165,7 +165,6 @@ class format_onetopic_renderer extends format_section_renderer_base {
      */
     public function print_single_section_page($course, $sections, $mods, $modnames, $modnamesused, $displaysection) {
         global $PAGE, $USER;
-        
         $real_course_display = $course->realcoursedisplay;
         $modinfo = get_fast_modinfo($course);
         $course = course_get_format($course)->get_course();
@@ -321,7 +320,6 @@ class format_onetopic_renderer extends format_section_renderer_base {
 					//$sectionname = $thissection->name;
 					$sectionname = get_section_name($course, $thissection->section);
 					$sectionid = $thissection->id;
-
                     if ($displaysection != $section) {
                         $sectionmenu[$section] = $sectionname;
                     }
