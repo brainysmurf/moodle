@@ -62,7 +62,7 @@
 			padding-left:10px;
 			padding-right:10px;
 			position:relative;
-		}   
+		}
 			/* Menu icons */
 			#awesomebar ul.dropdown i {
 				display:inline-block;
@@ -160,7 +160,7 @@
 
 	#awesomebar hr { 
 		color:#1a1a1a;
-		background-color:#1a1a1a;
+		background-color:#999;
 		border:1px #1a1a1a;
 		height:1px;
 		padding:0;
@@ -202,3 +202,30 @@
 #awesomebar > ul { margin-left:1px; }
 #awesomebar > ul > li:first-child { border-left:0; }
 #awesomebar ul.dropdown > li.hover > ul { left:-1px; }
+
+
+	#awesomebar a:hover {
+		color:#FAF955;
+	}
+
+	#awesomebar,
+	#awesomebar li {
+		background-color:#1F1F1F;
+		color:#EEE;
+	}
+
+	#awesomebar li:hover,
+	#awesomebar li.hover {
+		background-color:#999 !important;
+		cursor:default;
+		color: #EEE;
+	}
+
+	#awesomebar a:visited,
+	#awesomebar a:link {
+		color:#EEE;
+	}
+
+	#awesomebar a:hover {
+		color:#EEE;
+	}

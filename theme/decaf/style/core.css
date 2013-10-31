@@ -56,7 +56,7 @@ a:hover,a:active {color: #1662A3;}
 	float:none;
 	margin: 0;
 	padding: 0;
-	color:#FFF;
+	color:#EEE;
 	font-size:2.5em;
 	font-weight:700;
 	letter-spacing:-1px;
@@ -1023,100 +1023,6 @@ color: #333;
 			color: #fff;
 		}
 
-a:link,a:visited {color: #D45A10;}
-a:hover,a:active {color: #D45A10;}
-#page-header{
-	float:none;
-	background:#060606;
-	background-position:center right;
-	background-repeat: no-repeat;
-	border-bottom:1px solid #cbcbcb;
-	margin-right:0;
-	color: #D45A10;
-	position:relative;
-	min-height:144px;
-}
-	#page-header-gradient {
-		position: absolute;
-		top:0;
-		bottom:0;
-		right:0;
-		width:0px;
-		background: -moz-linear-gradient(left , rgb(212,91,16) 25%, rgb(245,212,0) 0%);
-		background: -webkit-linear-gradient(left , rgb(212,91,16) 25%, rgb(245,212,0) 0%);
-		background: -webkit-linear-gradient(left , rgb(212,91,16) 25%, rgb(245,212,0) 0%);
-		background: -o-linear-gradient(left , rgb(212,91,16) 25%, rgb(245,212,0) 0%);
-		background: -ms-linear-gradient(left , rgb(212,91,16) 25%, rgb(245,212,0) 0%);
-		background: linear-gradient(left , rgb(212,91,16) 25%, rgb(245,212,0) 0%);
-		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', endColorstr='#001662a3',GradientType=1 );
-	}
-
-
-.paging .btn.selected {
-    background:#D45A10;
-    color: #fff;
-}
-			.tabs ul li > span.selected {
-				font-weight:normal;
-				background:#D45A10;
-				font-size:12px;
-				color: #FFF;
-				border-color: #D45A10 !important;
-			}
-
-		.login-reminder {
-			margin:0 auto 0;
-			min-height:50px;
-			line-height: 22px;
-			padding: 15px;
-			background-color:#fff;
-			border-top: 2px solid #D45A10; 
-			border-bottom: 2px solid #D45A10;
-		}
-#back-to-top a.arrow {
-	padding: 5px 10px;
-	font-size: 36px;
-	color: #D45A10;
-	background: #EEE;
-	border: 1px solid #CCC;
-	border-bottom: 1px solid #AAA;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-}
-		.paging .btn.selected {
-			background:#D45A10;
-			color: #fff;
-		}
-.dnet-row {
-    margin-left:100px;
-    margin-right:100px;
-    margin-bottom:10px;
-    padding: 15px 20px;
-    background-color: #fff;
-    border-top: 2px solid #D45A10; 
-    border-bottom: 2px solid #D45A10;
-}
-
-#page-header .headermain{
-	float:none;
-	margin: 0;
-	padding: 0;
-	color:#D45A10;
-	font-size:2.5em;
-	line-height:normal;
-}
-.local-alert,
-.global-alert,
-.dnet-row {
-    margin-left:100px;
-    margin-right:100px;
-    margin-bottom:10px;
-    padding: 15px 20px;
-    background-color: #fff;
-    border-top: 2px solid #D45A10; 
-    border-bottom: 2px solid #D45A10;
-}
 /** Custom CSS **/
 [[setting:customcss]]
 
