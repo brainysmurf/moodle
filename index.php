@@ -68,45 +68,12 @@
     }
 
     // Implement ssis's need to have the frontpage redirect
-    
-    //Get necessary cohort ids
-	$cohort_ids = cohorts_get_all_ids();
-	
-	$redirect_url = $CFG->wwwroot . '/course/view.php?id=1395&section=';
-	
-    if ( $SESSION->userIsParent ) #cohort_is_member($parents_cohort, $USER->id) )
-    {
-        redirect( $redirect_url.'6' );
-    }
-    else if ( cohort_is_member($cohort_ids['studentsHS'], $USER->id) )
-    {
-		redirect( $redirect_url.'2' );
-    }
-	else if ( cohort_is_member($cohort_ids['studentsMS'], $USER->id) )
-	{
-		redirect( $redirect_url.'3' );
-    }
-    else if ( cohort_is_member($cohort_ids['studentsELEM'], $USER->id) )
-    {
-        redirect( $redirect_url.'10' );
-    }
-    else if ( cohort_is_member($cohort_ids['teachersSEC'], $USER->id) )
-	{
-		redirect( $redirect_url.'5' );
-    }
-    else if ( cohort_is_member($cohort_ids['teachersELEM'], $USER->id) )
-    {
-		redirect( $redirect_url.'4' );
-    }
-    else if ( cohort_is_member($cohort_ids['supportstaffALL'], $USER->id) )
-    {
-		redirect( $redirect_url.'8' );
-    }
-    else if ( cohort_is_member($cohort_ids['adminALL'], $USER->id) )
-    {
-		redirect( $redirect_url.'7' );
-    }
 
+	if ( $SESSION->userHasRedirect )
+	{	
+		echo $SESSION->userHasRedirect;
+		redirect( $SESSION->userHasRedirect );
+	}
 
     if (get_home_page() != HOMEPAGE_SITE) {
         // Redirect logged-in users to My Moodle overview if required
