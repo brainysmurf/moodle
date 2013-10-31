@@ -124,7 +124,7 @@
 
 
 		#awesomebar ul.blurry li {
-			background:rgba(51,51,51,1);
+			background:#060606;
 		}
 			#awesomebar ul.blurry li a {
 				-webkit-filter: none;
@@ -135,7 +135,7 @@
 			}
 			
 	#awesomebar ul.blurry > li {
-		background:rgba(51,51,51,.85);
+		background:#;
 	}
 		#awesomebar ul.blurry > li > a,
 		#awesomebar ul.blurry > li > i,
