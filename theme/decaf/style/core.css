@@ -1,12 +1,10 @@
 html{background-color:[[setting:backgroundcolor]];}
 body,h1,h2,h3,h4,h5,h6,p,ul,ol,dl,input,textarea{font-family:"Tahoma",Arial, Helvetica, sans-serif;}
 .wrapper {margin: 0 25px;}
-h1,h2,h3,h4,h5,h6,p{text-shadow:0 1px 0 #FFF;}
+/* h1,h2,h3,h4,h5,h6,p{text-shadow:0 1px 0 #FFF;} */
 p:last-child { margin-bottom:0; }
 body input{font-family:"Tahoma",Arial,Helvetica,sans-serif;}
 select,input,button,textarea{font-size:0.9em;}
-a:link,a:visited {color: #1662A3;}
-a:hover,a:active {color: #1662A3;}
 a img {border: none;}
 a:active {outline: none;}
 .singleselect option {text-align:left;}
@@ -15,6 +13,9 @@ a:active {outline: none;}
 		-moz-box-sizing: border-box;
 		box-sizing: border-box;
 	}
+a:link,a:visited {color: #1662A3;}
+a:hover,a:active {color: #1662A3;}
+
 /* Header
 ------------------------- */
 #page-header{
@@ -31,6 +32,8 @@ a:active {outline: none;}
 #page-header-wrapper{
 	margin:0;
 	padding: 49px 30px 53px 48px; /* Vertically center the page title */	
+	position: relative;
+	z-index: 2;
 }
 
 	#page-header-gradient {
@@ -39,18 +42,13 @@ a:active {outline: none;}
 		bottom:0;
 		right:0;
 		width:800px;
-background: -moz-linear-gradient(left,  rgba(22,98,163,1) 0%, rgba(22,98,163,0.7) 10%, rgba(22,98,163,0) 33%, rgba(22,98,163,0) 100%);
-background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(22,98,163,1)), color-stop(10%,rgba(22,98,163,0.7)), color-stop(33%,rgba(22,98,163,0)), color-stop(100%,rgba(22,98,163,0)));
-background: -webkit-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
-background: -o-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
-background: -ms-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
-background: linear-gradient(to right,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', endColorstr='#001662a3',GradientType=1 );
-
-
-
-
-
+		background: -moz-linear-gradient(left,  rgba(22,98,163,1) 0%, rgba(22,98,163,0.7) 10%, rgba(22,98,163,0) 33%, rgba(22,98,163,0) 100%);
+		background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(22,98,163,1)), color-stop(10%,rgba(22,98,163,0.7)), color-stop(33%,rgba(22,98,163,0)), color-stop(100%,rgba(22,98,163,0)));
+		background: -webkit-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+		background: -o-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+		background: -ms-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+		background: linear-gradient(to right,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', endColorstr='#001662a3',GradientType=1 );
 	}
 
 #page-header .sitelogo {float:left;margin:0.75em 0;}
@@ -58,14 +56,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', end
 	float:none;
 	margin: 0;
 	padding: 0;
-	color:#FFF;
+	color:#EEE;
 	font-size:2.5em;
 	font-weight:700;
 	letter-spacing:-1px;
-	text-decoration:none;
-	text-transform:none;
-	text-shadow:4px 2px 0 #414141;
-	-webkit-font-smoothing: antialised;
 	line-height:normal;
 }
 #page-header .headermenu {width:235px;}
@@ -785,9 +779,9 @@ body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questionca
     margin-right:100px;
     margin-bottom:10px;
     padding: 15px 20px;
-    background-color: #fff; 
-	border-top: 2px solid #1662A3; 
-	border-bottom: 2px solid #1662A3;
+    background-color: #fff;
+    border-top: 2px solid #1662A3; 
+    border-bottom: 2px solid #1662A3;
 }
 	.section .local-alert {
 		margin-top:10px;
@@ -1031,3 +1025,4 @@ color: #333;
 
 /** Custom CSS **/
 [[setting:customcss]]
+

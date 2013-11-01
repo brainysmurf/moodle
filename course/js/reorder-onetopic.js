@@ -6,8 +6,20 @@ $(function(){
 
 	function enableReordering()
 	{
-		//Show delete buttons
-		$('.tabs .delete_section').removeClass('hide');
+		//Add the delete section button
+		$('.tabs .selected').each(function()
+		{
+			var section = $(this).attr('data-section'); 
+			if ( section == 0 )
+			{
+				$(this).append('<a class="btn delete_section" href="#" title="You can\'t delete the first section" onclick="return false;"><i class="icon-ban-circle"></i></a>');
+			}
+			else
+			{
+				var url = '/course/delete_section.php?courseid='+courseID+'&amp;section='+section;
+				$(this).append('<a class="btn delete_section" href="'+url+'" title="Delete this section"><i class="icon-trash"></i></a>');	
+			}
+		});
 		
 		$('#reorderSectionsButton').addClass('selected');
 		$('.tabs').prepend('<div id="reorderSectionsAlert" class="local-alert"><i class="icon-move pull-left"></i> Drag and drop tabs (sections) to rearrange them. Your changes will be saved automatically.<br/><span class="small"><strong>Note:</strong> the first section cannot be moved.</span></div>');
@@ -57,7 +69,7 @@ $(function(){
 		$('#reorderSectionsAlert').slideUp(function(){ $(this).remove(); });
 		$('.tabs > ul').sortable('destroy');
 		//Hide delete buttons
-		$('.tabs .delete_section').addClass('hide');
+		$('.tabs .delete_section').remove();
 	}
 	
 	$(document).on('click','#reorderSectionsButton',function()

@@ -2894,12 +2894,13 @@ class tabobject implements renderable {
      * @param string $title title under the link, by defaul equals to text
      * @param bool $linkedwhenselected whether to display a link under the tab name when it's selected
      */
-    public function __construct($id, $link = null, $text = '', $title = '', $linkedwhenselected = false) {
+    public function __construct($id, $link = null, $text = '', $title = '', $linkedwhenselected = false, $data=array()) {
         $this->id = $id;
         $this->link = $link;
         $this->text = $text;
         $this->title = $title ? $title : $text;
         $this->linkedwhenselected = $linkedwhenselected;
+		$this->data = $data;
     }
 
     /**

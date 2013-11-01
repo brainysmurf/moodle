@@ -5,13 +5,27 @@ $(function()
 	/*
 	*	Settings
 	*/
-	var menuShowDelay = 150; //How long (in milliseconds) to wait before showing a menu
+	var menuShowDelay = 200; //How long (in milliseconds) to wait before showing a menu
 	var menuHideDelay = 500; //How long (in milliseconds) to keep menus open for after mouse leaves them
 	var liHeight = 32; //How tall (in pixels) is each item in the menu
 //	var menuSlideTime = 1000; //How long (in milliseconds) to animate the sliding when scrolling a menu
 	var menuHoverScrollTime = 200; //When hovering over the more or less button in a collapsed menu, scroll 1 item every x milliseconds
 	
 	var touchEnabled = iOS || 'ontouchstart' in window || window.navigator.msPointerEnabled;
+
+	//Open menus on click
+	$('#awesomebar li').on('click',function(e)
+	{
+		clearTimeout(menuShowTimeout);
+		clearTimeout(menuHideTimeout);
+		openMenu(this);	
+		e.stopPropagation();
+	});
+	
+	$(document).on('click',':not(#awesomebar)',function(e)
+	{
+		closeAllMenus();
+	});
 
 	/*
 	*	Delayed menu showing and hiding
@@ -28,35 +42,7 @@ $(function()
 		//Show this menu after menuShowDelay
 		menuShowTimeout = setTimeout(function()
 		{
-			//console.log('menuShowTimeout',$(li).text().substring(0,30));
-			
-			if ( $(li).closest('.openLeft').length < 1 )
-			{
-				$('#awesomebar .blurry').removeClass('blurry');
-			}
-			$('#awesomebar li.hover').removeClass('hover').trigger('hide'); //Close other open menus
-			$(li).addClass('hover').trigger('show'); //Keep this menu open
-			$(li).parents('li').addClass('hover').trigger('show'); //Keep the parents of this menu open
-			
-			//Move submenus so they aren't cut off
-			$(li).children('ul').each(function()
-			{
-				repositionChildMenu(this);
-				if ( $(this).hasClass('openLeft') )
-				{
-					//Select all this menus parent menus, except the first one and the horizontal awesomebar, and make them blurry
-					var i = 0;
-					$(this).parents('ul:not(#awesomebar > ul)').each(function()
-					{
-						i++;
-						if ( i != 1 )
-						{
-							$(this).addClass('blurry');
-						}
-					});
-				}
-			});	
-			
+			openMenu(li);
 		},menuShowDelay);
 		
 		e.stopPropagation();
@@ -72,12 +58,45 @@ $(function()
 		menuHideTimeout = setTimeout(function()
 		{
 			//console.log('menuHideTimeout',$(li).text().substring(0,30));
-			
 			$(li).removeClass('hover').trigger('hide').find('.hover').removeClass('hover').trigger('hide');
 		},menuHideDelay);
 	});
 	
+	function closeAllMenus()
+	{
+		$('#awesomebar .hover').removeClass('hover').trigger('hide');
+	}
 	
+	function openMenu( li )
+	{
+		//console.log('openMenu',$(li).text().substring(0,30));
+		if ( $(li).closest('.openLeft').length < 1 )
+		{
+			$('#awesomebar .blurry').removeClass('blurry');
+		}
+		$('#awesomebar li.hover').removeClass('hover').trigger('hide'); //Close other open menus
+		$(li).addClass('hover').trigger('show'); //Keep this menu open
+		$(li).parents('li').addClass('hover').trigger('show'); //Keep the parents of this menu open
+		
+		//Move submenus so they aren't cut off
+		$(li).children('ul').each(function()
+		{
+			repositionChildMenu(this);
+			if ( $(this).hasClass('openLeft') )
+			{
+				//Select all this menus parent menus, except the first one and the horizontal awesomebar, and make them blurry
+				var i = 0;
+				$(this).parents('ul:not(#awesomebar > ul)').each(function()
+				{
+					i++;
+					if ( i != 1 )
+					{
+						$(this).addClass('blurry');
+					}
+				});
+			}
+		});	
+	}
 	
 		
 	/*
