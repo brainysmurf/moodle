@@ -59,7 +59,8 @@ class format_onetopic extends format_base {
             return format_string($section->name, true,
                     array('context' => context_course::instance($this->courseid)));
         } else {
-            return get_string('sectionname', 'format_onetopic') . ' ' . $section->section;
+			return 'Unnamed Section';
+            #return get_string('sectionname', 'format_onetopic') . ' ' . $section->section;
         }
     }
 
@@ -249,9 +250,9 @@ class format_onetopic extends format_base {
                     'element_type' => 'select',
                     'element_attributes' => array(
                         array(
-                            COURSE_DISPLAY_SINGLEPAGE => new lang_string('coursedisplay_single'),
-                            COURSE_DISPLAY_MULTIPAGE => new lang_string('coursedisplay_multi')
-                        )
+                            COURSE_DISPLAY_SINGLEPAGE => 'Show the first section as its own tab',
+                            COURSE_DISPLAY_MULTIPAGE => 'Show the first section at the top of every tab'
+						)
                     ),
                     'help' => 'coursedisplay',
                     'help_component' => 'moodle',

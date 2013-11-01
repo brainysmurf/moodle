@@ -69,33 +69,11 @@
 
     // Implement ssis's need to have the frontpage redirect
 
-    $elem_student_cohort = $DB->get_record('cohort', array('idnumber'=>'studentsELEM'))->id;
-    $ms_student_cohort = $DB->get_record('cohort', array('idnumber'=>'studentsMS'))->id;
-    $hs_student_cohort = $DB->get_record('cohort', array('idnumber'=>'studentsHS'))->id;
-    $sec_teacher_cohort = $DB->get_record('cohort', array('idnumber'=>'teachersSEC'))->id;
-    $elem_teacher_cohort = $DB->get_record('cohort', array('idnumber'=>'teachersELEM'))->id;
-    $support_staff_cohort = $DB->get_record('cohort', array('idnumber'=>'supportstaffALL'))->id;
-    $admin_cohort = $DB->get_record('cohort', array('idnumber'=>'adminALL'))->id;
-    $parents_cohort = $DB->get_record('cohort', array('idnumber'=>'parentsALL'))->id;
-    $frontpage_course_id = 1395;  // DragonNet Frontpage
-
-    if (cohort_is_member($admin_cohort, $USER->id)) {
-	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=7');
-    } else if (cohort_is_member($support_staff_cohort, $USER->id)) {
-	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=8');
-    } else if (cohort_is_member($sec_teacher_cohort, $USER->id)) {
-	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=5');
-    } else if (cohort_is_member($elem_teacher_cohort, $USER->id)) {
-	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=4');
-    } else if (cohort_is_member($ms_student_cohort, $USER->id)) {
-	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=3');
-    } else if (cohort_is_member($hs_student_cohort, $USER->id)) {
-	redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=2');
-    } else if (cohort_is_member($elem_student_cohort, $USER->id)) {
-        redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=10');
-    } else if (cohort_is_member($parents_cohort, $USER->id)) {
-        redirect($CFG->wwwroot . '/course/view.php?id='.$frontpage_course_id.'&section=6');
-    }
+	if ( $SESSION->userHasRedirect )
+	{	
+		echo $SESSION->userHasRedirect;
+		redirect( $SESSION->userHasRedirect );
+	}
 
     if (get_home_page() != HOMEPAGE_SITE) {
         // Redirect logged-in users to My Moodle overview if required

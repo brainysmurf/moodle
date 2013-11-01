@@ -1,0 +1,140 @@
+/*  
+Copy and paste this into the custom css field that decaf theme makes available
+Site Administration -> Appearance -> Themes -> Decaf -> Custom CSS
+Also edit the header this way:
+/theme/decaf/layout/general.php
+Search for $headerBg
+Need to mod it so that only the one is displayed
+Change the assignment line to this:
+$headerBg = '/theme/decaf/pix/halloween.jpg';
+ */
+a:link,a:visited {color: #D45A10;}
+a:hover,a:active {color: #D45A10;}
+#page-header{
+	float:none;
+	background:#060606;
+	background-position:center right;
+	background-repeat: no-repeat;
+	border-bottom:1px solid #cbcbcb;
+	margin-right:0;
+	color: #D45A10;
+	position:relative;
+	min-height:144px;
+}
+	#page-header-gradient {
+		position: absolute;
+		top:0;
+		bottom:0;
+		right:0;
+		width:0px;
+		background: -moz-linear-gradient(left , rgb(212,91,16) 25%, rgb(245,212,0) 0%);
+		background: -webkit-linear-gradient(left , rgb(212,91,16) 25%, rgb(245,212,0) 0%);
+		background: -webkit-linear-gradient(left , rgb(212,91,16) 25%, rgb(245,212,0) 0%);
+		background: -o-linear-gradient(left , rgb(212,91,16) 25%, rgb(245,212,0) 0%);
+		background: -ms-linear-gradient(left , rgb(212,91,16) 25%, rgb(245,212,0) 0%);
+		background: linear-gradient(left , rgb(212,91,16) 25%, rgb(245,212,0) 0%);
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', endColorstr='#001662a3',GradientType=1 );
+	}
+
+.paging .btn.selected {
+    background:#D45A10;
+    color: #fff;
+}
+			.tabs ul li > span.selected {
+				font-weight:normal;
+				background:#D45A10;
+				font-size:12px;
+				color: #FFF;
+				border-color: #D45A10 !important;
+			}
+
+		.login-reminder {
+			margin:0 auto 0;
+			min-height:50px;
+			line-height: 22px;
+			padding: 15px;
+			background-color:#fff;
+			border-top: 2px solid #D45A10; 
+			border-bottom: 2px solid #D45A10;
+		}
+#back-to-top a.arrow {
+	padding: 5px 10px;
+	font-size: 36px;
+	color: #D45A10;
+	background: #EEE;
+	border: 1px solid #CCC;
+	border-bottom: 1px solid #AAA;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+		.paging .btn.selected {
+			background:#D45A10;
+			color: #fff;
+		}
+.dnet-row {
+    margin-left:100px;
+    margin-right:100px;
+    margin-bottom:10px;
+    padding: 15px 20px;
+    background-color: #fff;
+    border-top: 2px solid #D45A10; 
+    border-bottom: 2px solid #D45A10;
+}
+
+#page-header .headermain{
+	float:none;
+	margin: 0;
+	padding: 0;
+	color:#D45A10;
+	font-size:2.5em;
+	line-height:normal;
+}
+.local-alert,
+.global-alert,
+.dnet-row {
+    margin-left:100px;
+    margin-right:100px;
+    margin-bottom:10px;
+    padding: 15px 20px;
+    background-color: #fff;
+    border-top: 2px solid #D45A10; 
+    border-bottom: 2px solid #D45A10;
+}
+
+
+# Buttons
+ul.buttons a.btn {
+	   color:#D45A10;
+}
+
+#awesomebar a:visited,
+#awesomebar a:link {
+   color:#D45A10;
+}
+
+#awesomebar a:hover {
+  color:#FAF955;
+}
+
+#awesomebar,
+#awesomebar li {
+   background-color:#060606;
+   color:#D45A10;
+}
+
+#awesomebar li:hover,
+#awesomebar li.hover {
+   background-color:#999 !important;
+   cursor:default;
+   color: #D45A10;
+}
+
+#awesomebar a:visited,
+#awesomebar a:link {
+   color:#D45A10;
+}
+
+#awesomebar a:hover {
+   color:#D45A10;
+}

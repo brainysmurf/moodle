@@ -6,7 +6,7 @@ if (!empty($CFG->themedir) and file_exists("$CFG->themedir/decaf")) {
 }
 
 $hasheading = ($PAGE->heading);
-$hasnavbar = (empty($PAGE->layout_options['nonavbar']) && $PAGE->has_navbar());
+$hasnavbar = ( $PAGE->bodyid != 'page-site-index' && empty($PAGE->layout_options['nonavbar']) && $PAGE->has_navbar());
 $hasfooter = (empty($PAGE->layout_options['nofooter']));
 
 // $PAGE->blocks->region_has_content('region_name') doesn't work as we do some sneaky stuff 
@@ -111,7 +111,23 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 
 <?php if ($hasheading || $hasnavbar) { ?>
 
-    <div id="page-header">
+   <?php
+	   	$headerPhotos = array(
+	   		'header-0.jpg',
+	   		'header-1.jpg',
+	   		'header-2.jpg',
+	   		'header-3.jpg',
+	   		'header-4.jpg',
+	   	);
+	   	global $SESSION;
+	   	if ( isset($_GET['header']) ) { $headerPhoto = $_GET['header']; }
+	   	else if ( isset($SESSION) && isset($SESSION->headerPhoto) ) { $headerPhoto = $SESSION->headerPhoto; }
+	   	else { $headerPhoto = rand(0,4); }
+                $headerBg = '/theme/decaf/pix/'.$headerPhotos[$headerPhoto];
+   ?>   
+
+    <div id="page-header" style="background-image:url(<?php echo $headerBg; ?>);">
+    	<div id="page-header-gradient"></div>
 		<div id="page-header-wrapper">
 	        
 	        <?php if ($hasheading) { ?>

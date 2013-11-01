@@ -61,13 +61,15 @@ $sectionid = optional_param('sectionid', -1, PARAM_INT);
 
 if ( isset($sectionnum) && $sectionnum >= 0 )
 {
-	#$USER->display[$course->id] = $section;
+        //$USER->display[$course->id] = $section;
 	$displaysection = $sectionnum;
 } 
 else if ( isset($sectionid) && $sectionid > 0 )
 {
 	// $section is set in /course/view.php:42 if a sectionid was given in the url
-	$displaysection = $section['section'];
+	//$displaysection = $section['section'];  
+        // section is already an integer...
+	$displaysection = $section;  
 }
 else
 {
@@ -81,7 +83,14 @@ else
 		$USER->display[$course->id] = 0;
 		$displaysection = 0;
 	}*/
-	$displaysection = 0;
+	if ( $course->realcoursedisplay ) //First section at top
+	{
+		$displaysection = 1;
+	}
+	else //First section is a tab
+	{
+		$displaysection = 0;
+	}
 }
 
 $renderer->print_single_section_page($course, null, null, null, null, $displaysection);

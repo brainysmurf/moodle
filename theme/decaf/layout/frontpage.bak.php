@@ -83,7 +83,6 @@ if (empty($PAGE->layout_options['noawesomebar'])) {  ?>
 <div id="page">
 
 <!-- START OF HEADER -->
-   
     <div id="page-header" class="clearfix">
 		<div id="page-header-wrapper">
 	        <h1 class="headermain"><?php echo $PAGE->heading ?></h1>

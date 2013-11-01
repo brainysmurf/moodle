@@ -10,7 +10,7 @@ class user_edit_form extends moodleform {
 
     // Define the form
     function definition () {
-        global $CFG, $COURSE, $USER;
+        global $CFG, $COURSE, $USER, $SESSION;
 
         $mform =& $this->_form;
         $editoroptions = null;
@@ -45,7 +45,8 @@ class user_edit_form extends moodleform {
         useredit_shared_definition($mform, $editoroptions, $filemanageroptions);
 
         /// extra settigs
-        if (!empty($CFG->disableuserimages)) {
+        //disable user images is on OR user isn't a parent -> remove the image uploader
+        if ( !empty($CFG->disableuserimages) || !$SESSION->userIsParent ) {
             $mform->removeElement('deletepicture');
             $mform->removeElement('imagefile');
             $mform->removeElement('imagealt');
@@ -58,7 +59,7 @@ class user_edit_form extends moodleform {
     }
 
     function definition_after_data() {
-        global $CFG, $DB, $OUTPUT;
+        global $CFG, $DB, $OUTPUT, $SESSION;
 
         $mform =& $this->_form;
         $userid = $mform->getElementValue('id');
@@ -100,6 +101,14 @@ class user_edit_form extends moodleform {
             /// disable fields that are locked by auth plugins
             $fields = get_user_fieldnames();
             $authplugin = get_auth_plugin($user->auth);
+            
+            //If the user is a parent, allow editing firstname and lastname
+			if ( $SESSION->userIsParent )
+			{      
+				unset($authplugin->config->field_lock_firstname);
+				unset($authplugin->config->field_lock_lastname);
+			}
+            
             foreach ($fields as $field) {
                 if (!$mform->elementExists($field)) {
                     continue;

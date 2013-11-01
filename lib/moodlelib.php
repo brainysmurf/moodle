@@ -4351,6 +4351,73 @@ function complete_user_login($user) {
             print_error('nopasswordchangeforced', 'auth');
         }
     }
+    
+    // SSIS STUFF FOR EACH USER
+    global $SESSION;
+	require_once($CFG->dirroot .'/cohort/lib.php');
+	$redirect_url = $CFG->wwwroot . '/course/view.php?id=1395&section=';
+	
+	// TODO Check for guest user and short circut
+	// FIXME What about staff that are both parents?
+	
+	// FYI SSIS users should be enrolled into at least one cohort, the syncing software
+	//     sees to that	
+	$SESSION->userHasRedirect = 0;
+
+	// The general, non-redirect cohorts
+	$SESSION->userIsTeacher = cohort_is_member_by_idnumber('teachersALL', $USER->id);
+	$SESSION->userIsStudent = cohort_is_member_by_idnumber('studentsALL', $USER->id);
+	$SESSION->userIsSecStudent = cohort_is_member_by_idnumber('studentsSEC', $USER->id);
+
+	// The general, but redirect cohort(s)
+    if ( $SESSION->userIsParent ) #cohort_is_member($parents_cohort, $USER->id) )
+    {
+        $SESSION->userHasRedirect = $redirect_url.'6';
+    }
+	if ( $SESSION->userIsElemStudent = cohort_is_member_by_idnumber('studentsELEM', $USER->id)) 
+	{
+		$SESSION->userHasRedirect = $redirect_url.'10';
+	}
+
+	// The specific redirect cohorts
+	if ($SESSION->userIsParent = cohort_is_member_by_idnumber('parentsALL', $USER->id) )
+	{
+        $SESSION->userHasRedirect = $redirect_url.'6';
+	}
+
+	if ($SESSION->userIsHSStudent = cohort_is_member_by_idnumber('studentsHS', $USER->id))
+	{
+		$SESSION->userHasRedict = $redirect_url.'2';
+	}
+	
+	if ( $SESSION->userIsMSStudent = cohort_is_member_by_idnumber('studentsMS', $USER->id) )
+	{
+		$SESSION->userHasRedict = $redirect_url.'3';
+	}
+	
+	if ($SESSION->userIsSecTeacher = cohort_is_member_by_idnumber('teachersSEC', $USER->id))
+	{
+		$SESSION->userHasRedirect = $redirect_url.'5';
+	}
+
+	if ($SESSION->userIsElemTeacher = cohort_is_member_by_idnumber('teachersELEM', $USER->id))
+	{
+		$SESSION->userHasRedict = $redirect_url.'4';
+	}
+
+	if ($SESSION->userIsSupStaff = cohort_is_member_by_idnumber('supportstaffALL', $USER->id))
+	{
+		$SESSION->userHasRedict = $redirect_url.'8';
+	}
+
+	if ($SESSION->userIsAdminStaff = cohort_is_member_by_idnumber('adminALL', $USER->id))
+	{
+		$SESSION->userHasRedict = $redirect_url.'7';
+	}
+
+    //Pick a photo for the header and keep it for the session
+    $SESSION->headerPhoto = rand(0,4);
+    
     return $USER;
 }
 

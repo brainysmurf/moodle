@@ -242,7 +242,7 @@
 		if ( $PAGE->user_is_editing() && $course->format == 'onetopic' )
 		{
         	//Button for reordering tabs
-	        $buttons .= html_writer::tag('a', 'Rearrange Sections' , array('id'=>'reorderSectionsButton' , 'class'=>'btn' , 'href'=>'#'));
+	        $buttons .= html_writer::tag('a', 'Delete or Rearrange Sections' , array('id'=>'reorderSectionsButton' , 'class'=>'btn' , 'href'=>'#'));
 	        $PAGE->requires->js( new moodle_url($CFG->wwwroot . '/course/js/reorder-onetopic.js') );
 		}
         

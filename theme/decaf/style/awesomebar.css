@@ -5,7 +5,7 @@
  * @version		2013-10-07 08:57
  * @Copyright   GNU GENERAL PUBLIC LICENSE Version 3.0
  */
- 
+
 /* Awesomebar - workings and structure */
 #awesomebar { 
 	position:fixed;
@@ -62,7 +62,7 @@
 			padding-left:10px;
 			padding-right:10px;
 			position:relative;
-		}   
+		}
 			/* Menu icons */
 			#awesomebar ul.dropdown i {
 				display:inline-block;
@@ -109,7 +109,7 @@
 		#awesomebar li.scroll-up:hover,
 		#awesomebar li.scroll-down:hover {
 			cursor:pointer !important;
-			background-color:#595959;
+			background-color:#060606;
 		}
 		
 		#awesomebar li.scroll-down {
@@ -124,7 +124,7 @@
 
 
 		#awesomebar ul.blurry li {
-			background:rgba(51,51,51,1);
+			background:#060606;
 		}
 			#awesomebar ul.blurry li a {
 				-webkit-filter: none;
@@ -135,7 +135,7 @@
 			}
 			
 	#awesomebar ul.blurry > li {
-		background:rgba(51,51,51,.85);
+		background:#;
 	}
 		#awesomebar ul.blurry > li > a,
 		#awesomebar ul.blurry > li > a > i,
@@ -152,14 +152,17 @@
 	/* !Awesomebar appearance */
 
 	#awesomebar a:visited,
-	#awesomebar a:hover,
 	#awesomebar a:link {
-		color:#BDBDBD;
+		color:#D45A10;
+	}
+
+	#awesomebar a:hover {
+		color:#FAF955;
 	}
 
 	#awesomebar hr { 
 		color:#1a1a1a;
-		background-color:#1a1a1a;
+		background-color:#999;
 		border:1px #1a1a1a;
 		height:1px;
 		padding:0;
@@ -168,8 +171,8 @@
 	
 	#awesomebar,
 	#awesomebar li {
-		background-color:#333;
-		color:#BDBDBD;
+		background-color:#060606;
+		color:#D45A10;
 	}
 		#awesomebar li {
 			-webkit-transition: background 0.2s ease-in-out;
@@ -180,15 +183,20 @@
 
 	#awesomebar li:hover,
 	#awesomebar li.hover {
-		background-color:#595959 !important;
+		background-color:#060606 !important;
 		cursor:default;
+		color: #FAF955;
 	}
 
 	#awesomebar li {
-		border-color:#404040 #1a1a1a #1a1a1a #505050;
+		border-color:#404040 #505050 #1a1a1a #505050;
 		border-style:solid;
 		border-width:1px;
 	}
+		/* No right border for the last li in the last ul of the awesomebar */
+		#awesomebar > ul:last-child li:last-child {
+			border-right-color:#1a1a1a;
+		}
 		
 /* z-index overrides to prevent other things sitting on top of Awesomebar */
 .filepicker-filelist .filepicker-container, .filemanager.fm-noitems .fm-empty-container {z-index:300;}
@@ -200,3 +208,30 @@
 #awesomebar > ul { margin-left:1px; }
 #awesomebar > ul > li:first-child { border-left:0; }
 #awesomebar ul.dropdown > li.hover > ul { left:-1px; }
+
+
+	#awesomebar a:hover {
+		color:#FAF955;
+	}
+
+	#awesomebar,
+	#awesomebar li {
+		background-color:#1F1F1F;
+		color:#EEE;
+	}
+
+	#awesomebar li:hover,
+	#awesomebar li.hover {
+		background-color:#999 !important;
+		cursor:default;
+		color: #EEE;
+	}
+
+	#awesomebar a:visited,
+	#awesomebar a:link {
+		color:#EEE;
+	}
+
+	#awesomebar a:hover {
+		color:#EEE;
+	}

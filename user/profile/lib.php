@@ -349,7 +349,7 @@ class profile_field_base {
 
 function profile_load_data($user) {
     global $CFG, $DB;
-
+	
     if ($fields = $DB->get_records('user_info_field')) {
         foreach ($fields as $field) {
             require_once($CFG->dirroot.'/user/profile/field/'.$field->datatype.'/field.class.php');
@@ -530,4 +530,70 @@ function profile_load_custom_fields($user) {
     $user->profile = (array)profile_user_record($user->id);
 }
 
+/**
+ * Takes some text and replaces occurrences of {{USER:fieldname}} with the applicable profile fields
+ */
+function parse_user_fields_in_text( $text , $user=null )
+{
+	//Check for empty string
+	if ( !trim($text) ) { return $text; }
+
+	$custom_fields_loaded = false; //Don't load custom fields if we don't have to
+
+	//Use current logged in user if no user was given
+	if ( $user === null )
+	{
+		if ( !isloggedin() ) { return $text; }
+		global $USER;
+		$user = $USER;
+		$custom_fields_loaded = true;
+	}
+	if ( !$user ) { return $text; }
+
+	if ( preg_match_all('%\{\{USER:([a-zA-Z]+)\}\}%',$text,$matches) )
+	{
+		for ( $i=0 ; $i<count($matches[0]); $i++ )
+		{
+			$find = $matches[0][$i];
+			$field = $matches[1][$i];
+			$replacement = null;
+
+			if ( isset($user->$field) )
+			{
+				$replacement = $user->$field;
+				if ( !$replacement ) { $replacement = '&nbsp;'; }
+			}
+			else
+			{
+				if ( !$custom_fields_loaded )
+				{
+					//Load custom fields
+					profile_load_data($user);
+					$custom_fields_loaded = true;
+				}
+
+				if ( isset($user->{"profile_field_$field"}) )
+				{
+					if ( is_array($user->{"profile_field_$field"}) )
+					{
+						$replacement = $user->{"profile_field_$field"}['text'];
+					}
+					else
+					{
+						$replacement = $user->{"profile_field_$field"};
+					}
+
+					if ( !$replacement ) {$replacement = '&nbsp;'; }
+				}
+			}
+
+			if ( $replacement !== null )
+			{
+				$text = str_replace($find,$replacement,$text);
+			}
+		}
+	}
+
+	return $text;
+}
 
