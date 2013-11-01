@@ -138,8 +138,10 @@
 		background:rgba(51,51,51,.85);
 	}
 		#awesomebar ul.blurry > li > a,
-		#awesomebar ul.blurry > li > i,
-		#awesomebar ul.blurry > li > span {
+		#awesomebar ul.blurry > li > a > i,
+		#awesomebar ul.blurry > li > span,
+		#awesomebar ul.blurry > li > span > i
+		{
 			-webkit-filter: blur(2px);
 		    -moz-filter: blur(2px);
 		    -o-filter: blur(2px);
