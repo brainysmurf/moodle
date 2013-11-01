@@ -135,7 +135,10 @@
 			}
 			
 	#awesomebar ul.blurry > li {
-		background:#;
+		background:rgba(6,6,6,.85);
+	}
+	#awesomebar ul.blurry > li.hover {
+		background-color:rgba(153,153,153,.85) !important;
 	}
 		#awesomebar ul.blurry > li > a,
 		#awesomebar ul.blurry > li > i,
