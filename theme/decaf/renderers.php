@@ -189,67 +189,6 @@ class theme_decaf_core_renderer extends core_renderer {
         return $output;
     }
 
-
-       
-
-
-
-     
-
-    /*static function in_teaching_learning($element)
-    {
-        return $element->name == 'Teaching & Learning';
-    }
-
-    public function setup_guest_courses() {
-        $this->my_courses = array_filter(get_course_category_tree(), "theme_decaf_core_renderer::in_teaching_learning");
-    }*/
-
-   /* protected function add_category_to_custom_menu_for_admins($menu, $category) {
-        // We use a sort starting at a high value to ensure the category gets added to the end
-        static $sort = 1000;
-	$old_sort = $sort;
-	if (!($category->parent == '0')) {
-	    $url = new moodle_url('/course/category.php', array('id' =>  $category->id));
-	} else {
-	    $url = NULL;
-	}
-	$node = $menu->add($category->name, $url, NULL, NULL, $old_sort++);
-
-        // Add subcategories to the category node by recursivily calling this method.
-        $subcategories = $category->categories;
-        foreach ($subcategories as $subcategory) {
-            $this->add_category_to_custom_menu_for_admins($node, $subcategory);
-        }
-
-        // Now we add courses to the category node in the menu
-        $courses = $category->courses;
-        foreach ($courses as $course) {
-            $node->add($course->fullname, new moodle_url('/course/view.php', array('id' => $course->id)), $course->fullname);
-        }
-	$sort = $old_sort + 2;
-    } */
-
-    /*protected function add_to_custom_menu($menu, $cat_name, $array) {
-      global $CFG;
-
-	foreach ($array as $a) {
-	    $categories_no_click = NULL; // no clicking, change this to a url if you want clicking
-
-	    if ($a->name == 'Invisible') { continue; }
-
-	    $node = $menu->add($a->name, $categories_no_click, NULL, NULL, $a->sortorder);
-	    if ($a->name == 'Teaching & Learning') {
-	        $this->teachinglearningnode = $node;
-	    }
-
-            $this->add_to_custom_menu($node, $a->name, $a->categories);
-	    
-            foreach ($a->courses as $course) {
-	      $node->add($course->fullname, new moodle_url('/course/view.php', array('id' => $course->id)), $course->fullname);
-            }
-        }
-    } */
     
     // !SSIS Awesomebar
 
@@ -264,7 +203,7 @@ class theme_decaf_core_renderer extends core_renderer {
      */
     protected function render_custom_menu( custom_menu $menu )
     {
-        global $CFG, $USER;
+        global $CFG, $USER, $SESSION;
 	
 		$loggedIn = isloggedin();
 	
@@ -293,7 +232,8 @@ class theme_decaf_core_renderer extends core_renderer {
 				//Course Menus
 				//Each top level category becomes a button on the awesomebar
 				//The dropdown for that button shows the courses / categories within it
-				if ( !has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM)) || $this->page->course->id != '1266' )
+				 //Show courses unless it's an admin on course 1266 (so that there's more room for the site admin menu)
+				if ( !$SESSION->userIsAdmin || $this->page->course->id != '1266' )
 				{
 					$menus = $this->get_course_menus();
 					$content .= $this->render_array_as_menu_item($menus);
@@ -590,8 +530,9 @@ class theme_decaf_core_renderer extends core_renderer {
 			//TODO: Change this to not use depreciated metho
 			$allCategories = get_course_category_tree();
 			
+			global $SESSION;
 	    	//Show all courses to admins
-	        if ( has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM)) )
+	        if ( $SESSION->userIsAdmin )
 			{
 			    return $allCategories;
 			}
@@ -737,14 +678,14 @@ class theme_decaf_core_renderer extends core_renderer {
 
 	private function get_course_menus()
 	{
+		global $SESSION;
 		$courses = $this->get_my_courses();
-		$admin = has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM));
 
 		$menu = array();		
 		foreach ( $courses as $category )
 		{
 			//Non admins can be enrolled in invisible courses - but we don't want those to appear on the menu
-			if ( $category->name === 'Invisible' && !$admin ) { continue; }
+			if ( $category->name === 'Invisible' && !$SESSION->userIsAdmin ) { continue; }
 			
 			$this->add_category_to_menu($menu,$category);
 		}
