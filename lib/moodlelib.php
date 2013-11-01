@@ -4361,7 +4361,7 @@ function complete_user_login($user) {
 	require_once($CFG->dirroot .'/cohort/lib.php');
 	
 	//These are handy to know throughout the site, but aren't used for frontpage redirects
-	$SESSION->userIsAdmin = has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM));
+	$SESSION->userIsSiteAdmin = has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM));
 	$SESSION->userIsTeacher = cohort_is_member_by_idnumber('teachersALL', $USER->id);
 	$SESSION->userIsStudent = cohort_is_member_by_idnumber('studentsALL', $USER->id);
 	$SESSION->userIsSecStudent = cohort_is_member_by_idnumber('studentsSEC', $USER->id);
@@ -4413,7 +4413,7 @@ function complete_user_login($user) {
 		$SESSION->frontpageSection = 8;
 	}
 
-	if ($SESSION->userIsAdminStaff = cohort_is_member_by_idnumber('adminALL', $USER->id))
+	if ($SESSION->userIsSSISAdmin = cohort_is_member_by_idnumber('adminALL', $USER->id))
 	{
 		$SESSION->frontpageSection = 7;
 	}
