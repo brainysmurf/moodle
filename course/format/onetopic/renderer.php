@@ -287,6 +287,7 @@ class format_onetopic_renderer extends format_section_renderer_base {
 
         while ($section <= $course->numsections) {
             
+            //If we have the "first section at the top" layout, don't show a tab for the first section
             if ($course->realcoursedisplay == COURSE_DISPLAY_MULTIPAGE && $section == 0) {
                 $section++;
                 continue;
