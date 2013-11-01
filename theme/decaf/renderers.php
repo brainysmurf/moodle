@@ -929,20 +929,31 @@ class theme_decaf_core_renderer extends core_renderer {
 		foreach ( $tabobject as $tab )
 		{
 			$ul .= '<li>';
-			
+
+				$attributes = array();
+				if ( count($tab->data) )
+				{
+					foreach ( $tab->data as $key=>$value )
+					{
+						$attributes['data-'.$key] = $value;
+					}
+				}
+
 				if ( $tab->selected || $tab->activated )
 				{
-					$ul .= html_writer::tag('span', $tab->text , array('class'=>'selected'));
+					$attributes['class'] = 'selected';
+					$ul .= html_writer::tag('span', $tab->text , $attributes);
 				}
 				else if ( !($tab->link instanceof moodle_url) )
 	            {
-	                // backward compartibility when link was set as a string instead of an object
+	                // backward compatibility when link was set as a string instead of an object
 	                $ul .= '<a href="'.$tab->link.'" title="'.$tab->title.'">'.$tab->text.'</a>';
 	            }
 	            else
 	            {
 	            	//Tab links
-					$ul .= html_writer::link($tab->link, $tab->text, array('title' => $tab->title));
+					$attributes['title'] = $tab->title;
+					$ul .= html_writer::link($tab->link, $tab->text, $attributes);
 	            }
 	            
 	            if ( !empty($tab->subtree) )

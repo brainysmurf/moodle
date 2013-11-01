@@ -336,7 +336,8 @@ class format_onetopic_renderer extends format_section_renderer_base {
                     //$title is the text shown when hovering over the button
                     // You can add text shown on the button ($label), but if a tab has a very short name it doesn't look great
                     // icon is probably enough anyway
-					if ( $section==$displaysection && $PAGE->user_is_editing() && has_capability('moodle/course:update', $context) )
+                    //Button now added in javascript when reordering is turned on
+					/*if ( $section==$displaysection && $PAGE->user_is_editing() && has_capability('moodle/course:update', $context) )
 					{
 						if ( $section === 0 ) {
 					    	$url = new moodle_url('#');
@@ -353,10 +354,10 @@ class format_onetopic_renderer extends format_section_renderer_base {
 							$icon = '<i class="icon-trash"></i>';
 						} 
 						$tabtext .= '<a class="btn delete_section hide" href="'.$url.'" title="'.$title.'">'.$icon.' '.$label.'</a>';
-					}
+					}*/
         
                     
-                    $tabs[] = new tabobject( 'tab_topic_'.$section, $url, $tabtext, s($sectionname) );
+                    $tabs[] = new tabobject( 'tab_topic_'.$section, $url, $tabtext, s($sectionname) , false , array('section'=>$section, 'sectionid'=>$sectionid) );
                 }
             }
             $section++;
