@@ -14,7 +14,7 @@ $(function()
 	var touchEnabled = iOS || 'ontouchstart' in window || window.navigator.msPointerEnabled;
 
 	//Open menus on click
-	$('#awesomebar li').on('click',function(e)
+	$(document).on('click','#awesomebar li:not(.scroll-btn)',function(e)
 	{
 		clearTimeout(menuShowTimeout);
 		clearTimeout(menuHideTimeout);
@@ -22,7 +22,7 @@ $(function()
 		e.stopPropagation();
 	});
 	
-	$(document).on('click',':not(#awesomebar)',function(e)
+	$(document).on('click',':not(#awesomebar *)',function(e)
 	{
 		closeAllMenus();
 	});
@@ -261,7 +261,6 @@ $(function()
 			repositionChildMenu(this);
 		});	
 	}
-	
 	
 	//Scroll on click
 	$(document).on('click','#awesomebar .scroll-down',function()
