@@ -750,8 +750,13 @@ class theme_decaf_core_renderer extends core_renderer {
 			switch ( substr($course_shortname,0,3) )
 			{
 				case 'ENG': return 'book';
-				case 'GER': return 'euro';
-				case 'CHI': return 'rmb';
+				case 'FOO': return 'food';
+				case 'SPA': case 'GER': return 'euro';
+				case 'CHI': return 'cny';
+				case 'MAH': case 'MAS': case 'MAA': case 'MAT': return 'bar-chart';
+				case 'HRO': return 'home';
+				case 'ARM': return 'music';
+				case 'ARV': return 'facetime-video';
 			}
 		}
     
