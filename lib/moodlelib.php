@@ -4331,6 +4331,9 @@ function complete_user_login($user) {
     // extra session prefs init
     set_login_session_preferences();
 
+	//Pick a photo for the header and keep it for the session
+    $SESSION->headerPhoto = rand(0,4);
+
     if (isguestuser()) {
         // no need to continue when user is THE guest
         return $USER;
@@ -4351,73 +4354,70 @@ function complete_user_login($user) {
             print_error('nopasswordchangeforced', 'auth');
         }
     }
-    
-    // SSIS STUFF FOR EACH USER
+
+
+    // !SSIS STUFF FOR EACH USER
     global $SESSION;
 	require_once($CFG->dirroot .'/cohort/lib.php');
-	$redirect_url = $CFG->wwwroot . '/course/view.php?id=1395&section=';
 	
-	// TODO Check for guest user and short circut
-	// FIXME What about staff that are both parents?
-	
-	// FYI SSIS users should be enrolled into at least one cohort, the syncing software
-	//     sees to that	
-	$SESSION->userHasRedirect = 0;
-
-	// The general, non-redirect cohorts
+	//These are handy to know throughout the site, but aren't used for frontpage redirects
+	$SESSION->userIsAdmin = has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM));
 	$SESSION->userIsTeacher = cohort_is_member_by_idnumber('teachersALL', $USER->id);
 	$SESSION->userIsStudent = cohort_is_member_by_idnumber('studentsALL', $USER->id);
 	$SESSION->userIsSecStudent = cohort_is_member_by_idnumber('studentsSEC', $USER->id);
+	
 
-	// The general, but redirect cohort(s)
-    if ( $SESSION->userIsParent ) #cohort_is_member($parents_cohort, $USER->id) )
-    {
-        $SESSION->userHasRedirect = $redirect_url.'6';
-    }
+	/*
+		Decide which frontpage the user should be redirected to when they visit /inex.php
+		(Redirection happens on /index.php:75)
+		
+		FYI SSIS users should be enrolled into at least one cohort, the syncing software sees to that	
+		
+		FIXME: What about users that are both parents and teachers?
+	*/
+
+	$SESSION->frontpageSection = false;
+
 	if ( $SESSION->userIsElemStudent = cohort_is_member_by_idnumber('studentsELEM', $USER->id)) 
 	{
-		$SESSION->userHasRedirect = $redirect_url.'10';
+		$SESSION->frontpageSection = 10;
 	}
 
-	// The specific redirect cohorts
 	if ($SESSION->userIsParent = cohort_is_member_by_idnumber('parentsALL', $USER->id) )
 	{
-        $SESSION->userHasRedirect = $redirect_url.'6';
+        $SESSION->frontpageSection = 6;
 	}
 
 	if ($SESSION->userIsHSStudent = cohort_is_member_by_idnumber('studentsHS', $USER->id))
 	{
-		$SESSION->userHasRedirect = $redirect_url.'2';
+		$SESSION->frontpageSection = 2;
 	}
 	
 	if ( $SESSION->userIsMSStudent = cohort_is_member_by_idnumber('studentsMS', $USER->id) )
 	{
-		$SESSION->userHasRedirect = $redirect_url.'3';
+		$SESSION->frontpageSection = 3;
 	}
 	
 	if ($SESSION->userIsSecTeacher = cohort_is_member_by_idnumber('teachersSEC', $USER->id))
 	{
-		$SESSION->userHasRedirect = $redirect_url.'5';
+		$SESSION->frontpageSection = 5;
 	}
 
 	if ($SESSION->userIsElemTeacher = cohort_is_member_by_idnumber('teachersELEM', $USER->id))
 	{
-		$SESSION->userHasRedirect = $redirect_url.'4';
+		$SESSION->frontpageSection = 4;
 	}
 
 	if ($SESSION->userIsSupStaff = cohort_is_member_by_idnumber('supportstaffALL', $USER->id))
 	{
-		$SESSION->userHasRedict = $redirect_url.'8';
+		$SESSION->frontpageSection = 8;
 	}
 
 	if ($SESSION->userIsAdminStaff = cohort_is_member_by_idnumber('adminALL', $USER->id))
 	{
-		$SESSION->userHasRedirect = $redirect_url.'7';
+		$SESSION->frontpageSection = 7;
 	}
 
-    //Pick a photo for the header and keep it for the session
-    $SESSION->headerPhoto = rand(0,4);
-    
     return $USER;
 }
 
