@@ -83,7 +83,14 @@ else
 		$USER->display[$course->id] = 0;
 		$displaysection = 0;
 	}*/
-	$displaysection = 0;
+	if ( $course->realcoursedisplay ) //First section at top
+	{
+		$displaysection = 1;
+	}
+	else //First section is a tab
+	{
+		$displaysection = 0;
+	}
 }
 
 $renderer->print_single_section_page($course, null, null, null, null, $displaysection);
