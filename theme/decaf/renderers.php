@@ -394,7 +394,8 @@ class theme_decaf_core_renderer extends core_renderer {
 	            foreach ($menu->get_children() as $item)
 	            {
 	            	print_object($item);
-	                $content .= $this->render_custom_menu_item($item);
+	            	$menu = $this->custom_menu_item_to_array($item);
+	                $content .= $this->render_array_as_menu_item($menu);
 	            }
 				
 				//Course Menus
@@ -414,6 +415,7 @@ class theme_decaf_core_renderer extends core_renderer {
 
 	private function custom_menu_item_to_array( custom_menu_item $menunode )
 	{
+		print_object($menunode);
 		$menu = array();
 		
         // Required to ensure we get unique trackable id's
@@ -421,10 +423,6 @@ class theme_decaf_core_renderer extends core_renderer {
         
         if ($menunode->has_children()) {
         
-        	$menu[] = array(
-        		$menu[] = array( 'text'=>'Login', 'icon'=>'signin', 'url' => '/login' ); //Login button
-        	);
-        	
         	$menu[] = array( 'text'=>'Login', 'icon'=>'signin', 'url' => '/login' );
         	
             // If the child has menus render it as a sub menu
