@@ -311,7 +311,7 @@ a:hover,a:active {color: #1662A3;}
 #region-pre {background:transparent url([[pix:theme|main-divider]]) repeat-y scroll right center;}
 #region-post{background:transparent url([[pix:theme|main-divider]]) repeat-y scroll left center;}
 
-.headingblock, h2.headingblock { border-width:1px;margin:0;padding:5px;font-family:"Tahoma", arial, helvetica, sans-serif;}
+.headingblock, h2.headingblock { border:none;margin:0;padding:5px;font-family:"Tahoma", arial, helvetica, sans-serif;}
 /* YUI messes with IE unless we go overboard here */
 img.iconsmall, .commands a img {height:15px; margin:2px; width:15px; border: 0px solid #808080; padding:1px; -webkit-border-radius:5px;-moz-border-radius: 5px;border-radius:5px; }
 img.iconlarge {width:16px;height:16px;margin:6px 4px 2px 4px;} /* Our icons are only 16x16, so we don't want to stretch them */
