@@ -287,6 +287,7 @@ class theme_decaf_core_renderer extends core_renderer {
 	            {
 	            	$menu = $this->custom_menu_item_to_array($item);
 	                $content .= $this->render_array_as_menu_item($menu);
+	            	unset($menu);
 	            }
 				
 				//Course Menus
@@ -294,7 +295,9 @@ class theme_decaf_core_renderer extends core_renderer {
 				//The dropdown for that button shows the courses / categories within it
 				if ( !has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM)) || $this->page->course->id != '1266' )
 				{
-					$content .= $this->render_array_as_menu_item( $this->get_course_menus() );
+					$menus = $this->get_course_menus();
+					$content .= $this->render_array_as_menu_item($menus);
+	            	unset($menus);
 				}       
 			}
 
@@ -735,17 +738,17 @@ class theme_decaf_core_renderer extends core_renderer {
 	private function get_course_menus()
 	{
 		$courses = $this->get_my_courses();
-		
 		$admin = has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM));
-		
+
 		$menu = array();		
 		foreach ( $courses as $category )
 		{
-			if ( $category->name == 'Invisible' && !$admin ) { continue; }
+			//Non admins can be enrolled in invisible courses - but we don't want those to appear on the menu
+			if ( $category->name === 'Invisible' && !$admin ) { continue; }
 			
 			$this->add_category_to_menu($menu,$category);
 		}
-
+		
 		return $menu;
 	}
 	
@@ -759,9 +762,9 @@ class theme_decaf_core_renderer extends core_renderer {
 			);
 			
 				//Add subcategories to menu
-				foreach ( $category->categories as $category )
+				foreach ( $category->categories as $subcategory )
 				{
-					$this->add_category_to_menu($item['submenu'],$category);
+					$this->add_category_to_menu($item['submenu'],$subcategory);
 				}
 				
 				//Add courses to menu
