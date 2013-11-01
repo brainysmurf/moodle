@@ -393,7 +393,6 @@ class theme_decaf_core_renderer extends core_renderer {
 				//Navigate (Custom menu from decaf theme settings)
 	            foreach ($menu->get_children() as $item)
 	            {
-	            	print_object($item);
 	            	$menu = $this->custom_menu_item_to_array($item);
 	                $content .= $this->render_array_as_menu_item($menu);
 	            }
@@ -415,16 +414,37 @@ class theme_decaf_core_renderer extends core_renderer {
 
 	private function custom_menu_item_to_array( custom_menu_item $menunode )
 	{
-		print_object($menunode);
 		$menu = array();
 		
-        // Required to ensure we get unique trackable id's
-        static $submenucount = 0;
-        
-        if ($menunode->has_children()) {
-        
-        	$menu[] = array( 'text'=>'Login', 'icon'=>'signin', 'url' => '/login' );
-        	
+		if ( $menunode->get_text() == 'hr' )
+		{
+			$item = 'hr';
+		}
+		else
+		{
+	    	$item = array(
+	    		'text'=>$menunode->get_text(),
+	    		'icon'=> str_replace('icon-','',$menunode->get_title()),
+	    		'url' => $menunode->get_url() ? $menunode->get_url()->out() : false
+	    	);
+
+			if ( $menunode->has_children() )
+			{
+				$item['submenu'] = array();
+				foreach ( $menunode->get_children() as $child )
+				{
+					$child = $this->custom_menu_item_to_array( $child );
+					$item['submenu'][] = $child[0];
+				}
+			}
+		}
+    
+    	$menu[] = $item;
+		
+		return $menu;
+	}
+	
+	/*
             // If the child has menus render it as a sub menu
             $submenucount++;
             $content = html_writer::start_tag('li');
@@ -497,7 +517,7 @@ class theme_decaf_core_renderer extends core_renderer {
 
         // Return the sub menu
         return $content;
-    }
+    } */
 	
 
 	/*
