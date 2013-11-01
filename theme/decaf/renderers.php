@@ -691,16 +691,24 @@ class theme_decaf_core_renderer extends core_renderer {
 		//Returns the courses the current user is enrolled in
 		private function get_my_courses()
 	    {
+			//Load all categories (and courses within them)
+			//TODO: Change this to not use depreciated metho
+			$allCategories = get_course_category_tree();
+			
 	    	//Show all courses to admins
 	        if ( has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM)) )
 			{
-				//TODO: Change this to not use depreciated method
-			    return get_course_category_tree();
+			    return $allCategories();
 			}
 			else if ( isguestuser() )
 			{
-				//TODO: Change this to not use depreciated method
-				return array_filter(get_course_category_tree(), "theme_decaf_core_renderer::in_teaching_learning");
+				foreach( $allCategories as $category )
+				{
+					if ( $category->name == 'Teaching & Learning' )
+					{
+						return array($category);
+					}
+				}
 			}
 			else
 			{
@@ -709,10 +717,6 @@ class theme_decaf_core_renderer extends core_renderer {
 				{
 					return $courses;
 				}
-			
-				//Load all categories (and courses within them)
-				//TODO: Change this to not use depreciated method
-				$allCategories = get_course_category_tree();
 	            
 				//Get courses user is enrolled in
 	            $usersCourses = enrol_get_my_courses('category', 'visible DESC, fullname ASC');
@@ -836,7 +840,7 @@ class theme_decaf_core_renderer extends core_renderer {
 			return $these_courses;
 	    }
 
-private function get_course_menus()
+	private function get_course_menus()
 	{
 		$courses = $this->get_my_courses();
 		
