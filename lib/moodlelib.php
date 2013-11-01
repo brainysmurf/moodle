@@ -4387,12 +4387,12 @@ function complete_user_login($user) {
 
 	if ($SESSION->userIsHSStudent = cohort_is_member_by_idnumber('studentsHS', $USER->id))
 	{
-		$SESSION->userHasRedict = $redirect_url.'2';
+		$SESSION->userHasRedirect = $redirect_url.'2';
 	}
 	
 	if ( $SESSION->userIsMSStudent = cohort_is_member_by_idnumber('studentsMS', $USER->id) )
 	{
-		$SESSION->userHasRedict = $redirect_url.'3';
+		$SESSION->userHasRedirect = $redirect_url.'3';
 	}
 	
 	if ($SESSION->userIsSecTeacher = cohort_is_member_by_idnumber('teachersSEC', $USER->id))
@@ -4402,7 +4402,7 @@ function complete_user_login($user) {
 
 	if ($SESSION->userIsElemTeacher = cohort_is_member_by_idnumber('teachersELEM', $USER->id))
 	{
-		$SESSION->userHasRedict = $redirect_url.'4';
+		$SESSION->userHasRedirect = $redirect_url.'4';
 	}
 
 	if ($SESSION->userIsSupStaff = cohort_is_member_by_idnumber('supportstaffALL', $USER->id))
@@ -4412,7 +4412,7 @@ function complete_user_login($user) {
 
 	if ($SESSION->userIsAdminStaff = cohort_is_member_by_idnumber('adminALL', $USER->id))
 	{
-		$SESSION->userHasRedict = $redirect_url.'7';
+		$SESSION->userHasRedirect = $redirect_url.'7';
 	}
 
     //Pick a photo for the header and keep it for the session
