@@ -30,58 +30,6 @@ class theme_decaf_core_renderer extends core_renderer {
 		return parent::header();
 	}
 
-
-
-
-	/*
-		What does this do?
-	*/
-    /*public function navbuttons()
-    {
-		global $CFG;
-		$items = $this->page->navbar->get_items();
-	
-		$content = '';
-		for ($i=count($items); $i >= 0; $i--)
-		{
-	    	$item = $items[$i];
-		    if ( !$item->parent ) { continue; }
-		    if ( !$item->title ) { continue; }
-		    
-			$content .= html_writer::start_tag('li');
-			    if ( $item->title!=='' )
-			    {
-	        		if ( $item->text === strtoupper($item->text) )
-	        		{
-						$output = $item->title;
-			        }
-			        else
-			        {
-		  				$output = $item->title.': '.$item->text;
-					}
-	    		}
-	    		else
-	    		{
-					$output = $item->text;
-			    }
-		    	$content .= html_writer::tag('a', $output, array('href'=>$item->action));
-		    $content .= html_writer::end_tag('li');
-		}
-
-		$content .= html_writer::start_tag('li');
-			$icon = html_writer::tag('i', '', array('class'=>'icon-shield pull-left'));
-			$content .= html_writer::tag('a', $icon.'My DragonNet', array('href'=>$CFG->wwwroot.'/my'));
-		$content .= html_writer::end_tag('li');
-
-		$content .= html_writer::start_tag('li');
-			$icon = html_writer::tag('i', '', array('class'=>'icon-home pull-left'));
-			$content .= html_writer::tag('a', $icon.'Home (Front Page)', array('href'=>$CFG->wwwroot));
-		$content .= html_writer::end_tag('li');
-
-		return $content;
-	}*/
-	
-
     /*
     	Breadcrumbs
 		SSIS modifies this to only include coures name followed by whatever activity after that
@@ -139,7 +87,7 @@ class theme_decaf_core_renderer extends core_renderer {
     /* 
     	For this theme we put links into the tab as a drop down, so let's get rid of those
     */
-   /* public function login_info($withlinks = null) {
+   public function login_info($withlinks = null) {
         global $USER, $CFG, $DB, $SESSION;
         
         if (during_initial_install()) {
@@ -242,7 +190,7 @@ class theme_decaf_core_renderer extends core_renderer {
         }
 
         return $loggedinas;
-    } */
+    }
 
     /**
      * Returns HTML to display a "Turn editing on/off" button in a form.
@@ -415,7 +363,7 @@ class theme_decaf_core_renderer extends core_renderer {
 
     /**
      * Renders a custom menu object (located in outputcomponents.php)
-     *
+     * Super tweaked for SSIS to make the code easier
      * The custom menu this method override the render_custom_menu function
      * in outputrenderers.php
      * @staticvar int $menucount
@@ -445,6 +393,7 @@ class theme_decaf_core_renderer extends core_renderer {
 				//Navigate (Custom menu from decaf theme settings)
 	            foreach ($menu->get_children() as $item)
 	            {
+	            	print_object($item);
 	                $content .= $this->render_custom_menu_item($item);
 	            }
 				
@@ -462,6 +411,96 @@ class theme_decaf_core_renderer extends core_renderer {
         return $content;
     }
 
+
+	private function custom_menu_item_to_array( custom_menu_item $menunode )
+	{
+		$menu = array();
+		
+        // Required to ensure we get unique trackable id's
+        static $submenucount = 0;
+        
+        if ($menunode->has_children()) {
+        
+        	$menu[] = array(
+        		$menu[] = array( 'text'=>'Login', 'icon'=>'signin', 'url' => '/login' ); //Login button
+        	);
+        	
+        	$menu[] = array( 'text'=>'Login', 'icon'=>'signin', 'url' => '/login' );
+        	
+            // If the child has menus render it as a sub menu
+            $submenucount++;
+            $content = html_writer::start_tag('li');
+
+            $icon = html_writer::tag('i', '', array('class'=>'icon-none pull-left'));
+            if ($menunode->get_title()) {
+                // This adds the feature of using the title for the icon
+                $icon = html_writer::tag('i', '', array('class'=>$menunode->get_title().' pull-left'));
+            }
+
+            switch ($menunode->get_text()) {
+                case 'Teaching & Learning': $icon = html_writer::tag('i', '', array('class'=>'icon-magic pull-left')); break;
+                case 'Activities': $icon = html_writer::tag('i', '', array('class'=>'icon-rocket pull-left')); break;
+                case 'School Life': $icon = html_writer::tag('i', '', array('class'=>'icon-ticket pull-left')); break;
+                case 'Curriculum': $icon = html_writer::tag('i', '', array('class'=>'icon-save pull-left')); break;
+                case 'Parents': $icon = html_writer::tag('i', '', array('class'=>'icon-info-sign pull-left')); break;
+                case 'Invisible': $icon = html_writer::tag('i', '', array('class'=>'icon-star-half-empty pull-left')); break;
+            }
+
+            // Now we need to process whether to conver to a link and whether to append a right caret
+            $addcaret = '';
+                if ( $parent = $menunode->get_parent() )
+                {   
+                    if ( !($parent->get_text() === 'root') )
+                    {
+                            // filter out roots, so top level is ignored
+                        $addcaret = html_writer::tag('i', '', array('class'=>'pull-right icon-caret-right'));
+                    }
+                }            
+            
+            if ($menunode->get_url() !== null )
+            {
+                $content .= html_writer::link($menunode->get_url(), $icon.$menunode->get_text().$addcaret);
+            }
+            else
+            {
+                $content .= $icon.$menunode->get_text().$addcaret;
+            }
+
+            $content .= html_writer::start_tag('ul');
+            foreach ($menunode->get_children() as $menunode) {
+                $content .= $this->render_custom_menu_item($menunode);
+            }
+            $content .= html_writer::end_tag('ul');
+            $content .= html_writer::end_tag('li');
+
+        } else {
+
+            // The node doesn't have children so produce a leaf
+
+            if ($menunode->get_text() === 'hr') {
+                $content = html_writer::empty_tag('hr');
+            } else {
+                $content = html_writer::start_tag('li');
+                $icon = html_writer::tag('i', '', array('class'=>'icon-none'));
+
+                if ($menunode->get_title()) {
+                    $icon = html_writer::tag('i', '', array('class'=>$menunode->get_title().' pull-left'));
+                }
+
+                if ($menunode->get_url() !== null) {
+                    $url = $menunode->get_url();
+                } else {
+                    $url = '#';
+                }
+                $content .= html_writer::link($url, $icon.$menunode->get_text(), array('title'=>$menunode->get_title()));
+                $content .= html_writer::end_tag('li');
+            }
+        }
+
+        // Return the sub menu
+        return $content;
+    }
+	
 
 	/*
 		Takes an array and builds an HTML menu from it
@@ -533,19 +572,35 @@ class theme_decaf_core_renderer extends core_renderer {
 		else
 		{
 			//Current user button
-			//TODO: use the stuff from $this-login_info()
-			global $USER;
+			global $USER, $DB;
 			
+			$course = $this->page->course;
+
 			//Show username
-			if ( session_is_loggedinas() )
+			if ( session_is_loggedinas() ) //Used 'login as' to login as a different user
 			{
             	$realuser = session_get_realuser();
 	            $menu[] = array( 'icon'=>'user', 'text' => fullname($realuser).' -> '.fullname($USER) );	
 			}
-			else
+			else if ( !empty($course->id) && is_role_switched($course->id) ) //Role is switched
+			{
+				//Find out what role we switched to
+				$context = context_course::instance($course->id);
+                $rolename = '';
+                if ( $role = $DB->get_record('role', array('id'=>$USER->access['rsw'][$context->path])) )
+                {
+                    $rolename = role_get_name($role, $context);
+                }
+                $loggedinas = get_string('loggedinas', 'moodle', $username).$rolename;
+
+	            $menu[] = array( 'icon'=>'user', 'text' => $rolename );
+			}
+			else //Normal user
 			{
 	            $menu[] = array( 'icon'=>'user', 'text' => fullname($USER) );	
 			}
+			
+			
 			
 			$submenu = array();
 			
@@ -559,7 +614,18 @@ class theme_decaf_core_renderer extends core_renderer {
     			$context = context_course::instance($courseid);
 
 				//FIXME: This is broke
-		        if ( session_is_loggedinas() || is_role_switched($courseid) ) //Role is switched - show 'Return to normal' button
+				if ( session_is_loggedinas() )
+				{
+					//Undo 'login as user'
+        			$submenu[] = array(
+        				'text' => 'Return to normal',
+        				'icon' => 'user',
+        				'url' => new moodle_url('/course/loginas.php', array('id'=>$courseid, 'sesskey'=>sesskey(), 'switchrole'=>0, 'returnurl'=>$this->page->url->out_as_local_url(false)))
+        			);
+        			
+        			$submenu[] = 'hr';
+				}
+		        else if ( is_role_switched($courseid) ) //Role is switched - show 'Return to normal' button
         		{	
         			$submenu[] = array(
         				'text' => 'Return to normal',
@@ -798,6 +864,10 @@ private function get_course_menus()
 		}
 		
 		
+		/*
+			Returns the icon for a category
+			Or use the category idnumber and it returns the course icon for that idnumber
+		*/
 		function get_category_icon( $category_name , $category_idnumber=false )
 		{
 			switch( $category_name )
@@ -816,6 +886,7 @@ private function get_course_menus()
 			}
 		}
 		
+		//Takes the shortname for a course and returns the appropriate icon (from the first 3 letters)
 		function get_course_icon( $course_shortname )
 		{
 			switch ( substr($course_shortname,0,3) )
@@ -1125,10 +1196,11 @@ private function get_course_menus()
 
 }
 
-function students($item) {
-    return ($item == 'Student');
-}
 
+
+/*
+	For rendering the 'Course Administration' and 'Site Administration' menus
+*/
 class theme_decaf_topsettings_renderer extends plugin_renderer_base {
 
     public function settings_tree(settings_navigation $navigation) {
