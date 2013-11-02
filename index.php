@@ -69,7 +69,7 @@
 
     // Implement ssis's need to have the frontpage redirect
 
-	if ( $SESSION->frontpageSection )
+    if ( isset($SESSION->frontpageSection) && $SESSION->frontpageSection )
 	{
 		$frontpage_redirect_url = $CFG->wwwroot . '/course/view.php?id=1395&section=';
 		redirect( $frontpage_redirect_url.$SESSION->frontpageSection );
