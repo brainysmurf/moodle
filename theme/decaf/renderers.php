@@ -894,26 +894,11 @@ class theme_decaf_core_renderer extends core_renderer {
 	{
 		if ( empty($tabtree->subtree) ) { return ''; }
 
-        $str = html_writer::start_tag('div', array('class' => 'tabs'));
+		$str = html_writer::start_tag('div', array('class' => 'tabs'));
 	        #$str .= $this->render_tabobject($tabtree);
 	        $str .= $this->render_tabs($tabtree->subtree);
-	        
-	        $rendered = $this->render_tabs($tabtree->subtree);
-	        
-	        foreach ( $rendered as $ul )
-	        {
-	        	echo $ul['ul'];
-	        	if ( !emprty($ul['subtrees']) )
-	        	{
-	        		foreach ( $ul['subtrees'] as $subtree )
-	        		{
-	        			echo $subtree;
-	        		}
-	        	}
-	        }
-	        
+	        	        
 		$str .= html_writer::end_tag('div');
-		
 		$str .= html_writer::tag('div', ' ', array('class' => 'clearer'));
 		
         return $str;
