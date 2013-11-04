@@ -13,6 +13,8 @@ class awesomebar
 	function __construct( &$page )
 	{
 		$this->page = $page;
+		global $CFG;
+		require_once($CFG->libdir.'/coursecatlib.php');
 	}
 	
 	// !HTML Rendering

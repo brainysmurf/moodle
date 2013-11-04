@@ -1,7 +1,5 @@
 <?php
 
-	require_once($CFG->libdir.'/coursecatlib.php');
-
 class theme_decaf_core_renderer extends core_renderer {
 
 	protected $really_editing = false;
@@ -205,10 +203,11 @@ class theme_decaf_core_renderer extends core_renderer {
      */
     protected function render_custom_menu( custom_menu $menu )
     {
+    	$startTime = microtime(true);
+
 		//Return a cached menu if available
 		if ( $content = $this->cache->get('awesomebar') )
 		{
-			echo 'cached';
 			return $content;
 		}
 		
