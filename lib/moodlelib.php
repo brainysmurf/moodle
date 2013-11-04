@@ -4309,7 +4309,7 @@ function authenticate_user_login($username, $password, $ignorelockout=false, &$f
  * @return object A {@link $USER} object - BC only, do not use
  */
 function complete_user_login($user) {
-    global $CFG, $USER;
+    global $CFG, $USER, $SESSION;
 
     // regenerate session id and delete old session,
     // this helps prevent session fixation attacks from the same domain
@@ -4357,11 +4357,10 @@ function complete_user_login($user) {
 
 
     // !SSIS STUFF FOR EACH USER
-    global $SESSION;
 	require_once($CFG->dirroot .'/cohort/lib.php');
 	
 	//These are handy to know throughout the site, but aren't used for frontpage redirects
-	$SESSION->userIsAdmin = has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM));
+	$SESSION->userIsSiteAdmin = has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM));
 	$SESSION->userIsTeacher = cohort_is_member_by_idnumber('teachersALL', $USER->id);
 	$SESSION->userIsStudent = cohort_is_member_by_idnumber('studentsALL', $USER->id);
 	$SESSION->userIsSecStudent = cohort_is_member_by_idnumber('studentsSEC', $USER->id);
@@ -4413,7 +4412,7 @@ function complete_user_login($user) {
 		$SESSION->frontpageSection = 8;
 	}
 
-	if ($SESSION->userIsAdminStaff = cohort_is_member_by_idnumber('adminALL', $USER->id))
+	if ($SESSION->userIsSSISAdmin = cohort_is_member_by_idnumber('adminALL', $USER->id))
 	{
 		$SESSION->frontpageSection = 7;
 	}

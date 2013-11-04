@@ -145,7 +145,7 @@ h6.main img {vertical-align: middle;}
 /** The 1-pixel padding is there to avoid phantom scroll bars on OS X (FF, Safari and Chrome)
 Nope that makes it worse.
 **/
-/*.no-overflow {overflow:auto;padding-bottom:1px;}*/
+.no-overflow {overflow:auto;padding-bottom:1px;}
 
 .pagelayout-report .no-overflow {overflow:visible;}
 .no-overflow > .generaltable {margin-bottom:0;}
