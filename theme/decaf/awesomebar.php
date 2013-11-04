@@ -328,7 +328,7 @@ class awesomebar
 		foreach ( $courses as $category )
 		{
 			//Non admins can be enrolled in invisible courses - but we don't want those to appear on the menu
-			if ( $category['name'] === 'Invisible' && !$SESSION->userIsAdmin ) { continue; }
+			if ( $category['name'] === 'Invisible' && !$SESSION->userIsSiteAdmin ) { continue; }
 			
 			$this->add_category_to_menu($menu,$category);
 		}
@@ -431,7 +431,7 @@ class awesomebar
 		
 		$tree = array();
 
-		if ( $SESSION->userIsAdmin )
+		if ( $SESSION->userIsSiteAdmin )
 		{
 			//Admins can see all courses
 			$enrolledCourses = false;
