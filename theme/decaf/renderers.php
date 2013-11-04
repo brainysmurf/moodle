@@ -711,10 +711,27 @@ class theme_decaf_core_renderer extends core_renderer {
 				//Add courses to menu
 				foreach ( $category->courses as $course )
 				{
+					$course_icon = $this->get_course_icon( $course->shortname , $course->fullname );
+					
+					 //Activities
+					if ( $category->id == 1 )
+					{
+						if ( strpos($course->fullname,'(ALL)') === 0 )
+						{
+							$course->fullname = str_replace('(ALL) ','',$course->fullname);
+							$course_icon = 'text icon-text-all';
+						}
+						else if ( strpos($course->fullname,'(S1)') === 0 )
+						{
+							$course->fullname = str_replace('(S1) ','',$course->fullname);
+							$course_icon = 'text icon-text-s1';
+						}	
+					}
+				
 					$item['submenu'][] = array(
 						'text' => $course->fullname,
 						'url' => '/course/view.php?id='.$course->id,
-						'icon' => $this->get_course_icon( $course->shortname ),
+						'icon' => $course_icon,
 					);	
 				}
 				
@@ -742,21 +759,72 @@ class theme_decaf_core_renderer extends core_renderer {
 			{
 				return $this->get_course_icon($category_idnumber);
 			}
+			
 		}
 		
 		//Takes the shortname for a course and returns the appropriate icon (from the first 3 letters)
-		function get_course_icon( $course_shortname )
+		function get_course_icon( $course_shortname , $course_fullname=false )
 		{
+			//Overrides for courses with awkward shortnames
+			if ( $course_fullname == 'IB Economics SL/HR' ) { return 'bar-chart'; }
+			if ( $course_fullname == 'Design (10)' || $course_fullname == 'HSD Graphic Design (11/12)' ) { return 'edit-sign'; }
+			
+			//Course IDs
 			switch ( substr($course_shortname,0,3) )
 			{
-				case 'ENG': return 'book';
-				case 'FOO': return 'food';
-				case 'SPA': case 'GER': return 'euro';
-				case 'CHI': return 'cny';
-				case 'MAH': case 'MAS': case 'MAA': case 'MAT': return 'bar-chart';
-				case 'HRO': return 'home';
 				case 'ARM': return 'music';
 				case 'ARV': return 'facetime-video';
+				case 'ART': return 'picture';
+				case 'ARC': return 'beer';
+				case 'ARG': return 'edit-sign';
+				case 'DRA': return 'group';
+
+				case 'ENG': case 'LBE': case 'LAS': case 'TOE': case 'ENB': return 'book';
+				case 'Pro': return 'pushpin';
+								
+				case 'MAH': case 'MAS': case 'MAA': case 'MAT': return 'bar-chart';
+						
+				case 'WLD': return 'globe';		
+				case 'SCI': return 'beaker';
+				case 'SCC': return 'fire';
+				case 'SSP': return 'lightbulb';
+				case 'SCB': case 'SSB': return 'male';
+				case 'ENV': case 'SSE': return 'cloud';
+				
+				case 'FOO': case 'TEF': return 'food';
+				case 'COM': case 'TEC': return 'desktop';
+				case 'DES': case 'TED': return 'edit-sign';
+				
+				case 'HUM': return 'user';
+				case 'GBS': case 'SSG': case 'SSA': return 'globe';
+				case 'SSH': return 'time';
+				
+				case 'SPA': case 'SPI': case 'LBS': return 'euro';
+				case 'GER': return 'euro';
+				case 'JAP': return 'jpy';
+				case 'KOR': return 'krw';
+				case 'FRE': return 'euro';
+				case 'DAN': return 'euro';
+				
+				case 'CHI': case 'LBC': return 'cny';
+				
+				case 'HRO': case 'HOM': return 'home';
+				
+				case 'SEC': case 'LIB': return 'book';
+				case 'STD': case 'XST': case 'IBT': case 'STD': return 'edit';
+				case 'IBC': return 'certificate';
+				case 'CAR': return 'briefcase'; 
+				
+				case 'PHY': return 'dribbble'; //not a typo
+				case 'PEH': return 'medkit';
+				
+				case 'IBX': return 'certificate';
+				case 'G11': case 'G12': case 'EXT': return 'align-justify';
+				case 'SLC': return 'group';
+				case 'ACS': return 'star';
+				case 'PER': return 'briefcase';
+				
+				case 'GRA': return 'home';
 			}
 		}
     

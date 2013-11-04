@@ -238,3 +238,27 @@
 	#awesomebar a:hover {
 		color:#EEE;
 	}
+
+
+/* Numbers as icons */
+.icon-text {
+	width:15px;
+	height:30px;
+	position: relative;
+}
+	.icon-text:after {
+		display: block;
+		position: absolute;
+		top: 1px;
+		left: 0;
+		font-weight: bolder;
+		font-size: 8px;
+		width:100%;
+		text-align:center;
+	}
+	.icon-text-all:after {
+		content:"ALL";
+	}
+	.icon-text-s1:after {
+		content:"S1";
+	}
