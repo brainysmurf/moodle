@@ -4357,7 +4357,6 @@ function complete_user_login($user) {
 
 
     // !SSIS STUFF FOR EACH USER
-    global $SESSION;
 	require_once($CFG->dirroot .'/cohort/lib.php');
 	
 	//These are handy to know throughout the site, but aren't used for frontpage redirects
