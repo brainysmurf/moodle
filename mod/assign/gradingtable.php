@@ -122,6 +122,12 @@ class assign_grading_table extends table_sql implements renderable {
 
         $extrauserfields = get_extra_user_fields($this->assignment->get_context());
 
+	// ssis only wants the homeroom ('department' in the table) to be displayed
+	// all the other stuff just distracts from actually grading
+	// TODO: Make it so that it hides instead??
+
+	$extrauserfields = array(0=>'department');
+
         $fields = user_picture::fields('u', $extrauserfields) . ', ';
         $fields .= 'u.id as userid, ';
         $fields .= 's.status as status, ';
