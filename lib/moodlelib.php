@@ -4309,7 +4309,7 @@ function authenticate_user_login($username, $password, $ignorelockout=false, &$f
  * @return object A {@link $USER} object - BC only, do not use
  */
 function complete_user_login($user) {
-    global $CFG, $USER;
+    global $CFG, $USER, $SESSION;
 
     // regenerate session id and delete old session,
     // this helps prevent session fixation attacks from the same domain
@@ -4357,7 +4357,6 @@ function complete_user_login($user) {
 
 
     // !SSIS STUFF FOR EACH USER
-    global $SESSION;
 	require_once($CFG->dirroot .'/cohort/lib.php');
 	
 	//These are handy to know throughout the site, but aren't used for frontpage redirects
