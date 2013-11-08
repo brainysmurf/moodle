@@ -30,58 +30,6 @@ class theme_decaf_core_renderer extends core_renderer {
 		return parent::header();
 	}
 
-
-
-
-	/*
-		What does this do?
-	*/
-    /*public function navbuttons()
-    {
-		global $CFG;
-		$items = $this->page->navbar->get_items();
-	
-		$content = '';
-		for ($i=count($items); $i >= 0; $i--)
-		{
-	    	$item = $items[$i];
-		    if ( !$item->parent ) { continue; }
-		    if ( !$item->title ) { continue; }
-		    
-			$content .= html_writer::start_tag('li');
-			    if ( $item->title!=='' )
-			    {
-	        		if ( $item->text === strtoupper($item->text) )
-	        		{
-						$output = $item->title;
-			        }
-			        else
-			        {
-		  				$output = $item->title.': '.$item->text;
-					}
-	    		}
-	    		else
-	    		{
-					$output = $item->text;
-			    }
-		    	$content .= html_writer::tag('a', $output, array('href'=>$item->action));
-		    $content .= html_writer::end_tag('li');
-		}
-
-		$content .= html_writer::start_tag('li');
-			$icon = html_writer::tag('i', '', array('class'=>'icon-shield pull-left'));
-			$content .= html_writer::tag('a', $icon.'My DragonNet', array('href'=>$CFG->wwwroot.'/my'));
-		$content .= html_writer::end_tag('li');
-
-		$content .= html_writer::start_tag('li');
-			$icon = html_writer::tag('i', '', array('class'=>'icon-home pull-left'));
-			$content .= html_writer::tag('a', $icon.'Home (Front Page)', array('href'=>$CFG->wwwroot));
-		$content .= html_writer::end_tag('li');
-
-		return $content;
-	}*/
-	
-
     /*
     	Breadcrumbs
 		SSIS modifies this to only include coures name followed by whatever activity after that
@@ -89,15 +37,18 @@ class theme_decaf_core_renderer extends core_renderer {
     public function navbar()
     {
 		global $CFG;
-        $items = $this->page->navbar->get_items();
-        
-        $htmlblocks = array();
-        // Iterate the navarray and display each node
-        $itemcount = count($items);
-        $separator = get_separator();
+
+		$separator = get_separator();
+
+		//Array of our items on the bar (<li> tags)
+        $listitems = array();
+
+		//Link to frontpage
 		$home = html_writer::tag('a', '<i class="icon-home"></i> Home', array('href'=>$CFG->wwwroot));
-		$htmlblocks[] = html_writer::tag('li', $home);
-        
+		$listitems[] = html_writer::tag('li', $home);
+
+		// Iterate the navarray and display each node
+		$items = $this->page->navbar->get_items();
         foreach ( $items as $item )
 		{	
 			if (!$item->parent) { continue; }
@@ -105,144 +56,38 @@ class theme_decaf_core_renderer extends core_renderer {
 		    if ($item->title === 'Invisible') { continue; }
 		    if ($item->title === 'DragonNet Frontpage') { continue; }
 
-            //$item->hideicon = true;
             $content = html_writer::start_tag('li');
-			    if ( !($item->title==='') )
-			    {
-		        	if ( $item->text === strtoupper($item->text) )
-		        	{
-					    $output = $item->title;
-					}
-					else
-					{
-	  		    		$output = $item->title.': '.$item->text;
-					}
-				}
-				else
+
+				$label = '';
+				//We just want to show the title, not 'text' because 'text' appears to be the course shortname which is now used as an image
+				if ( $item->title )
 				{
-		        	$output = $item->text;
-			    }
-		    	$content .= html_writer::tag('a', $separator.$output, array('href'=>$item->action));
+					if ( $item->text ) //Since we have the icon here, let's show it
+					{
+						$label = '<i class="icon-'.$item->text.'"></i> ';
+					}
+					$label .= $item->title;
+				}
+				else if ( $item->text )
+				{
+					//Use text if there's no other choice
+					$label = $item->text;
+				}
+
+		    	$content .= html_writer::tag('a', $separator.$label, array('href'=>$item->action));
+
 	    	$content .= html_writer::end_tag('li');
 
-            $htmlblocks[] = $content;
+            $listitems[] = $content;
         }
 
         //accessibility: heading for navbar list  (MDL-20446)
         $navbarcontent = html_writer::tag('span', get_string('pagepath'), array('class'=>'accesshide'));
-        $navbarcontent .= html_writer::tag('ul', join('', $htmlblocks), array('role'=>'navigation'));
+        $navbarcontent .= html_writer::tag('ul', join('', $listitems), array('role'=>'navigation'));
 
         return $navbarcontent;
     }
 
-
-    /* 
-    	For this theme we put links into the tab as a drop down, so let's get rid of those
-    */
-   /* public function login_info($withlinks = null) {
-        global $USER, $CFG, $DB, $SESSION;
-        
-        if (during_initial_install()) {
-            return '';
-        }
-
-        if (is_null($withlinks)) {
-            $withlinks = empty($this->page->layout_options['nologinlinks']);
-        }
-
-        $loginpage = ((string)$this->page->url === get_login_url());
-        $course = $this->page->course;
-        if (session_is_loggedinas()) {
-            $realuser = session_get_realuser();
-            $fullname = fullname($realuser, true);
-            if ($withlinks) {
-                $loginastitle = get_string('loginas');
-                $realuserinfo = " [<a href=\"$CFG->wwwroot/course/loginas.php?id=$course->id&amp;sesskey=".sesskey()."\"";
-                $realuserinfo .= "title =\"".$loginastitle."\">$fullname</a>] ";
-            } else {
-                $realuserinfo = " [$fullname] ";
-            }
-        } else {
-            $realuserinfo = '';
-        }
-
-        $loginurl = get_login_url();
-
-        if (empty($course->id)) {
-            // $course->id is not defined during installation
-            return '';
-        } else if (isloggedin()) {
-            $context = context_course::instance($course->id);
-
-            $fullname = fullname($USER, true);
-            // Since Moodle 2.0 this link always goes to the public profile page (not the course profile page)
-            if ($withlinks) {
-	      //$linktitle = get_string('viewprofile');
-	      $username = $fullname;
-            } else {
-                $username = $fullname;
-            }
-            if (is_mnet_remote_user($USER) and $idprovider = $DB->get_record('mnet_host', array('id'=>$USER->mnethostid))) {
-                if ($withlinks) {
-                    $username .= " from <a href=\"{$idprovider->wwwroot}\">{$idprovider->name}</a>";
-                } else {
-                    $username .= " from {$idprovider->name}";
-                }
-            }
-            if (isguestuser()) {
-                $loggedinas = $realuserinfo.get_string('loggedinasguest');
-                if (!$loginpage && $withlinks) {
-                    $loggedinas .= " (<a href=\"$loginurl\">".get_string('login').'</a>)';
-                }
-		$loggedinas = 'Guest';
-            } else if (is_role_switched($course->id)) { // Has switched roles
-                $rolename = '';
-                if ($role = $DB->get_record('role', array('id'=>$USER->access['rsw'][$context->path]))) {
-                    $rolename = role_get_name($role, $context);
-                }
-                $loggedinas = get_string('loggedinas', 'moodle', $username).$rolename;
-		$loggedinas = $rolename;
-                //if ($withlinks) {
-                //    $url = new moodle_url('/course/switchrole.php', array('id'=>$course->id,'sesskey'=>sesskey(), 'switchrole'=>0, 'returnurl'=>$this->page->url->out_as_local_url(false)));
-                //    $loggedinas .= '('.html_writer::tag('a', get_string('switchrolereturn'), array('href'=>$url)).')';
-                //}
-            } else {
-                $loggedinas = $realuserinfo.get_string('loggedinas', 'moodle', $username);
-                if ($withlinks) {
-		  // Take out Logout link
-		  //$loggedinas .= " (<a href=\"$CFG->wwwroot/login/logout.php?sesskey=".sesskey()."\">".get_string('logout').'</a>)';
-                }
-            }
-        } else {
-	  $loggedinas = html_writer::tag('a', get_string('loggedinnot', 'moodle'), array('href'=>$CFG->wwwroot.'/login/index.php'));
-            if (!$loginpage && $withlinks) {
-	      //$loggedinas .= " (<a href=\"$loginurl\">".get_string('login').'</a>)';
-            }
-        }
-
-        if (isset($SESSION->justloggedin)) {
-            unset($SESSION->justloggedin);
-            if (!empty($CFG->displayloginfailures)) {
-                if (!isguestuser()) {
-                    if ($count = count_login_failures($CFG->displayloginfailures, $USER->username, $USER->lastlogin)) {
-                        $loggedinas .= '&nbsp;<div class="loginfailures">';
-                        if (empty($count->accounts)) {
-                            $loggedinas .= get_string('failedloginattempts', '', $count);
-                        } else {
-                            $loggedinas .= get_string('failedloginattemptsall', '', $count);
-                        }
-                        if (file_exists("$CFG->dirroot/report/log/index.php") and has_capability('report/log:view', context_system::instance())) {
-                            $loggedinas .= ' (<a href="'.$CFG->wwwroot.'/report/log/index.php'.
-                                                 '?chooselog=1&amp;id=1&amp;modid=site_errors">'.get_string('logs').'</a>)';
-                        }
-                        $loggedinas .= '</div>';
-                    }
-                }
-            }
-        }
-
-        return $loggedinas;
-    } */
 
     /**
      * Returns HTML to display a "Turn editing on/off" button in a form.
@@ -349,73 +194,12 @@ class theme_decaf_core_renderer extends core_renderer {
         return $output;
     }
 
-
-       
-
-
-
-     
-
-    /*static function in_teaching_learning($element)
-    {
-        return $element->name == 'Teaching & Learning';
-    }
-
-    public function setup_guest_courses() {
-        $this->my_courses = array_filter(get_course_category_tree(), "theme_decaf_core_renderer::in_teaching_learning");
-    }*/
-
-   /* protected function add_category_to_custom_menu_for_admins($menu, $category) {
-        // We use a sort starting at a high value to ensure the category gets added to the end
-        static $sort = 1000;
-	$old_sort = $sort;
-	if (!($category->parent == '0')) {
-	    $url = new moodle_url('/course/category.php', array('id' =>  $category->id));
-	} else {
-	    $url = NULL;
-	}
-	$node = $menu->add($category->name, $url, NULL, NULL, $old_sort++);
-
-        // Add subcategories to the category node by recursivily calling this method.
-        $subcategories = $category->categories;
-        foreach ($subcategories as $subcategory) {
-            $this->add_category_to_custom_menu_for_admins($node, $subcategory);
-        }
-
-        // Now we add courses to the category node in the menu
-        $courses = $category->courses;
-        foreach ($courses as $course) {
-            $node->add($course->fullname, new moodle_url('/course/view.php', array('id' => $course->id)), $course->fullname);
-        }
-	$sort = $old_sort + 2;
-    } */
-
-    /*protected function add_to_custom_menu($menu, $cat_name, $array) {
-      global $CFG;
-
-	foreach ($array as $a) {
-	    $categories_no_click = NULL; // no clicking, change this to a url if you want clicking
-
-	    if ($a->name == 'Invisible') { continue; }
-
-	    $node = $menu->add($a->name, $categories_no_click, NULL, NULL, $a->sortorder);
-	    if ($a->name == 'Teaching & Learning') {
-	        $this->teachinglearningnode = $node;
-	    }
-
-            $this->add_to_custom_menu($node, $a->name, $a->categories);
-	    
-            foreach ($a->courses as $course) {
-	      $node->add($course->fullname, new moodle_url('/course/view.php', array('id' => $course->id)), $course->fullname);
-            }
-        }
-    } */
     
     // !SSIS Awesomebar
 
     /**
      * Renders a custom menu object (located in outputcomponents.php)
-     *
+     * Super tweaked for SSIS to make the code easier
      * The custom menu this method override the render_custom_menu function
      * in outputrenderers.php
      * @staticvar int $menucount
@@ -424,412 +208,27 @@ class theme_decaf_core_renderer extends core_renderer {
      */
     protected function render_custom_menu( custom_menu $menu )
     {
-        global $CFG, $USER;
-	
-		$loggedIn = isloggedin();
-	
-        // If the menu has no children return an empty string
-        if ( !$menu->has_children() )
-        {
-            return '';
-        }
+    	$startTime = microtime(true);
 
-		//Begin ul
-        $content = html_writer::start_tag('ul', array('class'=>'dropdown dropdown-horizontal'));
+		//Return a cached menu if available
+		if ( $content = $this->cache->get('awesomebar') )
+		{
+			return $content;
+		}
+		
+		require_once dirname(__FILE__).'/awesomebar.php';
+		$awesomebar = new awesomebar($this->page);
+		$awesomebar->set_custom_menu($menu);
+		$content = $awesomebar->create();
 
-			// Login Button / User Menu (returns an li)
-			$content .= $this->render_array_as_menu_item( $this->get_user_menu() );
-			
-			if ( $loggedIn )
-			{
-				//Navigate (Custom menu from decaf theme settings)
-	            foreach ($menu->get_children() as $item)
-	            {
-	                $content .= $this->render_custom_menu_item($item);
-	            }
-				
-				//Course Menus
-				//Each top level category becomes a button on the awesomebar
-				//The dropdown for that button shows the courses / categories within it
-				if ( !has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM)) || $this->page->course->id != '1266' )
-				{
-					$content .= $this->render_array_as_menu_item( $this->get_course_menus() );
-				}       
-			}
-
-        $content .= html_writer::end_tag('ul'); // end whole ul
+		//Save in the cache
+		$this->cache->set('awesomebar',$content);	
 
         return $content;
     }
 
 
-	/*
-		Takes an array and builds an HTML menu from it
-	*/
-	private function render_array_as_menu_item( array $menu , $depth=0 )
-	{
-		$html = '';
-		foreach ( $menu as $item )
-		{
-			if ( is_string($item) && $item == 'hr' )
-			{
-				$html .= html_writer::tag('hr');
-				continue;
-			}
-		
-			$html .= html_writer::start_tag('li');
-						
-				$hasSubmenu = is_array($item['submenu']) && count($item['submenu']) > 0;
-						
-				if ( $hasSubmenu && $depth > 0 )
-				{
-					//Right arrow
-					$html .= html_writer::tag('i', '', array('class'=>'pull-right icon-caret-right'));
-				}		 
-			
-				if ( $item['icon'] )
-				{
-					$icon = html_writer::tag('i', '', array('class'=>'pull-left icon-'.$item['icon']));
-				}
-				else
-				{
-					$icon = false;
-				}
-			
-				if ( $item['url'] )
-				{
-    			    $html .= html_writer::tag('a', $icon.$item['text'], array('href'=>$item['url']));
-				}
-				else
-				{
-    			    $html .= html_writer::tag('span', $icon.$item['text']);
-				}
-				
-				if ( $hasSubmenu )
-				{
-					$html .= html_writer::start_tag('ul');
-						$html .= $this->render_array_as_menu_item($item['submenu'] , $depth+1);
-					$html .= html_writer::end_tag('ul');
-				}
-			
-			$html .= html_writer::end_tag('li');
-		}
-		return $html;
-	}
 	
-	
-	/*
-		Build the contents of the 'user' menu in the awesomebar
-	*/
-	private function get_user_menu( $loggedIn=false )
-	{
-		$menu = array();
-		$loggedIn = isloggedin();
-
-		if ( !$loggedIn )
-		{
-			$menu[] = array( 'text'=>'Login', 'icon'=>'signin', 'url' => '/login' ); //Login button
-		}
-		else
-		{
-			//Current user button
-			//TODO: use the stuff from $this-login_info()
-			global $USER;
-			
-			//Show username
-			if ( session_is_loggedinas() )
-			{
-            	$realuser = session_get_realuser();
-	            $menu[] = array( 'icon'=>'user', 'text' => fullname($realuser).' -> '.fullname($USER) );	
-			}
-			else
-			{
-	            $menu[] = array( 'icon'=>'user', 'text' => fullname($USER) );	
-			}
-			
-			$submenu = array();
-			
-			if ( isguestuser() ) // Any special items for guest users??
-			{
-				
-			}
-		    else //Items for regular logged in users
-		    {
-	  	        $courseid = $this->page->course->id;
-    			$context = context_course::instance($courseid);
-
-				//FIXME: This is broke
-		        if ( session_is_loggedinas() || is_role_switched($courseid) ) //Role is switched - show 'Return to normal' button
-        		{	
-        			$submenu[] = array(
-        				'text' => 'Return to normal',
-        				'icon' => 'user',
-        				'url' => new moodle_url('/course/switchrole.php', array('id'=>$courseid, 'sesskey'=>sesskey(), 'switchrole'=>0, 'returnurl'=>$this->page->url->out_as_local_url(false)))
-        			);
-        			
-        			$submenu[] = 'hr';
-		        }
-		        else if ( has_capability('moodle/role:switchroles', $context) ) //Become Student button
-		        {
-		            $roles = get_switchable_roles($context);
-    				if ( count($roles) > 0 && $role = $roles[5] )
-    				{
-    					$submenu[] = array(
-	        				'text' => 'Become '.$role,
-	        				'icon'=>'user',
-	        				'url' => new moodle_url('/course/switchrole.php', array('id'=>$courseid, 'sesskey'=>sesskey(), 'switchrole'=>5, 'returnurl'=>$this->page->url->out_as_local_url(false))),
-	        			);
-    				
-    					$submenu[] = 'hr';
-				    }
-        		}
-
-				$submenu[]= array( 'text'=>'Edit Profile', 'icon'=>'edit', 'url'=>"/user/edit.php?id=$USER->id&course=1" ); //Edit Profile
-    			$submenu[] = array( 'text'=>'Change Password', 'icon'=>'edit', 'url'=>'/login/change_password.php?id=1' ); //Change Password
-				$submenu[] = 'hr';
-				$submenu[] = array( 'text'=>'My DragonNet', 'icon'=>'anchor', 'url' => '/my' ); //My DragonNet
-				$submenu[] = array( 'text'=>'Home (Front Page)', 'icon'=>'home', 'url'=>'/' ); //Home
-				$submenu[] = 'hr';    			
-    		} //end if not guest user
-
-			$submenu[] = array( 'text'=>'Logout', 'icon'=>'signout', 'url'=>'/login/logout.php?sesskey='.sesskey() ); //Logout
-
-			//Add submenu to menu    
-			$menu[0]['submenu'] = $submenu;
-		}
-
-		return $menu;
-	}
-
-	
-	// !Courses / Categories For Menu
-		
-		//Returns the courses the current user is enrolled in
-		private function get_my_courses()
-	    {
-	    	//Show all courses to admins
-	        if ( has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM)) )
-			{
-				//TODO: Change this to not use depreciated method
-			    return get_course_category_tree();
-			}
-			else if ( isguestuser() )
-			{
-				//TODO: Change this to not use depreciated method
-				return array_filter(get_course_category_tree(), "theme_decaf_core_renderer::in_teaching_learning");
-			}
-			else
-			{
-				//Check if the courses are cached in the session cache
-				if ( $courses = $this->cache->get('myCourses') )
-				{
-					return $courses;
-				}
-			
-				//Load all categories (and courses within them)
-				//TODO: Change this to not use depreciated method
-				$allCategories = get_course_category_tree();
-	            
-				//Get courses user is enrolled in
-	            $usersCourses = enrol_get_my_courses('category', 'visible DESC, fullname ASC');
-	            
-	            //Now filter all the categories to remove courses user isn't enrolled in
-	            $myCategories = $allCategories;
-	            
-			    $this->remove_unenrolled_courses( $myCategories , $usersCourses );
-			    $this->remove_empty_categories( $myCategories );
-		    	$this->collapse_menu( $myCategories );
-
-		    	//Save in the cache
-				$this->cache->set('myCourses',$myCategories);	
-				
-				return $myCategories;
-			}
-	    }
-	    
-	    //Removes categories/courses user is not enrolled in
-		private function remove_unenrolled_courses( &$branch , $usersCourses )
-		{
-			foreach ( $branch as $b )
-			{
-				if ( $b->categories )
-				{
-					$this->remove_unenrolled_courses($b->categories , $usersCourses);
-				}
-	
-	        	foreach ( $b->courses as $course )
-	        	{
-		    		if ( !array_key_exists($course->id, $usersCourses) )
-		    		{
-		        		unset($b->courses[$course->id]);
-			    	}
-		        }
-			}
-	      
-	    }
-	
-		//Removes categories with no courses in them
-	    private function remove_empty_categories( &$branch )
-	    {
-	        for ( $i = 0, $size = count($branch); $i < $size; $i++ )
-	        {
-			    if (isset($branch[$i]->categories) && ! empty($branch[$i]->categories))
-			    {
-		        	$this->remove_empty_categories($branch[$i]->categories);
-			    }
-			    if ( isset($branch[$i]->depth) && empty($branch[$i]->courses) && empty($branch[$i]->categories) )
-			    {
-		        	unset($branch[$i]);
-	            }
-			}
-	    }
-	
-		//If there are less than 20 courses in the tree, collapse it to just one list instead of having branches for each category
-	    private function collapse_menu( &$branch )
-	    {
-	    	foreach ( $branch as &$b )
-	    	{
-	    		if ( $b->name != 'Teaching & Learning' )
-	    		{
-	    			continue;
-	    		}
-	
-				//Count how many actual courses are in this tab
-				$courses = $this->count_courses($b->categories);
-				
-				if ( $courses <= 20 )
-				{
-					//Collapse into a list showing just the courses, instead of the categories
-					$b->courses = $this->return_courses( array($b) );
-					$b->categories = array();
-				}
-	    	}
-	    }
-	    
-	    //Returns how many courses in a tree
-		private function count_courses( $branch )
-		{
-			$this_total = 0;
-			if ( !$branch ) { return 0; }
-	        foreach ($branch as $b)
-	        {
-		    	if ($b->courses)
-		    	{
-		        	$this_total += count($b->courses);
-			    }
-			    if ( $b->categories )
-			    {
-					$this_total += $this->count_courses($b->categories); 
-		    	}
-	        }
-			return $this_total;
-	    }
-	    
-	    //Takes all the courses out of categories and returns and array just the courses
-	    private function return_courses($branch)
-	    {
-			if ( !$branch ) { return; }
-			$these_courses = array();
-			foreach ($branch as $b)
-			{
-	            if ($b->categories)
-	            {
-		        	foreach ($this->return_courses($b->categories) as $course)
-		        	{
-					    $these_courses[$course->id] = $course;
-					    $these_courses[$course->id]->category = 50;
-			        }
-			    }
-		    	if ($b->courses)
-		    	{
-		        	foreach ($b->courses as $course)
-		        	{
-		            	$these_courses[$course->id] = $course;
-					    $these_courses[$course->id]->category = 50;
-		    	    }
-	            }
-			}
-			return $these_courses;
-	    }
-
-private function get_course_menus()
-	{
-		$courses = $this->get_my_courses();
-		
-		$admin = has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM));
-		
-		$menu = array();		
-		foreach ( $courses as $category )
-		{
-			if ( $category->name == 'Invisible' && !$admin ) { continue; }
-			
-			$this->add_category_to_menu($menu,$category);
-		}
-
-		return $menu;
-	}
-	
-		private function add_category_to_menu( &$menu , $category )
-		{
-			//Add category to menu
-			$item = array(
-				'text' => $category->name,
-				'icon' => $this->get_category_icon( $category->name , $category->idnumber ),
-				'submenu' => array()
-			);
-			
-				//Add subcategories to menu
-				foreach ( $category->categories as $category )
-				{
-					$this->add_category_to_menu($item['submenu'],$category);
-				}
-				
-				//Add courses to menu
-				foreach ( $category->courses as $course )
-				{
-					$item['submenu'][] = array(
-						'text' => $course->fullname,
-						'url' => '/course/view.php?id='.$course->id,
-						'icon' => $this->get_course_icon( $course->shortname ),
-					);	
-				}
-				
-			$menu[] = $item;
-		}
-		
-		
-		function get_category_icon( $category_name , $category_idnumber=false )
-		{
-			switch( $category_name )
-			{
-				case 'Teaching & Learning': return 'magic';
-				case 'Activities': return 'rocket';
-				case 'School Life': return 'ticket';
-				case 'Curriculum': return 'save';
-				case 'Parents': return 'info-sign';
-				case 'Invisible': return 'star-half-empty';
-			}
-			
-			if ( $category_idnumber )
-			{
-				return $this->get_course_icon($category_idnumber);
-			}
-		}
-		
-		function get_course_icon( $course_shortname )
-		{
-			switch ( substr($course_shortname,0,3) )
-			{
-				case 'ENG': return 'book';
-				case 'GER': return 'euro';
-				case 'CHI': return 'rmb';
-			}
-		}
-    
-    
-    
-
-
     /**
      * Renders a pix_icon widget and returns the HTML to display it.
      *
@@ -1128,10 +527,11 @@ private function get_course_menus()
 
 }
 
-function students($item) {
-    return ($item == 'Student');
-}
 
+
+/*
+	For rendering the 'Course Administration' and 'Site Administration' menus
+*/
 class theme_decaf_topsettings_renderer extends plugin_renderer_base {
 
     public function settings_tree(settings_navigation $navigation) {
