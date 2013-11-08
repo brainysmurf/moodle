@@ -393,6 +393,16 @@ class awesomebar
 					);	
 				}
 				
+			//Add browse all courses link to teaching & learning menu
+			if ( $category['name'] == 'Teaching & Learning' )
+			{
+				$item['submenu'][] = array(
+					'text' => 'Browse All DragonNet Courses',
+					'url' => '/course/index.php?categoryid=50',
+					'icon' => 'archive'
+				);
+			}
+				
 			$menu[] = $item;
 		}
 		
