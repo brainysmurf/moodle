@@ -657,13 +657,11 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 		       // if the entry is a student...
 		       //echo strpos($user->email, '@ssis-suzhou');
 
-		       $course = $DB->get_records('course', array('idnumber'=>'OLP:'.$user->idnumber));
-		       if ( !empty($course) ) {
-		       	   $course = array_shift($course);
-		           $olp_link = $CFG->wwwroot.'/course/view.php?id='.$course->id;
+		       if ( $olpCourseID = $DB->get_field('course', 'id' , array('idnumber'=>'OLP:'.$user->idnumber)) ) {
+		           $olpLink = $CFG->wwwroot.'/course/view.php?id='.$olpCourseID;
 		           $row->cells[1]->text .= '<tr>
 		             		<td>Online Portfolio</td>
-			          		<td><a href="'. $olp_link . '">' . 'link' . '</a></td>
+			          		<td><a href="'. $olpLink . '">' . 'link' . '</a></td>
 		               	</tr>';			 
 		       }
 
