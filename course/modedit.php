@@ -260,6 +260,32 @@ if ($mform->is_cancelled()) {
         list($cm, $fromform) = update_moduleinfo($cm, $fromform, $course, $mform);
     } else if (!empty($fromform->add)) {
         $fromform = add_moduleinfo($fromform, $course, $mform);
+		//$fromform is actually the return from creating the module (activity)
+
+		// If the user wanted the new module at the top, move it now
+		if ( isset($USER->addnewmodulewhere) )
+		{
+			if ( $USER->addnewmodulewhere == 'above')
+			{
+				//Get the module
+				$cm = get_coursemodule_from_id($fromform->modulename, $fromform->coursemodule, $fromform->course, true, MUST_EXIST);
+
+				//Get the section
+				$section = $DB->get_record('course_sections', array('section'=>$fromform->section, 'course'=>$fromform->course));
+
+				$sequence = explode(',',$section->sequence);
+				if ( count($sequence) > 0 )
+				{
+					//ID of the first module in this section
+					$beforecm = $sequence[0];
+
+					//Move our new module to before the first section
+					moveto_module($cm, $section, $beforecm);
+				}
+			}
+			unset($USER->addnewmodulewhere);
+		}
+
     } else {
         print_error('invaliddata');
     }

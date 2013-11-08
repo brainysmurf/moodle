@@ -4,7 +4,8 @@ YUI.add('moodle-course-modchooser', function(Y) {
         SECTION : 'li.section',
         SECTIONMODCHOOSER : 'span.section-modchooser-link',
         SITEMENU : 'div.block_site_main_menu',
-        SITETOPIC : 'div.sitetopic'
+        SITETOPIC : 'div.sitetopic',
+		WHEREINPUT : 'form#chooserform input.where'
     };
 
     var MODCHOOSERNAME = 'course-modchooser';
@@ -119,7 +120,14 @@ YUI.add('moodle-course-modchooser', function(Y) {
                 // The block site menu has a sectionid of 0
                 this.sectionid = 0;
             }
-            this.display_chooser(e);
+
+			// Set the 'where' input in the form - where the new module will be added
+			// Is this cross-browsery?
+			var addwhere = e.target.ancestor(CSS.SECTIONMODCHOOSER)._node.attributes['data-where'].value;
+			if ( !addwhere ) { addwhere = 'below'; }
+			this.addwhere = addwhere;
+
+			this.display_chooser(e);
         },
         toggle_mod_chooser : function(e) {
         	//This might be broken - Oct 11th 2013
@@ -176,7 +184,7 @@ YUI.add('moodle-course-modchooser', function(Y) {
         },
         option_selected : function(thisoption) {
             // Add the sectionid to the URL
-            this.jumplink.set('value', thisoption.get('value') + '&section=' + this.sectionid);
+            this.jumplink.set('value', thisoption.get('value') + '&section=' + this.sectionid + '&addnewmodulewhere=' + this.addwhere );
         }
     },
     {
