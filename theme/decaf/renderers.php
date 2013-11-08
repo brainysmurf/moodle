@@ -37,15 +37,18 @@ class theme_decaf_core_renderer extends core_renderer {
     public function navbar()
     {
 		global $CFG;
-        $items = $this->page->navbar->get_items();
-        
-        $htmlblocks = array();
-        // Iterate the navarray and display each node
-        $itemcount = count($items);
-        $separator = get_separator();
+
+		$separator = get_separator();
+
+		//Array of our items on the bar (<li> tags)
+        $listitems = array();
+
+		//Link to frontpage
 		$home = html_writer::tag('a', '<i class="icon-home"></i> Home', array('href'=>$CFG->wwwroot));
-		$htmlblocks[] = html_writer::tag('li', $home);
-        
+		$listitems[] = html_writer::tag('li', $home);
+
+		// Iterate the navarray and display each node
+		$items = $this->page->navbar->get_items();
         foreach ( $items as $item )
 		{	
 			if (!$item->parent) { continue; }
@@ -53,32 +56,34 @@ class theme_decaf_core_renderer extends core_renderer {
 		    if ($item->title === 'Invisible') { continue; }
 		    if ($item->title === 'DragonNet Frontpage') { continue; }
 
-            //$item->hideicon = true;
             $content = html_writer::start_tag('li');
-			    if ( !($item->title==='') )
-			    {
-		        	if ( $item->text === strtoupper($item->text) )
-		        	{
-					    $output = $item->title;
-					}
-					else
-					{
-	  		    		$output = $item->title.': '.$item->text;
-					}
-				}
-				else
+
+				$label = '';
+				//We just want to show the title, not 'text' because 'text' appears to be the course shortname which is now used as an image
+				if ( $item->title )
 				{
-		        	$output = $item->text;
-			    }
-		    	$content .= html_writer::tag('a', $separator.$output, array('href'=>$item->action));
+					if ( $item->text ) //Since we have the icon here, let's show it
+					{
+						$label = '<i class="icon-'.$item->text.'"></i> ';
+					}
+					$label .= $item->title;
+				}
+				else if ( $item->text )
+				{
+					//Use text if there's no other choice
+					$label = $item->text;
+				}
+
+		    	$content .= html_writer::tag('a', $separator.$label, array('href'=>$item->action));
+
 	    	$content .= html_writer::end_tag('li');
 
-            $htmlblocks[] = $content;
+            $listitems[] = $content;
         }
 
         //accessibility: heading for navbar list  (MDL-20446)
         $navbarcontent = html_writer::tag('span', get_string('pagepath'), array('class'=>'accesshide'));
-        $navbarcontent .= html_writer::tag('ul', join('', $htmlblocks), array('role'=>'navigation'));
+        $navbarcontent .= html_writer::tag('ul', join('', $listitems), array('role'=>'navigation'));
 
         return $navbarcontent;
     }
