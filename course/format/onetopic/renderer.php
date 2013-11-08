@@ -247,11 +247,11 @@ class format_onetopic_renderer extends format_section_renderer_base {
 
 			if ( $PAGE->user_is_editing() )
 			{
-				//Additional add button above list
+				//Additional add something button above list
 				$activity_count = count(explode(',',$thissection->_sequence));
 				if ( $activity_count >= 5 )
 				{
-					echo $this->courserenderer->course_section_add_cm_button();
+					echo $this->courserenderer->course_section_add_cm_button('above');
 				}
 			}
 			

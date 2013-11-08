@@ -1310,15 +1310,7 @@ function course_create_sections_if_missing($courseorid, $sections) {
     $coursechanged = false;
     foreach ($sections as $sectionnum) {
         if (!in_array($sectionnum, $existing)) {
-            $cw = new stdClass();
-            $cw->course   = $courseorid;
-            $cw->section  = $sectionnum;
-            #$cw->name = 'Topic '.$sectionnum;
-            $cw->name = 'New Section';
-            $cw->summary  = '';
-            $cw->summaryformat = FORMAT_HTML;
-            $cw->sequence = '';
-            $id = $DB->insert_record("course_sections", $cw);
+			$id = course_create_section( $courseorid , $sectionnum , false );
             $coursechanged = true;
         }
     }
@@ -1326,6 +1318,33 @@ function course_create_sections_if_missing($courseorid, $sections) {
         rebuild_course_cache($courseorid, true);
     }
     return $coursechanged;
+}
+
+/**
+ * Add a new section in a course
+ * @param      $courseid	Course ID
+ * @param      $sectionnum	Section number for the new section
+ * @param bool $rebuildcache	If true the course cache will be rebuild. Set to false to do it manually wherever you called this
+ */
+function course_create_section( $courseid , $sectionnum , $rebuildcache=true , $name='New Section' )
+{
+	global $DB;
+
+	$cw = new stdClass();
+	$cw->course   = $courseid;
+	$cw->section  = $sectionnum;
+	#$cw->name = 'Topic '.$sectionnum;
+	$cw->name = $name;
+	$cw->summary  = '';
+	$cw->summaryformat = FORMAT_HTML;
+	$cw->sequence = '';
+	$id = $DB->insert_record("course_sections", $cw);
+
+	if ( $rebuildcache )
+	{
+		rebuild_course_cache($courseid, true);
+	}
+	return $id;
 }
 
 /**
@@ -1768,7 +1787,7 @@ function reorder_sections($sections, $origin_position, $target_position) {
  * before which $modid should be inserted
  * All parameters are objects
  */
-function moveto_module($mod, $section, $beforemod=NULL) {
+function moveto_module($mod, $section, $beforemod=null) {
     global $OUTPUT, $DB;
 
 /// Remove original module from original section
@@ -2255,7 +2274,7 @@ function course_overviewfiles_options($course) {
  * @param object $data  - all the data needed for an entry in the 'course' table
  * @return object new course instance
  */
-function create_course($data, $editoroptions = NULL) {
+function create_course($data, $editoroptions = null) {
     global $CFG, $DB;
 
     //check the categoryid - must be given for all new courses
@@ -2349,7 +2368,7 @@ function create_course($data, $editoroptions = NULL) {
  * @param array $editoroptions course description editor options
  * @return void
  */
-function update_course($data, $editoroptions = NULL) {
+function update_course($data, $editoroptions = null) {
     global $CFG, $DB;
 
     $data->timemodified = time();

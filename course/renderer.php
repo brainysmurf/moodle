@@ -193,6 +193,8 @@ class core_course_renderer extends plugin_renderer_base {
                 'name' => 'course', 'value' => $course->id));
         $formcontent .= html_writer::tag('input', '',
                 array('type' => 'hidden', 'class' => 'jump', 'name' => 'jump', 'value' => ''));
+		$formcontent .= html_writer::tag('input', '',
+			array('type' => 'hidden', 'class' => 'where', 'name' => 'where', 'value' => 'below'));
         $formcontent .= html_writer::tag('input', '', array('type' => 'hidden', 'name' => 'sesskey',
                 'value' => sesskey()));
         $formcontent .= html_writer::end_tag('div');
@@ -469,11 +471,13 @@ class core_course_renderer extends plugin_renderer_base {
 
         return $output;
     }
-    
-    /**
-    * Renders just a button to just show the add resource dialog, instead of creating the whole dialog as course_section_add_cm_control does
-    */
-    function course_section_add_cm_button()
+
+	/**
+	 * Renders just a button to just show the add resource dialog, instead of creating the whole dialog as course_section_add_cm_control does
+	 * @param string $where Add the new module above or below the current ones. Default is below
+	 * @return string
+	 */
+	function course_section_add_cm_button( $where='below' )
     {
 	    $text = get_string('addresourceoractivity');
 	    // The module chooser link
@@ -482,7 +486,7 @@ class core_course_renderer extends plugin_renderer_base {
 	    	
 	        		$icon = '<i class="icon-plus"></i>';
 	    		    $text_span = html_writer::tag('span', $text, array('class' => 'section-modchooser-text'));
-		        $btn .= html_writer::tag('span', $icon . $text_span, array('class' => 'section-modchooser-link'));
+		        $btn .= html_writer::tag('span', $icon . $text_span, array('class' => 'section-modchooser-link' , 'data-where'=>$where));
 		        
 	        $btn .= html_writer::end_tag('div');
 	    $btn .= html_writer::end_tag('div');
