@@ -914,45 +914,44 @@ class theme_decaf_core_renderer extends core_renderer {
 		$ul = '<ul class="'.$ulclass.'">';
 		foreach ( $tabobject as $tab )
 		{
-			$ul .= '<li>';
+			$ul .= '<li id="'.$tab->id.'">';
 
-		         $attributes = array();
-			 if ( count($tab->data) )
-			 {
-			     foreach ( $tab->data as $key=>$value )
-			     {
-			         $attributes['data-'.$key] = $value;
-			     }
-			 }
+			$attributes = array();
+			if ( count($tab->data) )
+			{
+				foreach ( $tab->data as $key=>$value )
+				{
+					$attributes['data-'.$key] = $value;
+				}
+			}
 
-			 if ( $tab->selected || $tab->activated )
-			 {
-			     $attributes['class'] = 'selected';
-			     $ul .= html_writer::tag('span', $tab->text , $attributes);
-			 }
-			 else if ( !($tab->link) ) 
-			 {
-			   // some bizarre animals in this kingdom actually define the link itself in the title
-			   // which you can check as the link being empty
-			   $ul .= $tab->title;
-			 }
-			 else if ( !($tab->link instanceof moodle_url) )
-	                 {
-			   //print_object($tab);
- 	                     // backward compatibility when link was set as a string instead of an object
-	                     $ul .= '<a href="'.$tab->link.'" title="'.$tab->title.'">'.$tab->text.'</a>';
-  	                 }
-	                 else
-	                 {
-	            	     //Tab links
-			     $attributes['title'] = $tab->title;
-			     $ul .= html_writer::link($tab->link, $tab->text, $attributes);
-	                 }
+			if ( $tab->selected || $tab->activated )
+			{
+				$attributes['class'] = 'selected';
+				$ul .= html_writer::tag('span', $tab->text , $attributes);
+			}
+			else if ( !($tab->link) )
+			{
+				// some bizarre animals in this kingdom actually define the link itself in the title
+				// which you can check as the link being empty
+				$ul .= $tab->title;
+			}
+			else if ( !($tab->link instanceof moodle_url) )
+			{
+				// backward compatibility when link was set as a string instead of an object
+				$ul .= '<a href="'.$tab->link.'" title="'.$tab->title.'">'.$tab->text.'</a>';
+			}
+			else
+			{
+				//Tab links
+				$attributes['title'] = $tab->title;
+				$ul .= html_writer::link($tab->link, $tab->text, $attributes);
+			}
 	            
-	            if ( !empty($tab->subtree) )
-	            {
-	            	$subtrees[] = $tab->subtree;
-	            }
+			if ( !empty($tab->subtree) )
+			{
+				$subtrees[] = $tab->subtree;
+			}
 		
 			$ul .= '</li>';
 

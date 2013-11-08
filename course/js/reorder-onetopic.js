@@ -4,6 +4,29 @@
 
 $(function(){
 
+	//Also we'll sneak this in here:
+	//When you click on the 'new section' tab, prompt for a name for the new section and append it to the URL
+	$(document).on('click','.tabs #tab_add > a',function()
+	{
+		var name = prompt('Enter a name for the new section:');
+		//prompt() will block and wait for the user's input
+
+		if ( name === null )
+		{
+			//They clicked the cancel button
+			return false;
+		}
+
+		var url = $(this).attr('href');
+		url += '&name='+encodeURIComponent((name));
+		//Send them to the new URL
+		location.href = url;
+
+		//Cancel the default action because we've already sent them to the URL
+		return false;
+	});
+
+
 	function enableReordering()
 	{
 		//Add the delete section button
