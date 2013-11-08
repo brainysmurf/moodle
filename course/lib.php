@@ -3318,3 +3318,18 @@ function delete_section($courseid, $sectionid) {
 
     add_to_log($courseid, "course", "deletesection", "delete_section.php?id=$section->id", "$section->section");
 }
+
+// Returns how many sections are in a course
+// The real amount, including any that are hidden by reducting the number of sections in the course admin page
+function course_count_all_sections( $courseid )
+{
+	global $DB;
+	return $DB->count_records('course_sections' , array('course'=>$courseid) );
+}
+
+//Returns the maximum section number in a course
+function course_max_section( $courseid )
+{
+	global $DB, $CFG;
+	return (int)$DB->get_field_sql("SELECT MAX(section) FROM {$CFG->prefix}course_sections WHERE course = ? GROUP BY course",array($courseid));
+}

@@ -2,12 +2,13 @@
 
 /*
 
+	This script will enrol all the users that are in a cohort into all the courses that are in a category
+
 	Usage:
 	cd /admin/cli
-	php enrol_cohort_in_category.php cohortIDNumber courseID roleName
+	php enrol_cohort_in_category.php cohortIDNumber categoryID roleName
 	
 	e.g.
-	php enrol_cohort_in_category.php cohortIDNumber courseID roleName
 	php enrol_cohort_in_category.php studentsSEC 87 Teacher
 	
 */
