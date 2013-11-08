@@ -44,18 +44,32 @@ if (isset($courseformatoptions['numsections'])) {
     if ($increase) {
         // Add an additional section.
         $courseformatoptions['numsections']++;
+
+		$newsectionnum = $courseformatoptions['numsections'];
+		$name = isset($_GET['name']) && $_GET['name'] ? $_GET['name'] : 'Unnamed Section';
+		$name = trim($name);
+		
+		course_create_section( $course->id , $newsectionnum , true , $name );
+
+		$createsections = false;
+
     } else {
         // Remove a section.
         $courseformatoptions['numsections']--;
+
+		$createsections = true;
     }
 
     // Don't go less than 0, intentionally redirect silently (for the case of double clicks).
-    if ($courseformatoptions['numsections'] >= 0) {
+    if ( $courseformatoptions['numsections'] >= 0) {
         course_get_format($course)->update_course_format_options(
                 array('numsections' => $courseformatoptions['numsections']));
 		
-		//Create new sections
-		course_create_sections_if_missing($course, range(0,$courseformatoptions['numsections']));
+		if ( $createsections )
+		{
+			//Create new sections
+			course_create_sections_if_missing($course, range(0,$courseformatoptions['numsections']));
+		}
     }
 }
 

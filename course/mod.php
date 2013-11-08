@@ -42,6 +42,10 @@ $course        = optional_param('course', 0, PARAM_INT);
 $groupmode     = optional_param('groupmode', -1, PARAM_INT);
 $cancelcopy    = optional_param('cancelcopy', 0, PARAM_BOOL);
 $confirm       = optional_param('confirm', 0, PARAM_BOOL);
+$addnewmodulewhere = optional_param('addnewmodulewhere' , 'below' , PARAM_TEXT);
+
+// Remember where user wants to add the new module
+$USER->addnewmodulewhere = $addnewmodulewhere;
 
 // This page should always redirect
 $url = new moodle_url('/course/mod.php');
