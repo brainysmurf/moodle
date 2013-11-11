@@ -17,7 +17,7 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE ssismdl_course_ssis_metadata
-  OWNER TO dragonnet;
+  OWNER TO moodle;
 COMMENT ON TABLE ssismdl_course_ssis_metadata
   IS 'Stores custom field data for courses.';
 
@@ -37,6 +37,6 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE ssismdl_category_ssis_metadata
-  OWNER TO dragonnet;
+  OWNER TO moodle;
 COMMENT ON TABLE ssismdl_category_ssis_metadata
   IS 'Stores custom field data for categorys.';

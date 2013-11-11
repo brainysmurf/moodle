@@ -208,18 +208,23 @@ class theme_decaf_core_renderer extends core_renderer {
      */
     protected function render_custom_menu( custom_menu $menu )
     {
-		$cache = true;
+		$use_cached = true;
+		$save_in_cache = true;
 		
 		//For debugging
-		if ( isset($_GET['refreshawesomebar']) ) { $cache = false; }
+		if ( isset($_GET['refreshawesomebar']) )
+		{ 
+			$use_cached = false;
+		}
 
 		if ( $this->page->course->id == '1266' )
 		{
-			$cache = false;
+			$use_cached = false;
+			$save_in_cache = false;
 		}
 
 		//Return a cached menu if available
-		if ( $cache && $content = $this->cache->get('awesomebar') )
+		if ( $use_cached && $content = $this->cache->get('awesomebar') )
 		{
 			return $content;
 		}
@@ -229,7 +234,7 @@ class theme_decaf_core_renderer extends core_renderer {
 		$awesomebar->set_custom_menu($menu);
 		$content = $awesomebar->create();
 
-		if ( $cache )
+		if ( $save_in_cache )
 		{
 			//Save in the cache
 			$this->cache->set('awesomebar',$content);	

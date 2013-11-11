@@ -356,7 +356,7 @@ class awesomebar
 			//This can be removed when all category icons have been set in the metadata
 			if ( !$category_icon )
 			{
-				#$category_icon = $this->get_category_icon($category['name']);
+				$category_icon = $this->get_category_icon($category['name']);
 			}
 		
 			//Add category to menu
