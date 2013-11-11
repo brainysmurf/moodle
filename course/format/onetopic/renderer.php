@@ -367,13 +367,36 @@ class format_onetopic_renderer extends format_section_renderer_base {
 		//Add 'new section' button
 		if ( $PAGE->user_is_editing() && has_capability('moodle/course:update', $context) )
 		{
+			$data = array();
+
+			/*
+				If we're creating a new section we want to ask for the name
+				If sections already exist but have been hidden (by reducing the number of sections shown in the course admin page),
+				we just want to show the next hidden section and not ask for a name
+			*/
+
+			// $course->numsections = The highest section number visible (section numbers start from 0 though)
+			// course_count_all_sections($course->id) = how many records in the DB for this course
+			
+			if ( course_count_all_sections($course->id) > ($course->numsections+1) )
+			{
+				echo "hidden stuff";
+				$data['action'] = 'unhide';
+				$label = 'Add A Tab';
+			}
+			else
+			{
+				$data['action'] = 'create';
+				$label = 'Add A New Tab';
+			}
+				
             // Increase number of sections.
             $url = new moodle_url('/course/changenumsections.php',
                 array('courseid' => $course->id,
                       'increase' => true,
                       'sesskey' => sesskey()));
           		
-			$tabs[] = new tabobject('tab_add' , $url , '<i class="icon-plus"></i> Add A Tab' , 'Add A Tab');
+			$tabs[] = new tabobject('tab_add' , $url , '<i class="icon-plus"></i> '.$label , $label , false , $data);
 		}
 
        return $tabs;
