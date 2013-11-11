@@ -18,6 +18,7 @@
     $mode         = optional_param('mode', NULL, PARAM_INT);                  // use the MODE_ constants
     $accesssince  = optional_param('accesssince',0,PARAM_INT);                // filter by last access. -1 = never
     $search       = optional_param('search','',PARAM_RAW);                    // make sure it is processed with p() or s() when sending to output!
+    $searchin = optional_param('searchin','',PARAM_RAW);
     $roleid       = optional_param('roleid', 0, PARAM_INT);                   // optional roleid, 0 means all enrolled users (or all on the frontpage)
 
     $contextid    = optional_param('contextid', 0, PARAM_INT);                // one of this or
@@ -29,6 +30,7 @@
             'mode' => $mode,
             'accesssince' => $accesssince,
             'search' => $search,
+            'searchin' => $searchin,
             'roleid' => $roleid,
             'contextid' => $contextid,
             'id' => $courseid));
@@ -229,7 +231,7 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
     $formatmenu = array( '0' => get_string('brief'),
                          '1' => get_string('userdetails'));
     $select = new single_select($baseurl, 'mode', $formatmenu, $mode, null, 'formatmenu');
-    $select->set_label(get_string('userlist'));
+    $select->set_label(get_string('userlist')).':';
     $userlistcell = new html_table_cell();
     $userlistcell->attributes['class'] = 'right';
     $userlistcell->text = $OUTPUT->render($select);
@@ -391,13 +393,45 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
     $totalcount = $DB->count_records_sql("SELECT COUNT(u.id) $from $where", $params);
 
     if (!empty($search)) {
-        $fullname = $DB->sql_fullname('u.firstname','u.lastname');
-        $wheres[] = "(". $DB->sql_like($fullname, ':search1', false, false) .
-                    " OR ". $DB->sql_like('email', ':search2', false, false) .
-                    " OR ". $DB->sql_like('idnumber', ':search3', false, false) .") ";
-        $params['search1'] = "%$search%";
-        $params['search2'] = "%$search%";
-        $params['search3'] = "%$search%";
+    
+    	//Searching time...
+    	
+    	$fullname = $DB->sql_fullname('u.firstname','u.lastname');
+    	
+		//What columns to search in...
+    	switch ( $searchin )
+    	{
+    		case 'name':
+    		
+    			//Name is a special case because it's firstname and lastname together
+    			$wheres[] = $DB->sql_like($fullname, ':search', false, false);
+    			$params['search'] = "%$search%";
+    			    			
+    		break;
+    		
+    		case 'email':
+    		case 'department':
+    		
+    			//Add 'where' to query
+    			$wheres[] = $DB->sql_like( $searchin , ':search' , false, false);
+    			$params['search'] = "%$search%";
+    			
+    		break;
+
+    		default:
+    			$searchin = false;
+    		
+    			//Default is to search in all 3
+    			$wheres[] = "(". $DB->sql_like($fullname, ':searchname', false, false) .
+                    " OR ". $DB->sql_like('email', ':searchemail', false, false) .
+                    " OR ". $DB->sql_like('department', ':searchdepartment', false, false) .") ";
+		        $params['searchname'] = "%$search%";
+		        $params['searchemail'] = "%$search%";
+		        $params['searchdepartment'] = "%$search%";
+		        
+    		break;
+    	}
+    
     }
 
     list($twhere, $tparams) = $table->get_sql_where();
@@ -488,9 +522,24 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 
 
 //if (has_capability('moodle/site:viewparticipants', $context)) {
-        echo '<br /><center><form action="index.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id.'" />';
-        echo '<label for="search">' . get_string('search', 'search') . ' </label>';
-        echo '<input type="text" id="search" name="search" value="'.s($search).'" />&nbsp;<input type="submit" value="'.get_string('search').'" /></div></form></center><br />'."\n";
+
+	//Search box
+	$searchBox = '<br/>
+		<form action="index.php" class="directorysearchform searchform" style="text-align:center;">
+			<input type="hidden" name="id" value="'.$course->id.'" />
+			<label for="search">Search for</label> 
+			<input type="text" id="search" name="search" value="'.s($search).'" /> in 
+			<select name="searchin">
+				<option value="" '.(!$searchin?'selected':'').'>Name, Email, and/or Homeroom</option>
+				<option value="name" '.($searchin=='name'?'selected':'').'>Name only</option>
+				<option value="email" '.($searchin=='email'?'selected':'').'>Email only</option>
+				<option value="department" '.($searchin=='department'?'selected':'').'>Homeroom only</option>
+			</select>
+			<input type="submit" value="'.get_string('search').'" />
+		</form>
+		<br/>';
+	echo $searchBox;
+	
 //  }
 
     if ($bulkoperations) {
@@ -853,11 +902,9 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
         $PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
     }
 
-    // Show a search box if all participants don't fit on a single screen
+    // Show an aditional search box if all participants don't fit on a single screen
     if ($totalcount > $perpage) {
-        echo '<form action="index.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id.'" />';
-        echo '<label for="search">' . get_string('search', 'search') . ' </label>';
-        echo '<input type="text" id="search" name="search" value="'.s($search).'" />&nbsp;<input type="submit" value="'.get_string('search').'" /></div></form>'."\n";
+    	echo $searchBox;
     }
 
     $perpageurl = clone($baseurl);
