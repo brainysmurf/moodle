@@ -3359,3 +3359,10 @@ function course_get_category_icon( $categoryid )
 	
 	return $SSISMETADATA->getCategoryField( $categoryid , 'icon' );
 }
+
+//Return the course ID for a user's online portfolio
+function get_olp_courseid( $user_idnumber )
+{
+	global $DB;
+	return $DB->get_field('course', 'id' , array('idnumber'=>'OLP:'.$user_idnumber));
+}

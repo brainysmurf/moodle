@@ -657,7 +657,7 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 		       // if the entry is a student...
 		       //echo strpos($user->email, '@ssis-suzhou');
 
-		       if ( $olpCourseID = $DB->get_field('course', 'id' , array('idnumber'=>'OLP:'.$user->idnumber)) ) {
+		       if ( $olpCourseID = get_olp_courseid( $user->idnumber ) ) {
 		           $olpLink = $CFG->wwwroot.'/course/view.php?id='.$olpCourseID;
 		           $row->cells[1]->text .= '<tr>
 		             		<td>Online Portfolio</td>

@@ -47,6 +47,7 @@
 		function getCourseField( $courseid , $field )
 		{
 			$data = $this->getAllFields( 'course' , $courseid );
+			if ( !isset($data[$field]) ) { return null; }
 			return $data[ $field ];
 		}
 
@@ -73,6 +74,7 @@
 		function getCategoryField( $categoryid , $field )
 		{
 			$data = $this->getAllFields( 'category' , $categoryid );
+			if ( !isset($data[$field]) ) { return null; }
 			return $data[ $field ];
 		}
 

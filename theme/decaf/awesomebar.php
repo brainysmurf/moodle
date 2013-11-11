@@ -102,7 +102,7 @@ class awesomebar
 					$icon = false;
 				}
 			
-				if ( $item['url'] )
+				if ( isset($item['url']) )
 				{
     			    $html .= html_writer::tag('a', $icon.$item['text'], array('href'=>$item['url']));
 				}
@@ -365,6 +365,17 @@ class awesomebar
 				'icon' => strtolower($category_icon),
 				'submenu' => array()
 			);
+			
+			//Add a link to the user's OLP (if they have one) at the top of the teaching and learning menu
+			global $USER;
+			if ( $category['name'] == 'Teaching & Learning' && $olpCourseID = get_olp_courseid($USER->idnumber) )
+			{
+				$item['submenu'][] = array(
+					'text' => 'My Online Portfolio',
+					'url' => '/course/view.php?id='.$olpCourseID,
+					'icon' => 'certificate'
+				);
+			}
 			
 				//Add subcategories to menu
 				foreach ( $category['categories'] as $subcategory )
