@@ -25,7 +25,7 @@ class editsection_form extends moodleform {
 
         $elementgroup = array();
         $elementgroup[] = $mform->createElement('text', 'name', '', array('size' => '30'));
-        $elementgroup[] = $mform->createElement('checkbox', 'usedefaultname', '', get_string('sectionusedefaultname'));
+        //$elementgroup[] = $mform->createElement('checkbox', 'usedefaultname', '', get_string('sectionusedefaultname'));
         $mform->addGroup($elementgroup, 'name_group', get_string('sectionname'), ' ', false);
 
         $mform->setDefault('usedefaultname', true);

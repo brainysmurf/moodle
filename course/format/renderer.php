@@ -186,8 +186,8 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
             $url = new moodle_url('/course/editsection.php', array('id'=>$section->id, 'sr'=>$sectionreturn));
             $o.= html_writer::link($url,
                 html_writer::empty_tag('img', array('src' => $this->output->pix_url('t/edit'),
-                    'class' => 'iconsmall edit', 'alt' => get_string('edit'))),
-                array('title' => get_string('editsummary')));
+                    'class' => 'iconsmall edit', 'alt' => get_string('edit'))) .' Change section name or description',
+                array('title' => get_string('editsummary') , 'class'=>'editsectionbutton'));
         }
         $o.= html_writer::end_tag('div');
 

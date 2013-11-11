@@ -189,6 +189,18 @@ a:hover,a:active {color: #1662A3;}
 			white-space: nowrap;
 			text-align:center;
 		}
+			
+			.tabs ul li > a:hover {
+				background: rgb(244,244,244);
+				background: -moz-linear-gradient(top,  rgba(244,244,244,1) 0%, rgba(230,230,230,1) 100%);
+				background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(244,244,244,1)), color-stop(100%,rgba(230,230,230,1)));
+				background: -webkit-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+				background: -o-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+				background: -ms-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+				background: linear-gradient(to bottom,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f4f4f4', endColorstr='#d8d8d8',GradientType=0 );
+			}
+			
 			.tabs ul li > span.selected {
 				font-weight:normal;
 				background:#1662A3;
@@ -267,7 +279,18 @@ a:hover,a:active {color: #1662A3;}
 				font-size:12px;
 			}
 		
-		
+		a.editsectionbutton {
+			font-size:11px;
+			color:#999;
+			line-height:28px;
+		}
+			a.editsectionbutton img {
+				vertical-align: middle;
+				margin: 0;
+				position: relative;
+				top: -2px;
+			}
+			
 
 /* User
 --------------------------- */
@@ -501,7 +524,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 .mform fieldset{border-color:#ddd;}
 .mform legend{border:1px solid #ddd;background:url([[pix:theme|gradient-sb]]) repeat-x 0 -25%;padding:2px 7px;}
 .mform .fitem .felement { margin-left: 31%; margin-right: 0px; width: 68%;}
-.mform .fitem fieldset.felement{float:left;}
+.mform .fitem fieldset.felement{float:left; margin-left:0;}
 .mform .fitem .fitemtitle{width:30%;}
 
 .form-input {text-align:left;}
@@ -799,6 +822,8 @@ h4.advice {
 	font-weight:normal;
 }
 
+	/* User Directory */
+
 .userinfobox {
 	background: #F6F6F6;
 	border: 1px solid #D4D4D4;
@@ -862,6 +887,20 @@ table.styledtable tr:hover td {
     padding: 3px;
     text-align: center;
 }
+
+	.directorysearchform {
+		text-align:center;
+	}
+		.directorysearchform input,
+		.directorysearchform select {
+			margin:0 5px;
+		}
+			.directorysearchform input[type=text] {
+				padding: 1px 2px;
+				position: relative;
+				top: 1px;
+			}
+
 
 /* htmltable module */
 .userinfotable.htmltable p {
@@ -968,24 +1007,27 @@ color: #333;
 	
 	/* Icons page */
 	ul.iconList {
-		float:left;
-		width:33%;
 		list-style:none;
 		margin:0;
 		padding:0;
 	}
 		ul.iconList li {
+			float:left;
+			width:32%;
+			-moz-box-sizing: border-box;
+			-webkit-box-sizing: border-box;
+			box-sizing: border-box;
+			margin-right:1%;
+			margin-bottom:3px;
 			display:block;
 			font-size:15px;
 			background:rgba(255,255,255,0.5);
-			margin-bottom:3px;
-			margin-right:3px;
 			padding:5px 10px;
 		}
 			ul.iconList li:nth-child(even) {
 				background:rgba(255,255,255,0.75);
 			}
-		ul.iconList li span {
+		ul.iconList li i {
 			vertical-align: middle;
 			margin-right:5px;
 		}

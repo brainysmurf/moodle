@@ -59,6 +59,13 @@ $renderer = $PAGE->get_renderer('format_onetopic');
 $sectionnum = optional_param('section', -1, PARAM_INT);
 $sectionid = optional_param('sectionid', -1, PARAM_INT);
 
+    //Onetopic format, section 0 is shown at the top, and section==0 was given in the URL
+    if ( $course->realcoursedisplay && $sectionnum === 0 )
+	{
+		//Redirect to /course/view.php?id=courseid
+		redirect('/course/view.php?id='.$course->id);
+	}
+
 if ( isset($sectionnum) && $sectionnum >= 0 )
 {
         //$USER->display[$course->id] = $section;

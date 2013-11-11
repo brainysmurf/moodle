@@ -843,7 +843,7 @@ class flexible_table {
      * @param string $urlvar URL parameter name for this initial.
      */
     protected function print_one_initials_bar($alpha, $current, $class, $title, $urlvar) {
-        echo html_writer::start_tag('div', array('class' => 'initialbar paging' . $class));
+        echo html_writer::start_tag('div', array('class' => 'initialbar paging ' . $class));
         
         echo html_writer::tag('span', $title.':');
         

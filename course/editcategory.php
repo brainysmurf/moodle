@@ -103,6 +103,22 @@ if ($mform->is_cancelled()) {
         $newcategory = coursecat::create($data, $editoroptions);
     }
 
+    // Update SSIS Metadata
+    if ( isset($data->ssismetadata) && count($data->ssismetadata) > 0 )
+    {
+    	if ( !$SSISMETADATA )
+    	{
+    		require_once( $CFG->libdir.'/ssismetadata.php' );
+			$SSISMETADATA = new ssismetadata();
+		}
+
+    	foreach ( $data->ssismetadata as $field => $value )
+    	{
+    		$SSISMETADATA->setCategoryField( $newcategory->id , $field , $value );
+    	}
+    }
+    //End SSIS Metadata
+
     redirect('manage.php?categoryid='.$newcategory->id);
 }
 
