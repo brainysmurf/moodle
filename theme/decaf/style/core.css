@@ -267,7 +267,18 @@ a:hover,a:active {color: #1662A3;}
 				font-size:12px;
 			}
 		
-		
+		a.editsectionbutton {
+			font-size:11px;
+			color:#999;
+			line-height:28px;
+		}
+			a.editsectionbutton img {
+				vertical-align: middle;
+				margin: 0;
+				position: relative;
+				top: -2px;
+			}
+			
 
 /* User
 --------------------------- */
