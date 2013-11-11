@@ -283,6 +283,27 @@ class course_edit_form extends moodleform {
             }
         }
 
+//SSIS Metadata
+//--------------------------------------------------------------------------------
+
+	//Load current fields
+	global $SSISMETADATA;
+	if ( !$SSISMETADATA )
+	{
+		require_once( $CFG->libdir.'/ssismetadata.php' );
+		$SSISMETADATA = new ssismetadata();
+	}
+    $course->ssismetadata = $SSISMETADATA->getCourseFields($course->id);
+    
+    	//Set form fields
+        $mform->addElement('header','ssismetadatasection', 'Extra');
+        
+        $mform->addElement('text', 'ssismetadata[icon]', 'Course Icon', 'maxlength="100" size="20"');
+        $mform->setType('ssismetadata[icon]', PARAM_TEXT);
+        
+//--------------------------------------------------------------------------------                
+//End SSIS Metadata
+
 //--------------------------------------------------------------------------------
         $this->add_action_buttons();
 //--------------------------------------------------------------------------------

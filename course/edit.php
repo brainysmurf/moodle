@@ -147,6 +147,22 @@ if ($editform->is_cancelled()) {
         // Save any changes to the files used in the editor
         update_course($data, $editoroptions);
     }
+    
+    // Update SSIS Metadata
+    if ( isset($data->ssismetadata) && count($data->ssismetadata) > 0 )
+    {
+    	if ( !$SSISMETADATA )
+    	{
+    		require_once( $CFG->libdir.'/ssismetadata.php' );
+			$SSISMETADATA = new ssismetadata();
+		}
+
+    	foreach ( $data->ssismetadata as $field => $value )
+    	{
+    		$SSISMETADATA->setCourseField( $course->id , $field , $value );
+    	}
+    }
+    //End SSIS Metadata
 
     // Redirect user to newly created/updated course.
     redirect(new moodle_url('/course/view.php', array('id' => $course->id)));
