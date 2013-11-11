@@ -147,7 +147,7 @@ class awesomebar
 	    	$item = array(
 	    		'text'=>$menunode->get_text(),
 	    		'icon'=> str_replace('icon-','',$menunode->get_title()),
-	    		'url' => $menunode->get_url() ? $menunode->get_url()->out() : null
+	    		'url' => $menunode->get_url() ? $menunode->get_url()->out(false) : null
 	    	);
 
 			if ( $menunode->has_children() )
