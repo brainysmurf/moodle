@@ -209,6 +209,9 @@ class theme_decaf_core_renderer extends core_renderer {
     protected function render_custom_menu( custom_menu $menu )
     {
 		$cache = true;
+		
+		//For debugging
+		if ( isset($_GET['refreshawesomebar']) ) { $cache = false; }
 
 		if ( $this->page->course->id == '1266' )
 		{

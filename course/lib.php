@@ -3333,3 +3333,29 @@ function course_max_section( $courseid )
 	global $DB, $CFG;
 	return (int)$DB->get_field_sql("SELECT MAX(section) FROM {$CFG->prefix}course_sections WHERE course = ? GROUP BY course",array($courseid));
 }
+
+//Returns the icon for the course form the SSIS metadata
+function course_get_icon( $courseid )
+{
+	global $SSISMETADATA, $CFG;
+	if ( !$SSISMETADATA )
+	{
+		require_once( $CFG->libdir.'/ssismetadata.php' );
+		$SSISMETADATA = new ssismetadata();
+	}
+	
+	return $SSISMETADATA->getCourseField( $courseid , 'icon' );
+}
+
+//Returns the icon for the course category from the SSIS metadata
+function course_get_category_icon( $categoryid )
+{
+	global $SSISMETADATA, $CFG;
+	if ( !$SSISMETADATA )
+	{
+		require_once( $CFG->libdir.'/ssismetadata.php' );
+		$SSISMETADATA = new ssismetadata();
+	}
+	
+	return $SSISMETADATA->getCategoryField( $categoryid , 'icon' );
+}

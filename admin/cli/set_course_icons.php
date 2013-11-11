@@ -17,12 +17,17 @@
 	*/
 
 	#define('CLI_SCRIPT', true);
+	echo '<pre>';
+	
 	require(dirname(dirname(dirname(__FILE__))).'/config.php');
 	require_once($CFG->libdir.'/coursecatlib.php');
 	
+	require_once( $CFG->libdir.'/ssismetadata.php' );
+	$SSISMETADATA = new ssismetadata();
+	
 	function set_course_icons($category)
 	{
-		global $DB;
+		global $SSISMETADATA;
 		
 		//Get the icon
 		$icon = get_tl_icon($category->name);
@@ -36,10 +41,9 @@
 		foreach ( $courses as $course )
 		{
 			echo "\n\tCourse: ".$course->id.' '.$course->fullname.' --> '.$icon;
-			$update = new stdClass();
-			$update->id = $course->id;
-			$update->shortname = $icon;
-			$DB->update_record_raw('course',$update);
+			
+			//Set icon
+			$SSISMETADATA->setCourseField($course->id , 'icon' , $icon);
 		}
 		
 		//Set icons for this category and subcategories
@@ -48,13 +52,10 @@
 	
 		function set_category_icons($category , $icon='')
 		{
-			global $DB;
+			global $SSISMETADATA;
 			
 			//Set the icon for this category
-			$update = new stdClass();
-			$update->id = $category->id;
-			$update->idnumber = $icon;
-			$DB->update_record_raw('course_categories',$update);
+			$SSISMETADATA->setCategoryField( $category->id , 'icon' , $icon);
 			
 			$subcategories = $category->get_children();
 			
@@ -86,7 +87,7 @@
 		}
 	}
 	
-	//Start running from category 50
+	//Start running from category 50 (teaching and learning)
 	$teaching_learning_categories = coursecat::get(50)->get_children();
 	foreach ( $teaching_learning_categories as $category )
 	{

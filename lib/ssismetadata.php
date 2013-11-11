@@ -72,7 +72,7 @@
 		 */
 		function getCategoryField( $categoryid , $field )
 		{
-			$data = $this->getAllFields( 'course' , $categoryid );
+			$data = $this->getAllFields( 'category' , $categoryid );
 			return $data[ $field ];
 		}
 

@@ -349,13 +349,20 @@ class awesomebar
 				}
 			}
 			
-			//Category icons are stored in the idnumber field (or we use $this->get_category_icon otherwise)
-			$category_icon = $category['idnumber'] ? strtolower($category['idnumber']) : $this->get_category_icon($category['name']);
+			//See if an icon for this category is set in the SSIS metadata
+			$category_icon = course_get_category_icon($category['id']);
+			
+			//Backward compatibility: If no icon was set in the metadata, use the ones defined in this class
+			//This can be removed when all category icons have been set in the metadata
+			if ( !$category_icon )
+			{
+				#$category_icon = $this->get_category_icon($category['name']);
+			}
 		
 			//Add category to menu
 			$item = array(
 				'text' => $category['name'],
-				'icon' => $category_icon,
+				'icon' => strtolower($category_icon),
 				'submenu' => array()
 			);
 			
@@ -368,8 +375,9 @@ class awesomebar
 				//Add courses to menu
 				foreach ( $category['courses'] as $course )
 				{
-					//Course icons are stored in the sortname field
-					$course_icon = $course['shortname'] ? strtolower($course['shortname']) : false;
+					//See if an icon for this course is set in the SSIS metadata
+					$course_icon = course_get_icon($course['id']);
+					$course_icon = strtolower($course_icon);
 					
 					 //Activities
 					if ( $category['id'] == 1 )
