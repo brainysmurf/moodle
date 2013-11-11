@@ -256,6 +256,11 @@
 		width:100%;
 		text-align:center;
 	}
+	.icon-text.pull-right {
+		margin-right:0;
+		margin-left:10px !important;
+	}
 	.icon-text-all:after { content:"ALL"; }
 	.icon-text-s1:after { content:"S1"; }
 	.icon-text-s2:after { content:"S2"; }
+	.icon-text-full:after { content:"FULL"; }

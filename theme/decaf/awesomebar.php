@@ -393,22 +393,44 @@ class awesomebar
 					 //Activities
 					if ( $category['id'] == 1 )
 					{
+						
+						/*
+						TODO: Switch to this later
+						//Match text in parentheses at beginning of string
+						if ( preg_match_all('/\((.*?)\)/', $course['fullname'], $match) )
+						{
+							//Remove it from the name
+							$course['fullname'] = str_replace($match[0],'',$course['fullname']);
+							$course['fullname'] = trim($course['fullname']);
+							
+							//Replace with with an icon
+							$course['fullname'] = '<i class="pull-left icon-text icon-text-'.strtolower($match[1]).'"></i>'.$course['fullname'];
+						}
+						*/
+						
+						if ( strpos($course['fullname'],'(FULL)') !== false )
+						{
+							$course['fullname'] = str_replace('(FULL) ','',$course['fullname']);
+							$course['fullname'] = '<i class="pull-right icon-text icon-text-full"></i>'.$course['fullname'];
+						}
+					
 						//Add the text "icon" for activity seasons
-						if ( strpos($course['fullname'],'(ALL)') === 0 )
+						if ( strpos($course['fullname'],'(ALL)') !== false )
 						{
 							$course['fullname'] = str_replace('(ALL) ','',$course['fullname']);
-							$course['fullname'] = '<i class="pull-left icon-text icon-text-all"></i>'.$course['fullname'];
+							$course['fullname'] = '<i class="pull-right icon-text icon-text-all"></i>'.$course['fullname'];
 						}
-						else if ( strpos($course['fullname'],'(S1)') === 0 )
+						else if ( strpos($course['fullname'],'(S1)') !== false )
 						{
 							$course['fullname'] = str_replace('(S1) ','',$course['fullname']);
-							$course['fullname'] = '<i class="pull-left icon-text icon-text-s1"></i>'.$course['fullname'];
+							$course['fullname'] = '<i class="pull-right icon-text icon-text-s1"></i>'.$course['fullname'];
 						}	
-						else if ( strpos($course['fullname'],'(S2)') === 0 )
+						else if ( strpos($course['fullname'],'(S2)') !== false )
 						{
 							$course['fullname'] = str_replace('(S2) ','',$course['fullname']);
-							$course['fullname'] = '<i class="pull-left icon-text icon-text-s2"></i>'.$course['fullname'];
-						}	
+							$course['fullname'] = '<i class="pull-right icon-text icon-text-s2"></i>'.$course['fullname'];
+						}
+						
 					}
 				
 					$item['submenu'][] = array(
