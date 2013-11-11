@@ -385,12 +385,14 @@ class awesomebar
 						if ( strpos($course['fullname'],'(ALL)') === 0 )
 						{
 							$course['fullname'] = str_replace('(ALL) ','',$course['fullname']);
-							$course_icon = 'text icon-text-all';
+							//Add the text "icon"
+							$course['fullname'] = '<i class="pull-left icon-text icon-text-all"></i>'.$course['fullname'];
 						}
 						else if ( strpos($course['fullname'],'(S1)') === 0 )
 						{
 							$course['fullname'] = str_replace('(S1) ','',$course['fullname']);
-							$course_icon = 'text icon-text-s1';
+							//Add the text "icon"
+							$course['fullname'] = '<i class="pull-left icon-text icon-text-s1"></i>'.$course['fullname'];
 						}	
 					}
 				
