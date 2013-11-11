@@ -73,6 +73,7 @@ class editcategory_form extends moodleform {
         
         $mform->addElement('text', 'ssismetadata[icon]', 'Category Icon', 'maxlength="100" size="20"');
         $mform->setType('ssismetadata[icon]', PARAM_TEXT);
+        $mform->addHelpButton('ssismetadata[icon]', 'iconhelp', 'moodle');
         
 //--------------------------------------------------------------------------------                
 //End SSIS Metadata

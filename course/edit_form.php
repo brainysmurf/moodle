@@ -300,6 +300,7 @@ class course_edit_form extends moodleform {
         
         $mform->addElement('text', 'ssismetadata[icon]', 'Course Icon', 'maxlength="100" size="20"');
         $mform->setType('ssismetadata[icon]', PARAM_TEXT);
+		$mform->addHelpButton('ssismetadata[icon]', 'iconhelp', 'moodle');
         
 //--------------------------------------------------------------------------------                
 //End SSIS Metadata
