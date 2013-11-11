@@ -44,19 +44,28 @@ if (isset($courseformatoptions['numsections'])) {
     if ($increase) {
         // Add an additional section.
         $courseformatoptions['numsections']++;
+		$createsections = true;
 
-		$newsectionnum = $courseformatoptions['numsections'];
-		$name = isset($_GET['name']) && $_GET['name'] ? $_GET['name'] : 'Unnamed Section';
-		$name = trim($name);
-		
-		course_create_section( $course->id , $newsectionnum , true , $name );
+		//Is this creating a brand new section?
+		//Or unhiding an existing one hidden by reducing the number of sections on the course admin page
+		if ( $courseformatoptions['numsections'] >= course_count_all_sections($course->id))
+		{
+			//It's a new section
 
-		$createsections = false;
+			//Do we have a name?
+			if ( $_GET['name'] )
+			{
+				$newsectionnum = $courseformatoptions['numsections'];
+				$name = isset($_GET['name']) && $_GET['name'] ? $_GET['name'] : 'Unnamed Section';
+				$name = trim($name);
+				course_create_section( $course->id , $newsectionnum , true , $name );
+				$createsections = false;
+			}
+		}
 
     } else {
         // Remove a section.
         $courseformatoptions['numsections']--;
-
 		$createsections = true;
     }
 
