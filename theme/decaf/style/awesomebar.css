@@ -256,9 +256,6 @@
 		width:100%;
 		text-align:center;
 	}
-	.icon-text-all:after {
-		content:"ALL";
-	}
-	.icon-text-s1:after {
-		content:"S1";
-	}
+	.icon-text-all:after { content:"ALL"; }
+	.icon-text-s1:after { content:"S1"; }
+	.icon-text-s2:after { content:"S2"; }

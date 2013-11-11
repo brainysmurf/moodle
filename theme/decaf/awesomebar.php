@@ -147,7 +147,7 @@ class awesomebar
 	    	$item = array(
 	    		'text'=>$menunode->get_text(),
 	    		'icon'=> str_replace('icon-','',$menunode->get_title()),
-	    		'url' => $menunode->get_url() ? $menunode->get_url()->out() : false
+	    		'url' => $menunode->get_url() ? $menunode->get_url()->out() : null
 	    	);
 
 			if ( $menunode->has_children() )
@@ -393,17 +393,21 @@ class awesomebar
 					 //Activities
 					if ( $category['id'] == 1 )
 					{
+						//Add the text "icon" for activity seasons
 						if ( strpos($course['fullname'],'(ALL)') === 0 )
 						{
 							$course['fullname'] = str_replace('(ALL) ','',$course['fullname']);
-							//Add the text "icon"
 							$course['fullname'] = '<i class="pull-left icon-text icon-text-all"></i>'.$course['fullname'];
 						}
 						else if ( strpos($course['fullname'],'(S1)') === 0 )
 						{
 							$course['fullname'] = str_replace('(S1) ','',$course['fullname']);
-							//Add the text "icon"
 							$course['fullname'] = '<i class="pull-left icon-text icon-text-s1"></i>'.$course['fullname'];
+						}	
+						else if ( strpos($course['fullname'],'(S2)') === 0 )
+						{
+							$course['fullname'] = str_replace('(S2) ','',$course['fullname']);
+							$course['fullname'] = '<i class="pull-left icon-text icon-text-s2"></i>'.$course['fullname'];
 						}	
 					}
 				
