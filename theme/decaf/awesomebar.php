@@ -395,8 +395,7 @@ class awesomebar
 					{
 						
 						/*
-						TODO: Switch to this later
-						//Match text in parentheses at beginning of string
+						//Match text in parentheses
 						if ( preg_match_all('/\((.*?)\)/', $course['fullname'], $match) )
 						{
 							//Remove it from the name
@@ -429,6 +428,11 @@ class awesomebar
 						{
 							$course['fullname'] = str_replace('(S2) ','',$course['fullname']);
 							$course['fullname'] = '<i class="pull-right icon-text icon-text-s2"></i>'.$course['fullname'];
+						}
+						else if ( strpos($course['fullname'],'(S3)') !== false )
+						{
+							$course['fullname'] = str_replace('(S3) ','',$course['fullname']);
+							$course['fullname'] = '<i class="pull-right icon-text icon-text-s3"></i>'.$course['fullname'];
 						}
 						
 					}
