@@ -158,6 +158,11 @@
 				throw new coding_exception('Trying to setCourseData without a field name.');
 			}
 			
+			if ( $field == 'icon' )
+			{
+				$value = sanitize_icon_name($value);
+			}
+			
 			global $DB;
 			
 			//Get the name of the table to update
