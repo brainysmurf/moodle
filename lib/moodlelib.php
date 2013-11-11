@@ -11575,3 +11575,10 @@ class lang_string {
         return array('forcedstring', 'string', 'lang');
     }
 }
+
+
+function sanitize_icon_name( $name )
+{
+	$name = strtolower($name);
+	return preg_replace("/[^A-Za-z0-9]/", '', $name);
+}

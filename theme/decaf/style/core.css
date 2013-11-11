@@ -1007,24 +1007,27 @@ color: #333;
 	
 	/* Icons page */
 	ul.iconList {
-		float:left;
-		width:33%;
 		list-style:none;
 		margin:0;
 		padding:0;
 	}
 		ul.iconList li {
+			float:left;
+			width:32%;
+			-moz-box-sizing: border-box;
+			-webkit-box-sizing: border-box;
+			box-sizing: border-box;
+			margin-right:1%;
+			margin-bottom:3px;
 			display:block;
 			font-size:15px;
 			background:rgba(255,255,255,0.5);
-			margin-bottom:3px;
-			margin-right:3px;
 			padding:5px 10px;
 		}
 			ul.iconList li:nth-child(even) {
 				background:rgba(255,255,255,0.75);
 			}
-		ul.iconList li span {
+		ul.iconList li i {
 			vertical-align: middle;
 			margin-right:5px;
 		}

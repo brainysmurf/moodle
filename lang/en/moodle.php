@@ -860,6 +860,7 @@ $string['choosetheme'] = 'Choose theme';
 $string['chooseuser'] = 'Choose a user';
 $string['icqnumber'] = 'Details';
 $string['icon'] = 'Icon';
+$string['iconhelp_help'] = 'A list of all available icons can be found by <a href="/icons.php" target="_blank">clicking here</a>.';
 $string['idnumber'] = 'PowerSchool ID';
 $string['idnumbercourse'] = 'Course ID number';
 $string['idnumbercourse_help'] = 'The ID number of a course is only used when matching the course against external systems and is not displayed anywhere on the site. If the course has an official code name it may be entered, otherwise the field can be left blank.';

@@ -56,6 +56,28 @@ class editcategory_form extends moodleform {
         $mform->setType('id', PARAM_INT);
         $mform->setDefault('id', $category->id);
 
+//SSIS Metadata
+//--------------------------------------------------------------------------------
+
+	//Load current fields
+	global $SSISMETADATA;
+	if ( !$SSISMETADATA )
+	{
+		require_once( $CFG->libdir.'/ssismetadata.php' );
+		$SSISMETADATA = new ssismetadata();
+	}
+    $category->ssismetadata = $SSISMETADATA->getCategoryFields($category->id);
+    
+    	//Set form fields
+        $mform->addElement('header','ssismetadatasection', 'Extra');
+        
+        $mform->addElement('text', 'ssismetadata[icon]', 'Category Icon', 'maxlength="100" size="20"');
+        $mform->setType('ssismetadata[icon]', PARAM_TEXT);
+        $mform->addHelpButton('ssismetadata[icon]', 'iconhelp', 'moodle');
+        
+//--------------------------------------------------------------------------------                
+//End SSIS Metadata
+
         $this->add_action_buttons(true, $strsubmit);
     }
 

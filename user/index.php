@@ -681,10 +681,7 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
 		    		    }
 
 				        if ( ($field === 'email') or ($field === 'lastaccess') ) {
-                            // Skip email because it was displayed with different
-                            // logic above (because this page is intended for
-                            // students too)
-                            continue;
+					  continue;
 						}
 						
 					        if ($user->{$field} === "") {
@@ -706,9 +703,17 @@ $teachinglearning = array(1304, 1093, 1170, 1180, 1185, 1139, 1123, 1359, 1105, 
                    if ( $SESSION->userIsTeacher ) {
                    
                      if ( strpos($user->email, '@student.ssis-suzhou') != 0 ) {
+		       // if the entry is a student...
+		       //echo strpos($user->email, '@ssis-suzhou');
 
-						echo strpos($user->email, '@ssis-suzhou');
-		       
+		       if ( $olpCourseID = get_olp_courseid( $user->idnumber ) ) {
+		           $olpLink = $CFG->wwwroot.'/course/view.php?id='.$olpCourseID;
+		           $row->cells[1]->text .= '<tr>
+		             		<td>Online Portfolio</td>
+			          		<td><a href="'. $olpLink . '">' . 'link' . '</a></td>
+		               	</tr>';			 
+		       }
+
                         $parent_email_address = $user->username . "PARENTS@student.ssis-suzhou.net";
                         $row->cells[1]->text .= '<tr>
                                 		<td>Parents Email</td>
