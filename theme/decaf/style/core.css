@@ -189,6 +189,18 @@ a:hover,a:active {color: #1662A3;}
 			white-space: nowrap;
 			text-align:center;
 		}
+			
+			.tabs ul li > a:hover {
+				background: rgb(244,244,244);
+				background: -moz-linear-gradient(top,  rgba(244,244,244,1) 0%, rgba(230,230,230,1) 100%);
+				background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(244,244,244,1)), color-stop(100%,rgba(230,230,230,1)));
+				background: -webkit-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+				background: -o-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+				background: -ms-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+				background: linear-gradient(to bottom,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f4f4f4', endColorstr='#d8d8d8',GradientType=0 );
+			}
+			
 			.tabs ul li > span.selected {
 				font-weight:normal;
 				background:#1662A3;
