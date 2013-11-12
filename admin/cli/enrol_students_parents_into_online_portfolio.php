@@ -69,13 +69,14 @@ require_once('../../enrol/locallib.php');
 	
 	foreach( $cohort_members as $student )
 	{
-	        $userid = $student->id;
+	        $studentid = $student->id;
+		$useridnumber = $student->idnumber;
 		$parentid = substr($student->id, 0, -1).'P';
 
 		echo "\nUser $userid, parent $parentid...";
 		
 		//Get full course data from DB
-		$course = $DB->get_record('course',array('idnumber'=>$prefix.$userid));
+		$course = $DB->get_record('course',array('idnumber'=>$prefix.$useridnumber));
 		if ($course === false) {
 		    continue;
 		}
