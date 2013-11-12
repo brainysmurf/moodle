@@ -69,7 +69,7 @@ require_once('../../enrol/locallib.php');
 	}
 	else
 	{
-		echo "\nRole: ".$parent_role->name." (".$role->id.")";
+		echo "\nRole: ".$parent_role->name." (".$parentrole->id.")";
 	}
 	
 	echo "\n\nAll users in to cohort ".$cohort->name." (".$cohort->idnumber.") \n and their parents will be enrolled into their Online Portfolio (if it exists) as a ".$teacher_role->name."\n";
