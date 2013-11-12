@@ -69,7 +69,7 @@ require_once('../../enrol/locallib.php');
 	
 	foreach( $cohort_members as $student )
 	{
-	        $studentid = $student->id;
+	        $userid = $student->id;
 		$useridnumber = $student->idnumber;
 		$parentid = substr($student->id, 0, -1).'P';
 
