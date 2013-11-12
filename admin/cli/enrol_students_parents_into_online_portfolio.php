@@ -24,7 +24,6 @@ require_once('../../enrol/locallib.php');
         $prefix = 'OLP:';
 
 	//Look through everyone who is in studentsALL
-	$cohortID = $argv[1];
 	$cohort = $DB->get_record('cohort',array('idnumber'=>'studentsALL'));
 	
 	if ( !$cohort )
@@ -89,7 +88,7 @@ require_once('../../enrol/locallib.php');
 		
 		//Get full course data from DB
 		$course = $DB->get_record('course',array('idnumber'=>$prefix.$userid));
-		
+		$courseid = $course->id;
 		//Get context
 		if ( !$context = get_context_instance(CONTEXT_COURSE, $courseid, MUST_EXIST) )
 		{
