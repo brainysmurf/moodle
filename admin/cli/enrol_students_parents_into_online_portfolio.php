@@ -39,7 +39,7 @@ require_once('../../enrol/locallib.php');
 			
 	// Set up roles
 	$teacher_role = $DB->get_record( 'role', array('shortname'=>'editingteacher'));
-	$parent_role = $DB->get_record( 'role', array('shortname'=>'student'));	
+	$student_role = $DB->get_record( 'role', array('shortname'=>'student'));	
 
 	if ( !$teacher_role )
 	{
@@ -49,13 +49,13 @@ require_once('../../enrol/locallib.php');
 	{
 		echo "\nRole: ".$teacher_role->name." (".$teacher_role->id.")";
 	}
-	if ( !$parent_role )
+	if ( !$student_role )
 	{
 		die("\nRole not found\n");
 	}
 	else
 	{
-		echo "\nRole: ".$parent_role->name." (".$parent_role->id.")";
+		echo "\nRole: ".$student_role->name." (".$student_role->id.")";
 	}
 	
 	echo "\n\nAll users in to cohort ".$cohort->name." (".$cohort->idnumber.") \n and their parents will be enrolled into their Online Portfolio (if it exists) as a ".$teacher_role->name."\n";
@@ -69,16 +69,19 @@ require_once('../../enrol/locallib.php');
 	
 	foreach( $cohort_members as $user )
 	{
-	        $student = $DB->get_record('user', array('id'=>$user->id));
+	        $student = $DB->get_record('user', array('id'=>$user->userid));
 	        $userid = $student->id;
 		$useridnumber = $student->idnumber;
-		$parentid = substr($student->id, 0, -1).'P';
+		$parentidnumber = substr($student->idnumber, 0, -1).'P';
+		$parent = $DB->get_record('user', array('idnumber'=>$parentidnumber));
+		$parentid = $parent->id;
 
 		echo "\nUser $userid, parent $parentid...";
-		
+
 		//Get full course data from DB
 		$course = $DB->get_record('course',array('idnumber'=>$prefix.$useridnumber));
 		if ($course === false) {
+	            echo 'cannot';
 		    continue;
 		}
 
@@ -104,21 +107,21 @@ require_once('../../enrol/locallib.php');
 		//Create a manual enrolment plugin object
 		$plugins = $manager->get_enrolment_plugins();
 	  	$plugin = $plugins['manual'];
-	  	
+
 	  	$instances = $manager->get_enrolment_instances();
 		$instance = $instances[$enrolMethodID];
-		
+
 		if ( is_enrolled($context, $userid) )
 			{
 				//This would break if the user is already enrolled but with the wrong role
 				echo "\nUser $userid is already enrolled in course $courseid";			
 				continue;
 			}
-			
-		echo "\nEnrolling user $userid in course $courseid";
+
+		echo "\nEnrolling user $student->firstname $student->lastname in course $course->fullname";
 
 		cli_input("GO!.");
-			
+
 		$today = time();
 		$timestart = make_timestamp(date('Y', $today), date('m', $today), date('d', $today), 0, 0, 0);
 		$timeend = 0;
