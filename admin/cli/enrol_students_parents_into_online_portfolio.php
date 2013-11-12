@@ -67,8 +67,9 @@ require_once('../../enrol/locallib.php');
 	
 	//Go time
 	
-	foreach( $cohort_members as $student )
+	foreach( $cohort_members as $user )
 	{
+	        $student = $DB->get_record('user', array('id'=>$user->id));
 	        $userid = $student->id;
 		$useridnumber = $student->idnumber;
 		$parentid = substr($student->id, 0, -1).'P';
