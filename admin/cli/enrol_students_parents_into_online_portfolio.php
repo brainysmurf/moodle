@@ -36,10 +36,6 @@ require_once('../../enrol/locallib.php');
 	//Get members of cohort
 	$user_ids = array();
 	$cohort_members = $DB->get_records('cohort_members',array('cohortid'=>$cohort->id));
-	foreach ( $cohort_members as $member )
-	{
-		$user_ids[] = $member->userid;
-	}
 	
 	if ( count($user_ids) < 1 )
 	{
@@ -80,14 +76,19 @@ require_once('../../enrol/locallib.php');
 	
 	//Go time
 	
-	foreach( $user_ids as $userid )
+	foreach( $cohort_members as $student )
 	{
-		echo "\nUser $userid...";
+	        $userid = $student->id;
+		$parentid = substr($student->id, 0, -1).'P';
 
-		$parentid = substr($userid, 0, -1).'P';
+		echo "\nUser $userid, parent $parentid...";
 		
 		//Get full course data from DB
 		$course = $DB->get_record('course',array('idnumber'=>$prefix.$userid));
+		if ($course === false) {
+		    continue;
+		}
+
 		$courseid = $course->id;
 		//Get context
 		if ( !$context = get_context_instance(CONTEXT_COURSE, $courseid, MUST_EXIST) )
