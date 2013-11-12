@@ -69,7 +69,7 @@ require_once('../../enrol/locallib.php');
 	}
 	else
 	{
-		echo "\nRole: ".$parent_role->name." (".$parentrole->id.")";
+		echo "\nRole: ".$parent_role->name." (".$parent_role->id.")";
 	}
 	
 	echo "\n\nAll users in to cohort ".$cohort->name." (".$cohort->idnumber.") \n and their parents will be enrolled into their Online Portfolio (if it exists) as a ".$teacher_role->name."\n";
@@ -88,7 +88,7 @@ require_once('../../enrol/locallib.php');
 		$parentid = substr($userid, 0, -1).'P';
 		
 		//Get full course data from DB
-		$course = $DB->get_record('course',array('id'=>$prefix.$userid));
+		$course = $DB->get_record('course',array('idnumber'=>$prefix.$userid));
 		
 		//Get context
 		if ( !$context = get_context_instance(CONTEXT_COURSE, $courseid, MUST_EXIST) )
