@@ -85,7 +85,7 @@ require_once('../../enrol/locallib.php');
 	// Role to give the users
 	$roleName = $argv[3];
 	
-	$role = $DB->get_record( 'role', array('name'=>$roleName));
+	$role = $DB->get_record( 'role', array('shortname'=>$roleName));
 	
 	if ( !$role )
 	{
@@ -97,7 +97,7 @@ require_once('../../enrol/locallib.php');
 		$roleid = $role->id;
 	}
 	
-	echo "\n\nAll users in to cohort ".$cohort->name." (".$cohort->idnumber.") will be enrolled in the courses shown.\n";
+	echo "\n\nAll users in to cohort ".$cohort->name." (".$cohort->idnumber.") \nwill be enrolled as a \"".$role->name."\" \nin the courses in category ".$category->name."\n";
 	
 	$response = cli_input("Enter Y to continue.");
 	
