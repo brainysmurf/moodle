@@ -36,16 +36,7 @@ require_once('../../enrol/locallib.php');
 	//Get members of cohort
 	$user_ids = array();
 	$cohort_members = $DB->get_records('cohort_members',array('cohortid'=>$cohort->id));
-	
-	if ( count($user_ids) < 1 )
-	{
-		die("\nThere are no members of this cohort.\n");
-	}
-	else
-	{
-		echo "\n".number_format(count($user_ids))." users in this cohort.";
-	}
-		
+			
 	// Set up roles
 	$teacher_role = $DB->get_record( 'role', array('shortname'=>'editingteacher'));
 	$parent_role = $DB->get_record( 'role', array('shortname'=>'student'));	
