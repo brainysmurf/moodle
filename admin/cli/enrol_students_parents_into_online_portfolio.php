@@ -2,15 +2,18 @@
 
 /*
 
-	This script will enrol all the users that are in a cohort into all the courses that are in a category
+	This script will enrol all students into their own portfolio as an editor
+	and will enrol parents into their children's portfolio as a view
+	
+	Assumes that the courses have already been created, and the course idnumbers are
+	$prefix.$idnumber
+	e.g.
+	OLP:55555
 
 	Usage:
 	cd /admin/cli
-	php enrol_cohort_in_category.php cohortIDNumber categoryID roleName
-	
-	e.g.
-	php enrol_cohort_in_category.php studentsSEC 87 Teacher
-	
+	php enrol_student_into_online_portfolio.php
+		
 */
 
 define('CLI_SCRIPT', true);
