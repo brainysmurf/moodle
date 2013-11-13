@@ -120,8 +120,6 @@ require_once('../../enrol/locallib.php');
 
 		echo "\nEnrolling user $student->firstname $student->lastname in course $course->fullname";
 
-		cli_input("GO!.");
-
 		$today = time();
 		$timestart = make_timestamp(date('Y', $today), date('m', $today), date('d', $today), 0, 0, 0);
 		$timeend = 0;
