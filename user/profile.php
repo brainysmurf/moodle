@@ -230,6 +230,11 @@ echo '</div>';
 
 echo '<div class="descriptionbox"><div class="description">';
 // Print the description
+// for ssis, the description should include a link to the online portfolio
+$course = $DB->get_record('course', array('idnumber'=>'OLP:'.$user->idnumber));
+if ($course) {
+  echo '<a href="'.$CFG->wwwroot.'/course/view.php?id='.$course->id.'">My Online Portfolio</a>';
+}
 
 if ($user->description && !isset($hiddenfields['description'])) {
     if (!empty($CFG->profilesforenrolledusersonly) && !$currentuser && !$DB->record_exists('role_assignments', array('userid'=>$user->id))) {
