@@ -3,19 +3,11 @@
 class theme_decaf_core_renderer extends core_renderer {
 
 	protected $really_editing = false;
-	private $cache;
 
-
-	/*
-		Create a cache object on construct
-	*/
 	function __construct( moodle_page $page, $target )
 	{
-		$this->cache = cache::make_from_params(cache_store::MODE_SESSION, 'theme_decaf', 'decafcache');
 		parent::__construct( $page , $target );
 	}
-
-
 
 	/*
 		Change the heading when on an activity inside a "->" course
@@ -207,39 +199,11 @@ class theme_decaf_core_renderer extends core_renderer {
      * @return string
      */
     protected function render_custom_menu( custom_menu $menu )
-    {
-		$use_cached = true;
-		$save_in_cache = true;
-		
-		//For debugging
-		if ( isset($_GET['refreshawesomebar']) )
-		{ 
-			$use_cached = false;
-		}
-
-		if ( $this->page->course->id == '1266' )
-		{
-			$use_cached = false;
-			$save_in_cache = false;
-		}
-
-		//Return a cached menu if available
-		if ( $use_cached && $content = $this->cache->get('awesomebar') )
-		{
-			return $content;
-		}
-		
+    {		
 		require_once dirname(__FILE__).'/awesomebar.php';
 		$awesomebar = new awesomebar($this->page);
 		$awesomebar->set_custom_menu($menu);
 		$content = $awesomebar->create();
-
-		if ( $save_in_cache )
-		{
-			//Save in the cache
-			$this->cache->set('awesomebar',$content);	
-		}
-
         return $content;
     }
 

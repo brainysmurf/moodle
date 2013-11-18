@@ -7,6 +7,10 @@
 class awesomebar
 {
 
+	private $cache; //Awesomebar cache store
+	private $use_cache; //Should we use a cached version of the menu?
+	private $save_in_cache; //Should we save the menu in the cache?
+	
 	private $page; //Reference to the current page
 	private $custom_menu; 	//Custom menu is the 'Navigate' menu item, which is defined using the theme settings page on the web
 
@@ -15,27 +19,68 @@ class awesomebar
 		$this->page = $page;
 		global $CFG;
 		require_once($CFG->libdir.'/coursecatlib.php');
+		
+		//Setup the cache (for this session)
+		$this->cache = cache::make_from_params(cache_store::MODE_SESSION, 'theme_decaf', 'awesomebar');
+		
+		//Should we use the cache?
+		$this->use_cached = true;
+		$this->save_in_cache = true;
+		
+		//For development - add ?refreshawesomebar to the URL to update the menu
+		if ( isset($_GET['refreshawesomebar']) )
+		{ 
+			$this->use_cached = false;
+		}
+
+		//If we're on the site admin course page, don't use a cached version and don't create a cached version
+		if ( $this->page->course->id == '1266' )
+		{
+			$this->use_cached = false;
+			$this->save_in_cache = false;
+		}
 	}
+	
 	
 	// !HTML Rendering
 	
 	/*
-	* Create the whole HTML for the awesomebar
+	* Returns the complete HTML for the awesomebar menus
 	*/
 	public function create()
 	{
+		//Begin ul
+        $content = html_writer::start_tag('ul', array('class'=>'dropdown dropdown-horizontal'));
+        
+        	//Login Button / User Menu (returns an li)
+        	//We always use a fresh user menu
+			$content .= $this->render_array_as_menu_item($this->get_user_menu());
+        	
+        	//Get the rest of the menu
+        	$content .= $this->get_static_menus();
+        
+        //End ul
+        $content .= '</ul>';
+        
+        return $content;
+	}
+	
+	/*
+	* Returns the HTML for the cacheable parts of the menu
+	* (Navigate onwards - user menu doesn't get cached)
+	*/
+	private function get_static_menus()
+	{
+		//Now the rest of the menu might be cached, if so we append that and return
+		if ( $this->use_cached && $content = $this->cache->get('awesomebar') )
+		{
+			return $content;
+		}
+		
 		global $SESSION;
 		
 		$loggedIn = isloggedin();
 
-		//Begin ul
-        $content = html_writer::start_tag('ul', array('class'=>'dropdown dropdown-horizontal'));
-
-			// Login Button / User Menu (returns an li)
-			$menu = $this->get_user_menu();
-			$content .= $this->render_array_as_menu_item($menu);
-			unset($menu);
-			
 			if ( $loggedIn )
 			{
 			
@@ -63,6 +108,12 @@ class awesomebar
 			}
 
         $content .= html_writer::end_tag('ul'); // end whole ul
+       
+		if ( $this->save_in_cache )
+		{
+			//Save in the cache
+			$this->cache->set('awesomebar',$content);	
+		}
         
         return $content;
 	}
