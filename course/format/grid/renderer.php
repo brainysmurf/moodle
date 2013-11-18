@@ -316,19 +316,13 @@ class format_grid_renderer extends format_section_renderer_base {
 				} else {
 					$hasIcon = true;
 				}
-
 				$hasIcon = rand(0,1);
 
 				$btnClasses = 'btn';
 				if ($this->courseformat->is_section_current($section)) {
 					$btnClasses .= ' selected';
 				}
-				if ($hasIcon) {
-					$btnClasses .= ' hasIcon';
-				} else {
-					$btnClasses .= ' noIcon';
-				}
-				
+				$btnClasses .= $hasIcon ? ' hasIcon' : ' noIcon';
 
                 if ($course->coursedisplay != COURSE_DISPLAY_MULTIPAGE) {
                     echo html_writer::start_tag('a', array(
@@ -338,17 +332,15 @@ class format_grid_renderer extends format_section_renderer_base {
                         'style' => $hasIcon ? 'background-image:url(http://lorempixel.com/400/20'.$section.'/food);' : ''
 					));
 
+
+					//If section has been updated since the last visit, show the red start
+                    if ( true || isset($section_updated[$thissection->id])) {
+                    	$section_name = '<i class="icon-star icon-red"></i> '.$section_name;
+                    }
+                    
 					echo html_writer::tag('span',$section_name);
 
-                    if (isset($section_updated[$thissection->id])) {
-                        // The section has been updated since the user last visited this course, add NEW label.
-                        echo html_writer::empty_tag('img', array(
-                            'class' => 'new_activity',
-                            'src' => $url_pic_new_activity,
-                            'alt' => ''));
-                    }
-
-                    echo html_writer::start_tag('div', array('class' => 'image_holder'));
+                    /*echo html_writer::start_tag('div', array('class' => 'image_holder'));
 
                     $sectionicon = $this->courseformat->grid_get_icon(
                             $course->id, $thissection->id);
@@ -364,7 +356,7 @@ class format_grid_renderer extends format_section_renderer_base {
                             'alt' => $section_name));
                     }
 
-                    echo html_writer::end_tag('div');
+                    echo html_writer::end_tag('div'); */
                     
                     echo html_writer::end_tag('a');
 

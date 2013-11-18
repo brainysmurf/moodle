@@ -1114,6 +1114,10 @@ color: #333;
 			ul.gridformatbuttons .btn.hasIcon:hover span {
 				opacity:1;
 			}
+			
+	.icon-red {
+		color:#A00;
+	}
 
 /** Custom CSS **/
 [[setting:customcss]]
