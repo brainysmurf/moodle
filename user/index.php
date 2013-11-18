@@ -695,8 +695,8 @@
 					$this_user_is_a_parent = substr($user->idnumber, -1) == 'P';
 					$this_user_is_a_student = strpos($user->email, '@student.ssis-suzhou') != 0;
 					
-					//Don't show parents to students
-			 		if ($this_user_is_a_parent && !$SESSION->userIsTeacher) { continue; }
+					//Don't show parents to students or other parents
+			 		if ($this_user_is_a_parent && !$SESSION->userIsTeacher && ($SESSION->userIsStudent || $SESSION->userIsParent)) { continue; }
 
 					$usersprinted[] = $user->id; // Remember that we've shown this user
 
