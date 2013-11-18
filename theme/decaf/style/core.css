@@ -1085,8 +1085,11 @@ color: #333;
 		}
 		
 		ul.gridformatbuttons.buttons li {
+			margin:0 !important;
 			width:25% !important;
 			padding:5px !important;
+			background:none !important;
+			opacity:1 !important;
 		}
 		
 		ul.gridformatbuttons .btn.hasIcon {

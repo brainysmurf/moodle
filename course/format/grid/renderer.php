@@ -102,7 +102,7 @@ class format_grid_renderer extends format_section_renderer_base {
         }
         
         echo html_writer::start_tag('div', array('id' => 'gridiconcontainer'));
-        echo html_writer::start_tag('ul', array('class' => 'gridformatbuttons buttons'));
+        echo html_writer::start_tag('ul', array('class' => 'gridicons gridformatbuttons buttons'));
         // Print all of the icons.
         $this->make_block_icon_topics($context, $modinfo, $course, $editing, $has_cap_update, $has_cap_vishidsect,
                 $url_pic_edit);
@@ -318,7 +318,7 @@ class format_grid_renderer extends format_section_renderer_base {
 				}
 				$hasIcon = rand(0,1);
 
-				$btnClasses = 'btn';
+				$btnClasses = 'gridicon_link btn';
 				if ($this->courseformat->is_section_current($section)) {
 					$btnClasses .= ' selected';
 				}

@@ -141,6 +141,7 @@ M.format_grid.icon_click = function(e) {
     this.selected_section_no = icon_index;
     this.update_selected_background(previous_no);
     this.icon_toggle(e);
+	return false;
 };
 
 /**
