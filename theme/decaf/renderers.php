@@ -51,18 +51,19 @@ class theme_decaf_core_renderer extends core_renderer {
             $content = html_writer::start_tag('li');
 
 				$label = '';
-				//We just want to show the title, not 'text' because 'text' appears to be the course shortname which is now used as an image
-				if ( $item->title )
+				
+				//Show the course icon
+				if ( $icon = course_get_icon($item->key) )
 				{
-					if ( $item->text ) //Since we have the icon here, let's show it
-					{
-						$label = '<i class="icon-'.$item->text.'"></i> ';
-					}
+					$label = '<i class="icon-'.$icon.'"></i> ';
+				}
+				
+				if ( $item->title ) // item->title = course fullname
+				{
 					$label .= $item->title;
 				}
-				else if ( $item->text )
+				else if ( $item->text ) // item->text = course shortname
 				{
-					//Use text if there's no other choice
 					$label = $item->text;
 				}
 
