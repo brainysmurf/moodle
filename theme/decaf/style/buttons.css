@@ -30,6 +30,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9f9f9', end
 -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
 -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
 box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+overflow: hidden;
+text-overflow: ellipsis;
 }
 
 input[type=submit]:hover, button:hover,
@@ -53,10 +55,12 @@ input[type=submit]:active,
 button:active,
 .btn:active,
 a.btn:active,
+ul.buttons a.btn.selected,
 .tabtree .tabrow0 li a.btn:active,
 .btn.selected,
 .section-navigation a:active,
 .addresourcemodchooser a:active {
+color:#000;
 background: rgb(227,227,227);
 background: -moz-linear-gradient(top,  rgba(227,227,227,1) 0%, rgba(249,249,249,1) 100%);
 background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(227,227,227,1)), color-stop(100%,rgba(249,249,249,1)));

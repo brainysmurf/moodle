@@ -100,13 +100,16 @@ class format_grid_renderer extends format_section_renderer_base {
             // For the purpose of the grid shade box shown array topic 0 is not shown.
             $this->shadeboxshownarray[0] = 1;
         }
+        
         echo html_writer::start_tag('div', array('id' => 'gridiconcontainer'));
-        echo html_writer::start_tag('ul', array('class' => 'gridicons'));
+        echo html_writer::start_tag('ul', array('class' => 'gridformatbuttons buttons'));
         // Print all of the icons.
         $this->make_block_icon_topics($context, $modinfo, $course, $editing, $has_cap_update, $has_cap_vishidsect,
                 $url_pic_edit);
         echo html_writer::end_tag('ul');
         echo html_writer::end_tag('div');
+        
+        
         echo html_writer::start_tag('div', array('id' => 'gridshadebox'));
         echo html_writer::tag('div', '', array('id' => 'gridshadebox_overlay', 'style' => 'display:none;'));
         echo html_writer::start_tag('div', array('id' => 'gridshadebox_content', 'class' => 'hide_content'));
@@ -301,20 +304,41 @@ class format_grid_renderer extends format_section_renderer_base {
 
                 $section_name = $this->courseformat->get_section_name($thissection);
 
-                if ($this->courseformat->is_section_current($section)) {
+                /*if ($this->courseformat->is_section_current($section)) {
                     $sectionstyle = array('class' => 'current');
                 } else {
                     $sectionstyle = null;
-                }
-                echo html_writer::start_tag('li', $sectionstyle);
+                }*/
+                echo html_writer::start_tag('li');
+
+				if (is_object($sectionicon) && !empty($sectionicon->imagepath)) {
+					$hasIcon = true;
+				} else {
+					$hasIcon = true;
+				}
+
+				$hasIcon = rand(0,1);
+
+				$btnClasses = 'btn';
+				if ($this->courseformat->is_section_current($section)) {
+					$btnClasses .= ' selected';
+				}
+				if ($hasIcon) {
+					$btnClasses .= ' hasIcon';
+				} else {
+					$btnClasses .= ' noIcon';
+				}
+				
 
                 if ($course->coursedisplay != COURSE_DISPLAY_MULTIPAGE) {
                     echo html_writer::start_tag('a', array(
                         'href' => '#',
                         'id' => 'gridsection-' . $thissection->section,
-                        'class' => 'gridicon_link'));
+                        'class' => $btnClasses,
+                        'style' => $hasIcon ? 'background-image:url(http://lorempixel.com/400/20'.$section.'/food);' : ''
+					));
 
-                    echo html_writer::tag('p', $section_name, array('class' => 'icon_content'));
+					echo html_writer::tag('span',$section_name);
 
                     if (isset($section_updated[$thissection->id])) {
                         // The section has been updated since the user last visited this course, add NEW label.
@@ -329,7 +353,7 @@ class format_grid_renderer extends format_section_renderer_base {
                     $sectionicon = $this->courseformat->grid_get_icon(
                             $course->id, $thissection->id);
 
-                    if (is_object($sectionicon) && !empty($sectionicon->imagepath)) {
+                    if (false && $hasIcon) {
                         echo html_writer::empty_tag('img', array(
                             'src' => moodle_url::make_pluginfile_url(
                                     $context->id, 'course', 'section', $thissection->id, '/', $sectionicon->imagepath),
@@ -341,6 +365,7 @@ class format_grid_renderer extends format_section_renderer_base {
                     }
 
                     echo html_writer::end_tag('div');
+                    
                     echo html_writer::end_tag('a');
 
                     if ($editing && $has_cap_update) {
@@ -351,7 +376,7 @@ class format_grid_renderer extends format_section_renderer_base {
                                     'userid' => $USER->id)), html_writer::empty_tag('img', array(
                                     'src' => $url_pic_edit,
                                     'alt' => $str_edit_image_alt)) . '&nbsp;' . $str_edit_image,
-                                        array('title' => $str_edit_image_alt));
+                                        array('title' => $str_edit_image_alt, 'class'=>'editsectionbutton'));
 
                         if ($section == 0) {
                             $str_display_summary = get_string('display_summary', 'format_grid');
