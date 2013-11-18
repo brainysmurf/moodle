@@ -3319,15 +3319,15 @@ function delete_section($courseid, $sectionid) {
     add_to_log($courseid, "course", "deletesection", "delete_section.php?id=$section->id", "$section->section");
 }
 
-// Returns how many sections are in a course
-// The real amount, including any that are hidden by reducting the number of sections in the course admin page
+//Returns the count of how many sections are in a course
+//The real amount, including any that are hidden by reducting the number of sections in the course admin page
 function course_count_all_sections( $courseid )
 {
 	global $DB;
 	return $DB->count_records('course_sections' , array('course'=>$courseid) );
 }
 
-//Returns the maximum section number in a course
+//Returns the highest section number in a course
 function course_max_section( $courseid )
 {
 	global $DB, $CFG;
@@ -3360,9 +3360,30 @@ function course_get_category_icon( $categoryid )
 	return $SSISMETADATA->getCategoryField( $categoryid , 'icon' );
 }
 
-//Return the course ID for a user's online portfolio
+//Returns the course ID for a user's online portfolio
 function get_olp_courseid( $user_idnumber )
 {
 	global $DB;
 	return $DB->get_field('course', 'id' , array('idnumber'=>'OLP:'.$user_idnumber));
+}
+
+//Returns the IDs of all courses in the Teaching & Learning category
+function get_teaching_and_learning_ids()
+{
+	$cache = cache::make_from_params(cache_store::MODE_APPLICATION, 'courses', 'ssis');
+	
+	if ($IDs = $cache->get('teaching_and_learning_ids')) {
+		return $IDs;
+	}
+	
+	global $CFG, $DB;
+	$rows = $DB->get_records_sql("select crse.id from {$CFG->prefix}course crse join  {$CFG->prefix}course_categories cc on cc.id = crse.category and cc.parent = 50");
+	
+	$IDs = array();
+	foreach ($rows as $ID => $row) {
+		$IDs[$ID] = $ID;
+	}
+	
+	$cache->set('teaching_and_learning_ids',$IDs);
+	return $IDs;
 }

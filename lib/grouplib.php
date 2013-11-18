@@ -529,7 +529,7 @@ function groups_print_course_menu($course, $urlroot, $return=false) {
 
     //if ($groupmode == VISIBLEGROUPS) {
       //$grouplabel = get_string('groupsvisible');
-    $grouplabel = 'Filter by classes'; 
+    $grouplabel = 'Filter by classes: ';
 	//} else {
       //$grouplabel = get_string('groupsseparate');
 	//}
