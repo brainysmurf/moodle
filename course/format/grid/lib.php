@@ -226,8 +226,8 @@ class format_grid extends format_base {
                     'element_type' => 'select',
                     'element_attributes' => array(
                         array(
-                            COURSE_DISPLAY_SINGLEPAGE => new lang_string('coursedisplay_single'),
-                            COURSE_DISPLAY_MULTIPAGE => new lang_string('coursedisplay_multi')
+                            COURSE_DISPLAY_SINGLEPAGE => 'Show sections in a popup when clicked',
+                            COURSE_DISPLAY_MULTIPAGE => 'Show sections on their own page when clicked'
                         )
                     ),
                     'help' => 'coursedisplay',
