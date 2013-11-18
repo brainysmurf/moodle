@@ -80,32 +80,31 @@ class awesomebar
 		global $SESSION;
 		
 		$loggedIn = isloggedin();
-
-			if ( $loggedIn )
+		if ( $loggedIn )
+		{
+		
+			if ( $this->custom_menu )
 			{
-			
-				if ( $this->custom_menu )
-				{
-					//Navigate (Custom menu from decaf theme settings)
-		            foreach ($this->custom_menu->get_children() as $menu)
-		            {
-		            	$menu = $this->convert_custom_menu_item_to_array($menu);
-		                $content .= $this->render_array_as_menu_item($menu);
-		            	unset($menu);
-		            }
-				}
-				
-				//Course Menus
-				//Each top level category becomes a button on the awesomebar
-				//The dropdown for that button shows the courses / categories within it
-				 //We don't show courses on page 1266 so that there's more room for the site admin menu
-				if ( !isguestuser() && $this->page->course->id != '1266' )
-				{
-					$menu = $this->get_course_menus();
-					$content .= $this->render_array_as_menu_item($menu);
+				//Navigate (Custom menu from decaf theme settings)
+	            foreach ($this->custom_menu->get_children() as $menu)
+	            {
+	            	$menu = $this->convert_custom_menu_item_to_array($menu);
+	                $content .= $this->render_array_as_menu_item($menu);
 	            	unset($menu);
-				}       
+	            }
 			}
+			
+			//Course Menus
+			//Each top level category becomes a button on the awesomebar
+			//The dropdown for that button shows the courses / categories within it
+			 //We don't show courses on page 1266 so that there's more room for the site admin menu
+			if ( !isguestuser() && $this->page->course->id != '1266' )
+			{
+				$menu = $this->get_course_menus();
+				$content .= $this->render_array_as_menu_item($menu);
+            	unset($menu);
+			}       
+		}
 
         $content .= html_writer::end_tag('ul'); // end whole ul
        
@@ -441,51 +440,22 @@ class awesomebar
 					$course_icon = course_get_icon($course['id']);
 					$course_icon = strtolower($course_icon);
 					
-					 //Activities
+					//For courses in the Activities category, replace text in (parentheses) with an "icon" on the right
 					if ( $category['id'] == 1 )
 					{
+						//Match all text in parentheses
+						//  if ( preg_match_all('/\((.*?)\)/', $course['fullname'], $matches) )
 						
-						/*
-						//Match text in parentheses
-						if ( preg_match_all('/\((.*?)\)/', $course['fullname'], $match) )
+						//Match specific text in parentheses
+						if ( preg_match_all('/\((S1|S2|S3|ALL|FULL)\)/i', $course['fullname'], $matches) )
 						{
-							//Remove it from the name
-							$course['fullname'] = str_replace($match[0],'',$course['fullname']);
-							$course['fullname'] = trim($course['fullname']);
-							
-							//Replace with with an icon
-							$course['fullname'] = '<i class="pull-left icon-text icon-text-'.strtolower($match[1]).'"></i>'.$course['fullname'];
-						}
-						*/
-						
-						if ( strpos($course['fullname'],'(FULL)') !== false )
-						{
-							$course['fullname'] = str_replace('(FULL) ','',$course['fullname']);
-							$course['fullname'] = '<i class="pull-right icon-text icon-text-full"></i>'.$course['fullname'];
-						}
-					
-						//Add the text "icon" for activity seasons
-						if ( strpos($course['fullname'],'(ALL)') !== false )
-						{
-							$course['fullname'] = str_replace('(ALL) ','',$course['fullname']);
-							$course['fullname'] = '<i class="pull-right icon-text icon-text-all"></i>'.$course['fullname'];
-						}
-						else if ( strpos($course['fullname'],'(S1)') !== false )
-						{
-							$course['fullname'] = str_replace('(S1) ','',$course['fullname']);
-							$course['fullname'] = '<i class="pull-right icon-text icon-text-s1"></i>'.$course['fullname'];
-						}	
-						else if ( strpos($course['fullname'],'(S2)') !== false )
-						{
-							$course['fullname'] = str_replace('(S2) ','',$course['fullname']);
-							$course['fullname'] = '<i class="pull-right icon-text icon-text-s2"></i>'.$course['fullname'];
-						}
-						else if ( strpos($course['fullname'],'(S3)') !== false )
-						{
-							$course['fullname'] = str_replace('(S3) ','',$course['fullname']);
-							$course['fullname'] = '<i class="pull-right icon-text icon-text-s3"></i>'.$course['fullname'];
-						}
-						
+							foreach ($matches[0] as $i => $matchedText)
+							{
+								$icon = '<i class="pull-right icon-text">'.$matches[1][$i].'</i>';
+								$course['fullname'] = str_replace($matchedText, $icon, $course['fullname']);
+								$course['fullname'] = trim($course['fullname']);	
+							}
+						}						
 					}
 				
 					$item['submenu'][] = array(

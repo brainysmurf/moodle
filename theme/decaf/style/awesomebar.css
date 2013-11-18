@@ -240,28 +240,18 @@
 	}
 
 
-/* Numbers as icons */
+/* When text is used similar to the icons in the awesome */
 .icon-text {
-	width:15px;
+	width:auto;
+	min-width:15px;
 	height:30px;
 	position: relative;
+	font-size: 8px;
+	text-align:center;
+	font-weight: bolder;
+	text-transform: uppercase;
 }
-	.icon-text:after {
-		display: block;
-		position: absolute;
-		top: 1px;
-		left: 0;
-		font-weight: bolder;
-		font-size: 8px;
-		width:100%;
-		text-align:center;
-	}
 	.icon-text.pull-right {
 		margin-right:0;
-		margin-left:10px !important;
+		margin-left:6px !important;
 	}
-	.icon-text-all:after { content:"ALL"; }
-	.icon-text-s1:after { content:"S1"; }
-	.icon-text-s2:after { content:"S2"; }
-	.icon-text-s3:after { content:"S3"; }
-	.icon-text-full:after { content:"FULL"; }
