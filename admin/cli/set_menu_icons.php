@@ -1,11 +1,11 @@
 <?php
 
 	/*
-		This script goes through every course in a particular menu
+		This script goes through every course and subcategory in a particular category and a sets a default icon
 		
 		If you run it in the command line it won't set invisible categories/courses.
 		To fix that, comment out define('CLI_SCRIPT', true);
-		and then run it in the browser
+		and then run it in the browser (by going to http://dragonnet.ssis-suzhou.net/admin/ci/set_menu_icons.php)
 		
 		The icon is decided from the first subcategory.
 		e.g.
@@ -25,13 +25,11 @@
 	require_once( $CFG->libdir.'/ssismetadata.php' );
 	$SSISMETADATA = new ssismetadata();
 	
-	function set_course_icons($category)
+	function set_course_icons($category, $icon)
 	{
+		if ( !$icon ) { return false; }
 		global $SSISMETADATA;
-		
-		//Get the icon
-		$icon = get_tl_icon($category->name);
-		
+				
 		echo "\nCategory: ".$category->id.' '.$category->name.' --> '.$icon;
 		
 		if ( !$icon ) { return; }
@@ -67,9 +65,8 @@
 		}
 	
 	//Returns an icon for a category name
-	function get_tl_icon( $name )
+	function get_icon( $name )
 	{
-	        return 'rocket';
 		switch ( $name )
 		{
 			case 'Arts': return 'picture';
@@ -88,15 +85,28 @@
 		}
 	}
 	
-	//Start running from category 50 (teaching and learning)
+	
+	
+	//Running time...
 
-        set_course_icons( coursecat::get(1) );
-
-	//$teaching_learning_categories = coursecat::get(1)->get_courses();
-        //var_dump($teaching_learning_categories);
-	//foreach ( $teaching_learning_categories as $category )
-	//{
-	//	set_course_icons( $category );	
-	//}
+	//Set all children of the 'Activities' category to 'rocket'
+	set_course_icons( coursecat::get(1) , 'rocket' );
+	
+	//Set all children of the 'Curriculum' category to 'save'
+	set_course_icons( coursecat::get(64) , 'save' );
+	
+	//Set all children of the 'Parents' category to 'info-sign'
+	set_course_icons( coursecat::get(68) , 'info-sign' );
+	
+	//Get all the categories in 'Teaching & Learning'
+	$teaching_learning_categories = coursecat::get(50)->get_children();
+	
+	//For each of the direct children of the T&L category
+	foreach ( $teaching_learning_categories as $category )
+	{
+		//Decide what icon to set the children of this category to from the category's name
+		$icon = get_icon($category->name);	
+		set_course_icons($category, $icon);	
+	}
 
 ?>
