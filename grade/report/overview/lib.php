@@ -75,7 +75,7 @@ class grade_report_overview extends grade_report {
         $this->user = $DB->get_record('user', array('id' => $userid));
 
         // Load the user's courses.
-        $this->courses = enrol_get_users_courses($this->user->id, false, 'id, shortname, showgrades');
+        $this->courses = enrol_get_users_courses($this->user->id, false, 'id, fullname, idnumber, shortname, showgrades');
 
         $this->showrank = array();
         $this->showrank['any'] = false;
@@ -153,8 +153,9 @@ class grade_report_overview extends grade_report {
                     continue;
                 }
 
-                $courseshortname = format_string($course->shortname, true, array('context' => $coursecontext));
-                $courselink = html_writer::link(new moodle_url('/grade/report/user/index.php', array('id' => $course->id, 'userid' => $this->user->id)), $courseshortname);
+				$coursefullname = format_string($course->fullname, true, array('context' => $coursecontext));
+                #$courseshortname = format_string($course->shortname, true, array('context' => $coursecontext));
+                $courselink = html_writer::link(new moodle_url('/grade/report/user/index.php', array('id' => $course->id, 'userid' => $this->user->id)), $coursefullname, array('title'=>$course->idnumber));
                 $canviewhidden = has_capability('moodle/grade:viewhidden', $coursecontext);
 
                 // Get course grade_item
