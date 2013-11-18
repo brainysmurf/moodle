@@ -3,13 +3,16 @@
 /*
 
 	This script will enrol all the users that are in a cohort into all the courses that are in a category
+	and give them the role you specify
 
-	Usage:
+	Run via the command line like this:
 	cd /admin/cli
-	php enrol_cohort_in_category.php cohortIDNumber categoryID roleName
+	php enrol_cohort_in_category.php cohortIDNumber categoryID roleShortname
 	
 	e.g.
-	php enrol_cohort_in_category.php studentsSEC 87 Teacher
+	php enrol_cohort_in_category.php studentsSEC 87 teacher
+	
+		Will enrol all users in the studentsSEC into all courses in category 87 (and it's subcategories) and give them the 'teacher' role
 	
 */
 
@@ -97,10 +100,13 @@ require_once('../../enrol/locallib.php');
 		$roleid = $role->id;
 	}
 	
+	//We ask the user to confirm to make sure we're doing the right thing
+	
 	echo "\n\nAll users in to cohort ".$cohort->name." (".$cohort->idnumber.") \nwill be enrolled as a \"".$role->name."\" \nin the courses in category ".$category->name."\n";
 	
-	$response = cli_input("Enter Y to continue.");
+	$response = cli_input("Enter Y to continue. (Any other key to cancel)");
 	
+	//If they press something other than Y we quit.
 	if ( trim(strtoupper($response)) !== 'Y' ) { die(); }
 	
 	

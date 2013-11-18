@@ -63,7 +63,7 @@ require_once('../../enrol/locallib.php');
 	
 	echo "\n\nAll users in to cohort ".$cohort->name." (".$cohort->idnumber.") \n and their parents will be enrolled into their Online Portfolio (if it exists) as a ".$teacher_role->name."\n";
 	
-	$response = cli_input("Enter Y to continue.");
+	$response = cli_input("Enter Y to continue. (Any other key to cancel)");
 	
 	if ( trim(strtoupper($response)) !== 'Y' ) { die(); }
 	
