@@ -304,19 +304,16 @@ class format_grid_renderer extends format_section_renderer_base {
 
                 $section_name = $this->courseformat->get_section_name($thissection);
 
-                /*if ($this->courseformat->is_section_current($section)) {
-                    $sectionstyle = array('class' => 'current');
-                } else {
-                    $sectionstyle = null;
-                }*/
+				$sectionicon = $this->courseformat->grid_get_icon($course->id, $thissection->id);
                 echo html_writer::start_tag('li');
-
+                
 				if (is_object($sectionicon) && !empty($sectionicon->imagepath)) {
 					$hasIcon = true;
+					$imageURL = moodle_url::make_pluginfile_url($context->id, 'course', 'section', $thissection->id, '/', $sectionicon->imagepath);
+                    $imageURL = $imageURL->out();
 				} else {
-					$hasIcon = true;
+					$hasIcon = false;
 				}
-				$hasIcon = rand(0,1);
 
 				$btnClasses = 'gridicon_link btn';
 				if ($this->courseformat->is_section_current($section)) {
@@ -324,40 +321,23 @@ class format_grid_renderer extends format_section_renderer_base {
 				}
 				$btnClasses .= $hasIcon ? ' hasIcon' : ' noIcon';
 
+
+
                 if ($course->coursedisplay != COURSE_DISPLAY_MULTIPAGE) {
                     echo html_writer::start_tag('a', array(
                         'href' => '#',
                         'id' => 'gridsection-' . $thissection->section,
                         'class' => $btnClasses,
-                        'style' => $hasIcon ? 'background-image:url(http://lorempixel.com/400/20'.$section.'/food);' : ''
+                        'style' => $hasIcon ? "background-image:url({$imageURL});" : ''
 					));
 
-
-					//If section has been updated since the last visit, show the red start
-                    if ( true || isset($section_updated[$thissection->id])) {
-                    	$section_name = '<i class="icon-star icon-red"></i> '.$section_name;
-                    }
+						//If section has been updated since the last visit, show the red start
+	                    if ( true || isset($section_updated[$thissection->id])) {
+	                    	$section_name = '<i class="icon-star icon-red"></i> '.$section_name;
+	                    }
                     
-					echo html_writer::tag('span',$section_name);
+						echo html_writer::tag('span',$section_name);
 
-                    /*echo html_writer::start_tag('div', array('class' => 'image_holder'));
-
-                    $sectionicon = $this->courseformat->grid_get_icon(
-                            $course->id, $thissection->id);
-
-                    if (false && $hasIcon) {
-                        echo html_writer::empty_tag('img', array(
-                            'src' => moodle_url::make_pluginfile_url(
-                                    $context->id, 'course', 'section', $thissection->id, '/', $sectionicon->imagepath),
-                                    'alt' => $section_name));
-                    } else if ($section == 0) {
-                        echo html_writer::empty_tag('img', array(
-                            'src' => $this->output->pix_url('info', 'format_grid'),
-                            'alt' => $section_name));
-                    }
-
-                    echo html_writer::end_tag('div'); */
-                    
                     echo html_writer::end_tag('a');
 
                     if ($editing && $has_cap_update) {
