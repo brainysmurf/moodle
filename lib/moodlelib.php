@@ -4339,23 +4339,6 @@ function complete_user_login($user) {
         return $USER;
     }
 
-    /// Select password change url
-    $userauth = get_auth_plugin($USER->auth);
-
-    /// check whether the user should be changing password
-    if (get_user_preferences('auth_forcepasswordchange', false)){
-        if ($userauth->can_change_password()) {
-            if ($changeurl = $userauth->change_password_url()) {
-                redirect($changeurl);
-            } else {
-                redirect($CFG->httpswwwroot.'/login/change_password.php');
-            }
-        } else {
-            print_error('nopasswordchangeforced', 'auth');
-        }
-    }
-
-
     // !SSIS STUFF FOR EACH USER
 	require_once($CFG->dirroot .'/cohort/lib.php');
 	
@@ -4367,12 +4350,12 @@ function complete_user_login($user) {
 	
 
 	/*
-		Decide which frontpage the user should be redirected to when they visit /inex.php
-		(Redirection happens on /index.php:75)
+		Decide which frontpage the user should be redirected to when they visit /index.php
+		(The redirection happens on /index.php:75)
 		
 		FYI SSIS users should be enrolled into at least one cohort, the syncing software sees to that	
 		
-		FIXME: What about users that are both parents and teachers?
+		TODO: What about users that are both parents and teachers?
 	*/
 
 	$SESSION->frontpageSection = false;
@@ -4416,6 +4399,22 @@ function complete_user_login($user) {
 	{
 		$SESSION->frontpageSection = 7;
 	}
+	
+    /// Select password change url
+    $userauth = get_auth_plugin($USER->auth);
+
+    /// check whether the user should be changing password
+    if (get_user_preferences('auth_forcepasswordchange', false)){
+        if ($userauth->can_change_password()) {
+            if ($changeurl = $userauth->change_password_url()) {
+                redirect($changeurl);
+            } else {
+                redirect($CFG->httpswwwroot.'/login/change_password.php');
+            }
+        } else {
+            print_error('nopasswordchangeforced', 'auth');
+        }
+    }
 
     return $USER;
 }

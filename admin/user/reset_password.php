@@ -19,11 +19,11 @@ $user = $DB->get_record('user', array('id'=>$userID), '*', MUST_EXIST);
 
 echo $OUTPUT->header();
 
+$newPassword = 'changeme';
+
 	if ( $confirm and confirm_sesskey() )
 	{		
 		$authplugin = get_auth_plugin($user->auth);
-		
-		$newPassword = 'changeme';
 		
         if ($authplugin->can_change_password())
         {
@@ -67,7 +67,7 @@ SSIS DragonNet Admin Team";
 		echo $OUTPUT->heading(get_string('confirmation', 'admin'));
 	    $formcontinue = new single_button(new moodle_url('reset_password.php', array('confirm' => 1, 'id'=>$userID, 'ref'=>$ref)), get_string('yes'));
 	    $formcancel = new single_button(new moodle_url($ref), get_string('no'), 'get');
-	    echo $OUTPUT->confirm('Are you sure you want to reset <strong>'.$user->username.'</strong>\'s password?', $formcontinue, $formcancel);
+	    echo $OUTPUT->confirm('Are you sure you want to reset <strong>'.$user->username.'</strong>\'s password to <strong>'.$newPassword.'</strong>?', $formcontinue, $formcancel);
 	}
 
 echo $OUTPUT->footer();
