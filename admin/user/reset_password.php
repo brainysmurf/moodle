@@ -6,7 +6,11 @@
 require_once('../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
-$userID = required_param('id', PARAM_INT);
+$userID = optional_param('id', false, PARAM_INT);
+if (!$userID) {
+	redirect('/admin/user.php');
+	exit();
+}
 $confirm = optional_param('confirm', 0, PARAM_BOOL);
 $ref = optional_param('ref', '/admin/user.php' , PARAM_TEXT);
 
