@@ -557,8 +557,7 @@ class awesomebar
 			foreach ( $category->get_courses() as $course )
 			{
 				//But only If the user is enrolled in this course...
-				//FIXME Add check so that we don't get PHP notice about undefined offset
-				if ( $enrolledCourses === false || $enrolledCourses[$course->id] !== null )
+				if ( $enrolledCourses === false || isset($enrolledCourses[$course->id]) )
 				{
 					$branch['courses'][] = array(
 						'id'=>$course->id,
