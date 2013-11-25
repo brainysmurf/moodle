@@ -4,7 +4,9 @@
 	This script will update the self enrolment method for each course in the Activities category to allow parents to enrol children
 */
 
-define('CLI_SCRIPT', true);
+//Run in the browser at /admin/cli/set_activities_parent_enrolable.php
+#define('CLI_SCRIPT', true);
+echo '<pre>';
 
 require(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once($CFG->libdir.'/clilib.php'); 
