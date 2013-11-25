@@ -238,6 +238,8 @@ class theme_decaf_core_renderer extends core_renderer {
 	case 'i/publish': return html_writer::tag('i', '', array('class'=>'icon-globe pull-left')); break;
 	case 'i/return': return html_writer::tag('i', '', array('class'=>'icon-rotate-left pull-left')); break;
 	case 'i/checkpermissions': return html_writer::tag('i', '', array('class'=>'icon-key pull-left')); break;
+	case 'i/user': return html_writer::tag('i', '', array('class'=>'icon-user pull-left')); break;
+	case 'i/eject': return html_writer::tag('i', '', array('class'=>'icon-eject pull-left')); break;
 
 	}
         return html_writer::empty_tag('img', $attributes);

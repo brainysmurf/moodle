@@ -86,6 +86,10 @@ if ($mform->is_cancelled()) {
         // Add previous value of newenrols if disabled.
         $data->customint6 = $instance->customint6;
     }
+    if (!isset($data->customint8)) {
+        // Add previous value of parent can enrol children if the input was disabled.
+        $data->customint8 = $instance->customint8;
+    }
 
     if ($instance->id) {
         $reset = ($instance->status != $data->status);
@@ -99,6 +103,7 @@ if ($mform->is_cancelled()) {
         $instance->customint4     = $data->customint4;
         $instance->customint5     = $data->customint5;
         $instance->customint6     = $data->customint6;
+        $instance->customint8     = $data->customint8; //Parent can enrol children?
         $instance->customtext1    = $data->customtext1;
         $instance->roleid         = $data->roleid;
         $instance->enrolperiod    = $data->enrolperiod;

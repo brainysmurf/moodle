@@ -2569,6 +2569,16 @@ EOD;
     public function box($contents, $classes = 'generalbox', $id = null) {
         return $this->box_start($classes, $id) . $contents . $this->box_end();
     }
+    
+    public function errorbox($contents, $extraclasses = '', $id = null)
+    {
+    	return $this->box($contents, 'generalbox errorbox ' . $extraclasses, $id);
+    }
+    
+    public function successbox($contents, $extraclasses = '', $id = null)
+    {
+    	return $this->box($contents, 'generalbox successbox ' . $extraclasses, $id);
+    }
 
     /**
      * Outputs the opening section of a box.

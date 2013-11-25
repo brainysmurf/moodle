@@ -41,36 +41,107 @@ class enrol_self_enrol_form extends moodleform {
     }
 
     public function definition() {
-        global $DB;
+        global $DB, $CFG, $OUTPUT, $SESSION, $USER;
+		require_once("$CFG->dirroot/cohort/lib.php");
 
         $mform = $this->_form;
         $instance = $this->_customdata;
         $this->instance = $instance;
         $plugin = enrol_get_plugin('self');
 
-        $heading = $plugin->get_instance_name($instance);
-        $mform->addElement('header', 'selfheader', $heading);
-
-        if ($instance->customint3 > 0) {
-            // Max enrol limit specified.
-            $count = $DB->count_records('user_enrolments', array('enrolid'=>$instance->id));
-            if ($count >= $instance->customint3) {
-                // Bad luck, no more self enrolments here.
-                $this->toomany = true;
-                $mform->addElement('static', 'notice', '', get_string('maxenrolledreached', 'enrol_self'));
-                return;
-            }
-        }
-
+		//Enrollment requires a password - show the password box       
         if ($instance->password) {
             // Change the id of self enrolment key input as there can be multiple self enrolment methods.
             $mform->addElement('passwordunmask', 'enrolpassword', get_string('password', 'enrol_self'),
                     array('id' => 'enrolpassword_'.$instance->id));
         } else {
-            $mform->addElement('static', 'nokey', '', get_string('nopassword', 'enrol_self'));
+            //$mform->addElement('static', 'nokey', '', get_string('nopassword', 'enrol_self'));
         }
 
-        $this->add_action_buttons(false, get_string('enrolme', 'enrol_self'));
+
+        //Enrollments are limited to a certain cohort
+        if ($instance->customint5) {
+			$mustBeInCohort = $DB->get_record('cohort', array('id'=>$instance->customint5));
+	        if (!$mustBeInCohort) {
+	            return null;
+	        }
+	        $niceCohortName = strtolower($mustBeInCohort->name);
+	        $niceCohortName = preg_replace('/(^all )/i','',$niceCohortName);
+        } else {
+        	$mustBeInCohort = false;
+        }
+
+
+		/*
+		* Parent enrolling child
+		*/
+
+		//If user is a parent and parents can enrol children
+		if ($instance->customint8 && $SESSION->userIsParent) {
+
+			if ($children = $SESSION->usersChildren) {
+				$enrollingChildren = true;
+				
+				$mform->addElement('header', 'enrolchildsection', 'Enrol your child in this activity');
+				
+				$mform->addElement('html', '<div class="helptext">Tick which of your children you want to enrol in this activity and then click <strong>Enrol My Child</strong></div>');
+				
+				$options = array();
+				foreach($children as $child) {
+				
+					$name = $child->firstname.' '.$child->lastname;
+				
+					if (enrol_user_is_enrolled($child->userid, $instance->id)) { 
+						
+						//User is already enrolled
+						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="green"><i class="ok-sign"></i> Already enrolled.</span>', array('disabled'=>'disabled'));
+			
+			        } else if ($mustBeInCohort && !cohort_is_member($mustBeInCohort->id, $child->userid)) {
+			        
+			        	//Child isn't in the required cohort
+						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, "<span class=\"red\"><i class=\"icon-warning-sign\"></i> Can't be enrolled because only <strong>{$niceCohortName}</strong> can join.</span>", array('disabled'=>'disabled'));
+			        
+			        } else {
+			        	
+			        	//User can be enrolled
+						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="grey"></span>');
+						
+			        }
+				
+				}
+				
+				//Enrol my child button
+				$mform->addElement('submit', 'enrolchildsubmit', get_string('enrolchild', 'enrol_self'));
+			}
+		}
+		
+		/*
+		* User enrolling self
+		*/
+		
+		$heading = 'Enrol yourself in this activity';
+        $mform->addElement('header', 'selfheader', $heading, array('class'=>'collapsed'));
+		
+		if (enrol_user_is_enrolled($USER->id, $instance->id)) { 
+			
+			//User is already enrolled
+			$mform->addElement('html', $OUTPUT->successbox('You are already enrolled in this activity.<br/><a class="btn" href="/course/view.php?id='.$instance->courseid.'" style="font-size:0.9em; position:relative; top:5px;>Go to activity page</a>'));
+
+        } else if ($mustBeInCohort && !cohort_is_member($mustBeInCohort->id, $USER->id)) {
+        
+        	//User isn't in the required cohort
+			$mform->addElement('html', $OUTPUT->errorbox("You can't enrol yourself because only <strong>{$niceCohortName}</strong> can join this activity."));
+        
+        } else {
+        
+        	//User is allowed to enrol
+			$this->add_action_buttons(false, get_string('enrolme', 'enrol_self'), false);
+				        
+		}
+		
+		/*
+		* End user enrolling self
+		*/
 
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);

@@ -135,12 +135,47 @@ class enrol_self_plugin extends enrol_plugin {
         if ($instance->enrol !== 'self') {
              throw new coding_exception('Invalid enrol instance type!');
         }
-
+      
         $context = context_course::instance($instance->courseid);
         if (has_capability('enrol/self:config', $context)) {
             $managelink = new moodle_url('/enrol/self/edit.php', array('courseid'=>$instance->courseid, 'id'=>$instance->id));
             $instancesnode->add($this->get_instance_name($instance), $managelink, navigation_node::TYPE_SETTING);
         }
+        
+		/*
+		* We want parents to be able to unenrol their children from activities (if they were allowed to enrol them to start with)
+		* Add links to do this in the course administration menu in the awesomebar
+		*/
+		
+		global $SESSION;
+		
+		//If the current user is a parent, and the current course allows parents to enrol their children, and the current user has at least 1 child...
+		if ($SESSION->userIsParent && $instance->customint8 && count($SESSION->usersChildren) > 0) {
+			
+			$showEnrolMoreChildrenLink = false;
+			foreach ($SESSION->usersChildren as $child) {
+			
+				//Is this child enrolled in the course?
+				if(enrol_user_is_enrolled($child->userid, $instance->id)) {
+				
+					//If the user is enrolled, add a link for the parent to unenrol the child
+					$str = "Remove {$child->firstname} {$child->lastname} from activity";
+					$instancesnode->parent->parent->add($str, "/enrol/self/unenrolchild.php?enrolid={$instance->id}&childuserid={$child->userid}", navigation_node::TYPE_SETTING);
+					/*
+						About the parent->parent thing...
+						If we just used this to add the menu item:
+						$instancesnode->add('Testing', '#', navigation_node::TYPE_SETTING);
+						then the link would get added into a submenu for this enrolment plugin (like this http://ctrlv.in/262781)
+						So we add it to the parent's parent so it goes into the main menu (like this http://ctrlv.in/262782)
+					*/
+				} else {
+					//This child isn't enrolled, so show the link to the enrol page for this course
+					$showEnrolMoreChildrenLink = true;
+					$instancesnode->parent->parent->add('Enrol my children in this activity', "/enrol/index.php?id={$instance->courseid}", navigation_node::TYPE_SETTING);
+				}
+			}
+		}
+        
     }
 
     /**
@@ -196,46 +231,44 @@ class enrol_self_plugin extends enrol_plugin {
             // Can not enrol guest!!
             return null;
         }
-        if ($DB->record_exists('user_enrolments', array('userid'=>$USER->id, 'enrolid'=>$instance->id))) {
-            //TODO: maybe we should tell them they are already enrolled, but can not access the course
-            return null;
-        }
-
+        
+		//Enrollments don't start yet
         if ($instance->enrolstartdate != 0 and $instance->enrolstartdate > time()) {
-            //TODO: inform that we can not enrol yet
-            return null;
+            return $OUTPUT->errorbox("Sorry, you can't join this activity until " . date('l M jS Y', $instance->enrolstartdate));
         }
 
+		//Enrollments have ended
         if ($instance->enrolenddate != 0 and $instance->enrolenddate < time()) {
-            //TODO: inform that enrolment is not possible any more
-            return null;
+            return $OUTPUT->errorbox("Sorry, you can't join this activity after " . date('l M jS Y', $instance->enrolenddate));
         }
 
+		//Allow new enrollments is set to 'no'
         if (!$instance->customint6) {
+        	return $OUTPUT->errorbox("Sorry, enrollments for this activity are closed.");
             // New enrols not allowed.
             return null;
         }
-
-        if ($instance->customint5) {
-            require_once("$CFG->dirroot/cohort/lib.php");
-            if (!cohort_is_member($instance->customint5, $USER->id)) {
-                $cohort = $DB->get_record('cohort', array('id'=>$instance->customint5));
-                if (!$cohort) {
-                    return null;
-                }
-                $a = format_string($cohort->name, true, array('context'=>context::instance_by_id($cohort->contextid)));
-                return $OUTPUT->box(markdown_to_html(get_string('cohortnonmemberinfo', 'enrol_self', $a)));
+        
+        //Max enrol limit specified.
+		if ($instance->customint3 > 0) {
+            $count = $DB->count_records('user_enrolments', array('enrolid'=>$instance->id));
+            if ($count >= $instance->customint3) {
+            	//Too many people enrolled already
+                return $OUTPUT->errorbox("Sorry, this activity already has the maximum number of participants.");
             }
         }
 
         require_once("$CFG->dirroot/enrol/self/locallib.php");
         require_once("$CFG->dirroot/group/lib.php");
-
+        
         $form = new enrol_self_enrol_form(NULL, $instance);
         $instanceid = optional_param('instance', 0, PARAM_INT);
 
         if ($instance->id == $instanceid) {
+        
             if ($data = $form->get_data()) {
+            	//User has submitted the self enrolment form (clicked the enrol my child or join activity button)
+            	
                 $enrol = enrol_get_plugin('self');
                 $timestart = time();
                 if ($instance->enrolperiod) {
@@ -243,27 +276,54 @@ class enrol_self_plugin extends enrol_plugin {
                 } else {
                     $timeend = 0;
                 }
+            	
+            	$userids_to_enrol = array();
+            	
+            	if (isset($data->enrolchildsubmit)) { //Parent wants to enrol their child instead of theirself
 
-                $this->enrol_user($instance, $USER->id, $instance->roleid, $timestart, $timeend);
-                add_to_log($instance->courseid, 'course', 'enrol', '../enrol/users.php?id='.$instance->courseid, $instance->courseid); //TODO: There should be userid somewhere!
+            		$userid_to_enrol = $data->enrolchilduserid;
+            		foreach ($data->enrolchilduserids as $userid => $one) {
+						$userids_to_enrol[] = $userid;
+					}
+					
+					//We also want to enrol the parent
+					$this->enrol_user($instance, $USER->id, $instance->roleid, $timestart, $timeend);
+					
+            	} else { //Enrol the current user
+            		$userids_to_enrol[] = $USER->id;
+            	}
+            	
 
-                if ($instance->password and $instance->customint1 and $data->enrolpassword !== $instance->password) {
-                    // it must be a group enrolment, let's assign group too
-                    $groups = $DB->get_records('groups', array('courseid'=>$instance->courseid), 'id', 'id, enrolmentkey');
-                    foreach ($groups as $group) {
-                        if (empty($group->enrolmentkey)) {
-                            continue;
-                        }
-                        if ($group->enrolmentkey === $data->enrolpassword) {
-                            groups_add_member($group->id, $USER->id);
-                            break;
-                        }
-                    }
-                }
-                // Send welcome message.
-                if ($instance->customint4) {
-                    $this->email_welcome_message($instance, $USER);
-                }
+				foreach ($userids_to_enrol as $userid_to_enrol) {
+	                $this->enrol_user($instance, $userid_to_enrol, $instance->roleid, $timestart, $timeend);
+	                	 //TODO: There should be userid somewhere!
+    	            add_to_log($instance->courseid, 'course', 'enrol', '../enrol/users.php?id='.$instance->courseid, $instance->courseid);
+    	            
+    	             if ($instance->password and $instance->customint1 and $data->enrolpassword !== $instance->password) {
+	                    // it must be a group enrolment, let's assign group too
+	                    $groups = $DB->get_records('groups', array('courseid'=>$instance->courseid), 'id', 'id, enrolmentkey');
+	                    foreach ($groups as $group) {
+	                        if (empty($group->enrolmentkey)) {
+	                            continue;
+	                        }
+	                        if ($group->enrolmentkey === $data->enrolpassword) {
+	                            groups_add_member($group->id, $userid_to_enrol);
+	                            break;
+	                        }
+	                    }
+	                }
+    	            
+					// Send welcome message.
+	                if ($instance->customint4) {
+	                    //$this->email_welcome_message($instance, $USER);
+    	            }
+				}
+				
+				if (count($userids_to_enrol) > 0) {
+					//We want to refresh the page to show changes
+					redirect("/enrol/index.php?id={$instance->courseid}");
+				}
+
             }
         }
 
@@ -271,7 +331,8 @@ class enrol_self_plugin extends enrol_plugin {
         $form->display();
         $output = ob_get_clean();
 
-        return $OUTPUT->box($output);
+		return $output;
+        //return $OUTPUT->box($output);
     }
 
     /**
@@ -575,4 +636,5 @@ class enrol_self_plugin extends enrol_plugin {
         // we do not use component in manual or self enrol.
         role_assign($roleid, $userid, $contextid, '', 0);
     }
+
 }
