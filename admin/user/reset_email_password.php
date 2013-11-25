@@ -6,15 +6,20 @@
 require_once('../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
-$userID = required_param('id', PARAM_INT);
+$userID = optional_param('id', false, PARAM_INT);
+if (!$userID) {
+	redirect('/admin/user.php');
+	exit();
+}
 $confirm = optional_param('confirm', 0, PARAM_BOOL);
 $ref = optional_param('ref', '/admin/user.php' , PARAM_TEXT);
 
 $tableName = 'user_email_password_reset';
 
 require_login();
-admin_externalpage_setup('resetemailpassword');
 require_capability('moodle/user:update', context_system::instance());
+$PAGE->set_title("Reset A User's Email Password");
+$PAGE->set_heading("Reset A User's Email Password");
 
 //Get the user
 $user = $DB->get_record('user', array('id'=>$userID), '*', MUST_EXIST);

@@ -557,7 +557,7 @@ class awesomebar
 			foreach ( $category->get_courses() as $course )
 			{
 				//But only If the user is enrolled in this course...
-				if ( $enrolledCourses === false || $enrolledCourses[$course->id] !== null )
+				if ( $enrolledCourses === false || isset($enrolledCourses[$course->id]) )
 				{
 					$branch['courses'][] = array(
 						'id'=>$course->id,

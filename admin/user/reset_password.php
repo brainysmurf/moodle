@@ -6,24 +6,29 @@
 require_once('../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
-$userID = required_param('id', PARAM_INT);
+$userID = optional_param('id', false, PARAM_INT);
+if (!$userID) {
+	redirect('/admin/user.php');
+	exit();
+}
 $confirm = optional_param('confirm', 0, PARAM_BOOL);
 $ref = optional_param('ref', '/admin/user.php' , PARAM_TEXT);
 
 require_login();
-admin_externalpage_setup('resetpassword');
 require_capability('moodle/user:update', context_system::instance());
+$PAGE->set_title("Reset A User's Password");
+$PAGE->set_heading("Reset A User's Password");
 
 //Get the user
 $user = $DB->get_record('user', array('id'=>$userID), '*', MUST_EXIST);
 
 echo $OUTPUT->header();
 
+$newPassword = 'changeme';
+
 	if ( $confirm and confirm_sesskey() )
 	{		
 		$authplugin = get_auth_plugin($user->auth);
-		
-		$newPassword = 'changeme';
 		
         if ($authplugin->can_change_password())
         {
@@ -67,7 +72,7 @@ SSIS DragonNet Admin Team";
 		echo $OUTPUT->heading(get_string('confirmation', 'admin'));
 	    $formcontinue = new single_button(new moodle_url('reset_password.php', array('confirm' => 1, 'id'=>$userID, 'ref'=>$ref)), get_string('yes'));
 	    $formcancel = new single_button(new moodle_url($ref), get_string('no'), 'get');
-	    echo $OUTPUT->confirm('Are you sure you want to reset <strong>'.$user->username.'</strong>\'s password?', $formcontinue, $formcancel);
+	    echo $OUTPUT->confirm('Are you sure you want to reset <strong>'.$user->username.'</strong>\'s password to <strong>'.$newPassword.'</strong>?', $formcontinue, $formcancel);
 	}
 
 echo $OUTPUT->footer();
