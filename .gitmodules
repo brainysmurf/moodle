@@ -52,3 +52,6 @@
 [submodule "lib/MathJax"]
 	path = lib/MathJax
 	url = https://github.com/mathjax/MathJax.git
+[submodule "mod/scheduler"]
+	path = mod/scheduler
+	url = https://github.com/bostelm/moodle-mod_scheduler.git
