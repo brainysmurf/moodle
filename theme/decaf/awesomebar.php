@@ -19,6 +19,7 @@ class awesomebar
 		$this->page = $page;
 		global $CFG;
 		require_once($CFG->libdir.'/coursecatlib.php');
+		require_once($CFG->dirroot.'/course/lib.php');
 		
 		//Setup the cache (for this session)
 		$this->cache = cache::make_from_params(cache_store::MODE_SESSION, 'theme_decaf', 'awesomebar');
