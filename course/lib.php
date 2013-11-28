@@ -3377,7 +3377,7 @@ function get_teaching_and_learning_ids()
 	}
 	
 	global $CFG, $DB;
-	$rows = $DB->get_records_sql("select crse.id from {$CFG->prefix}course crse join  {$CFG->prefix}course_categories cc on cc.id = crse.category and cc.parent = 50");
+    $rows = $DB->get_records_sql("select crse.id from {$CFG->prefix}course crse, {$CFG->prefix}course_categories crsecats where crse.category = crsecats.id and crsecats.path like '%/50/%'");
 	
 	$IDs = array();
 	foreach ($rows as $ID => $row) {
