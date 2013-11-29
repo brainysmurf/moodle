@@ -52,6 +52,8 @@ Google|http://www.google.com|icon-home|studentsALL
 <strong>Link that only students and parents can see:</strong>
 Link Name|http://www.example.com|icon-home|studentsALL,parentsALL
 
+(Site admins will always see all items even if they\'re not in the right cohorts)
+
 You can skip parts you don\'t want to add.
 <strong>Link with no icon that only parents can see:</strong>
 Link Name|http://www.google.com|icon-home|parentsALL
