@@ -2,7 +2,7 @@
  * Customized Horizontal CSS Drop-Down Menu for Moodle settings
  *
  * @file		awesomebar.css
- * @version		2013-10-07 08:57
+ * @version		2013-11-29 14:08
  * @Copyright   GNU GENERAL PUBLIC LICENSE Version 3.0
  */
 
@@ -70,6 +70,35 @@
 				width:15px;
 				line-height:30px;
 			}
+			
+			#awesomebar ul.dropdown li.header {
+				font-size: 11px;
+				padding: 10px 10px 5px;
+				height: auto;
+				line-height: normal;
+				font-weight: bold;
+				background: #0e0e0e;
+				background: -moz-linear-gradient(top,  #0e0e0e 87%, #1f1f1f 100%);
+				background: -webkit-gradient(linear, left top, left bottom, color-stop(87%,#0e0e0e), color-stop(100%,#1f1f1f));
+				background: -webkit-linear-gradient(top,  #0e0e0e 87%,#1f1f1f 100%);
+				background: -o-linear-gradient(top,  #0e0e0e 87%,#1f1f1f 100%);
+				background: -ms-linear-gradient(top,  #0e0e0e 87%,#1f1f1f 100%);
+				background: linear-gradient(to bottom,  #0e0e0e 87%,#1f1f1f 100%);
+				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0e0e0e', endColorstr='#1f1f1f',GradientType=0 );
+				color: #999;
+				border-bottom:none;
+			}
+			
+				#awesomebar ul.dropdown li.header + li {
+					border-top:none;
+				}
+			
+				#awesomebar ul.dropdown li.header i {
+					line-height: normal;
+					margin-top: 1px;
+					font-size: 11px;
+					margin-left: 0px;
+				}
 
 	/* Submenus (pop out on right) */
 	#awesomebar ul.dropdown li > ul {
@@ -190,6 +219,10 @@
 		cursor:default;
 		color: #FAF955;
 	}
+		#awesomebar li.header:hover,
+		#awesomebar li.header.hover {
+			background-color: #0E0E0E !important;
+		}
 
 	#awesomebar li {
 		border-color:#404040 #505050 #1a1a1a #505050;

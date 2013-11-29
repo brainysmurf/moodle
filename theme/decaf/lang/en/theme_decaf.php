@@ -39,6 +39,51 @@ $string['backgroundcolordesc'] = 'This sets the background colour for the theme.
 $string['configtitle'] = 'Decaf theme settings';
 $string['customcss'] = 'Custom CSS';
 $string['customcssdesc'] = 'Any CSS you enter here will be added to every page allowing your to easily customise this theme.';
+$string['custommenuitems'] = 'Custom Menu Items';
+$string['custommenuitemsdesc'] = '<pre style="font-size: 0.95em; color: #444; font-family:Tahoma,Arial, Helvetica, sans-serif;">Items here appear as menus in the Awesomebar.
+Each line consists of 4 parts: some text (required) | a link URL (optional) | an icon name (optional) | and a list of cohorts that can see it (optional).
+
+<strong>Example:</strong>
+Google|http://www.google.com
+<strong>Link with an icon:</strong>
+Google|http://www.google.com|icon-home
+<strong>Link that only students can see:</strong>
+Google|http://www.google.com|icon-home|studentsALL
+<strong>Link that only students and parents can see:</strong>
+Link Name|http://www.example.com|icon-home|studentsALL,parentsALL
+
+You can skip parts you don\'t want to add.
+<strong>Link with no icon that only parents can see:</strong>
+Link Name|http://www.google.com|icon-home|parentsALL
+
+Relative links should be used for things on Moodle.
+Some Course|/course/view.php?id=123
+
+<strong>Headers</strong>
+To make a header separating sections, add "header=" in front of the text: (Links are always ignored on headers)
+header=Header Text||icon-name
+header=Header Text||icon-name|studentsALL
+
+<strong>Horizontal Lines</strong>
+hr
+<strong>Line only students can see:</strong>
+hr|||studentsALL
+
+<strong>Submenus</strong>
+You can add submenus by indenting each line with dashes, like this:
+
+Search Engines||icon-search
+-Google|http://www.google.com|icon-google-plus
+--Google Docs|http://docs.google.com|icon-paper-clip
+--Google Maps|http://maps.google.com|icon-map-marker
+---UK|http://maps.google.co.uk|icon-map-marker
+---HK|http://map.google.com.hk|icon-map-marker
+--Google Mail|http://mail.google.com|icon-envelope
+-Microsoft|http://www.microsoft.com|icon-desktop
+--Bing|http://www.bing.com|icon-search
+
+</pre>
+';
 $string['footnote'] = 'Footnote';
 $string['footnotedesc'] = 'The content from this textarea will be displayed in the footer of every page.';
 $string['logo'] = 'Logo';

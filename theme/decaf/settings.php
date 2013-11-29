@@ -30,6 +30,13 @@ if ($ADMIN->fulltree) {
     $description = get_string('customcssdesc', 'theme_decaf');
     $setting = new admin_setting_configtextarea($name, $title, $description, '');
     $settings->add($setting);
+    
+	// custommenuitems
+    $name = 'theme_decaf/custommenuitems';
+    $title = get_string('custommenuitems','theme_decaf');
+    $description = html_entity_decode(get_string('custommenuitemsdesc', 'theme_decaf'));
+    $setting = new admin_setting_configtextarea($name, $title, $description, '');
+    $settings->add($setting);
 
     // Enable edit buttons (replace rows of icons)
     $name = 'theme_decaf/useeditbuttons';
