@@ -1,15 +1,18 @@
 <?php
 
 /*
-	This script will unenrol all students and parents that are self-enroled in activities
+	This script will update the self enrolment method for each course in the Activities category to allow parents to enrol children
 */
 
 define('CLI_SCRIPT', true);
 
 require(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once($CFG->libdir.'/clilib.php'); 
+require_once($CFG->dirroot.'/cohort/lib.php');
 require_once($CFG->libdir.'/coursecatlib.php');
 require_once($CFG->libdir.'/enrollib.php');
+require_once('../../enrol/locallib.php');
+
 	
 //Get all courses in Activities category
 
@@ -29,15 +32,11 @@ foreach ($courses as $course) {
 		if ($instance->enrol == 'self') {
 			echo "\n\tSelf enrolment instance ID: " . $instance->id;
 			
-			//Now get all the users
+			$row = new stdClass();
+			$row->id = $instance->id;
+			$row->customint8 = 1;
 			
-			$users = $DB->get_records('user_enrolments', array('enrolid'=>$instance->id), 'userid');
-			echo "\n\t" . count($users) . " users enroled by this method.";
-			
-			foreach ($users as $user) {
-				echo "\n\t\tUnenroling user {$user->userid}";
-				$selfenrolment->unenrol_user($instance, $user->userid);
-			}
+			$DB->update_record('enrol', $row);
 		}
 		
 	}
