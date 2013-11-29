@@ -55,3 +55,6 @@
 [submodule "testrepo"]
 	path = testrepo
 	url = https://github.com/brainysmurf/testrepo.git
+[submodule "forked_config_reports"]
+	path = blocks/configurable_reports
+	url = https://github.com/brainysmurf/moodle-block_configurablereports.git
