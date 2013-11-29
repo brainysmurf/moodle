@@ -113,18 +113,18 @@ class awesomebar
 	*/
 	private function render_array_as_html_list(array $menu, $depth = 0)
 	{
+		global $CFG, $USER, $SESSION;
+		require_once($CFG->dirroot.'/cohort/lib.php');
+			
 		$html = '';
 		foreach ($menu as $item) {
 			
 			//Restricted to certain cohorts
-			if (!empty($item['cohorts'])) {
-			
-				global $CFG, $USER;
-				require_once($CFG->dirroot.'/cohort/lib.php');
+			if (!empty($item['cohorts']) && !$SESSION->userIsSiteAdmin) {
 			
 				$canSee = false;
-				foreach ($item['cohorts'] as $cohort) {
 				
+				foreach ($item['cohorts'] as $cohort) {
 					if (cohort_is_member_by_idnumber($cohort, $USER->id)) {
 						$canSee = true;
 						break;
