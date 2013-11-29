@@ -14,11 +14,17 @@
     display:none;
 }
 
-.empty-region-side-post #region-bs-main-and-pre.span9 {
-    width:100%;
+.empty-region-side-post #region-bs-main-and-pre.span9,
+.empty-region-side-pre #region-bs-main-and-post.span9,
+.empty-region-side-post #region-bs-main-and-post.span9 #region-main.span8 {
+    /** LTR with no post area.
+        RTL with no pre area.
+        RTL with no post area. **/
+    width: 100%;
 }
 
-.empty-region-side-pre #region-main {
+.empty-region-side-pre #region-bs-main-and-pre.span9 #region-main {
+    /** LTR with no pre area. **/
     float:none;
     width:100%;
 }
@@ -37,9 +43,9 @@
     .fluid-span(3);
 }
 
-.empty-region-side-post #region-bs-main-and-post.span9 #region-main.span8 {
-    /** RTL with no post area. **/
-    width:100%;
+.empty-region-side-pre #region-bs-main-and-post.span9 #region-main.span8 {
+    /** RTL with no pre area. **/
+    float: right;
 }
 
 /** Page layout CSS ends **/
@@ -1262,8 +1268,11 @@ audio.mediaplugin_html5audio {
 .core_media_preview.pagelayout-embedded #maincontent {
     height: 0;
 }
-.core_media_preview.pagelayout-embedded .mediaplugin {
+body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
+    padding: 0;
     margin: 0;
+    min-width: 0;
+    background: none;
 }
 /** Fix YUI 2 Treeview for Right to left languages **/
 .dir-rtl .ygtvtn,
@@ -1872,6 +1881,9 @@ div.badge .expireimage {
 .notconnected {
     color: @errorText;
 }
+.connecting {
+    color: @warningText;
+}
 #page-badges-award .recipienttable tr td {
     vertical-align: top;
 }
@@ -1899,6 +1911,9 @@ div.badge .expireimage {
     text-align: left;
     vertical-align: middle;
 }
+img#persona_signin {
+    cursor: pointer;
+}
 .addcourse {
     float: right;
 }
@@ -1920,4 +1935,8 @@ div.badge .expireimage {
 }
 .breadcrumb-nav .breadcrumb {
     margin: 0;
+}
+
+body.bodynoheader {
+  padding-top: 0;
 }

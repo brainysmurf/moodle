@@ -218,6 +218,8 @@ class flexible_table {
 
     /**
      * Use text sorting functions for this column (required for text columns with Oracle).
+     * Be warned that you cannot use this with column aliases. You can only do this
+     * with real columns. See MDL-40481 for an example.
      * @param string column name
      */
     function text_sorting($column) {
@@ -1043,7 +1045,7 @@ class flexible_table {
             // Print empty rows to fill the table to the current pagesize.
             // This is done so the header aria-controls attributes do not point to
             // non existant elements.
-            $emptyrow = array_fill(0, count($this->columns) - 1, '');
+            $emptyrow = array_fill(0, count($this->columns), '');
             while ($this->currentrow < $this->pagesize) {
                 $this->print_row($emptyrow, 'emptyrow');
             }
