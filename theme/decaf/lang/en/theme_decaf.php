@@ -82,6 +82,8 @@ Search Engines||icon-search
 -Microsoft|http://www.microsoft.com|icon-desktop
 --Bing|http://www.bing.com|icon-search
 
+When you make changes to this you won\'t see them until your logout and log back in, or <a href="/?refreshawesomebar" target="blank">reload the awesomebar</a>.
+
 </pre>
 ';
 $string['footnote'] = 'Footnote';
