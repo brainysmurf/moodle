@@ -82,29 +82,36 @@ $mform = new grid_image_form(null, array(
 if ($mform->is_cancelled()) {
     // Someone has hit the 'cancel' button.
     redirect(new moodle_url($CFG->wwwroot . '/course/view.php?id=' . $course->id));
-} else if ($formdata = $mform->get_data()) { // Form has been submitted.
+} else if ($formdata = $mform->get_data()) {
+
+	// Form has been submitted.
     $fs = get_file_storage();
 
-    if ($newfilename = $mform->get_new_filename('icon_file')) {
-        // We have a new file so can delete the old....
+    if ($filename = $mform->get_new_filename('icon_file')) {
+    
+    	//$newfilename is the filename of the selected file
+    
+        //Delete any existing icon
         $fs->delete_area_files($context->id, 'course', 'section', $sectionid);
-        // Resize the new image and save it...
-        $created = time();
-        $storedfile_record = array(
-            'contextid' => $contextid,
-            'component' => 'course',
-            'filearea' => 'section',
-            'itemid' => $sectionid,
-            'filepath' => '/',
-            'filename' => $newfilename,
-            'timecreated' => $created,
-            'timemodified' => $created);
+        
+		//Add some junk to the end of the filename to make it unique
+		$filename = $filename.uniqid();
 
-        $temp_file = $mform->save_stored_file(
-                'icon_file', $storedfile_record['contextid'], $storedfile_record['component'], $storedfile_record['filearea'],
-                             $storedfile_record['itemid'], $storedfile_record['filepath'], 'temp.'.$storedfile_record['filename'],
-                             true);
-
+        $file = $mform->save_stored_file(
+	        'icon_file', //Name of the file upload element in the form
+	        $contextid,
+	        'course', //component
+	        'section', //filearea
+			$sectionid, //itemid
+			'/', //path in the section
+			$filename,
+			true //overwrite file if exists
+		);
+                             
+		//Save the filename for the section in the database
+		$DB->set_field('format_grid_icon', 'imagepath', $filename, array('sectionid' => $sectionid));
+		
+		/*
         try {
             $convert_success = true;
             // Ensure the right quality setting...
@@ -149,6 +156,8 @@ if ($mform->is_cancelled()) {
             print('Grid Format Edit Image Exception:...');
             debugging($e->getMessage());
         }
+        */
+        
         redirect($CFG->wwwroot . "/course/view.php?id=" . $course->id);
     }
 }
