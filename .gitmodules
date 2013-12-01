@@ -58,3 +58,9 @@
 [submodule "forked_config_reports"]
 	path = blocks/configurable_reports
 	url = https://github.com/brainysmurf/moodle-block_configurablereports.git
+[submodule "mod/lightboxgallery"]
+	path = mod/lightboxgallery
+	url = https://github.com/netspotau/moodle-mod_lightboxgallery.git
+[submodule "forked_questionnaire"]
+	path = mod/questionnaire
+	url = https://github.com/brainysmurf/moodle-mod_questionnaire.git
