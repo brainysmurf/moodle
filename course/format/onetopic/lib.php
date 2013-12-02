@@ -228,9 +228,9 @@ class format_onetopic extends format_base {
                     'element_type' => 'select',
                     'element_attributes' => array(
                         array(
-                            0 => new lang_string('hiddensectionscollapsed'),
-                            1 => new lang_string('hiddensectionsinvisible')
-                        )
+                            0 => 'Show hidden section tabs to students',
+                            1 => 'Hide hidden section tabs from students'
+						)
                     ),
                 ),
                 'hidetabsbar' => array(
