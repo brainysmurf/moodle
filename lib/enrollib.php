@@ -478,7 +478,7 @@ function enrol_add_course_navigation(navigation_node $coursenode, $course) {
                 $plugin = $plugins[$instance->enrol];
                 if ($unenrollink = $plugin->get_unenrolself_link($instance)) {
                     $shortname = format_string($course->shortname, true, array('context' => $coursecontext));
-                    $coursenode->add(get_string('unenrolme', 'core_enrol', $shortname), $unenrollink, navigation_node::TYPE_SETTING, null, 'unenrolself', new pix_icon('i/user', ''));
+                    $coursenode->add(get_string('unenrolme', 'core_enrol', $shortname), $unenrollink, navigation_node::TYPE_SETTING, null, 'unenrolself', new pix_icon('i/eject', ''));
                     break;
                     //TODO. deal with multiple unenrol links - not likely case, but still...
                 }
@@ -1033,6 +1033,14 @@ function enrol_get_enrolment_end($courseid, $userid) {
     }
 }
 
+/**
+* Returns true or false if the given userid is enrolled in the given enrolment instance
+*/
+function enrol_user_is_enrolled($userid, $instanceid)
+{
+	global $DB;
+	return $DB->record_exists('user_enrolments', array('userid'=>$userid, 'enrolid'=>$instanceid));
+}
 
 /**
  * All enrol plugins should be based on this class,

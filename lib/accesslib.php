@@ -4781,6 +4781,22 @@ function role_change_permission($roleid, $context, $capname, $permission) {
     $context->mark_dirty();
 }
 
+/* Returns child users the given userid s a parent of
+* When a parent logs in the results of this function are cached in $SESSION->usersChildren (/lib/moodlelib.php:4390)
+*  use that result if possible instead of calling this again
+*/
+function get_users_children($userid)
+{
+	global $DB;
+	$usercontexts = $DB->get_records_sql("SELECT c.instanceid, c.instanceid, u.id AS userid, u.firstname, u.lastname
+        FROM {role_assignments} ra, {context} c, {user} u
+       WHERE ra.userid = ?
+             AND ra.contextid = c.id
+             AND c.instanceid = u.id
+             AND c.contextlevel = ".CONTEXT_USER, array($userid));
+	return $usercontexts;
+}
+
 
 /**
  * Basic moodle context abstraction class.

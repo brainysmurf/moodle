@@ -527,6 +527,10 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 .mform .fitem fieldset.felement{float:left; margin-left:0;}
 .mform .fitem .fitemtitle{width:30%;}
 
+.mform .felement.fsubmit {
+	margin:0 auto !important;
+}
+
 .form-input {text-align:left;}
 
 	/* Login Form */
@@ -968,6 +972,30 @@ table.styledtable tr:hover td {
 color: #333;
 }
 
+h2.noAccess {
+	text-align:center;
+	font-size:18px;
+	margin:20px 0 30px;
+	font-weight:bold;
+	color: #A00;
+}
+	h2.noAccess a {
+		color: #A00;
+		text-decoration: underline;
+	}
+
+.coursebox:last-child {
+	border-bottom:0;
+}
+.coursebox>.info>.name {
+	width:auto;
+	float:none;	
+}
+.coursebox .content .summary {
+	width:auto;
+	float:none;
+}
+
 .generalbox,
 .mform > fieldset {
 	background: rgba(255, 255, 255, 0.8);
@@ -975,10 +1003,70 @@ color: #333;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	padding:10px;
-  -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-  -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+	-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+	-moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+	margin-top:15px
 }
+
+	.errorbox {
+		text-align:center;
+		color: #A00;
+		border-color:#A00;
+	}
+		.errorbox a {
+			color: #A00;
+			font-weight:bold;	
+		}
+		/* Add fontawesome alert icon to errorboxes*/
+		.errorbox:before {
+			font-family: FontAwesome;
+			content: "\f071";
+			margin-right:5px;
+		}
+		
+	.successbox {
+		text-align:center;
+		color:#048804;
+		border-color:#048804;
+	}
+		/* Add fontawesome alert icon to errorboxes*/
+		.successbox:before {
+			font-family: FontAwesome;
+			content: "\f058";
+			margin-right:5px;
+		}
+		
+	.generalbox .errorbox,
+	.mform > fieldset .errorbox,
+	.generalbox .successbox,
+	.mform > fieldset .successbox {
+		border:none;
+		-moz-box-shadow:none;
+		-webkit-box-shadow:none;
+		box-shadow:none;
+	}
+		
+	.helptext {
+		font-size:12px;
+		text-align:center;
+		margin:10px !important;
+		color:#888;
+	}
+		.helptext:before {
+			font-family: FontAwesome;
+			content: "\f129";
+			margin-right:5px;
+		}
+
+	span.grey,
+	span.red,
+	span.green {
+		font-size:12px;
+	}
+		span.grey { color:#888; }
+		span.red { color:#A00; }
+		span.green { color:#048804; }
 
 	#intro.generalbox {
 		padding: 10px;

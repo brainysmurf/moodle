@@ -4368,6 +4368,9 @@ function complete_user_login($user) {
 	if ($SESSION->userIsParent = cohort_is_member_by_idnumber('parentsALL', $USER->id) )
 	{
         $SESSION->frontpageSection = 6;
+        
+        //Cache user's children in the session
+		$SESSION->usersChildren = get_users_children($USER->id);
 	}
 
 	if ($SESSION->userIsHSStudent = cohort_is_member_by_idnumber('studentsHS', $USER->id))

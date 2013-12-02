@@ -54,7 +54,7 @@ $string['enrolmentinstances'] = 'Enrolment methods';
 $string['enrolmentnew'] = 'New enrolment in {$a}';
 $string['enrolmentnewuser'] = '{$a->user} has enrolled in course "{$a->course}"';
 $string['enrolments'] = 'Enrolments';
-$string['enrolmentoptions'] = 'You have not been given access to this course. If you think you should have access, email help@ssis-suzhou.net';    // 'Enrolment options'
+$string['enrolmentoptions'] = 'You have not been given access to this course. If you think you should have access, please email <a href="mailto:help@ssis-suzhou.net">help@ssis-suzhou.net</a>';    // 'Enrolment options'
 $string['enrolnotpermitted'] = 'You do not have permission or are not allowed to enrol someone in this course';
 $string['enrolperiod'] = 'Enrolment duration';
 $string['enrolusage'] = 'Instances / enrolments';
