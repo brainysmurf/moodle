@@ -125,7 +125,7 @@ class enrol_self_enrol_form extends moodleform {
 		if (enrol_user_is_enrolled($USER->id, $instance->id)) { 
 			
 			//User is already enrolled
-			$mform->addElement('html', $OUTPUT->successbox('You are already enrolled in this activity.<br/><a class="btn" href="/course/view.php?id='.$instance->courseid.'" style="font-size:0.9em; position:relative; top:5px;>Go to activity page</a>'));
+			$mform->addElement('html', $OUTPUT->successbox('You are already enrolled in this activity.<br/><a class="btn" href="/course/view.php?id='.$instance->courseid.'" style="font-size:0.9em; position:relative; top:5px;">Go to activity page</a>'));
 
         } else if ($mustBeInCohort && !cohort_is_member($mustBeInCohort->id, $USER->id)) {
         
