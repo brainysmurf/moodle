@@ -63,4 +63,4 @@
 	url = https://github.com/netspotau/moodle-mod_lightboxgallery.git
 [submodule "mod/questionnaire"]
 	path = mod/questionnaire
-	url = https://github.com/remotelearner/moodle-mod_questionnaire.git
+	url = https://github.com/brainysmurf/moodle-mod_questionnaire.git

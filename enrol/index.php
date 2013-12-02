@@ -65,7 +65,7 @@ foreach($enrolinstances as $instance) {
 }
 
 // Check if user already enrolled
-if (is_enrolled($context, $USER, '', true)) {
+if (is_enrolled($context, $USER, '', true) && !$SESSION->userIsParent) {
     if (!empty($SESSION->wantsurl)) {
         $destination = $SESSION->wantsurl;
         unset($SESSION->wantsurl);
@@ -80,7 +80,10 @@ $PAGE->set_heading($course->fullname);
 $PAGE->navbar->add(get_string('enrolmentoptions','enrol'));
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('enrolmentoptions','enrol'));
+
+//echo $OUTPUT->errorbox(get_string('enrolmentoptions','enrol'));
+//echo $OUTPUT->heading(get_string('enrolmentoptions','enrol'));
+echo '<h2 class="noAccess"><i class="icon-info-sign"></i> '.get_string('enrolmentoptions','enrol').'</div>';
 
 $courserenderer = $PAGE->get_renderer('core', 'course');
 echo $courserenderer->course_info_box($course);
@@ -91,12 +94,13 @@ foreach ($forms as $form) {
     echo $form;
 }
 
-if (!$forms) {
+//Prevent the double warning about not having access
+/*if (!$forms) {
     if (isguestuser()) {
         notice(get_string('noguestaccess', 'enrol'), get_login_url());
     } else {
         notice(get_string('notenrollable', 'enrol'), "$CFG->wwwroot/index.php");
     }
-}
+}*/
 
 echo $OUTPUT->footer();

@@ -221,35 +221,16 @@ class theme_decaf_core_renderer extends core_renderer {
 	}
 
 
-	/**
-	 * Renders a custom menu object (located in outputcomponents.php)
-	 * Super tweaked for SSIS to make the code easier
-	 * The custom menu this method override the render_custom_menu function
-	 * in outputrenderers.php
-	 * @staticvar int $menucount
-	 * @param custom_menu $menu
-	 * @return string
-	 */
-	/*protected function render_custom_menu( custom_menu $menu )
-	{
-		require_once dirname(__FILE__).'/awesomebar.php';
-		$awesomebar = new awesomebar($this->page);
-		$awesomebar->set_custom_menu($menu);
-		$content = $awesomebar->create();
-		return $content;
-	}*/
 
-
-
-	/**
-	 * Renders a pix_icon widget and returns the HTML to display it.
-	 *
-	 * @param pix_icon $icon
-	 * @return string HTML fragment
-	 */
-	protected function render_pix_icon(pix_icon $icon) {
-		$attributes = $icon->attributes;
-		$attributes['src'] = $this->pix_url($icon->pix, $icon->component);
+    /**
+     * Renders a pix_icon widget and returns the HTML to display it.
+     *
+     * @param pix_icon $icon
+     * @return string HTML fragment
+     */
+    protected function render_pix_icon(pix_icon $icon) {
+        $attributes = $icon->attributes;
+        $attributes['src'] = $this->pix_url($icon->pix, $icon->component);
 		switch ($icon->pix) {
 			case 'i/navigationitem': return html_writer::tag('i', '', array('class'=>'icon-cog pull-left')); break;
 			case 'i/edit': return html_writer::tag('i', '', array('class'=>'icon-edit pull-left')); break;
@@ -269,151 +250,11 @@ class theme_decaf_core_renderer extends core_renderer {
 			case 'i/publish': return html_writer::tag('i', '', array('class'=>'icon-globe pull-left')); break;
 			case 'i/return': return html_writer::tag('i', '', array('class'=>'icon-rotate-left pull-left')); break;
 			case 'i/checkpermissions': return html_writer::tag('i', '', array('class'=>'icon-key pull-left')); break;
-
+			case 'i/user': return html_writer::tag('i', '', array('class'=>'icon-user pull-left')); break;
+			case 'i/eject': return html_writer::tag('i', '', array('class'=>'icon-eject pull-left')); break;
 		}
 		return html_writer::empty_tag('img', $attributes);
 	}
-
-
-
-
-	/**
-	 * Renders a custom menu node as part of a submenu
-	 *
-	 * The custom menu this method override the render_custom_menu_item function
-	 * in outputrenderers.php
-	 *
-	 * @see render_custom_menu()
-	 *
-	 * @staticvar int $submenucount
-	 * @param custom_menu_item $menunode
-	 * @return string
-	 */
-	/* protected function render_custom_menu_item(custom_menu_item $menunode) {
-			// Required to ensure we get unique trackable id's
-			static $submenucount = 0;
-
-			if ($menunode->has_children()) {
-				// If the child has menus render it as a sub menu
-				$submenucount++;
-			$content = html_writer::start_tag('li');
-
-			$icon = html_writer::tag('i', '', array('class'=>'icon-none pull-left'));
-			if ($menunode->get_title()) {
-				// This adds the feature of using the title for the icon
-				$icon = html_writer::tag('i', '', array('class'=>$menunode->get_title().' pull-left'));
-			}
-
-			switch ($menunode->get_text()) {
-				case 'Teaching & Learning': $icon = html_writer::tag('i', '', array('class'=>'icon-magic pull-left')); break;
-				case 'Activities': $icon = html_writer::tag('i', '', array('class'=>'icon-rocket pull-left')); break;
-				case 'School Life': $icon = html_writer::tag('i', '', array('class'=>'icon-ticket pull-left')); break;
-				case 'Curriculum': $icon = html_writer::tag('i', '', array('class'=>'icon-save pull-left')); break;
-				case 'Parents': $icon = html_writer::tag('i', '', array('class'=>'icon-info-sign pull-left')); break;
-				case 'Invisible': $icon = html_writer::tag('i', '', array('class'=>'icon-star-half-empty pull-left')); break;
-			}
-
-			// Now we need to process whether to conver to a link and whether to append a right caret
-			$addcaret = '';
-			if ( $parent = $menunode->get_parent() )
-			{
-				if ( !($parent->get_text() === 'root') )
-				{
-					// filter out roots, so top level is ignored
-					$addcaret = html_writer::tag('i', '', array('class'=>'pull-right icon-caret-right'));
-				}
-			}
-
-				if ($menunode->get_url() !== null )
-				{
-					$content .= html_writer::link($menunode->get_url(), $icon.$menunode->get_text().$addcaret);
-				}
-				else
-				{
-					$content .= $icon.$menunode->get_text().$addcaret;
-				}
-
-				$content .= html_writer::start_tag('ul');
-				foreach ($menunode->get_children() as $menunode) {
-					$content .= $this->render_custom_menu_item($menunode);
-				}
-				$content .= html_writer::end_tag('ul');
-			$content .= html_writer::end_tag('li');
-
-			} else {
-
-			// The node doesn't have children so produce a leaf
-
-			if ($menunode->get_text() === 'hr') {
-				$content = html_writer::empty_tag('hr');
-			} else {
-			$content = html_writer::start_tag('li');
-				$icon = html_writer::tag('i', '', array('class'=>'icon-none'));
-
-				if ($menunode->get_title()) {
-				$icon = html_writer::tag('i', '', array('class'=>$menunode->get_title().' pull-left'));
-				}
-
-					if ($menunode->get_url() !== null) {
-						$url = $menunode->get_url();
-					} else {
-						$url = '#';
-					}
-					$content .= html_writer::link($url, $icon.$menunode->get_text(), array('title'=>$menunode->get_title()));
-			$content .= html_writer::end_tag('li');
-			}
-			}
-
-			// Return the sub menu
-			return $content;
-		} */
-
-
-	/*
-		// Copied from core_renderer with one minor change - changed $this->output->render() call to $this->render()
-		protected function render_navigation_node(navigation_node $item) {
-			$content = $item->get_content();
-			$title = $item->get_title();
-			if ($item->icon instanceof renderable && !$item->hideicon) {
-					$icon = $this->render($item->icon);
-				$content = $icon.$content; // use CSS for spacing of icons
-			}
-			if ($content === '') {
-				return '';
-			}
-
-			if ($item->action instanceof action_link) {
-				//TODO: to be replaced with something else
-				$link = $item->action;
-				if ($item->hidden) {
-					$link->add_class('dimmed');
-				}
-				$content = $this->render($link);
-			} else if ($item->action instanceof moodle_url) {
-				$attributes = array();
-				if ($title !== '') {
-					$attributes['title'] = $title;
-				}
-				if ($item->hidden) {
-					$attributes['class'] = 'dimmed_text';
-				}
-				$content = html_writer::link($item->action, $content, $attributes);
-
-			} else if (is_string($item->action) || empty($item->action)) {
-				$attributes = array();
-				if ($title !== '') {
-					$attributes['title'] = $title;
-				}
-				if ($item->hidden) {
-					$attributes['class'] = 'dimmed_text';
-				}
-			}
-
-			return $content;
-		} */
-
-
-
 
 
 	// !Blocks

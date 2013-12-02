@@ -1208,7 +1208,7 @@ abstract class moodleform {
      * @param bool $cancel whether to show cancel button, default true
      * @param string $submitlabel label for submit button, defaults to get_string('savechanges')
      */
-    function add_action_buttons($cancel = true, $submitlabel=null){
+    function add_action_buttons($cancel = true, $submitlabel=null, $closeHeaderBefore=true){
         if (is_null($submitlabel)){
             $submitlabel = get_string('savechanges');
         }
@@ -1219,11 +1219,15 @@ abstract class moodleform {
             $buttonarray[] = &$mform->createElement('submit', 'submitbutton', $submitlabel);
             $buttonarray[] = &$mform->createElement('cancel');
             $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
-            $mform->closeHeaderBefore('buttonar');
+			if ($closeHeaderBefore) {
+				$mform->closeHeaderBefore('buttonar');
+			}
         } else {
             //no group needed
             $mform->addElement('submit', 'submitbutton', $submitlabel);
-            $mform->closeHeaderBefore('submitbutton');
+			if ($closeHeaderBefore) {
+				$mform->closeHeaderBefore('submitbutton');
+			}
         }
     }
 

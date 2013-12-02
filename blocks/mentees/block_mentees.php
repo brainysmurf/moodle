@@ -19,7 +19,7 @@ class block_mentees extends block_base {
     }
 
     function get_content() {
-        global $CFG, $USER, $DB;
+        global $CFG, $USER, $DB, $SESSION;
 
         if ($this->content !== NULL) {
             return $this->content;
@@ -28,13 +28,8 @@ class block_mentees extends block_base {
         $this->content = new stdClass();
 
         // get all the mentees, i.e. users you have a direct assignment to
-        if ($usercontexts = $DB->get_records_sql("SELECT c.instanceid, c.instanceid, u.firstname, u.lastname
-                                                    FROM {role_assignments} ra, {context} c, {user} u
-                                                   WHERE ra.userid = ?
-                                                         AND ra.contextid = c.id
-                                                         AND c.instanceid = u.id
-                                                         AND c.contextlevel = ".CONTEXT_USER, array($USER->id))) {
-
+        // Nov 25th '13: Uses the new cached $SESSION->usersChildren
+        if ($usercontexts = $SESSION->usersChildren) { //$usercontexts = get_users_children($USER->id)) {
             $this->content->text = '<ul>';
             foreach ($usercontexts as $usercontext) {
                 $this->content->text .= '<li><a href="'.$CFG->wwwroot.'/user/view.php?id='.$usercontext->instanceid.'&amp;course='.SITEID.'">'.fullname($usercontext).'</a></li>';
