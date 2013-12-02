@@ -281,7 +281,6 @@ class enrol_self_plugin extends enrol_plugin {
             	
             	if (isset($data->enrolchildsubmit)) { //Parent wants to enrol their child instead of theirself
 
-            		$userid_to_enrol = $data->enrolchilduserid;
             		foreach ($data->enrolchilduserids as $userid => $one) {
 						$userids_to_enrol[] = $userid;
 					}

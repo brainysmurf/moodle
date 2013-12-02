@@ -1342,6 +1342,10 @@ abstract class enrol_plugin {
                 remove_temp_course_roles($context);
             }
         }
+        
+        //Refresh the awesomebar
+        global $OUTPUT;
+        $OUTPUT->refresh_awesomebar();
     }
 
     /**
@@ -1476,6 +1480,11 @@ abstract class enrol_plugin {
                 remove_temp_course_roles($context);
             }
         }
+        
+        //Refresh the awesomebar
+        global $OUTPUT;
+        $OUTPUT->refresh_awesomebar();
+        
     }
 
     /**
