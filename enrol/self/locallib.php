@@ -79,7 +79,7 @@ class enrol_self_enrol_form extends moodleform {
 		//If user is a parent and parents can enrol children
 		if ($instance->customint8 && $SESSION->userIsParent) {
 
-			if ($children = $SESSION->usersChildren) {
+			if (!empty($SESSION->usersChildren) && $children = $SESSION->usersChildren) {
 				$enrollingChildren = true;
 				
 				$mform->addElement('header', 'enrolchildsection', 'Enrol your child in this activity');

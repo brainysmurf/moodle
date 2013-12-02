@@ -4371,7 +4371,10 @@ function complete_user_login($user) {
         
         //Cache user's children in the session
 		$SESSION->usersChildren = get_users_children($USER->id);
+	} else {
+		$SESSION->usersChildren = array();
 	}
+	
 
 	if ($SESSION->userIsHSStudent = cohort_is_member_by_idnumber('studentsHS', $USER->id))
 	{
