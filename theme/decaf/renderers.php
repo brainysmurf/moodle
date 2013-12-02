@@ -219,6 +219,19 @@ class theme_decaf_core_renderer extends core_renderer {
 		$awesomebar = new awesomebar($this->page);
 		return $awesomebar->create();
 	}
+	
+	
+	/**
+	* Updates the cached awesomebar HTML for the current session, but doesn't display it
+	*/
+	public function refresh_awesomebar()
+	{
+		require_once dirname(__FILE__).'/awesomebar.php';
+		ob_start();
+		$awesomebar = new awesomebar($this->page);
+		return $awesomebar->create(true);
+		ob_end_clean();
+	}
 
 
 
