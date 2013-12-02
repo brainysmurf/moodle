@@ -44,8 +44,13 @@ class awesomebar
 	/*
 	* Returns the complete HTML for the awesomebar menus
 	*/
-	public function create()
+	public function create($forceRefresh = false)
 	{
+		if ($forceRefresh) {
+			$this->use_cached = false;
+			$this->save_in_cache = true;
+		}
+	
 		//Begin ul
 		$content = html_writer::start_tag('ul', array('class' => 'dropdown dropdown-horizontal'));
 
@@ -322,8 +327,13 @@ class awesomebar
 				unset($submenu); //Unlink the reference
 			}
 			
-		   $lastDepth = $depth;
-		   ++$itemsAtDepth[$depth];
+			$lastDepth = $depth;
+			if (isset($itemsAtDepth[$depth])) {
+				++$itemsAtDepth[$depth];
+			} else {
+				$itemsAtDepth[$depth] = 1;
+			}
+			
 		}
 		
 		return $menus;

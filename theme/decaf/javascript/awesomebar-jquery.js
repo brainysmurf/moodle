@@ -111,7 +111,7 @@ $(function()
 	{
 		viewportHeight = document.documentElement.clientHeight;
 		maxMenuSpace = viewportHeight - awesomebarHeight; //The maximum space a menu has to fit in
-		maxMenuItems = Math.floor( maxMenuSpace / liHeight ); //How many menu items fit in that space
+		maxMenuItems = Math.floor( maxMenuSpace / liHeight ) -2; //How many menu items fit in that space
 		if ( maxMenuItems < 4 ) { maxMenuItems = 4; }
 		
 		//Reset menus
@@ -161,21 +161,28 @@ $(function()
 		$('#awesomebar li ul').each(function()
 		{
 			var items = 0;
+			var itemsHidden = 0;
 			$(this).children('li:not(.scroll-btn)').each(function()
 			{
 				++items;
-				if ( items >= maxMenuItems ) //Using >= so that the last item gets hidden too, to make room for the 'next' button
+				if ( items > maxMenuItems ) //Using >= so that the last item gets hidden too, to make room for the 'next' button
 				{
+					if (items == maxMenuItems+1)
+					{
+						//The first one we hide, we also want to hide the one before it, to make room for the 'more items' button
+						$(this).prev().hide();
+						++itemsHidden;
+					}
+					++itemsHidden;
 					$(this).hide();
 				}
 			});
 			
-			if ( items > maxMenuItems )
+			if ( itemsHidden )
 			{
-				var overflow = items - maxMenuItems;
 				$(this).children('.scroll-btn').remove();
 				$(this).prepend( $('<li class="scroll-up scroll-btn"><i class="icon-caret-up"></i> <span>0 previous items</span></li>').hide() );
-				$(this).append('<li class="scroll-btn scroll-down"><i class="icon-caret-down"></i> <span>'+overflow+' more item'+(overflow==1?'':'s')+'</span></li>');
+				$(this).append('<li class="scroll-btn scroll-down"><i class="icon-caret-down"></i> <span>'+itemsHidden+' more item'+(itemsHidden==1?'':'s')+'</span></li>');
 				$(this).attr('data-offset',0);
 				$(this).attr('data-total-items',items);
 			}
@@ -195,21 +202,25 @@ $(function()
 		var totalItems = parseInt($(menu).attr('data-total-items'));
 		
 		//When going down the first time, the first item gets replaced with the previous button, so scroll by 2
-		if (newOffset>currentOffset && newOffset==1) { newOffset=2;} 
+		if (newOffset>currentOffset && newOffset==1) { newOffset=2; }
 		//And when going back up, the scroll up button will disappear so work around that
-		else if (newOffset<currentOffset && newOffset==1) { newOffset=0;}
+		else if (newOffset<currentOffset && newOffset==1) { newOffset=0; }
 		
-		var remainingItems = totalItems - (newOffset+maxMenuItems);
 		
 		if ( newOffset > 0 )
 		{
 			maxToShowInThisMenu--; //Make room for previous button
 		}
 		
+		var remainingItems = totalItems - (newOffset+maxToShowInThisMenu);
+		
 		if ( remainingItems > 0 )
 		{
 			maxToShowInThisMenu--; //Make room for next button
 		}
+		
+		remainingItems = totalItems - (newOffset+maxToShowInThisMenu);
+		
 		
 		var newEnd = newOffset+maxToShowInThisMenu;
 		var i = 0;

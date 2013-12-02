@@ -15,224 +15,226 @@
 	border-bottom: 1px solid #1a1a1a; 
 }
 
-	#awesomebar ul#awesomeHomeMenu > li { display:block; }
+#awesomebar ul#awesomeHomeMenu > li { display:block; }
 
-	/* Reset menu styles */
-	#awesomebar ul,
-	#awesomebar li {
-		list-style:none;
-		margin:0;
-		padding:0;
-	}
-	
-	/* This makes the link fully clickable within the li element */
-	#awesomebar a {
-		display:block;
-		line-height:30px;
-		width:100%;
-		height:100%;
-	}
-	
-	/* Buttons across horizontal bar */
-	#awesomebar > ul > li {
-		float:left;
-		min-width:fit-content;
-	}
-		#awesomebar > ul > li > a {
-			width: auto;
-			float: left;
-		}
+/* Reset menu styles */
+#awesomebar ul,
+#awesomebar li {
+	list-style:none;
+	margin:0;
+	padding:0;
+}
 
-	/* The initial dropdowns (from the horizontal bar) */
-	/*#awesomebar ul.dropdown > li:hover > ul, */
-	#awesomebar ul.dropdown > li.hover > ul {
-		left:0;
-		top:100%;
+/* This makes the link fully clickable within the li element */
+#awesomebar a {
+	display:block;
+	line-height:30px;
+	width:100%;
+	height:100%;
+}
+
+/* Buttons across horizontal bar */
+#awesomebar > ul > li {
+	float:left;
+	min-width:fit-content;
+}
+	#awesomebar > ul > li > a {
+		width: auto;
+		float: left;
 	}
 
-	/* All Dropdown menus (from horizontal bar, and submenus) */
-	#awesomebar ul.dropdown ul {
-		display:none; /* Hide dropdowns until they need to be shown */
-		width:250px;
-		z-index:598;
-	}
-		#awesomebar ul.dropdown li {
-			line-height:30px;
-			height:30px;
-			padding-left:10px;
-			padding-right:10px;
-			position:relative;
-		}
-			/* Menu icons */
-			#awesomebar ul.dropdown i {
-				display:inline-block;
-				padding-top:1px;
-				width:15px;
-				line-height:30px;
-			}
-			
-			#awesomebar ul.dropdown li.header {
-				font-size: 11px;
-				padding: 10px 10px 5px;
-				height: auto;
-				line-height: normal;
-				font-weight: bold;
-				background: #0e0e0e;
-				background: -moz-linear-gradient(top,  #0e0e0e 87%, #1f1f1f 100%);
-				background: -webkit-gradient(linear, left top, left bottom, color-stop(87%,#0e0e0e), color-stop(100%,#1f1f1f));
-				background: -webkit-linear-gradient(top,  #0e0e0e 87%,#1f1f1f 100%);
-				background: -o-linear-gradient(top,  #0e0e0e 87%,#1f1f1f 100%);
-				background: -ms-linear-gradient(top,  #0e0e0e 87%,#1f1f1f 100%);
-				background: linear-gradient(to bottom,  #0e0e0e 87%,#1f1f1f 100%);
-				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0e0e0e', endColorstr='#1f1f1f',GradientType=0 );
-				color: #999;
-				border-bottom:none;
-			}
-			
-				#awesomebar ul.dropdown li.header + li {
-					border-top:none;
-				}
-			
-				#awesomebar ul.dropdown li.header i {
-					line-height: normal;
-					margin-top: 1px;
-					font-size: 11px;
-					margin-left: 0px;
-				}
+/* The initial dropdowns (from the horizontal bar) */
+/*#awesomebar ul.dropdown > li:hover > ul, */
+#awesomebar ul.dropdown > li.hover > ul {
+	left:0;
+	top:100%;
+}
 
-	/* Submenus (pop out on right) */
-	#awesomebar ul.dropdown li > ul {
-		position:absolute;
-		left:100%;
-		top:-1px;
-	
-		/* Prvent text highlighting in menus */
-		-webkit-touch-callout: none;
-		-webkit-user-select: none;
-		-khtml-user-select: none;
-		-moz-user-select: none;
-		-ms-user-select: none;
-		user-select: none;
-	}
-	
-	#awesomebar ul.dropdown li > ul.openLeft,
-	#awesomebar ul.dropdown li > ul.openLeft ul {
-		left:auto;
-		right:100%;
-	}
+/* All Dropdown menus (from horizontal bar, and submenus) */
+#awesomebar ul.dropdown ul {
+	display:none; /* Hide dropdowns until they need to be shown */
+	width:250px;
+	z-index:598;
+}
+#awesomebar ul.dropdown li {
+	line-height:30px;
+	height:30px;
+	padding-left:10px;
+	padding-right:10px;
+	position:relative;
+}
+/* Menu icons */
+#awesomebar ul.dropdown i {
+	display:inline-block;
+	padding-top:1px;
+	width:15px;
+	line-height:30px;
+}
+
+#awesomebar ul.dropdown li.header {
+	font-size: 11px;
+	padding: 15px 10px 5px;
+	height: auto;
+	line-height: normal;
+	font-weight: bold;
+	background: #0e0e0e;
+	background: -moz-linear-gradient(top,  #0e0e0e 87%, #1f1f1f 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(87%,#0e0e0e), color-stop(100%,#1f1f1f));
+	background: -webkit-linear-gradient(top,  #0e0e0e 87%,#1f1f1f 100%);
+	background: -o-linear-gradient(top,  #0e0e0e 87%,#1f1f1f 100%);
+	background: -ms-linear-gradient(top,  #0e0e0e 87%,#1f1f1f 100%);
+	background: linear-gradient(to bottom,  #0e0e0e 87%,#1f1f1f 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0e0e0e', endColorstr='#1f1f1f',GradientType=0 );
+	color: #999;
+	border-bottom:none;
+}
+
+#awesomebar ul.dropdown li.header + li {
+	border-top:none;
+}
+
+#awesomebar ul.dropdown li.header i {
+	line-height: normal;
+	margin-top: 1px;
+	font-size: 11px;
+	margin-left: 0px;
+}
+
+/* Submenus (pop out on right) */
+#awesomebar ul.dropdown li > ul {
+	position:absolute;
+	left:100%;
+	top:-1px;
+
+	/* Prvent text highlighting in menus */
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+#awesomebar ul.dropdown li > ul.openLeft,
+#awesomebar ul.dropdown li > ul.openLeft ul {
+	left:auto;
+	right:100%;
+}
 
 /* This makes the dropdown menus appear on hover */
 /*#awesomebar ul.dropdown li:hover > ul,*/
 #awesomebar ul.dropdown li.hover > ul {
 	display:block;
 }
-	#awesomebar li.scroll-up,
-	#awesomebar li.scroll-down {
-		background-color:#444 !important;
-	}
-		#awesomebar ul.blurry > li.scroll-up,
-		#awesomebar ul.blurry > li.scroll-down {
-			background-color:rgba(68,68,68,.85) !important;
-		}
+#awesomebar li.scroll-up,
+#awesomebar li.scroll-down {
+	background-color:#444 !important;
+}
+#awesomebar ul.blurry > li.scroll-up,
+#awesomebar ul.blurry > li.scroll-down {
+	background-color:rgba(68,68,68,.85) !important;
+}
+
+#awesomebar li.scroll-up:hover,
+#awesomebar li.scroll-down:hover {
+	cursor:pointer !important;
+	background-color:#060606;
+}
+
+#awesomebar li.scroll-down {
+	border-top:1px #1a1a1a solid;
+}
+
+#awesomebar li.scroll-up {
+	border-bottom:2px #1a1a1a solid;
+}
+
+body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Awesomebar */
+
+#awesomebar ul.blurry li {
+	background:#060606;
+}
+
+#awesomebar ul.blurry li a {
+	-webkit-filter: none;
+	-moz-filter: none;
+	-o-filter: none;
+	-ms-filter: none;
+	filter: none;
+}
 		
-		#awesomebar li.scroll-up:hover,
-		#awesomebar li.scroll-down:hover {
-			cursor:pointer !important;
-			background-color:#060606;
-		}
-		
-		#awesomebar li.scroll-down {
-			border-top:1px #1a1a1a solid;
-		}
-		
-		#awesomebar li.scroll-up {
-			border-bottom:2px #1a1a1a solid;
-		}
+#awesomebar ul.blurry > li {
+	background:rgba(6,6,6,.85);
+}
+#awesomebar ul.blurry > li.hover {
+	background-color:rgba(153,153,153,.85) !important;
+}
+#awesomebar ul.blurry > li > a,
+#awesomebar ul.blurry > li > a > i,
+#awesomebar ul.blurry > li > span,
+#awesomebar ul.blurry > li > span > i
+{
+	-webkit-filter: blur(2px);
+    -moz-filter: blur(2px);
+    -o-filter: blur(2px);
+    -ms-filter: blur(2px);
+    filter: blur(2px);
+}
 
-	body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Awesomebar */
+/* !Awesomebar appearance */
 
+#awesomebar a:visited,
+#awesomebar a:link {
+	color:#D45A10;
+}
 
-		#awesomebar ul.blurry li {
-			background:#060606;
-		}
-			#awesomebar ul.blurry li a {
-				-webkit-filter: none;
-				-moz-filter: none;
-				-o-filter: none;
-				-ms-filter: none;
-				filter: none;
-			}
-			
-	#awesomebar ul.blurry > li {
-		background:rgba(6,6,6,.85);
+#awesomebar a:hover {
+	color:#FAF955;
+}
+
+#awesomebar hr { 
+	color:#000000;
+	background-color:#000000;
+	border:1px #000000;
+	height:5px;
+	padding:0;
+	margin:0;
+}
+
+#awesomebar,
+#awesomebar li {
+	background-color:#060606;
+	color:#D45A10;
+}
+
+#awesomebar li {
+	-webkit-transition: background 0.2s ease-in-out;
+	-moz-transition: background 0.2s ease-in-out;
+	-o-transition: background 0.2s ease-in-out;
+	transition: background 0.2s ease-in-out;
+}
+
+#awesomebar li:hover,
+#awesomebar li.hover {
+	background-color:#060606 !important;
+	cursor:default;
+	color: #FAF955;
+}
+	#awesomebar li.header:hover,
+	#awesomebar li.header.hover {
+		background-color: #0E0E0E !important;
 	}
-	#awesomebar ul.blurry > li.hover {
-		background-color:rgba(153,153,153,.85) !important;
-	}
-		#awesomebar ul.blurry > li > a,
-		#awesomebar ul.blurry > li > a > i,
-		#awesomebar ul.blurry > li > span,
-		#awesomebar ul.blurry > li > span > i
-		{
-			-webkit-filter: blur(2px);
-		    -moz-filter: blur(2px);
-		    -o-filter: blur(2px);
-		    -ms-filter: blur(2px);
-		    filter: blur(2px);
-		}
 
-	/* !Awesomebar appearance */
+#awesomebar li {
+	border-color:#000000 #505050 #000000 #505050;
+	border-style:solid;
+	border-width:1px;
+}
 
-	#awesomebar a:visited,
-	#awesomebar a:link {
-		color:#D45A10;
-	}
-
-	#awesomebar a:hover {
-		color:#FAF955;
-	}
-
-	#awesomebar hr { 
-		color:#1a1a1a;
-		background-color:#999;
-		border:1px #1a1a1a;
-		height:1px;
-		padding:0;
-		margin:0;
-	}
-	
-	#awesomebar,
-	#awesomebar li {
-		background-color:#060606;
-		color:#D45A10;
-	}
-		#awesomebar li {
-			-webkit-transition: background 0.2s ease-in-out;
-			-moz-transition: background 0.2s ease-in-out;
-			-o-transition: background 0.2s ease-in-out;
-			transition: background 0.2s ease-in-out;
-		}
-
-	#awesomebar li:hover,
-	#awesomebar li.hover {
-		background-color:#060606 !important;
-		cursor:default;
-		color: #FAF955;
-	}
-		#awesomebar li.header:hover,
-		#awesomebar li.header.hover {
-			background-color: #0E0E0E !important;
-		}
-
-	#awesomebar li {
-		border-color:#404040 #505050 #1a1a1a #505050;
-		border-style:solid;
-		border-width:1px;
-	}
-		/* No right border for the last li in the last ul of the awesomebar */
-		#awesomebar > ul:last-child li:last-child {
-			border-right-color:#1a1a1a;
-		}
+/* No right border for the last li in the last ul of the awesomebar */
+#awesomebar > ul:last-child li:last-child {
+	border-right-color:#1a1a1a;
+}
 		
 /* z-index overrides to prevent other things sitting on top of Awesomebar */
 .filepicker-filelist .filepicker-container, .filemanager.fm-noitems .fm-empty-container {z-index:300;}
@@ -245,33 +247,31 @@
 #awesomebar > ul > li:first-child { border-left:0; }
 #awesomebar ul.dropdown > li.hover > ul { left:-1px; }
 
+#awesomebar a:hover {
+	color:#FAF955;
+}
 
-	#awesomebar a:hover {
-		color:#FAF955;
-	}
+#awesomebar,
+#awesomebar li {
+	background-color:#1F1F1F;
+	color:#EEE;
+}
 
-	#awesomebar,
-	#awesomebar li {
-		background-color:#1F1F1F;
-		color:#EEE;
-	}
+#awesomebar li:hover,
+#awesomebar li.hover {
+	background-color:#1F1F1F !important;
+	cursor:default;
+	color: #EEE;
+}
 
-	#awesomebar li:hover,
-	#awesomebar li.hover {
-		background-color:#999 !important;
-		cursor:default;
-		color: #EEE;
-	}
+#awesomebar a:visited,
+#awesomebar a:link {
+	color:#EEE;
+}
 
-	#awesomebar a:visited,
-	#awesomebar a:link {
-		color:#EEE;
-	}
-
-	#awesomebar a:hover {
-		color:#EEE;
-	}
-
+#awesomebar a:hover {
+	color:#EEE;
+}
 
 /* When text is used similar to the icons in the awesome */
 .icon-text {
@@ -284,7 +284,8 @@
 	font-weight: bolder;
 	text-transform: uppercase;
 }
-	.icon-text.pull-right {
-		margin-right:0;
-		margin-left:6px !important;
-	}
+
+.icon-text.pull-right {
+	margin-right:0;
+	margin-left:6px !important;
+}

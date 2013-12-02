@@ -71,6 +71,11 @@ background: linear-gradient(to bottom,  rgba(227,227,227,1) 0%,rgba(249,249,249,
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e3e3e3', endColorstr='#f9f9f9',GradientType=0 );
 }
 
+input[disabled=disabled],
+input.disabled {
+	opacity:.6;
+}
+
 
 /* Frontpage buttons (kept here for comaptibility - should use the new ul.buttons below instead) */
 

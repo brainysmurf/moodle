@@ -22,6 +22,25 @@ class theme_decaf_core_renderer extends core_renderer {
 		return parent::header();
 	}
 
+	public function enable_color_picker()
+	{
+		echo '<link rel="stylesheet" type="text/css" href="/spectrum/spectrum.css" />';
+		echo '<script src="/spectrum/spectrum.js"></script>';
+		echo '<script>
+			$(function(){
+				$(".colorpicker").each(function(){
+					$(this).spectrum({
+						color: $(this).attr("data-color"),
+						showInput: true,
+						change: function(color) {
+							$(this).trigger("changecolor", [color]);
+							console.log(this);
+						}
+					});
+				});
+			}); </script>';
+	}
+
 	/*
 		Breadcrumbs
 		SSIS modifies this to only include coures name followed by whatever activity after that
@@ -199,6 +218,19 @@ class theme_decaf_core_renderer extends core_renderer {
 		require_once dirname(__FILE__).'/awesomebar.php';
 		$awesomebar = new awesomebar($this->page);
 		return $awesomebar->create();
+	}
+	
+	
+	/**
+	* Updates the cached awesomebar HTML for the current session, but doesn't display it
+	*/
+	public function refresh_awesomebar()
+	{
+		require_once dirname(__FILE__).'/awesomebar.php';
+		ob_start();
+		$awesomebar = new awesomebar($this->page);
+		return $awesomebar->create(true);
+		ob_end_clean();
 	}
 
 
