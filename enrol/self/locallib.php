@@ -94,24 +94,46 @@ class enrol_self_enrol_form extends moodleform {
 					if (enrol_user_is_enrolled($child->userid, $instance->id)) { 
 						
 						//User is already enrolled
-						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="green"><i class="ok-sign"></i> Already enrolled.</span>', array('disabled'=>'disabled'));
+						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="green"><i class="ok-sign"></i> Already enrolled.</span>', array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox'));
 			
 			        } else if ($mustBeInCohort && !cohort_is_member($mustBeInCohort->id, $child->userid)) {
 			        
 			        	//Child isn't in the required cohort
-						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, "<span class=\"red\"><i class=\"icon-warning-sign\"></i> Can't be enrolled because only <strong>{$niceCohortName}</strong> can join.</span>", array('disabled'=>'disabled'));
+						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, "<span class=\"red\"><i class=\"icon-warning-sign\"></i> Can't be enrolled because only <strong>{$niceCohortName}</strong> can join.</span>", array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox'));
 			        
 			        } else {
 			        	
 			        	//User can be enrolled
-						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="grey"></span>');
+						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="grey"></span>', array('class'=>'enrolchildcheckbox'));
 						
 			        }
 				
 				}
 				
 				//Enrol my child button
-				$mform->addElement('submit', 'enrolchildsubmit', get_string('enrolchild', 'enrol_self'));
+				$mform->addElement('submit', 'enrolchildsubmit', get_string('enrolchild', 'enrol_self'), array('class' => 'disabled'));
+				
+				//A .disabled class instead of the disabled attribute is used so click events can be bound to the button
+				$mform->addElement('html', '<script>
+				
+					$(document).on("change","input.enrolchildcheckbox",function()
+					{
+						var count = $("input.enrolchildcheckbox:checked").length;
+						if (count > 0) {
+							$("#id_enrolchildsubmit").removeClass("disabled");
+						} else {
+							$("#id_enrolchildsubmit").addClass("disabled");
+						}
+					});
+					
+					$(document).on("click","#id_enrolchildsubmit",function()
+					{
+						if ($(this).hasClass("disabled")) {
+							alert("Please tick at least one child to enrol.");
+							return false;
+						}
+					});
+				</script>');
 			}
 		}
 		
