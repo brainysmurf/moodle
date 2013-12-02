@@ -37,8 +37,8 @@ if (!$instance->customint8) {
 	die("Can't do that.");
 }
 
-require_login();
-//require_login($course);
+//require_login();
+require_login($course);
 
 //Require that user is a parent
 if (!$SESSION->userIsParent) {
