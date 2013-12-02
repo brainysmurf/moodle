@@ -1,7 +1,7 @@
 <?php
 
 /*
-	This page lists all the icons available in fontawesome
+	Redirect to the course with the shortname OLP:CURRENTUSERID
 */
 require_once(dirname(__FILE__) . '/config.php');
 require_once($CFG->basedir . 'course/lib.php');
