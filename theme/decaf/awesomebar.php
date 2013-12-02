@@ -327,8 +327,13 @@ class awesomebar
 				unset($submenu); //Unlink the reference
 			}
 			
-		   $lastDepth = $depth;
-		   ++$itemsAtDepth[$depth];
+			$lastDepth = $depth;
+			if (isset($itemsAtDepth[$depth])) {
+				++$itemsAtDepth[$depth];
+			} else {
+				$itemsAtDepth[$depth] = 1;
+			}
+			
 		}
 		
 		return $menus;
