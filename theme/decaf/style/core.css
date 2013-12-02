@@ -1071,19 +1071,12 @@ color: #333;
 		padding:0;
 	}
 	
+	/* Button list */
 	ul.gridformatbuttons.buttons {
 		max-width:none;
 	}
-		ul.gridformatbuttons.buttons a.btn {
-			font-size:16px;
-			position: relative;
-			height:142px;
-		}
 		
-		ul.gridformatbuttons .btn.noIcon {
-			padding: 98px 10px 10px;
-		}
-		
+		/* Button list items */
 		ul.gridformatbuttons.buttons li {
 			margin:0 !important;
 			width:25% !important;
@@ -1091,32 +1084,48 @@ color: #333;
 			background:none !important;
 			opacity:1 !important;
 		}
-		
-		ul.gridformatbuttons .btn.hasIcon {
-			padding:0;
-			background-size:cover;
-		}
-			ul.gridformatbuttons .btn.hasIcon span {
+			
+			/* Button links (the actual buttons) */
+			ul.gridformatbuttons.buttons a.btn {
+				position: relative;
+				height:142px;
 				white-space: normal;
-				position: absolute;
-				bottom:0;
-				left:0;
-				right:0;
-				color:#fff;
-				opacity:.9;
-				display:block;
-				padding: 23px 10px 10px;
-				background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0.8) 100%);
-				background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0)), color-stop(30%,rgba(0,0,0,0.8)), color-stop(100%,rgba(0,0,0,0.8)));
-				background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
-				background: -o-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
-				background: -ms-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
-				background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
-				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#cc000000',GradientType=0 );
+				padding:0;
 			}
-			ul.gridformatbuttons .btn.hasIcon:hover span {
-				opacity:1;
-			}
+				/* Button label */
+				ul.gridformatbuttons.buttons a.btn span {
+					white-space: normal !important;
+					position: absolute;
+					bottom:0;
+					left:0;
+					right:0;
+					opacity:.9;
+					display:block;
+					padding: 23px 10px 10px;
+					font-size:14px;
+					line-height: 22px;
+				}
+					ul.gridformatbuttons.buttons .btn:hover span {
+						opacity:1;
+					}
+			
+				/* Buttons with images */
+				ul.gridformatbuttons a.btn.hasIcon {
+					background-size:cover !important;
+				}
+				
+					/* Labels for buttons with images */
+					ul.gridformatbuttons .btn.hasIcon span {
+						color:#fff;
+						background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0.8) 100%);
+						background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0)), color-stop(30%,rgba(0,0,0,0.8)), color-stop(100%,rgba(0,0,0,0.8)));
+						background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
+						background: -o-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
+						background: -ms-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
+						background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
+						filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#cc000000',GradientType=0 );
+					}
+					
 			
 	.icon-red {
 		color:#A00;
