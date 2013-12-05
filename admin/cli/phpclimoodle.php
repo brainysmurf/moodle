@@ -33,7 +33,7 @@ class moodlephp
     }
   }
 
-  private function create_cohort($idnumber, $name, $description)
+  public function create_cohort($idnumber, $name, $description)
   {
     $new_cohort = new stdClass;
     $new_cohort->idnumber = $idnumber;
@@ -45,7 +45,7 @@ class moodlephp
     return $cohortID;
   }
 
-  private function add_user_to_cohort($args) 
+  public function add_user_to_cohort($args) 
   {
     $idnumber = $args[0];
     $cohortidnumber = $args[1];
@@ -73,7 +73,7 @@ class moodlephp
     return $r;
   }
 
-  private function remove_user_from_cohort($args) 
+  public function remove_user_from_cohort($args) 
   {
     $idnumber = $args[0];
     $cohortidnumber = $args[1];
@@ -100,7 +100,7 @@ class moodlephp
   return $r;
   }
 
-  private function create_account( $args ) 
+  public function create_account( $args ) 
   {
     $username = $args[0];
     $email = $args[1];
@@ -137,7 +137,7 @@ class moodlephp
     return "0";
   }
 
-  private function user_does_exist($args)
+  public function user_does_exist($args)
   {
     $username = $args[0];
 
@@ -146,7 +146,7 @@ class moodlephp
     return $s;
   }
 
-  private function associate_child_to_parent($args)
+  public function associate_child_to_parent($args)
   {
     $parent_idnumber = $args[0];
     $child_idnumber = $args[1];
@@ -168,7 +168,7 @@ class moodlephp
     return "0";
   }
 
-  private function add_user_to_group($args)
+  public function add_user_to_group($args)
   {
     $user_idnum = $args[0];
     $group_name = $args[1];
@@ -181,7 +181,7 @@ class moodlephp
     groups_add_member($group, $user);
   }
 
-  private function remove_user_from_group($args)
+  public function remove_user_from_group($args)
   {
     $user_idnum = $args[0];
     $group_name = $args[1];
@@ -194,7 +194,19 @@ class moodlephp
     groups_remove_member($group, $user);
   }
 
-  private function create_group_for_course($args)
+  public function remove_all_users_from_group($args) {
+    $group_name = $args[0];
+    global $DB;
+    echo $group_name;
+    $group = $DB->get_record('groups', array('name'=>$group_name), '*', MUST_EXIST);
+    $group_members = $DB->get_records('groups_members', array('groupid'=>$group->id));
+    foreach ($group_members as $group_member) {
+      $userid = $group_member->userid;
+      groups_remove_member($group->id, $userid);
+    }
+  }
+
+  public function create_group_for_course($args)
   {
     $short_name = $args[0];
     $group_name = $args[1];
@@ -213,7 +225,7 @@ class moodlephp
     }
   }
 
-  private function enrol_user_in_course($args)
+  public function enrol_user_in_course($args)
   {
     $useridnumber = $args[0];
     $short_name = $args[1];
@@ -221,14 +233,14 @@ class moodlephp
     $role = $args[3];
 
     switch ($role) {
-    case "Student": 
-      $roleid = $this->STUDENT_ROLE_ID;
-      break;
-    case "Parent":
-      $roleid = $this->PARENT_ROLE_ID;
-      break;
-    default :
-    return "-1 No viable role ID was passed ".$role;
+      case "Student": 
+        $roleid = $this->STUDENT_ROLE_ID;
+        break;
+      case "Parent":
+        $roleid = $this->PARENT_ROLE_ID;
+        break;
+      default :
+        return "-1 No viable role ID was passed: ".$role.". ";
     }
 
     global $DB, $PAGE;
@@ -295,7 +307,7 @@ class moodlephp
     }
   }
 
-  private function deenrol_user_in_course($args)
+  public function deenrol_user_in_course($args)
   {
     $useridnumber = $args[0];
     $short_name = $args[1];
@@ -338,7 +350,7 @@ class moodlephp
     echo "PHP says de-enrolled ".$user->id." from class ".$short_name;
   }
 
-  private function change_username($args)
+  public function change_username($args)
   {
     $idnumber = $args[0];
     $new_username = $args[1];
@@ -350,14 +362,14 @@ class moodlephp
     $DB->update_record($user);
   }
 
-  private function getUserByIDNumber($idnumber)
+  public function getUserByIDNumber($idnumber)
   {
     global $DB;
     $s = $DB->get_record_select( 'user' , 'idnumber = ?', array($idnumber) );
     return $s;    
   }
 
-  private function getUserByUsername($username)
+  public function getUserByUsername($username)
   {
     global $DB;
     $s = $DB->get_record_select( 'user', 'username = ?', array($username) );
