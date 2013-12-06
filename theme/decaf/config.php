@@ -191,8 +191,7 @@ $THEME->csspostprocess = 'decaf_process_css';
 ////////////////////////////////////////////////////
 
 $THEME->javascripts_footer = array(
-	'awesomebar-jquery',
-	'snow'
+	'awesomebar-jquery'
 );
 
 ////////////////////////////////////////////////////

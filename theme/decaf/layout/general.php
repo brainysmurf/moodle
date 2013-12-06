@@ -75,6 +75,18 @@ echo $OUTPUT->doctype() ?>
     <title><?php echo ltrim($PAGE->title,': ') ?></title>
     <link rel="shortcut icon" href="<?php echo $OUTPUT->pix_url('favicon', 'theme')?>" />
     <?php echo $OUTPUT->standard_head_html() ?>
+    
+    <!-- Snow -->
+   	<link rel="stylesheet" href="/jquery-snowfall/styles.css"></link>
+    <script src="/jquery-snowfall/snowfall.min.jquery.js"></script>
+    <script>
+    	$(function(){
+    		$('#page-header').css('overflow','hidden');
+	    	$('#page-header').snowfall({flakeCount : 50, maxSpeed : 1, maxSize : 4, round:true});
+	    });
+    </script>
+    <!-- end snow -->
+    
 </head>
 
 <body id="<?php p($PAGE->bodyid) ?>" class="<?php p($PAGE->bodyclasses.' '.join(' ', $bodyclasses)) ?>">
@@ -154,6 +166,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
         	
 	    </div>
     </div>
+    
     <?php if ($hascustommenu && empty($PAGE->theme->settings->custommenuinawesomebar)) { ?>
       <div id="custommenu" class="decaf-awesome-bar"><?php echo $custommenu; ?></div>
  	<?php } ?>

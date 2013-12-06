@@ -222,6 +222,11 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
 	border-width:1px;
 }
 
+/* No bottom border for items directly on the awesomebar */
+#awesomebar > ul > li {
+	border-bottom:none;
+}
+
 /* No right border for the last li in the last ul of the awesomebar (across the top) */
 #awesomebar > ul:last-child li:last-child {
 	border-right:none;
