@@ -83,7 +83,7 @@ echo $OUTPUT->doctype() ?>
     <script>
     	$(function(){
     		$('#page-header').css('overflow','hidden');
-	    	$('#page-header').snowfall({flakeCount : 60, maxSpeed : 1, maxSize : 4, round:true});
+	    	$('#page-header').snowfall({flakeCount : 50, maxSpeed :1, maxSize : 4, round:true});
 	    });
     </script>
     <!-- end snow -->
@@ -147,13 +147,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 		<div id="page-header-wrapper">
 	        
 	        <?php if ($hasheading) { ?>
-		    	<h1 class="headermain"><?php 
-		    		if ($PAGE->heading == 'DragonNet') {
-		    			echo '<img src="/theme/decaf/pix/dragonnet-hat.png" alt="DragonNet" style="width:217px; height:44px;" />';
-		    		} else {
-		    			echo $PAGE->heading;
-		    		}
-		    	?></h1>
+		    	<h1 class="headermain"><?php echo str_replace('DragonNet','<img src="/theme/decaf/pix/dragonnet-hat.png" alt="DragonNet" style="height:40px; vertical-align:middle; margin-top:-5px;" />', $PAGE->heading); ?></h1>
     		    <div class="headermenu">
         			<?php
         			if (!empty($PAGE->theme->settings->showuserpicture)) {
