@@ -4797,6 +4797,25 @@ function get_users_children($userid)
 	return $usercontexts;
 }
 
+function get_users_parents($userid)
+{
+	global $DB;
+	$usercontexts = $DB->get_records_sql("
+		SELECT
+			ra.userid,
+			u.username,
+			u.firstname,
+			u.lastname
+		FROM {role_assignments} ra, {context} c, {user} u
+		WHERE 
+			c.contextlevel = ".CONTEXT_USER."
+			AND c.instanceid = ?
+			AND ra.contextid = c.id
+			AND u.id = ra.userid
+			", array($userid));
+	return $usercontexts;
+}
+
 
 /**
  * Basic moodle context abstraction class.
