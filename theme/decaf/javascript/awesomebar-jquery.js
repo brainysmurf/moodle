@@ -337,8 +337,17 @@ $(function()
 
 				$(menu).css('top','-'+shiftTop+'px');
 			}			
+		} else {
+			//Only if the menu isn't repositioned to fit
+			
+			if ($(menu).children(':first-child').is('.header')) {
+				//If the first item is a header, move it up some pixels so the header is above stuff
+				var shiftTop = $(menu).children(':first-child').outerHeight();
+				$(menu).css('top','-'+shiftTop+'px');
+			}
 		}
 		
+		//If it would be cut off the right of the screen, open the submenu on the left
 		if ( info.cutHorizontal )
 		{
 			$(menu).addClass('openLeft');
