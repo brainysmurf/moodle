@@ -181,8 +181,8 @@ $(function()
 			if ( itemsHidden )
 			{
 				$(this).children('.scroll-btn').remove();
-				$(this).prepend( $('<li class="scroll-up scroll-btn"><i class="icon-caret-up"></i> <span>0 previous items</span></li>').hide() );
-				$(this).append('<li class="scroll-btn scroll-down"><i class="icon-caret-down"></i> <span>'+itemsHidden+' more item'+(itemsHidden==1?'':'s')+'</span></li>');
+				$(this).prepend( $('<li class="scroll-up scroll-btn"><i class="pull-right icon-caret-up"></i> <span>0 previous items</span></li>').hide() );
+				$(this).append('<li class="scroll-btn scroll-down"><i class="pull-right icon-caret-down"></i> <span>'+itemsHidden+' more item'+(itemsHidden==1?'':'s')+'</span></li>');
 				$(this).attr('data-offset',0);
 				$(this).attr('data-total-items',items);
 			}
