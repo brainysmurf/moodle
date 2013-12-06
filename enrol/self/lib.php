@@ -641,7 +641,30 @@ class enrol_self_plugin extends enrol_plugin {
 		role_assign($roleid, $userid, $contextid, '', 0);
 	}
 	
-	public function unenrol_user(stdClass $instance, $userid) {
+	
+	public function enrol_user(stdClass $instance, $userid, $roleid = null, $timestart = 0, $timeend = 0, $status = null, $recovergrades = null)
+	{
+		//Enrol the person
+		parent::enrol_user($instance, $userid, $roleid, $timestart, $timeend, $status, $recovergrades);
+		
+		//If this course allows parents to enrol students, we want to enrol the parent if they're not already
+		if ($instance->customint8) {
+		
+			//Get the user's parents
+			$parents = get_users_parents($userid);
+			foreach ($parents as $parent) {
+				//Check if parent is enrolled
+				if (!enrol_user_is_enrolled($parent->userid, $instance->id)) {
+					$this->enrol_user($instance, $parent->userid, 12);
+				}
+			}
+			
+		}
+		
+	}
+	
+	public function unenrol_user(stdClass $instance, $userid)
+	{
 	
 		//Unenrol the person
 		parent::unenrol_user($instance, $userid);
