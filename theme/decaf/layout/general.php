@@ -75,6 +75,20 @@ echo $OUTPUT->doctype() ?>
     <title><?php echo ltrim($PAGE->title,': ') ?></title>
     <link rel="shortcut icon" href="<?php echo $OUTPUT->pix_url('favicon', 'theme')?>" />
     <?php echo $OUTPUT->standard_head_html() ?>
+    
+    <?php if (empty($_COOKIE['nosnow'])) { ?>
+    <!-- Snow -->
+   	<link rel="stylesheet" href="/jquery-snowfall/styles.css"></link>
+    <script src="/jquery-snowfall/snowfall.min.jquery.js"></script>
+    <script>
+    	$(function(){
+    		$('#page-header').css('overflow','hidden');
+	    	$('#page-header').snowfall({flakeCount : 60, maxSpeed : 1, maxSize : 4, round:true});
+	    });
+    </script>
+    <!-- end snow -->
+    <? } ?>
+    
 </head>
 
 <body id="<?php p($PAGE->bodyid) ?>" class="<?php p($PAGE->bodyclasses.' '.join(' ', $bodyclasses)) ?>">
@@ -123,7 +137,9 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 	   	if ( isset($_GET['header']) ) { $headerPhoto = $_GET['header']; }
 	   	else if ( isset($SESSION) && isset($SESSION->headerPhoto) ) { $headerPhoto = $SESSION->headerPhoto; }
 	   	else { $headerPhoto = rand(0,4); }
-                $headerBg = '/theme/decaf/pix/'.$headerPhotos[$headerPhoto];
+		$headerBg = '/theme/decaf/pix/'.$headerPhotos[$headerPhoto];
+		
+		$headerBg = '/theme/decaf/pix/header-xmas.jpg';
    ?>   
 
     <div id="page-header" style="background-image:url(<?php echo $headerBg; ?>);">
@@ -131,7 +147,13 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 		<div id="page-header-wrapper">
 	        
 	        <?php if ($hasheading) { ?>
-		    	<h1 class="headermain"><?php echo $PAGE->heading ?></h1>
+		    	<h1 class="headermain"><?php 
+		    		if ($PAGE->heading == 'DragonNet') {
+		    			echo '<img src="/theme/decaf/pix/dragonnet-hat.png" alt="DragonNet" style="width:217px; height:44px;" />';
+		    		} else {
+		    			echo $PAGE->heading;
+		    		}
+		    	?></h1>
     		    <div class="headermenu">
         			<?php
         			if (!empty($PAGE->theme->settings->showuserpicture)) {
@@ -205,6 +227,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
     <?php } ?>
     <?php if ($hasfooter) { ?>
     <div id="page-footer" class="clearfix">
+		<p><a href="/togglesnow.php"><i class="icon-cloud"></i> Click here to turn the snow <?=(empty($_COOKIE['nosnow'])?'off':'on')?></a></p>
     	<p><a href="#"><i class="icon-arrow-up"></i> Go back to the top of the page</a></p>
 		<p class="footnote"><?php echo $footnote; ?></p>
 		<p><?php echo page_doc_link(get_string('moodledocslink')) ?></p>
