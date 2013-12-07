@@ -1295,6 +1295,10 @@ ul.buttons a.btn
 	border-color: #23811F !important;
 }
 
+.paging .btn.selected {
+	background:#23811F;
+	color: #fff;
+}
 
 /** Custom CSS **/
 [[setting:customcss]]
