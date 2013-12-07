@@ -146,7 +146,7 @@ class awesomebar
 				$html .= html_writer::empty_tag('hr');
 				continue;
 			}
-			
+
 			if (!empty($item['icon'])) {
 				$icon = html_writer::tag('i', '', array('class' => 'pull-left icon-' . $item['icon']));
 			} else {
@@ -388,9 +388,10 @@ class awesomebar
 				$courseid = $this->page->course->id;
 				$context = context_course::instance($courseid);
 
-				//FIXME: This is broke
 				if (session_is_loggedinas()) {
 					//Undo 'login as user'
+					$submenu[] = array(
+						'header'=> 'Change Identity');
 					$submenu[] = array(
 						'text' => 'Return to normal',
 						'icon' => 'user',
@@ -402,9 +403,10 @@ class awesomebar
 						))
 					);
 
-					$submenu[] = array('hr' => true);
 				} else if (is_role_switched($courseid)) //Role is switched - show 'Return to normal' button
 				{
+					$submenu[] = array(
+						'header'=> 'Change Identity');
 					$submenu[] = array(
 						'text' => 'Return to normal',
 						'icon' => 'user',
@@ -416,11 +418,12 @@ class awesomebar
 						))
 					);
 
-					$submenu[] = array('hr' => true);
 				} else if (has_capability('moodle/role:switchroles', $context)) //Become Student button
 				{
 					$roles = get_switchable_roles($context);
 					if (count($roles) > 0 && $role = $roles[5]) {
+						$submenu[] = array(
+						'header'=> 'Change Identity');
 						$submenu[] = array(
 							'text' => 'Become ' . $role,
 							'icon' => 'user',
@@ -431,11 +434,12 @@ class awesomebar
 								'returnurl' => $this->page->url->out_as_local_url(false)
 							)),
 						);
-
-						$submenu[] = array('hr' => true);
 					}
 				}
-
+				$submenu[] = array('header' => 'Frequent Locations');
+				$submenu[] = array('text' => 'My DragonNet', 'icon' => 'anchor', 'url' => '/my'); //My DragonNet
+				$submenu[] = array('text' => 'Home (Front Page)', 'icon' => 'home', 'url' => '/'); //Home
+				$submenu[] = array('header'=> 'Account Management');
 				$submenu[] = array(
 					'text' => 'Edit Profile',
 					'icon' => 'edit',
@@ -446,10 +450,6 @@ class awesomebar
 					'icon' => 'edit',
 					'url' => '/login/change_password.php?id=1'
 				); //Change Password
-				$submenu[] = array('hr' => true);
-				$submenu[] = array('text' => 'My DragonNet', 'icon' => 'anchor', 'url' => '/my'); //My DragonNet
-				$submenu[] = array('text' => 'Home (Front Page)', 'icon' => 'home', 'url' => '/'); //Home
-				$submenu[] = array('hr' => true);
 			} //end if not guest user
 
 			$submenu[] = array(
