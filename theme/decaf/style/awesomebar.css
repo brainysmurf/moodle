@@ -202,19 +202,21 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
 
 /* Quickly hovering over a menu item */
 #awesomebar li:hover {
-	background-color:rgb(83,83,83) !important;
+	background-color:rgb(153,153,153) !important;
 	cursor:default;
 }
 
 /* Hovering over a menu item for a few seconds (the .hover class gets added by javascript */
 #awesomebar li.hover, #awesomebar li.hover:hover {
 	background-color:rgb(153,153,153) !important;
+	color:#1662A3;
 	cursor:default;
 }
-	#awesomebar li.header:hover,
-	#awesomebar li.header.hover {
-		background-color: #0E0E0E !important;
-	}
+
+#awesomebar li.header:hover,
+#awesomebar li.header.hover {
+	background-color: #0E0E0E !important;
+}
 
 #awesomebar li {
 	border-color:#000000 #505050 #1f1f1f #505050;
@@ -286,8 +288,6 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
 }
 
 
-
-
 /* !Headers */
 
 /* Menu headers */
@@ -298,20 +298,8 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
 	line-height: normal;
 	font-weight: bold;
 	background: #0e0e0e;
-	background: -moz-linear-gradient(top,  #0e0e0e 87%, #1f1f1f 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(87%,#0e0e0e), color-stop(100%,#1f1f1f));
-	background: -webkit-linear-gradient(top,  #0e0e0e 87%,#1f1f1f 100%);
-	background: -o-linear-gradient(top,  #0e0e0e 87%,#1f1f1f 100%);
-	background: -ms-linear-gradient(top,  #0e0e0e 87%,#1f1f1f 100%);
-	background: linear-gradient(to bottom,  #0e0e0e 87%,#1f1f1f 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0e0e0e', endColorstr='#1f1f1f',GradientType=0 );
 	color: #1662A3;
 	border-bottom:none;
-}
-
-/* The frst item after a header */
-#awesomebar ul.dropdown li.header + li {
-	border-top:none;
 }
 
 /* Icons in headers */
