@@ -217,7 +217,7 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
 	}
 
 #awesomebar li {
-	border-color:#000000 #505050 #505050 #505050;
+	border-color:#000000 #505050 #1f1f1f #505050;
 	border-style:solid;
 	border-width:1px;
 }
@@ -305,7 +305,7 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
 	background: -ms-linear-gradient(top,  #0e0e0e 87%,#1f1f1f 100%);
 	background: linear-gradient(to bottom,  #0e0e0e 87%,#1f1f1f 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0e0e0e', endColorstr='#1f1f1f',GradientType=0 );
-	color: #999;
+	color: #1662A3;
 	border-bottom:none;
 }
 
