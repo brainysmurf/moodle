@@ -181,8 +181,8 @@ $(function()
 			if ( itemsHidden )
 			{
 				$(this).children('.scroll-btn').remove();
-				$(this).prepend( $('<li class="scroll-up scroll-btn"><i class="icon-caret-up"></i> <span>0 previous items</span></li>').hide() );
-				$(this).append('<li class="scroll-btn scroll-down"><i class="icon-caret-down"></i> <span>'+itemsHidden+' more item'+(itemsHidden==1?'':'s')+'</span></li>');
+				$(this).prepend( $('<li class="scroll-up scroll-btn"><i class="pull-right icon-caret-up"></i> <span>0 previous items</span></li>').hide() );
+				$(this).append('<li class="scroll-btn scroll-down"><i class="pull-right icon-caret-down"></i> <span>'+itemsHidden+' more item'+(itemsHidden==1?'':'s')+'</span></li>');
 				$(this).attr('data-offset',0);
 				$(this).attr('data-total-items',items);
 			}
@@ -337,8 +337,17 @@ $(function()
 
 				$(menu).css('top','-'+shiftTop+'px');
 			}			
+		} else {
+			//Only if the menu isn't repositioned to fit
+			
+			if (!$(menu).is('#awesomebar > ul > li > ul') && $(menu).children(':first-child').is('.header')) {
+				//If the first item is a header, move it up some pixels so the header is above stuff
+				var shiftTop = $(menu).children(':first-child').outerHeight();
+				$(menu).css('top','-'+shiftTop+'px');
+			}
 		}
 		
+		//If it would be cut off the right of the screen, open the submenu on the left
 		if ( info.cutHorizontal )
 		{
 			$(menu).addClass('openLeft');

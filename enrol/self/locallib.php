@@ -111,24 +111,24 @@ class enrol_self_enrol_form extends moodleform {
 				}
 				
 				//Enrol my child button
-				$mform->addElement('submit', 'enrolchildsubmit', get_string('enrolchild', 'enrol_self'), array('class' => 'disabled'));
+				$mform->addElement('submit', 'enrolchildsubmit', get_string('enrolchild', 'enrol_self'), array('class' => 'dnet-disabled'));
 				
-				//A .disabled class instead of the disabled attribute is used so click events can be bound to the button
+				//A .dnet-disabled class instead of the disabled attribute is used so click events can be bound to the button
 				$mform->addElement('html', '<script>
 				
 					$(document).on("change","input.enrolchildcheckbox",function()
 					{
 						var count = $("input.enrolchildcheckbox:checked").length;
 						if (count > 0) {
-							$("#id_enrolchildsubmit").removeClass("disabled");
+							$("#id_enrolchildsubmit").removeClass("dnet-disabled");
 						} else {
-							$("#id_enrolchildsubmit").addClass("disabled");
+							$("#id_enrolchildsubmit").addClass("dnet-disabled");
 						}
 					});
 					
 					$(document).on("click","#id_enrolchildsubmit",function()
 					{
-						if ($(this).hasClass("disabled")) {
+						if ($(this).hasClass("dnet-disabled")) {
 							alert("Please tick at least one child to enrol.");
 							return false;
 						}

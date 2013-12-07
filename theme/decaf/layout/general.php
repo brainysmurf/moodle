@@ -154,6 +154,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
         	
 	    </div>
     </div>
+    
     <?php if ($hascustommenu && empty($PAGE->theme->settings->custommenuinawesomebar)) { ?>
       <div id="custommenu" class="decaf-awesome-bar"><?php echo $custommenu; ?></div>
  	<?php } ?>
