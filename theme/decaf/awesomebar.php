@@ -529,10 +529,10 @@ class awesomebar
 
 		if ($category['name'] == 'Teaching & Learning') {
 			$courses = $this->extract_courses_from_branch($category);
-			if (count($courses) <= 20) {
-				$category['courses'] = $courses;
-				$category['categories'] = array();
-			}
+			//if (count($courses) <= 20) {
+			//	$category['courses'] = $courses;
+			//	$category['categories'] = array();
+			//}
 		}
 
 		//See if an icon for this category is set in the SSIS metadata
@@ -564,12 +564,22 @@ class awesomebar
 		global $USER;
 		if ($depth == 0) {
 			// Do special case stuff
-		 	if ($category['name'] == 'Teaching & Learning' && $olpCourseID = get_olp_courseid($USER->idnumber)) {
-				$item['submenu'][] = array(
-					'text' => 'My Online Portfolio',
-					'url' => '/course/view.php?id=' . $olpCourseID,
-					'icon' => 'certificate'
-				);
+		 	if ($category['name'] == 'Teaching & Learning') {
+		 		$item['submenu'][] = array(
+		 			'header' => 'General'
+		 		);
+		 		if ($olpCourseID = get_olp_courseid($USER->idnumber)) {
+					$item['submenu'][] = array(
+						'text' => 'My Online Portfolio',
+						'url' => '/course/view.php?id=' . $olpCourseID,
+						'icon' => 'certificate'
+					);
+				}
+		 		$item['submenu'][] = array(
+		 			'text' => 'Browse All DragonNet Courses',
+		 			'url' => '/course/index.php?categoryid=50',
+		 			'icon' => 'search'
+		 		);
 			}
 			if ($category['name'] == 'Activities') {
 				$item['submenu'][] = array(
@@ -613,15 +623,6 @@ class awesomebar
 				'text' => $course['fullname'],
 				'url' => '/course/view.php?id=' . $course['id'],
 				'icon' => $course_icon,
-			);
-		}
-
-		//Add browse all courses link to teaching & learning menu
-		if ($category['name'] == 'Teaching & Learning') {
-			$item['submenu'][] = array(
-				'text' => 'Browse All DragonNet Courses',
-				'url' => '/course/index.php?categoryid=50',
-				'icon' => 'archive'
 			);
 		}
 
