@@ -202,14 +202,13 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
 
 /* Quickly hovering over a menu item */
 #awesomebar li:hover {
-	background-color:rgb(153,153,153) !important;
+	background-color:#1f1f1f !important;
 	cursor:default;
 }
 
 /* Hovering over a menu item for a few seconds (the .hover class gets added by javascript */
 #awesomebar li.hover, #awesomebar li.hover:hover {
-	background-color:rgb(153,153,153) !important;
-	color:#1662A3;
+	background-color: #1662A3 !important;
 	cursor:default;
 }
 
