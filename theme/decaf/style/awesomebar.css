@@ -208,7 +208,7 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
 
 /* Hovering over a menu item for a few seconds (the .hover class gets added by javascript */
 #awesomebar li.hover, #awesomebar li.hover:hover {
-	background-color: #1662A3 !important;
+	background-color: #0080FF !important;
 	cursor:default;
 }
 
@@ -291,13 +291,13 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
 
 /* Menu headers */
 #awesomebar ul.dropdown li.header {
-	font-size: 11px;
+	font-size: 12px;
 	padding: 15px 10px 5px;
 	height: auto;
 	line-height: normal;
 	font-weight: bold;
 	background: #0e0e0e;
-	color: #1662A3;
+	color: #0080FF;
 	border-bottom:none;
 }
 
