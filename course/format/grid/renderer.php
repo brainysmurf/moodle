@@ -113,6 +113,7 @@ class format_grid_renderer extends format_section_renderer_base {
 		echo html_writer::start_tag('div', array('id' => 'gridshadebox'));
 		echo html_writer::tag('div', '', array('id' => 'gridshadebox_overlay', 'style' => 'display:none;'));
 		echo html_writer::start_tag('div', array('id' => 'gridshadebox_content', 'class' => 'hide_content'));
+		echo html_writer::start_tag('div', array('id' => 'gridshadebox_content_inner'));
 
 		echo html_writer::tag('img', '', array('id' => 'gridshadebox_close', 'style' => 'display:none;',
 			'src' => $this->output->pix_url('close', 'format_grid')));
@@ -135,8 +136,9 @@ class format_grid_renderer extends format_section_renderer_base {
 		$this->make_block_topics($course, $sections, $modinfo, $editing, $has_cap_update, $has_cap_vishidsect,
 				$str_edit_summary, $url_pic_edit, false);
 
-		echo html_writer::end_tag('div');
-		echo html_writer::end_tag('div');
+		echo html_writer::end_tag('div'); //gridshadebox_content_inner
+		echo html_writer::end_tag('div'); //gridshadebox_content
+		echo html_writer::end_tag('div'); //gridshadeboxs
 		echo html_writer::tag('div', '&nbsp;', array('class' => 'clearer'));
 		echo html_writer::end_tag('div');
 

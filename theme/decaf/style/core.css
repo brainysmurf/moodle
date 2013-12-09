@@ -1259,6 +1259,30 @@ h2.noAccess {
 		#gridshadebox_content .activity .activityinstance img.activityicon {
 			margin-top:2px;
 		}
+	
+	/* Grid format popup */	
+	#gridshadebox_content {
+		position:fixed !important;
+		top:40px !important;
+		bottom:40px;
+		left:40px !important;
+		right:40px;
+		width:auto !important;
+	}
+		#gridshadebox_content_inner {
+			height:100%;
+			overflow: auto;
+			padding:20px;
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+			#gridshadebox_content ul.gtopics {
+				margin:0;
+			}
+				#gridshadebox_content ul.gtopics .section {
+					padding:0;
+				}
 		
 /** Custom CSS **/
 [[setting:customcss]]
