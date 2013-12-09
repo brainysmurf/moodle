@@ -26,6 +26,11 @@ a:hover,a:active {color: #1662A3;}
 	text-align:right;
 }
 
+.icon-red {
+	color:#A00;
+}
+
+
 /* Header
 ------------------------- */
 #page-header{
@@ -1244,11 +1249,17 @@ h2.noAccess {
 					ul.gridformatbuttons .editbuttons a:hover {
 						color:#888;
 					}
-			
-	.icon-red {
-		color:#A00;
+	
+	#gridshadebox_content .activity {
+		border-bottom-width:0;
 	}
-
+		body.editing #gridshadebox_content .activity {
+			border-bottom-width:1px;
+		}
+		#gridshadebox_content .activity .activityinstance img.activityicon {
+			margin-top:2px;
+		}
+		
 /** Custom CSS **/
 [[setting:customcss]]
 
