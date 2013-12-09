@@ -1270,6 +1270,10 @@ h2.noAccess {
 		width:auto !important;
 		border-color:#1662A3;
 	}
+		body.editing #gridshadebox_content {
+			position: static !important;
+		}
+	
 		#gridshadebox_content_inner {
 			height:100%;
 			overflow: auto;
