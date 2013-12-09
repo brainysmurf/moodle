@@ -1287,6 +1287,12 @@ ul.buttons a.btn
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', endColorstr='#001662a3',GradientType=1 );
 }
 
+.login-reminder,
+.local-alert {
+	border-top-color: #23811F;
+	border-bottom-color: #23811F;
+}
+
 .tabs ul li > span.selected {
 	font-weight:normal;
 	background:#23811F;
