@@ -1268,6 +1268,7 @@ h2.noAccess {
 		left:40px !important;
 		right:40px;
 		width:auto !important;
+		border-color:#1662A3;
 	}
 		#gridshadebox_content_inner {
 			height:100%;
