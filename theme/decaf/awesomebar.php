@@ -383,17 +383,22 @@ class awesomebar
 
 			$submenu = array();
 
-			if (isguestuser()) // Any special items for guest users??
-			{
-			} else //Items for regular logged in users
-			{
+			if (isguestuser()) {
+			
+				// Any special items for guest users??
+			
+			} else {
+			
+				//Items for regular logged in users
+
 				$courseid = $this->page->course->id;
 				$context = context_course::instance($courseid);
 
+				$submenu[] = array('header'=> 'Change Identity');
+
 				if (session_is_loggedinas()) {
+				
 					//Undo 'login as user'
-					$submenu[] = array(
-						'header'=> 'Change Identity');
 					$submenu[] = array(
 						'text' => 'Return to normal',
 						'icon' => 'user',
@@ -404,11 +409,10 @@ class awesomebar
 							'returnurl' => $this->page->url->out_as_local_url(false)
 						))
 					);
+					
+				} elseif (is_role_switched($courseid)) {
 
-				} else if (is_role_switched($courseid)) //Role is switched - show 'Return to normal' button
-				{
-					$submenu[] = array(
-						'header'=> 'Change Identity');
+					//Role is switched - show 'Return to normal' button
 					$submenu[] = array(
 						'text' => 'Return to normal',
 						'icon' => 'user',
@@ -420,12 +424,11 @@ class awesomebar
 						))
 					);
 
-				} else if (has_capability('moodle/role:switchroles', $context)) //Become Student button
-				{
+				} elseif (has_capability('moodle/role:switchroles', $context)) {
+				
+					//Become Student button
 					$roles = get_switchable_roles($context);
 					if (count($roles) > 0 && $role = $roles[5]) {
-						$submenu[] = array(
-						'header'=> 'Change Identity');
 						$submenu[] = array(
 							'text' => 'Become ' . $role,
 							'icon' => 'user',
@@ -438,27 +441,38 @@ class awesomebar
 						);
 					}
 				}
+				
+				
 				$submenu[] = array('header' => 'Frequent Locations');
+				
 				$submenu[] = array('text' => 'My DragonNet', 'icon' => 'anchor', 'url' => '/my'); //My DragonNet
 				$submenu[] = array('text' => 'Home (Front Page)', 'icon' => 'home', 'url' => '/'); //Home
+				
+				
 				$submenu[] = array('header'=> 'Account Management');
+				
+				//Edit Profile
 				$submenu[] = array(
 					'text' => 'Edit Profile',
 					'icon' => 'edit',
 					'url' => "/user/edit.php?id=$USER->id&course=1"
-				); //Edit Profile
+				);
+				
+				//Change Password
 				$submenu[] = array(
 					'text' => 'Change Password',
 					'icon' => 'edit',
 					'url' => '/login/change_password.php?id=1'
-				); //Change Password
+				);
+				
 			} //end if not guest user
 
+			//Logout
 			$submenu[] = array(
 				'text' => 'Logout',
 				'icon' => 'signout',
 				'url' => '/login/logout.php?sesskey=' . sesskey()
-			); //Logout
+			);
 
 			//Add submenu to menu	
 			$menu[0]['submenu'] = $submenu;
@@ -527,13 +541,13 @@ class awesomebar
 	{
 		//Collapse the teaching and learning menu if it doesn't have many items in it
 
-		if ($category['name'] == 'Teaching & Learning') {
+		/*if ($category['name'] == 'Teaching & Learning') {
 			$courses = $this->extract_courses_from_branch($category);
-			//if (count($courses) <= 20) {
-			//	$category['courses'] = $courses;
-			//	$category['categories'] = array();
-			//}
-		}
+			if (count($courses) <= 20) {
+				$category['courses'] = $courses;
+				$category['categories'] = array();
+			}
+		}*/
 
 		//See if an icon for this category is set in the SSIS metadata
 		$category_icon = course_get_category_icon($category['id']);
@@ -546,54 +560,58 @@ class awesomebar
 
 		//Add category to menu
 		if ($depth == 1) {
-			$item = array(
-				'header' => $category['name'],
-				'icon' => strtolower($category_icon),
-				'submenu' => array()
-			);
+			
+			//If this is a depth = 1 item (a category that's a direct child of a categories ON the awesomebar,
+			//show the title as a header
+			$item = array('header' => $category['name']);
+			
 		} else {
+		
 			$item = array(
 				'text' => $category['name'],
 				'icon' => strtolower($category_icon),
 				'submenu' => array()
 			);
+			
 		}
 
-
-		//Add a link to the user's OLP (if they have one) at the top of the teaching and learning menu
-		global $USER;
+		//Add static headings for the first items in the menus
 		if ($depth == 0) {
-			// Do special case stuff
-		 	if ($category['name'] == 'Teaching & Learning') {
-		 		$item['submenu'][] = array(
-		 			'header' => 'General'
-		 		);
-		 		if ($olpCourseID = get_olp_courseid($USER->idnumber)) {
+		
+			switch ($category['name']) {
+			
+				case 'Teaching & Learning':
+					$item['submenu'][] = array(	'header' => 'General');
+		 		
+			 		//My Online Portfolio
+	 				//Add a link to the user's OLP (if they have one) at the top of the teaching and learning menu
+			 		global $USER;
+			 		if ($olpCourseID = get_olp_courseid($USER->idnumber)) {
+						$item['submenu'][] = array(
+							'text' => 'My Online Portfolio',
+							'url' => '/course/view.php?id=' . $olpCourseID,
+							'icon' => 'certificate'
+						);
+					}
+					
+			 		$item['submenu'][] = array(
+			 			'text' => 'Browse All DragonNet Courses',
+			 			'url' => '/course/index.php?categoryid=50',
+			 			'icon' => 'search'
+			 		);
+					break;
+					
+				case 'Activities':
+					$item['submenu'][] = array(	'header' => 'Information');				
 					$item['submenu'][] = array(
-						'text' => 'My Online Portfolio',
-						'url' => '/course/view.php?id=' . $olpCourseID,
-						'icon' => 'certificate'
+						'text' => 'Handbook',
+						'url' => '',
+						'icon' => 'rocket'
 					);
-				}
-		 		$item['submenu'][] = array(
-		 			'text' => 'Browse All DragonNet Courses',
-		 			'url' => '/course/index.php?categoryid=50',
-		 			'icon' => 'search'
-		 		);
+					$item['submenu'][] = array(	'header' => 'Enrolled Activities');
+					break;
 			}
-			if ($category['name'] == 'Activities') {
-				$item['submenu'][] = array(
-					'header' => 'Information'
-				);
-				$item['submenu'][] = array(
-					'text' => 'Handbook',
-					'url' => '',
-					'icon' => 'rocket'
-				);
-				$item['submenu'][] = array(
-					'header' => 'Enrolled Activities:'
-				);
-			}
+			
 		}
 
 		//Add subcategories to menu
@@ -617,6 +635,9 @@ class awesomebar
 						$course['fullname'] = trim($course['fullname']);
 					}
 				}
+				
+				//Remove empty parentheses
+				$course['fullname'] = str_replace('( )', '', $course['fullname']);
 			}
 
 			$item['submenu'][] = array(
