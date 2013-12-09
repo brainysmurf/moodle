@@ -153,7 +153,8 @@ class awesomebar
 			
 			//A header?
 			if (!empty($item['header'])) {
-				$html .= html_writer::tag('li', $icon . $item['header'], array('class' => 'header'));
+				$headerText = html_writer::tag('span', $item['header']);
+				$html .= html_writer::tag('li', $icon . $headerText, array('class' => 'header'));
 				//if (!empty($item['submenu'])) {
 				//	echo 'goinside';
 				//	foreach ($item['submenu'] as $submenuitem) {

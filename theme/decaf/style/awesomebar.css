@@ -136,6 +136,8 @@
 
 body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Awesomebar */
 
+/* !Blurry menus */
+
 #awesomebar ul.blurry li {
 	background:#060606;
 }
@@ -165,6 +167,13 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
     -ms-filter: blur(2px);
     filter: blur(2px);
 }
+	#awesomebar ul.blurry > li.header {
+		-moz-box-shadow:none;
+		-webkit-box-shadow:none;
+		box-shadow:none;
+	}
+	
+/* !End blurry menus */
 
 
 
@@ -300,11 +309,15 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
 	color: #1662A3;
 	border-bottom:none;
 }
+	/* When headers go blurry */
+	#awesomebar ul.blurry > li.header {
+		background-color:rgba(14, 14, 14, .85) !important;
+	}
 
-/* Icons in headers */
-#awesomebar ul.dropdown li.header i {
-	line-height: normal;
-	margin-top: 1px;
-	font-size: 11px;
-	margin-left: 0px;
-}
+	/* Icons in headers */
+	#awesomebar ul.dropdown li.header i {
+		line-height: normal;
+		margin-top: 1px;
+		font-size: 11px;
+		margin-left: 0px;
+	}
