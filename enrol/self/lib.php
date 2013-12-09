@@ -290,7 +290,9 @@ class enrol_self_plugin extends enrol_plugin {
 					}
 					
 					//We also want to enrol the parent
-					$this->enrol_user($instance, $USER->id, 12, $timestart, $timeend);
+					//Dec 9th - don't need to explicitly do this here anymore because the parent will be enrol when the student is enrolled
+					//by the enrol_user method anyway
+					//$this->enrol_user($instance, $USER->id, 12, $timestart, $timeend);
 					
 				} else { //Enrol the current user
 					$userids_to_enrol[] = $USER->id;
