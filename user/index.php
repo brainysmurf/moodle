@@ -576,7 +576,8 @@
 
 
 	// !Search box above user list
-	$searchBox = '<br/>
+	$searchBox = '
+		<p style="text-align:center;font-size:10pt;padding-top:10px;padding-bottom:10px;"><i>Please note that the email addresses provided for elementary students and their parents do NOT work at the moment. <br />If you are a teacher looking to contact an elementary parent, please use PowerSchool until our team is able to get these emails working.</i></p>
 		<form action="index.php" class="directorysearchform searchform" style="text-align:center;">
 			<input type="hidden" name="id" value="'.$course->id.'" />
 			<label for="search">Search for</label> 
