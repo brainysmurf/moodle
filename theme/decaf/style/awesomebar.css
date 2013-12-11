@@ -77,7 +77,6 @@
 /* Menu icons */
 #awesomebar ul.dropdown i {
 	display:inline-block;
-	padding-top:1px;
 	width:15px;
 	line-height:25px;
 }
@@ -273,7 +272,7 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
 .icon-text {
 	width:auto;
 	min-width:15px;
-	height:30px;
+	height:25px;
 	position: relative;
 	font-size: 8px;
 	text-align:center;
@@ -292,7 +291,7 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
 /* Menu headers */
 #awesomebar ul.dropdown li.header {
 	font-size: 12px;
-	padding: 15px 10px 5px;
+	padding: 7px 10px 5px;
 	height: auto;
 	line-height: normal;
 	font-weight: bold;
@@ -304,7 +303,7 @@ body #dock {top:30px; height:auto; bottom:0px;} /* Start dock at bottom of Aweso
 /* Icons in headers */
 #awesomebar ul.dropdown li.header i {
 	line-height: normal;
+	font-size: 10px;
 	margin-top: 1px;
-	font-size: 11px;
 	margin-left: 0px;
 }
