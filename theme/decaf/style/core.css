@@ -47,6 +47,7 @@ a:hover,a:active {color: #1662A3;}
 #page-header-wrapper{
 	margin:0;
 	position: relative;
+	padding: 49px 30px 53px 48px; /* Vertically center the page title */        
 	z-index: 2;
 }
 
@@ -352,7 +353,7 @@ a.editsectionbutton img {
 	margin:0;
 }
 
-#page {top:25px;border-top:2px solid #505050;} /*Space for awesomebar at top */
+#page {top:25px;} /*Space for awesomebar at top */
 #page-content-wrapper { margin:25px 50px; }
 #page-content .region-content { padding:0; }
 
