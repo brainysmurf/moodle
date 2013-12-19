@@ -190,6 +190,25 @@ class awesomebar
 		return $html;
 	}
 
+	private function is_beta_tester() {
+		// returns true if the current user is a beta tester
+		global $USER, $DB;
+
+		if (in_array($USER->username, array('admin', 'geoffreyderry', 'bevanjames', 'sammyadams'))) {
+			return true;
+		}
+
+		$courseid = $DB->get_field('course', 'id', array('fullname'=>'Beta Test'));
+		$enrolid = $DB->get_field('enrol', 'id', array('courseid'=>$courseid, 'enrol'=>'self'));
+		$beta_testers = $DB->get_records('user_enrolments', array('enrolid'=>$enrolid));
+		$beta_tester_array = array();
+		foreach ($beta_testers as $beta_tester) {
+			$beta_tester_array[] = $beta_tester->userid;
+		}
+
+		return in_array($USER->id, $beta_tester_array);
+	}
+
 	// !Custom Menus (Navigate)
 
 	/*
@@ -197,11 +216,22 @@ class awesomebar
 	*/
 	private function get_custom_menus()
 	{
-		if (empty($this->page->theme->settings->custommenuitems)) {
+		// DragonNet beta testers get a different menu
+
+		if (empty($this->page)) {
 			return false;
 		}
+
+		if ( $this->is_beta_tester() ) {
+			// gets custom menu from decaf theme
+			$custommenuitems = $this->page->theme->settings->custommenuitems;
+		} else {
+			// gets from moodle's built-in custom menu
+			global $CFG;
+			$custommenuitems = $CFG->custommenuitems;
+		}
 		
-		return $this->convert_custom_menu_text_to_array($this->page->theme->settings->custommenuitems);
+		return $this->convert_custom_menu_text_to_array($custommenuitems);
 	}
 
 
@@ -395,10 +425,12 @@ class awesomebar
 				$courseid = $this->page->course->id;
 				$context = context_course::instance($courseid);
 
-				$submenu[] = array('header'=> 'Change Identity');
+
 
 				if (session_is_loggedinas()) {
-				
+					if ($this->is_beta_tester()) {
+						$submenu[] = array('header'=> 'Change Identity');				
+				 	}
 					//Undo 'login as user'
 					$submenu[] = array(
 						'text' => 'Return to normal',
@@ -412,6 +444,9 @@ class awesomebar
 					);
 					
 				} elseif (is_role_switched($courseid)) {
+					if ($this->is_beta_tester()) {
+						$submenu[] = array('header'=> 'Change Identity');
+					}
 
 					//Role is switched - show 'Return to normal' button
 					$submenu[] = array(
@@ -426,7 +461,9 @@ class awesomebar
 					);
 
 				} elseif (has_capability('moodle/role:switchroles', $context)) {
-				
+					if ($this->is_beta_tester()) {
+						$submenu[] = array('header'=> 'Change Identity');
+					}
 					//Become Student button
 					$roles = get_switchable_roles($context);
 					if (count($roles) > 0 && $role = $roles[5]) {
@@ -443,14 +480,16 @@ class awesomebar
 					}
 				}
 				
-				
-				$submenu[] = array('header' => 'Frequent Locations');
+				if ($this->is_beta_tester()) {
+					$submenu[] = array('header' => 'Frequent Locations');
+				}
 				
 				$submenu[] = array('text' => 'My DragonNet', 'icon' => 'anchor', 'url' => '/my'); //My DragonNet
 				$submenu[] = array('text' => 'Home (Front Page)', 'icon' => 'home', 'url' => '/'); //Home
 				
-				
-				$submenu[] = array('header'=> 'Account Management');
+				if ($this->is_beta_tester()) {							
+					$submenu[] = array('header'=> 'Account Management');
+				}
 				
 				//Edit Profile
 				$submenu[] = array(
@@ -540,15 +579,17 @@ class awesomebar
 
 	private function add_category_to_menu(&$menu, $category, $depth=0)
 	{
-		//Collapse the teaching and learning menu if it doesn't have many items in it
 
-		/*if ($category['name'] == 'Teaching & Learning') {
-			$courses = $this->extract_courses_from_branch($category);
-			if (count($courses) <= 20) {
-				$category['courses'] = $courses;
-				$category['categories'] = array();
+		if (!$this->is_beta_tester()) {
+			//Collapse the teaching and learning menu if it doesn't have many items in it
+			if ($category['name'] == 'Teaching & Learning') {
+				$courses = $this->extract_courses_from_branch($category);
+				if (count($courses) <= 20) {
+					$category['courses'] = $courses;
+					$category['categories'] = array();
+				}
 			}
-		}*/
+		}
 
 		//See if an icon for this category is set in the SSIS metadata
 		$category_icon = course_get_category_icon($category['id']);
@@ -559,21 +600,27 @@ class awesomebar
 			$category_icon = $this->get_category_icon($category['name']);
 		}
 
-		//Add category to menu
-		if ($depth == 1) {
-			
-			//If this is a depth = 1 item (a category that's a direct child of a categories ON the awesomebar,
-			//show the title as a header
-			$item = array('header' => $category['name']);
-			
+		if ($this->is_beta_tester()) {
+			//Add category to menu
+
+			if ($depth == 1) {			
+				//If this is a depth = 1 item (a category that's a direct child of a categories ON the awesomebar,
+				//show the title as a header
+				$item = array('header' => $category['name']);	
+			} else {		
+				$item = array(
+					'text' => $category['name'],
+					'icon' => strtolower($category_icon),
+					'submenu' => array()
+				);
+			}
+
 		} else {
-		
 			$item = array(
 				'text' => $category['name'],
 				'icon' => strtolower($category_icon),
 				'submenu' => array()
 			);
-			
 		}
 
 		//Add static headings for the first items in the menus
@@ -582,7 +629,9 @@ class awesomebar
 			switch ($category['name']) {
 			
 				case 'Teaching & Learning':
-					$item['submenu'][] = array(	'header' => 'General');
+					if ($this->is_beta_tester()) {
+						$item['submenu'][] = array(	'header' => 'General');
+					}
 		 		
 			 		//My Online Portfolio
 	 				//Add a link to the user's OLP (if they have one) at the top of the teaching and learning menu
@@ -603,13 +652,18 @@ class awesomebar
 					break;
 					
 				case 'Activities':
-					$item['submenu'][] = array(	'header' => 'Information');				
+					if ($this->is_beta_tester()) {
+						$item['submenu'][] = array(	'header' => 'Information');
+					}
+
 					$item['submenu'][] = array(
 						'text' => 'Handbook',
 						'url' => '',
 						'icon' => 'rocket'
 					);
-					$item['submenu'][] = array(	'header' => 'Enrolled Activities');
+					if ($this->is_beta_tester()) {
+						$item['submenu'][] = array(	'header' => 'Enrolled Activities');
+					}
 					break;
 			}
 			
@@ -648,22 +702,27 @@ class awesomebar
 			);
 		}
 
-		if (!empty($item['header']) && !empty($item['submenu'])) {
-			// This is a header with a submenu, 
-			// So move anything in a header's submenu out into the parent, remove the submenu
-			// and add things non-standard-like
+		if ($this->is_beta_tester()) {
+			if (!empty($item['header']) && !empty($item['submenu'])) {
+				// This is a header with a submenu, 
+				// So move anything in a header's submenu out into the parent, remove the submenu
+				// and add things non-standard-like
 
-			// oh and we don't want the icon to display in the header
-			unset($item['icon']);
-			$menu[] = $item;
+				// oh and we don't want the icon to display in the header
+				unset($item['icon']);
+				$menu[] = $item;
 
-			foreach ($item['submenu'] as $submenuitem) {
-				$menu[] = $submenuitem;
-			}
-			unset($item['submenu']);
+				foreach ($item['submenu'] as $submenuitem) {
+					$menu[] = $submenuitem;
+				}
+				unset($item['submenu']);
+	 		} else {
+	 			// This is a normal item, add as normal
+	 			$menu[] = $item;
+	 		}	
+
  		} else {
- 			// This is a normal item, add as normal
- 			$menu [] = $item;
+ 			$menu[] = $item;
  		}
 	}
 

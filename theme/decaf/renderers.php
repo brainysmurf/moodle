@@ -227,6 +227,7 @@ class theme_decaf_core_renderer extends core_renderer {
 	public function refresh_awesomebar()
 	{
 		require_once dirname(__FILE__).'/awesomebar.php';
+		echo('refreshing the awesomebar!');
 		ob_start();
 		$awesomebar = new awesomebar($this->page);
 		return $awesomebar->create(true);
