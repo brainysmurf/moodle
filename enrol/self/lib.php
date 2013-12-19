@@ -662,7 +662,9 @@ class enrol_self_plugin extends enrol_plugin {
 			}
 			
 		}
-		
+
+		global $OUTPUT;
+		$OUTPUT->refresh_awesomebar();
 	}
 	
 	public function unenrol_user(stdClass $instance, $userid)
@@ -698,6 +700,9 @@ class enrol_self_plugin extends enrol_plugin {
 			}
 		
 		}
+
+		global $OUTPUT;
+		$OUTPUT->refresh_awesomebar();
 	}
 
 }
