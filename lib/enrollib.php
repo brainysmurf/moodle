@@ -1485,10 +1485,11 @@ abstract class enrol_plugin {
             }
         }
         
-        //Refresh the awesomebar
-        global $OUTPUT;
-        $OUTPUT->refresh_awesomebar();
-        
+        if (!defined('CLI_SCRIPT')) {
+            //Refresh the awesomebar
+            global $OUTPUT;
+            $OUTPUT->refresh_awesomebar();
+        }
     }
 
     /**
