@@ -1,6 +1,5 @@
 Navigate||icon-plane
 
-
 -header=Areas||
 -SSIS Website||icon-link
 --header=Frequently Used||
@@ -24,6 +23,7 @@ Navigate||icon-plane
 --Can I have my own site?||icon-question-sign
 
 -header=Curriculum||
+-SSIS Vertical Articulation||icon-suitcase|teachersALL
 -PYP Curriculum||icon-suitcase|studentsELEM,teachersELEM,parentsELEM
 --Leadership Team||icon-suitcase
 ---Test
@@ -56,7 +56,7 @@ Navigate||icon-plane
 ----Grade 6||icon-globe
 ----Grade 7||icon-globe
 --English||icon-pencil
----header=English||icon-pencil
+---header=English||
 ---English A||icon-pencil
 ----header=English A||
 ----Grade 6||icon-pencil
@@ -64,7 +64,7 @@ Navigate||icon-plane
 ---English B Advanced||icon-pencil
 ---English B Standard||icon-pencil
 --Humanities||icon-man
----header=Humanities||icon-man
+---header=Humanities||
 ---Grade 6||icon-man
 ---Grade 7||icon-man
 ---Grade 8||icon-man

@@ -199,6 +199,10 @@ class awesomebar
 		}
 
 		$courseid = $DB->get_field('course', 'id', array('fullname'=>'Beta Test'));
+		if (empty($courseid)) {
+			echo 'make an activity called "Beta Test" and self enrol into it to get the new Dragonnet menu    ';
+			return false;
+		}
 		$enrolid = $DB->get_field('enrol', 'id', array('courseid'=>$courseid, 'enrol'=>'self'));
 		$beta_testers = $DB->get_records('user_enrolments', array('enrolid'=>$enrolid));
 		$beta_tester_array = array();
@@ -653,20 +657,43 @@ class awesomebar
 					
 				case 'Activities':
 					if ($this->is_beta_tester()) {
-						$item['submenu'][] = array(	'header' => 'Information');
-					}
+						$item['submenu'][] = array('header' => 'General');
+						$item['submenu'][] = array(
+							'text' => 'All Activity Information', 
+							'url' => '',
+							'icon' => 'home');
+						$item['submenu'][] = array('header' => 'Signing Up');
+						$item['submenu'][] = array(
+							'text' => 'This Season\'s Handbook', 
+							'url' => '', 
+							'icon' => 'file-text');
+						$item['submenu'][] = array(
+							'text' => 'Browse Elementary Activities', 
+							'url' => '', 
+							'icon' => 'search');						
+						$item['submenu'][] = array(
+							'text' => 'Browse Secondary Activities', 
+							'url' => '', 
+							'icon' => 'search');						
+						
+						$item['submenu'][] = array(	'header' => 'My Activities');
+					}  http://dragonnet.ssis-suzhou.net/course/view.php?id=1221
+					break;
 
-					$item['submenu'][] = array(
-						'text' => 'Handbook',
-						'url' => '',
-						'icon' => 'rocket'
-					);
+				case 'Curriculum':
 					if ($this->is_beta_tester()) {
-						$item['submenu'][] = array(	'header' => 'Enrolled Activities');
+						$item['submenu'][] = array('header' => 'Notice');
+						$item['submenu'][] = array(
+							'text' => 'Curriculum menu to be removed', 
+							'url' => '', 
+							'icon' => 'bullhorn');
+						$item['submenu'][] = array(
+							'text' => 'See Navigate menu instead', 
+							'url' => '', 
+							'icon' => 'bullhorn');
 					}
 					break;
-			}
-			
+			}			
 		}
 
 		//Add subcategories to menu
