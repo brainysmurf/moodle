@@ -1,0 +1,121 @@
+Navigate||icon-plane
+
+
+-header=Areas||
+-SSIS Website||icon-link
+--header=Frequently Used||
+--Staff Webmail|||teachersALL
+--Calendar|http://www.ssis-suzhou.net/calendars/index.aspx|
+--News|http://www.ssis-suzhou.net/news/index.aspx|
+-LiveDocs||icon-link
+-DragonTV||icon-link
+--header=Navigate||
+--Explore||icon-search
+--Login||icon-signin
+--header=Help||
+--How to upload a video||
+--Access off-campus||
+-WordPress||icon-link
+--header=Frequently Used||
+--Parent Portal||icon-thumbs-up
+--Student & Parent Handbook||icon-info-sign
+--header=Help||
+--What is WordPress used for?||icon-question-sign
+--Can I have my own site?||icon-question-sign
+
+-header=Curriculum||
+-PYP Curriculum||icon-suitcase|studentsELEM,teachersELEM,parentsELEM
+--Leadership Team||icon-suitcase
+---Test
+--IB Documents||icon-suitcase
+--Early Years||icon-suitcase
+---header=Early Years||
+---Nursery||icon-suitcase
+---Pre-K||icon-suitcase
+---Kindergarten||icon-suitcase
+--Grades 1-5||icon-suitcase
+---header=Grades 1-5
+---Grade 1||icon-suitcase
+---Grade 2||icon-suitcase
+---Grade 3||icon-suitcase
+---Grade 4||icon-suitcase
+---Grade 5||icon-suitcase
+-MYP Curriculum||icon-suitcase|studentsSEC,teachersSEC,parentsSEC
+--World Languages||icon-globe
+---header=World Languages||
+---Korean||icon-globe
+----header=Korean||
+----Grade 6||icon-globe
+----Grade 7||icon-globe
+---Chinese||icon-globe
+----header=Chinese||
+----Grade 6||icon-globe
+----Grade 7||icon-globe
+---Spanish||icon-globe
+---header=Spanish||
+----Grade 6||icon-globe
+----Grade 7||icon-globe
+--English||icon-pencil
+---header=English||icon-pencil
+---English A||icon-pencil
+----header=English A||
+----Grade 6||icon-pencil
+----Grade 7||icon-pencil
+---English B Advanced||icon-pencil
+---English B Standard||icon-pencil
+--Humanities||icon-man
+---header=Humanities||icon-man
+---Grade 6||icon-man
+---Grade 7||icon-man
+---Grade 8||icon-man
+-DP Curriculum||icon-suitcase|studentsSEC,teachersSEC,parentsSEC
+--World Languages||icon-globe
+---header=World Languages||
+---Korean||icon-globe
+----header=Korean||
+----Grade 6||icon-globe
+----Grade 7||icon-globe
+---Chinese||icon-globe
+----header=Chinese||
+----Grade 6||icon-globe
+----Grade 7||icon-globe
+---Spanish||icon-globe
+---header=Spanish||
+----Grade 6||icon-globe
+----Grade 7||icon-globe
+--English||icon-pencil
+---header=English||icon-pencil
+---English A||icon-pencil
+---English B Advanced||icon-pencil
+---English B Standard||icon-pencil
+
+-header=Policies|icon-folder-open|
+-Whole School||icon-folder-open|
+--Buses||icon-truck
+--I don't know||
+-Elementary||icon-folder-open|
+--Teachers||icon-folder-open|teachersELEM
+--Students & Parents||icon-folder-open|studentsELEM,teachersELEM,parentsELEM
+-Secondary||icon-folder-open|
+--Teachers||icon-folder-open|teachersSEC
+--Students & Parents||icon-folder-open|studentsSEC,teachersSEC,parentsSEC
+
+-header=Directories||
+-Student Directory|/user/index.php?contextid=11083\&sifirst=\&silast=\&roleid=5\&mode=1|icon-info-sign
+-Teacher Directory|/user/index.php?contextid=11083\&sifirst=\&silast=\&roleid=5\&mode=1|icon-info-sign
+-Bulk Emails||icon-info-sign|teachersALL
+--Find Activity Email||icon-envelope
+--Find Class Email||icon-envelope
+
+-header=Communications||
+-Surveys||icon-bar-chart
+--Whole School||icon-bar-chart|
+--Survey Students only||icon-bar-chart|teachersALL
+--Survey Teachers only||icon-bar-chart|parentsALL
+--Survey Parents only||icon-bar-chart|studentsALL
+-Forums||icon-comment-alt
+-Notices||icon-bullhorn
+--header=Secondary||
+--Today's Student Notices||icon-bullhorn
+--Add Student Notice||icon-plus|teachersALL,studentsNOTICES
+--Student Notice Help||icon-question-sign|
