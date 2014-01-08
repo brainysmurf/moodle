@@ -194,9 +194,9 @@ class awesomebar
 		// returns true if the current user is a beta tester
 		global $USER, $DB;
 
-		if (in_array($USER->username, array('admin', 'geoffreyderry', 'bevanjames', 'sammyadams'))) {
-			return true;
-		}
+		#if (in_array($USER->username, array('admin', 'geoffreyderry', 'bevanjames', 'sammyadams'))) {
+		#	return true;
+		#}
 
 		$courseid = $DB->get_field('course', 'id', array('fullname'=>'Beta Test'));
 		if (empty($courseid)) {
