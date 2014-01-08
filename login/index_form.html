@@ -10,7 +10,7 @@ if (!empty($CFG->loginpasswordautocomplete)) {
   <div class="loginpanel">
     <h2><?php print_string("returningtosite") ?></h2>
     
-      <div class="login-reminder"><icon class="icon-hand-right pull-left icon-4x"></icon>Remember, DragonNet passwords require a <strong>symbol character</strong>, such as <strong>!@#</strong> or <strong>$</strong>.</div>
+      <div class="login-reminder"><icon class="icon-hand-right pull-left icon-4x"></icon>Parents, if you need DragonNet details please email help@ssis-suzhou.net with details about your child.</div>
 
         <div class="desc">
           <?php
@@ -51,7 +51,7 @@ if (!empty($CFG->loginpasswordautocomplete)) {
               
 		</form>
 	      
-	<?php if ($CFG->guestloginbutton and !isguestuser()) {  ?>
+	<!-- <?php if ($CFG->guestloginbutton and !isguestuser()) {  ?>
 	<div id="login-guest">
 		<h4>Or, if you don't have a DragonNet account...</h4>
         <form action="index.php" method="post" id="guestlogin">
@@ -70,6 +70,8 @@ if (!empty($CFG->loginpasswordautocomplete)) {
 			<input type="submit" value="<?php print_string("forgotten") ?>" />
 		</form>
 	</div>
+
+-->
 
 
      </div> <!-- end loginpanel -->
