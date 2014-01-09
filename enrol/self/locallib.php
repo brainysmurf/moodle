@@ -94,7 +94,7 @@ class enrol_self_enrol_form extends moodleform {
 					if (enrol_user_is_enrolled($child->userid, $instance->id)) { 
 						
 						//User is already enrolled
-						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="green"><i class="ok-sign"></i> Already enrolled.</span>', array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox'));
+						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="green"><i class="ok-sign"></i> Enrolled!&nbsp;&nbsp;(Use the "Course administration" menu above to remove.)</span>', array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox'));
 			
 			        } else if ($mustBeInCohort && !cohort_is_member($mustBeInCohort->id, $child->userid)) {
 			        
@@ -141,26 +141,26 @@ class enrol_self_enrol_form extends moodleform {
 		* User enrolling self
 		*/
 		
-		$heading = 'Enrol yourself in this activity';
-        $mform->addElement('header', 'selfheader', $heading, array('class'=>'collapsed'));
-		
-		if (enrol_user_is_enrolled($USER->id, $instance->id)) { 
-			
-			//User is already enrolled
-			$mform->addElement('html', $OUTPUT->successbox('You are already enrolled in this activity.<br/><a class="btn" href="/course/view.php?id='.$instance->courseid.'" style="font-size:0.9em; position:relative; top:5px;">Go to activity page</a>'));
-
-        } else if ($mustBeInCohort && !cohort_is_member($mustBeInCohort->id, $USER->id)) {
-        
-        	//User isn't in the required cohort
-			$mform->addElement('html', $OUTPUT->errorbox("You can't enrol yourself because only <strong>{$niceCohortName}</strong> can join this activity."));
-        
+		if ($mustBeInCohort && !cohort_is_member($mustBeInCohort->id, $USER->id)) {
+        	// don't display the self-enrol section at all
         } else {
-        
-        	//User is allowed to enrol
-			$this->add_action_buttons(false, get_string('enrolme', 'enrol_self'), false);
-				        
-		}
+
+			$heading = 'Enrol yourself in this activity';
+	        $mform->addElement('header', 'selfheader', $heading, array('class'=>'collapsed'));
+			
+			if (enrol_user_is_enrolled($USER->id, $instance->id)) { 
+				
+				//User is already enrolled
+				$mform->addElement('html', $OUTPUT->successbox('You are already enrolled in this activity.<br/><a class="btn" href="/course/view.php?id='.$instance->courseid.'" style="font-size:0.9em; position:relative; top:5px;">Go to activity page</a>'));
+
+	        } else {
+	        
+	        	//User is allowed to enrol
+				$this->add_action_buttons(false, get_string('enrolme', 'enrol_self'), false);
+					        
+			}
 		
+		}
 		/*
 		* End user enrolling self
 		*/

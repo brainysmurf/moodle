@@ -54,9 +54,13 @@ if (session_is_loggedinas() and $USER->loginascontext->contextlevel == CONTEXT_C
 $enrols = enrol_get_plugins(true);
 $enrolinstances = enrol_get_instances($course->id, true);
 $forms = array();
+$self_enrollment = false;
 foreach($enrolinstances as $instance) {
     if (!isset($enrols[$instance->enrol])) {
         continue;
+    }
+    if ($instance->enrol == 'self') {
+        $self_enrollment = true;
     }
     $form = $enrols[$instance->enrol]->enrol_page_hook($instance);
     if ($form) {

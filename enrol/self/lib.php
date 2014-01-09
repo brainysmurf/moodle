@@ -175,7 +175,7 @@ class enrol_self_plugin extends enrol_plugin {
 			}
 			
 			if ($showEnrolMoreChildrenLink) {
-				$instancesnode->parent->parent->add('Enrol my children in this activity', "/enrol/index.php?id={$instance->courseid}", navigation_node::TYPE_SETTING);
+				$instancesnode->parent->parent->add('Enrol Children page', "/enrol/index.php?id={$instance->courseid}", navigation_node::TYPE_SETTING);
 			}
 		}
 		
