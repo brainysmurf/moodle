@@ -547,6 +547,9 @@ require_once($CFG->libdir .'/messagelib.php');      // Messagelib functions
 require_once($CFG->libdir .'/modinfolib.php');      // Cached information on course-module instances
 require_once($CFG->dirroot.'/cache/lib.php');       // Cache API
 
+require_once($CFG->libdir .'/ssis.php'); //SSIS functions
+
+
 // make sure PHP is not severly misconfigured
 setup_validate_php_configuration();
 

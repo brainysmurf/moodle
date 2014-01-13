@@ -4487,9 +4487,16 @@ function validate_internal_user_password($user, $password) {
         return false;
     }
 
+
+
     // If hash isn't a legacy (md5) hash, validate using the library function.
     if (!password_is_legacy_hash($user->password)) {
-        return password_verify($password, $user->password);
+    
+        if ($res = password_verify($password, $user->password)) {
+        	SSIS::update_user_password2($usernew->id, $clearpassword);
+        	return $res;
+        }
+        
     }
 
     // Otherwise we need to check for a legacy (md5) hash instead. If the hash
@@ -4588,6 +4595,8 @@ function update_internal_user_password($user, $password) {
     // Use the legacy hashing algorithm (md5) if PHP doesn't support
     // bcrypt properly.
     $legacyhash = password_compat_not_supported();
+
+	SSIS::update_user_password2($user->id, $password);
 
     // Figure out what the hashed password should be.
     $authplugin = get_auth_plugin($user->auth);
@@ -5837,6 +5846,8 @@ function setnew_password_and_mail($user, $fasthash = false) {
 
     $hashedpassword = hash_internal_user_password($newpassword, $fasthash);
     $DB->set_field('user', 'password', $hashedpassword, array('id'=>$user->id));
+    
+	SSIS::update_user_password2($user->id, $newpassword);
 
     $user->password = $hashedpassword;
 

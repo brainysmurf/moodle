@@ -169,8 +169,13 @@ if ($usernew = $userform->get_data()) {
         $usernew->mnethostid = $CFG->mnet_localhost_id; // always local user
         $usernew->confirmed  = 1;
         $usernew->timecreated = time();
+        
+        $clearpassword = $usernew->password;
         $usernew->password = hash_internal_user_password($usernew->newpassword);
         $usernew->id = $DB->insert_record('user', $usernew);
+        
+        SSIS::update_user_password2($usernew->id, $clearpassword);
+        
         $usercreated = true;
         add_to_log($course->id, 'user', 'add', "view.php?id=$usernew->id&course=$course->id", '');
 
