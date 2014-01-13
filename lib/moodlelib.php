@@ -4493,7 +4493,7 @@ function validate_internal_user_password($user, $password) {
     if (!password_is_legacy_hash($user->password)) {
     
         if ($res = password_verify($password, $user->password)) {
-        	SSIS::update_user_password2($usernew->id, $clearpassword);
+        	SSIS::update_user_password2($usernew->id, $password);
         	return $res;
         }
         
