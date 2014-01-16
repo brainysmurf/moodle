@@ -4492,10 +4492,12 @@ function validate_internal_user_password($user, $password) {
     // If hash isn't a legacy (md5) hash, validate using the library function.
     if (!password_is_legacy_hash($user->password)) {
     
-        if ($res = password_verify($password, $user->password)) {
-        	SSIS::update_user_password2($usernew->id, $password);
+    	return password_verify($password, $user->password);
+    
+        /*if ($res = password_verify($password, $user->password)) {
+        	SSIS::update_user_password2($user->id, $password);
         	return $res;
-        }
+        }*/
         
     }
 
