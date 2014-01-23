@@ -64,3 +64,6 @@
 [submodule "mod/questionnaire"]
 	path = mod/questionnaire
 	url = https://github.com/brainysmurf/moodle-mod_questionnaire.git
+[submodule "blocks/search"]
+        path = blocks/search
+        url = https://github.com/antriver/moodle-block_search.git
