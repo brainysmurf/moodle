@@ -298,7 +298,17 @@
     .path-backup .mform .fitem .felement,
     .mform .fdescription.required,
     .form-item .form-description {
-      margin-left: 0;
+        margin-left: 0;
+    }
+    .dir-rtl {
+        .form-item .form-label,
+        .mform .fitem div.fitemtitle {
+            float: none;
+            text-align: right;
+        }
+        .mform .fitem .felement {
+            margin-right: 0;
+        }
     }
     table#form td.submit,
     .form-buttons,
@@ -374,18 +384,6 @@
         float: left;
     }
 
-// Hide broken drag'n'drop options on touch devices MDL-38371
-// Not a great workaround, landscape iPads are wider than this,
-// and a resized window on a netbook could be smaller, but best
-// we can do with CSS. There might be a JS-based solution.
-    .section .side,
-    .editing_move {
-        display: none;
-    }
-    .activityinstance > a {
-        display: block;
-    }
-
   // GRID & CONTAINERS
   // -----------------
   // Remove width from containers
@@ -423,4 +421,29 @@
   div[role=main] {
       margin-bottom: 1em;
   }
+}
+
+// All widths up to 1199px.
+@media (max-width: 1199px) {
+    #page-mod-forum-discuss .discussioncontrols {
+        text-align: right;
+        .discussioncontrol {
+            float: none;
+            width: auto;
+            display: inline-block;
+            margin: 0 3px 0.5em;
+            select,
+            input {
+                margin-bottom: 0;
+            }
+            &.movediscussion {
+                margin-right: 0;
+                padding-right: 0;
+            }
+        }
+    }
+
+   #page-mod-forum-discuss.dir-rtl .discussioncontrols {
+       text-align: left;
+   }
 }
