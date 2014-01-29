@@ -1012,7 +1012,7 @@
 	if ($userlist) {
 		$userlist->close();
 	}
-}
+
 
 
 function get_course_lastaccess_sql($accesssince='') {

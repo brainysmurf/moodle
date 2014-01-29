@@ -94,7 +94,7 @@ class enrol_self_enrol_form extends moodleform {
 					if (enrol_user_is_enrolled($child->userid, $instance->id)) { 
 						
 						//User is already enrolled
-						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="green"><i class="ok-sign"></i> Enrolled!&nbsp;&nbsp;(Use the "Confirm or change" button on the front page above to remove.)</span>', array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox'));
+						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="green"><i class="ok-sign"></i> Enrolled!&nbsp;&nbsp;(Go to the "Course Administration" menu above to remove.)</span>', array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox'));
 			
 			        } else if ($mustBeInCohort && !cohort_is_member($mustBeInCohort->id, $child->userid)) {
 			        
