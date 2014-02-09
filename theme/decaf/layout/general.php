@@ -147,7 +147,39 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
         			}
 			 //echo $OUTPUT->login_info();
     	        echo $OUTPUT->lang_menu();
+
 	        	echo $PAGE->headingmenu;
+
+                $course_id = $PAGE->course->id;
+                if ($course_id != 1) {   # if not frontpage
+                    $formid = 'coursesearchbox';
+                    $inputid = 'navsearchbox';
+                    $inputsize = 40;
+                    if (empty($course_id) || $course_id == 1395) {
+                        $value = 'Search All of DragonNet';
+                    } else {
+                        $value = 'Search within This Course';
+                    }
+
+                    $strsearchcourses= get_string("searchcourses");
+                    $searchurl = new moodle_url('/blocks/search/');
+
+                    $searchcontent = html_writer::start_tag('form', array('id' => $formid, 'action' => $searchurl, 'method' => 'get'));
+                    $searchcontent .= html_writer::start_tag('fieldset', array('class' => 'coursesearchbox invisiblefieldset'));
+                    $searchcontent .= html_writer::tag('label', '', array('for' => $inputid));
+                    $searchcontent .= html_writer::empty_tag('input', array('type' => 'text', 'id' => $inputid, 'size' => $inputsize, 
+                        'onClick' => 'this.select();', 'name' => 'q', 'value' => s($value)));
+                    if (!empty($course_id) && $course_id != 1395) {
+                        $searchcontent .= html_writer::empty_tag('input', array('type' => 'hidden', 
+                            'name' => 'courseID', 'value' => $course_id));
+                    }
+                    #$searchcontent .= html_writer::empty_tag('input', array('type' => 'submit',
+                    #    'value' => get_string('go')));
+                    $searchcontent .= html_writer::end_tag('fieldset');
+                    $searchcontent .= html_writer::end_tag('form');
+                    echo $searchcontent;
+            }
+
         			?>
 	        	</div>
 	        <?php } ?>        

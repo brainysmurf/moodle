@@ -158,6 +158,13 @@ a:hover,a:active {color: #1662A3;}
 	height: 14px;
 }
 
+#navsearchbox {
+	width: 150px;
+	margin-top: 25px;
+	margin-left: 110px;
+	padding: 2px 2px;
+}
+
 .sep{background:url([[pix:theme|breadcrumb_arrow]]) no-repeat scroll 100% 50%;margin-right:5px;padding:0.98em 7px;}
 /* Calendar
 --------------------------- */
