@@ -380,7 +380,6 @@ class format_onetopic_renderer extends format_section_renderer_base {
 			
 			if ( course_count_all_sections($course->id) > ($course->numsections+1) )
 			{
-				echo "hidden stuff";
 				$data['action'] = 'unhide';
 				$label = 'Add A Tab';
 			}
