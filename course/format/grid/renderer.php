@@ -100,7 +100,7 @@ class format_grid_renderer extends format_section_renderer_base {
 			// For the purpose of the grid shade box shown array topic 0 is not shown.
 			$this->shadeboxshownarray[0] = 1;
 		}
-		
+
 		echo html_writer::start_tag('div', array('id' => 'gridiconcontainer'));
 		echo html_writer::start_tag('ul', array('class' => 'gridicons gridformatbuttons buttons'));
 		// Print all of the icons.
@@ -108,8 +108,8 @@ class format_grid_renderer extends format_section_renderer_base {
 				$url_pic_edit);
 		echo html_writer::end_tag('ul');
 		echo html_writer::end_tag('div');
-		
-		
+
+
 		echo html_writer::start_tag('div', array('id' => 'gridshadebox'));
 		echo html_writer::tag('div', '', array('id' => 'gridshadebox_overlay', 'style' => 'display:none;'));
 		echo html_writer::start_tag('div', array('id' => 'gridshadebox_content', 'class' => 'hide_content'));
@@ -274,14 +274,14 @@ class format_grid_renderer extends format_section_renderer_base {
 	static function make_button_gradient_style($color)
 	{
 		$hex = ltrim($color, '#');
-		
+
 		//Convert hex to rgb
 		list($r, $g, $b) = sscanf($hex, "%02x%02x%02x");
-	
+
 		$r2 = $r  - 80;
 		$g2 = $g  - 80;
 		$b2 = $b  - 80;
-	
+
 		return "
 		background: rgb($r,$g,$b);
 		background: -moz-linear-gradient(top,  rgba($r,$g,$b,1) 0%, rgba($r2,$g2,$b2,1) 100%);
@@ -309,7 +309,7 @@ class format_grid_renderer extends format_section_renderer_base {
 		if ($editing) {
 			$str_edit_image = get_string('editimage', 'format_grid');
 			$str_edit_image_alt = get_string('editimage_alt', 'format_grid');
-			
+
 			global $OUTPUT;
 			$OUTPUT->enable_color_picker();
 		}
@@ -325,26 +325,26 @@ class format_grid_renderer extends format_section_renderer_base {
 					$('ul.gridformatbuttons .colorpicker').each(function(){
 						var color = $(this).attr('data-color');
 						$(this).css('color','#'+color);
-						
+
 						$(this).bind('changecolor',function(e, color)
 						{
 							$(this).attr('data-color', color);
 							$(this).css('color','#'+color);
-							
+
 							var li = $(this).closest('li');
 							var sectionID = $(li).attr('data-sectionid');
-							
+
 							//Save in the DB...
 							$.post('/course/format/grid/ajax/setcolor.php', {courseid:courseID, sectionid:sectionID, color:color.toHex()}, function(res){
-							
+
 								var id = $(li).find('a.btn').attr('id');
-							
+
 								//Update the style
 								var style = '#' + id + ' { ' +res.style + ' }';
 								$(li).find('style').html(style);
-								
+
 							});
-							
+
 						});
 					});
 				});
@@ -367,15 +367,15 @@ class format_grid_renderer extends format_section_renderer_base {
 				$section_name = $this->courseformat->get_section_name($thissection);
 
 				$sectionicon = $this->courseformat->grid_get_icon($course->id, $thissection->id);
-				
+
 				$btnColor = $sectionicon->color;
 				if (!$btnColor) {
 					//Default button color
 					$btnColor = '888888';
 				}
-				
+
 				echo html_writer::start_tag('li', array('data-sectionid' => $thissection->id));
-				
+
 					if (is_object($sectionicon) && !empty($sectionicon->imagepath)) {
 						$hasIcon = true;
 						$imageURL = moodle_url::make_pluginfile_url($context->id, 'course', 'section', $thissection->id, '/', $sectionicon->imagepath);
@@ -383,7 +383,7 @@ class format_grid_renderer extends format_section_renderer_base {
 					} else {
 						$hasIcon = false;
 					}
-	
+
 					$btnClasses = 'btn';
 					if ($course->coursedisplay != COURSE_DISPLAY_MULTIPAGE) {
 						$btnClasses .= ' gridicon_link';
@@ -392,9 +392,9 @@ class format_grid_renderer extends format_section_renderer_base {
 						$btnClasses .= ' selected';
 					}
 					$btnClasses .= $hasIcon ? ' hasIcon' : ' noIcon';
-	
+
 					$btnID = 'gridsection-' . $thissection->section;
-	
+
 					 echo html_writer::start_tag('a', array(
 						 'href' => '/course/view.php?id=' . $course->id . '&sectionid=' . $thissection->id,
 						 'id' => $btnID,
@@ -402,34 +402,34 @@ class format_grid_renderer extends format_section_renderer_base {
 						 'style' => $hasIcon ? "background-image:url({$imageURL});" : '',
 						 'data-sectionid' => $thissection->id
 					));
-	
+
 						//If section has been updated since the last visit, show the red star
 						 /*if ( isset($section_updated[$thissection->id])) {
 						 	$section_name = '<i class="icon-star icon-red"></i> '.$section_name;
 						 }*/
-					 
+
 						echo html_writer::tag('span',$section_name);
-	
+
 					 echo html_writer::end_tag('a');
-	
+
 					 if ($editing && $has_cap_update) {
-					 
+
 					 	echo html_writer::start_tag('div', array('class' => 'editbuttons'));
 
 					 	//Change image link
 						$edit_image_url = $this->courseformat->grid_moodle_url('editimage.php', array( 'sectionid' => $thissection->id, 'contextid' => $context->id, 'userid' => $USER->id));
 						echo html_writer::link($edit_image_url, '<i class="icon-picture"></i> Change image');
-	
+
 						echo ' &nbsp;<b>or</b>&nbsp; ';
 
 						$edit_color_url = $this->courseformat->grid_moodle_url('editcolor.php', array( 'sectionid' => $thissection->id, 'contextid' => $context->id, 'userid' => $USER->id));
-						
+
 						echo html_writer::link($edit_color_url, '<i class="icon-pencil"></i> Change color', array('class' => 'colorpicker', 'data-color' => $btnColor));
-	
+
 						 if ($section == 0) {
 							 $str_display_summary = get_string('display_summary', 'format_grid');
 							 $str_display_summary_alt = get_string('display_summary_alt', 'format_grid');
-	
+
 							 echo html_writer::empty_tag('br') . html_writer::link(
 									 $this->courseformat->grid_moodle_url('mod_summary.php', array(
 										 'sesskey' => sesskey(),
@@ -438,16 +438,16 @@ class format_grid_renderer extends format_section_renderer_base {
 										 'src' => $this->output->pix_url('out_of_grid', 'format_grid'),
 										 'alt' => $str_display_summary_alt)) . '&nbsp;' . $str_display_summary,
 											 array('title' => $str_display_summary_alt));
-											 
+
 						 }
-						 
+
 						 echo html_writer::end_tag('div');
 					 }
-					 
+
 					 echo '<style type="text/css"> #'.$btnID.' { '.$this->make_button_gradient_style($btnColor).' } </style>';
-					 
+
 				echo html_writer::end_tag('li');
-							 
+
 			} else {
 				// We now know the value for the grid shade box shown array.
 				$this->shadeboxshownarray[$section] = 1;
@@ -593,7 +593,7 @@ class format_grid_renderer extends format_section_renderer_base {
 
 	/**
 	 * Attempts to return a 40 character title for the section icon.
-	 * If section names are set, they are used. Otherwise it scans 
+	 * If section names are set, they are used. Otherwise it scans
 	 * the summary for what looks like the first line.
 	 */
 	private function get_title($section) {
@@ -669,4 +669,88 @@ class format_grid_renderer extends format_section_renderer_base {
 
 		return $sections_edited;
 	}
+
+	public function print_single_section_page($course, $sections, $mods, $modnames, $modnamesused, $displaysection) {
+        global $PAGE;
+        $modinfo = get_fast_modinfo($course);
+        $course = course_get_format($course)->get_course();
+
+        // Can we view the section in question?
+        if (!($sectioninfo = $modinfo->get_section_info($displaysection))) {
+            // This section doesn't exist
+            print_error('unknowncoursesection', 'error', null, $course->fullname);
+            return;
+        }
+
+        if (!$sectioninfo->uservisible) {
+            if (!$course->hiddensections) {
+                echo $this->start_section_list();
+                echo $this->section_hidden($displaysection);
+                echo $this->end_section_list();
+            }
+            // Can't view this section.
+            return;
+        }
+
+        // Copy activity clipboard..
+        echo $this->course_activity_clipboard($course, $displaysection);
+
+        //Shows section 0 at the top of every page
+        /*$thissection = $modinfo->get_section_info(0);
+        if ($thissection->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
+            echo $this->start_section_list();
+            echo $this->section_header($thissection, $course, true, $displaysection);
+            echo $this->courserenderer->course_section_cm_list($course, $thissection, $displaysection);
+            echo $this->courserenderer->course_section_add_cm_control($course, 0, $displaysection);
+            echo $this->section_footer();
+            echo $this->end_section_list();
+        }*/
+
+        // Start single-section div
+        echo html_writer::start_tag('div', array('class' => 'single-section'));
+
+        // The requested section page.
+        $thissection = $modinfo->get_section_info($displaysection);
+
+        // Title with section navigation links.
+        $sectionnavlinks = $this->get_nav_links($course, $modinfo->get_section_info_all(), $displaysection);
+        $sectiontitle = '';
+        $sectiontitle .= html_writer::start_tag('div', array('class' => 'section-navigation header headingblock'));
+        //$sectiontitle .= html_writer::tag('span', $sectionnavlinks['previous'], array('class' => 'mdl-left'));
+        //$sectiontitle .= html_writer::tag('span', $sectionnavlinks['next'], array('class' => 'mdl-right'));
+        // Title attributes
+        $titleattr = 'mdl-align title';
+        if (!$thissection->visible) {
+            $titleattr .= ' dimmed_text';
+        }
+        $sectiontitle .= html_writer::tag('div', get_section_name($course, $displaysection), array('class' => $titleattr));
+        $sectiontitle .= html_writer::end_tag('div');
+        echo $sectiontitle;
+
+        // Now the list of sections..
+        echo $this->start_section_list();
+
+        echo $this->section_header($thissection, $course, true, $displaysection);
+        // Show completion help icon.
+        $completioninfo = new completion_info($course);
+        echo $completioninfo->display_help_icon();
+        echo $this->courserenderer->course_section_cm_list($course, $thissection, $displaysection);
+        echo $this->courserenderer->course_section_add_cm_control($course, $displaysection, $displaysection);
+        echo $this->section_footer();
+        echo $this->end_section_list();
+
+        // Display section bottom navigation.
+        //$sectionbottomnav = '';
+        //$sectionbottomnav .= html_writer::start_tag('div', array('class' => 'section-navigation mdl-bottom'));
+        //$sectionbottomnav .= html_writer::tag('span', $sectionnavlinks['previous'], array('class' => 'mdl-left'));
+        //$sectionbottomnav .= html_writer::tag('span', $sectionnavlinks['next'], array('class' => 'mdl-right'));
+        //$sectionbottomnav .= html_writer::tag('div', $this->section_nav_selection($course, $sections, $displaysection),
+        //    array('class' => 'mdl-align'));
+        //$sectionbottomnav .= html_writer::end_tag('div');
+        //echo $sectionbottomnav;
+
+        // Close single-section div.
+        echo html_writer::end_tag('div');
+    }
+
 }
