@@ -35,7 +35,8 @@ if ($PAGE->course->id != 1 && isloggedin()) {   # if not frontpage
 			'type' => 'text',
 			'size' => $inputsize,
 			'name' => 'q',
-			'placeholder' => s($placeholder)
+			'placeholder' => s($placeholder),
+			'onclick' => 'this.select()'
 		));
 
 		//Search button
