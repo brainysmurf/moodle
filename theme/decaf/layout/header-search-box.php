@@ -33,7 +33,6 @@ if ($PAGE->course->id != 1 && isloggedin()) {   # if not frontpage
 		//Input box
 		echo html_writer::empty_tag('input', array(
 			'type' => 'text',
-			'size' => $inputsize,
 			'name' => 'q',
 			'placeholder' => s($placeholder),
 			'onclick' => 'this.select()'
