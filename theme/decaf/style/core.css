@@ -47,7 +47,7 @@ a:hover,a:active {color: #1662A3;}
 #page-header-wrapper{
 	margin:0;
 	position: relative;
-	padding: 49px 30px 53px 48px; /* Vertically center the page title */        
+	padding: 49px 30px 53px 48px; /* Vertically center the page title */
 	z-index: 2;
 }
 
@@ -91,7 +91,7 @@ a:hover,a:active {color: #1662A3;}
 }
 
 #page-site-index #page-header-wrapper .headermain{ font-size: 3em; }
-			
+
 /* Header Profile
 -------------------------- */
 #header-profileoptions ul{margin-right:4px;}
@@ -217,7 +217,7 @@ a:hover,a:active {color: #1662A3;}
 	white-space: nowrap;
 	text-align:center;
 }
-	
+
 .tabs ul li > a:hover {
 	background: rgb(244,244,244);
 	background: -moz-linear-gradient(top,  rgba(244,244,244,1) 0%, rgba(230,230,230,1) 100%);
@@ -236,7 +236,7 @@ a:hover,a:active {color: #1662A3;}
 	color: #FFF;
 	border-color: #1662A3 !important;
 }
-	
+
 /* Delete section button */
 .tabs ul li span.selected a.btn {
 	display:inline-block;
@@ -321,7 +321,7 @@ a.editsectionbutton img {
 	position: relative;
 	top: -2px;
 }
-			
+
 
 /* User
 --------------------------- */
@@ -400,8 +400,8 @@ body.editing ul.section>li {border-bottom: 1px dashed #808080; position:relative
 	display:inline-block;
 }
 	.addresourcemodchooser i { margin-right:4px; }
-	
-	
+
+
 /* Make 2.3 activity chooser sit on top of modules in sections */
 div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 
@@ -442,7 +442,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 .block .block_action {margin-right:4px;}
 .block .header .block_action{ margin: 6px 6px 0 0; }
 .block_with_controls .header .title {position:relative;}
-.block .commands { 
+.block .commands {
 	clear:both;
 	height:auto;
 	padding:0;
@@ -567,7 +567,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 .form-input {text-align:left;}
 
 	/* Login Form */
-	
+
 	.loginpanel {
 		width:75%;
 		max-width:500px;
@@ -579,30 +579,30 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 			line-height: 22px;
 			padding: 15px;
 			background-color:#fff;
-			border-top: 2px solid #1662A3; 
+			border-top: 2px solid #1662A3;
 			border-bottom: 2px solid #1662A3;
 		}
 			.login-reminder icon { margin-top: -4px; }
-	
+
 	.loginerrors {
 		text-align: center;
 		padding: 10px 0 0 0;
 		color: #A00;
 	}
-		
+
 	.loginform-input-row {
 		padding: 0 0 0 25px;
 		position: relative;
 		margin:15px 0;
 	}
-	
+
 		/* form icons */
 		.loginform-input-row icon {
 			position: absolute;
 			top: 14px;
 			left: 2px;
 		}
-	
+
 		/* Username & Password */
 		.loginform input[type=text],
 		.loginform input[type=password],
@@ -616,23 +616,23 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 			font-size:16px;
 			line-height:1.5em;
 			padding:10px;
-			width:100%;			
+			width:100%;
 			/* to have 100% width with padding */
 			-moz-box-sizing:border-box;
 			-webkit-box-sizing:border-box;
 			box-sizing:border-box;
 		}
-		
+
 		.loginform input[type=submit],
 		.loginform button {
 			cursor:pointer;
 		}
-		
+
 	.loginform-remember-row {
 		margin:15px 0;
 		text-align:center;
 	}
-	
+
 	.loginform #login-guest,
 	.loginform #login-forgotten {
 		margin-top:30px;
@@ -643,13 +643,13 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 		-webkit-box-sizing:border-box;
 		box-sizing:border-box;
 	}
-	
+
 		.loginform h4 {
 			font-size:12px;
 			font-weight:bold;
 			min-height:30px;
 		}
-	
+
 	.loginform #login-guest {
 		float:left;
 		padding-right:10px;
@@ -658,17 +658,17 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 			margin:5px 0 0 0;
 			font-size:12px;
 		}
-	
+
 	.loginform #login-forgotten {
 		float:right;
 		padding-left:10px;
 	}
-	
+
 
 
 /* Footer
 -------------------------- */
-#page-footer { 
+#page-footer {
 	padding:15px;
 	margin:15px 0 0 0;
 	font-size:12px;
@@ -685,7 +685,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 		margin: 0 0 7px 0;
 	}
 		#page-footer p:last-child { margin-bottom:0; }
-		
+
 #page-footer .logininfo{margin:1em 0;}
 
 #back-to-top {
@@ -740,7 +740,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 		.course-content ul.weeks li.section .right {
 			margin: 10px 0 0 0;
 		}
-		
+
 		.course-content ul.topics li.section .right a,
 		.course-content ul.weeks li.section .right a {
 			margin:0 5px;
@@ -840,7 +840,7 @@ body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questionca
     margin-bottom:10px;
     padding: 15px 20px;
     background-color: #fff;
-    border-top: 2px solid #1662A3; 
+    border-top: 2px solid #1662A3;
     border-bottom: 2px solid #1662A3;
 }
 	.section .local-alert {
@@ -983,16 +983,16 @@ table.styledtable tr:hover td {
 			.htmltable_removecol_button button {
 				margin-bottom:5px;
 			}
-		
-		#htmltable_edittable td:first-child button {		
+
+		#htmltable_edittable td:first-child button {
 			position: absolute;
 			top: 6px;
 			left: 5px;
 		}
-			#htmltable_edittable tr:last-child {		
+			#htmltable_edittable tr:last-child {
 				padding-left:3px;
 			}
-			#htmltable_edittable tr:last-child td:first-child button {		
+			#htmltable_edittable tr:last-child td:first-child button {
 				position: static;
 			}
 		#htmltable_edittable td:first-child input[type=text] {
@@ -1022,7 +1022,7 @@ h2.noAccess {
 }
 .coursebox>.info>.name {
 	width:auto;
-	float:none;	
+	float:none;
 }
 .coursebox .content .summary {
 	width:auto;
@@ -1049,7 +1049,7 @@ h2.noAccess {
 	}
 		.errorbox a {
 			color: #A00;
-			font-weight:bold;	
+			font-weight:bold;
 		}
 		/* Add fontawesome alert icon to errorboxes*/
 		.errorbox:before {
@@ -1057,7 +1057,7 @@ h2.noAccess {
 			content: "\f071";
 			margin-right:5px;
 		}
-		
+
 	.successbox {
 		text-align:center;
 		color:#048804;
@@ -1069,7 +1069,7 @@ h2.noAccess {
 			content: "\f058";
 			margin-right:5px;
 		}
-		
+
 	.generalbox .errorbox,
 	.mform > fieldset .errorbox,
 	.generalbox .successbox,
@@ -1079,7 +1079,7 @@ h2.noAccess {
 		-webkit-box-shadow:none;
 		box-shadow:none;
 	}
-		
+
 	.helptext {
 		font-size:12px;
 		text-align:center;
@@ -1104,7 +1104,7 @@ h2.noAccess {
 	#intro.generalbox {
 		padding: 10px;
 	}
-	
+
 	.generalbox.inset {
 		-webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.2) inset;
 		-moz-box-shadow: 0 0 8px rgba(0, 0, 0, 0.2) inset;
@@ -1115,17 +1115,17 @@ h2.noAccess {
 	.mform > fieldset .ftoggler {
 		background: #fff;
 	}
-	.generalbox > :last-child { 
+	.generalbox > :last-child {
 		margin-bottom:0;
 	}
-	
+
 	.sitetopic {
 		background:none;
 		-webkit-box-shadow:none;
 		-moz-box-shadow:none;
 		box-shadow:none;
 	}
-	
+
 	/* Icons page */
 	ul.iconList {
 		list-style:none;
@@ -1152,18 +1152,18 @@ h2.noAccess {
 			vertical-align: middle;
 			margin-right:5px;
 		}
-		
+
 
 	.boxwidthwide {
 		width:auto;
 	}
-	
+
 	.template_heading {
 		margin-bottom: 10px;
 		font-weight: bold;
 		font-size: 12px;
 	}
-	
+
 	/* Pagination */
 	.paging {
 		text-align:center;
@@ -1175,7 +1175,7 @@ h2.noAccess {
 			top: 1px;
 			margin-right: 5px;
 		}
-		.paging .btn { 
+		.paging .btn {
 			font-weight:normal;
 			margin:0 1px;
 			font-size:13px;
@@ -1187,16 +1187,16 @@ h2.noAccess {
 		}
 
 	/* Grid course format tweaks */
-	
+
 	#gridiconcontainer {
 		padding:0;
 	}
-	
+
 	/* Button list */
 	ul.gridformatbuttons.buttons {
 		max-width:none;
 	}
-		
+
 		/* Button list items */
 		ul.gridformatbuttons.buttons li {
 			margin:0 !important;
@@ -1205,7 +1205,7 @@ h2.noAccess {
 			background:none !important;
 			opacity:1 !important;
 		}
-			
+
 			/* Button links (the actual buttons) */
 			ul.gridformatbuttons.buttons a.btn {
 				position: relative;
@@ -1229,12 +1229,12 @@ h2.noAccess {
 					ul.gridformatbuttons.buttons .btn:hover span {
 						opacity:1;
 					}
-			
+
 				/* Buttons with images */
 				ul.gridformatbuttons a.btn.hasIcon {
 					background-size:cover !important;
 				}
-				
+
 					/* Labels gradient */
 					ul.gridformatbuttons .btn.hasIcon span {
 						color:#fff;
@@ -1246,7 +1246,7 @@ h2.noAccess {
 						background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
 						filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#cc000000',GradientType=0 );
 					}
-					
+
 					ul.gridformatbuttons .btn.noIcon span {
 						color:#fff;
 						background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.4) 100%);
@@ -1257,7 +1257,7 @@ h2.noAccess {
 						background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 30%,rgba(0,0,0,0.4) 100%);
 						filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#cc000000',GradientType=0 );
 					}
-					
+
 				ul.gridformatbuttons .editbuttons,
 				ul.gridformatbuttons .editbuttons a {
 					text-align:center;
@@ -1267,7 +1267,7 @@ h2.noAccess {
 					ul.gridformatbuttons .editbuttons a:hover {
 						color:#888;
 					}
-	
+
 	#gridshadebox_content .activity {
 		border-bottom-width:0;
 	}
@@ -1277,8 +1277,8 @@ h2.noAccess {
 		#gridshadebox_content .activity .activityinstance img.activityicon {
 			margin-top:2px;
 		}
-	
-	/* Grid format popup */	
+
+	/* Grid format popup */
 	#gridshadebox_content {
 		position:fixed !important;
 		top:40px !important;
@@ -1291,7 +1291,7 @@ h2.noAccess {
 		body.editing #gridshadebox_content {
 			position: static !important;
 		}
-	
+
 		#gridshadebox_content_inner {
 			height:100%;
 			overflow: auto;
@@ -1306,7 +1306,37 @@ h2.noAccess {
 				#gridshadebox_content ul.gtopics .section {
 					padding:0;
 				}
-		
+
+
+/* Search form in header */
+#headerSearchForm {
+	position: absolute;
+	bottom:10px;
+	right:10px;
+	width:290px;
+}
+
+#headerSearchForm input,
+#headerSearchForm button {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+#headerSearchForm input[type=text] {
+	width:220px;
+	margin-right:10px;
+	font-size:13px;
+	padding:3px;
+}
+
+#headerSearchForm button {
+	width:60px;
+	font-size:13px;
+	margin-top: -3px;
+	padding: 4px;
+}
+
+
 /** Custom CSS **/
 [[setting:customcss]]
-

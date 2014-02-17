@@ -115,6 +115,15 @@ class cachestore_memcache extends cache_store implements cache_is_configurable {
             if (!is_array($server)) {
                 $server = explode(':', $server, 3);
             }
+            //Is it a socket?
+            if ($server[0] == 'unix') {
+                $this->servers[] = array(
+                    0 => implode(':', $server), //host string
+                    1 => 0, //port
+                    2 => 100, //persistent
+                );
+                continue;
+            }
             if (!array_key_exists(1, $server)) {
                 $server[1] = 11211;
                 $server[2] = 100;

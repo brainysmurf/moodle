@@ -104,7 +104,7 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
                #$o = implode('<br />', $controls);
                $o = implode('', $controls);
             }
-            
+
         }
 
         return $o;
@@ -612,7 +612,6 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
      */
     public function print_single_section_page($course, $sections, $mods, $modnames, $modnamesused, $displaysection) {
         global $PAGE;
-
         $modinfo = get_fast_modinfo($course);
         $course = course_get_format($course)->get_course();
 
@@ -673,7 +672,6 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
         // Show completion help icon.
         $completioninfo = new completion_info($course);
         echo $completioninfo->display_help_icon();
-
         echo $this->courserenderer->course_section_cm_list($course, $thissection, $displaysection);
         echo $this->courserenderer->course_section_add_cm_control($course, $displaysection, $displaysection);
         echo $this->section_footer();

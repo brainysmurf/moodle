@@ -106,7 +106,7 @@ class tinymce_texteditor extends texteditor {
         if ($fpoptions) {
             $PAGE->requires->js_init_call('M.editor_tinymce.init_filepicker', array($elementid, $fpoptions), true);
         }
-	// ssis doesn't want the stupid "show" thingie
+  // ssis doesn't want the stupid "show" thingie
         //$this->initialise_collapse_js();
     }
 
@@ -121,7 +121,7 @@ class tinymce_texteditor extends texteditor {
         $strdate        = get_string('strftimedaydate');
         $lang           = current_language();
         $contentcss     = $PAGE->theme->editor_css_url()->out(false);
-        
+
         //Make font awesome work in editor
         $contentcss .= ',/font-awesome/css/font-awesome.min.css';
 
@@ -218,16 +218,18 @@ class tinymce_texteditor extends texteditor {
 
         // Remove temporary parameters.
         unset($params['moodle_config']);
-	
-		$params['plugins'] .= ",mediacoreinsert";
-		$params['theme_advanced_buttons3_add'] = ",|,mediacoreinsert";
-	
-		//Buttons plugin 
-		$params['plugins'] .= ',buttons';
-		
-			//This should probalbly be set in the Site Admin > plugins > text editors > tiny mce > general, but that doesn't sync. So sticking it here
-			//(Same for mediacore above, but that has more issues)
-		$params['theme_advanced_buttons3'] .= ",|,addbuttons";
+
+        if ($_SERVER['SERVER_NAME'] != 'dragonnet.local') {
+          $params['plugins'] .= ",mediacoreinsert";
+          $params['theme_advanced_buttons3_add'] = ",|,mediacoreinsert";
+        }
+
+        //Buttons plugin
+        $params['plugins'] .= ',buttons';
+
+        //This should probalbly be set in the Site Admin > plugins > text editors > tiny mce > general, but that doesn't sync. So sticking it here
+        //(Same for mediacore above, but that has more issues)
+        $params['theme_advanced_buttons3'] .= ",|,addbuttons";
 
 
         return $params;
