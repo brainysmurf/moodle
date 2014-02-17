@@ -577,7 +577,6 @@
 
 	// !Search box above user list
 	$searchBox = '
-		<p style="text-align:center;font-size:10pt;padding-top:10px;padding-bottom:10px;"><i>Please note that the email addresses provided for elementary students and their parents do NOT work at the moment. <br />If you are a teacher looking to contact an elementary parent, please use PowerSchool until our team is able to get these emails working.</i></p>
 		<form action="index.php" class="directorysearchform searchform" style="text-align:center;">
 			<input type="hidden" name="id" value="'.$course->id.'" />
 			<label for="search">Search for</label> 
@@ -747,11 +746,12 @@
 						or
 						($user->id == $USER->id)
 					) {
-						
 						$row->cells[1]->text .= '<tr>
 							<td>'.get_string('email').'</td>
 							<td>'.html_writer::link("mailto:$user->email", $user->email).'</td>
 						</tr>';
+
+
 
 						foreach ($extrafields as $field)
 						{
@@ -796,19 +796,21 @@
 							<td><a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a></td>
 						</tr>';
 						
-						//Show the address to bulk email all the student's teachers
-						$teachers_email_address = $user->username . "TEACHERS@student.ssis-suzhou.net";
-						$row->cells[1]->text .= '<tr>
-							<td>All Teachers Email</td>
-							<td><a href="mailto:' . $teachers_email_address . '">' . $teachers_email_address . '</a></td>
-						</tr>';
+						if ( (int)$user->department >= 6 ) {
+							//Show the address to bulk email all the student's teachers
+							$teachers_email_address = $user->username . "TEACHERS@student.ssis-suzhou.net";
+							$row->cells[1]->text .= '<tr>
+								<td>All Teachers Email</td>
+								<td><a href="mailto:' . $teachers_email_address . '">' . $teachers_email_address . '</a></td>
+							</tr>';
 
-						//Show their homeroom teacher's email address
-						$hr_email_address = $user->username . "HR@student.ssis-suzhou.net";
-						$row->cells[1]->text .= '<tr>
-							<td>Homeroom Teacher\'s Email</td>
-							<td><a href="mailto:' . $hr_email_address . '">' . $hr_email_address . '</a></td>
-						</tr>';
+							//Show their homeroom teacher's email address
+							$hr_email_address = $user->username . "HR@student.ssis-suzhou.net";
+							$row->cells[1]->text .= '<tr>
+								<td>Homeroom Teacher\'s Email</td>
+								<td><a href="mailto:' . $hr_email_address . '">' . $hr_email_address . '</a></td>
+							</tr>';
+						}
 					}
 					
 					/*
