@@ -34,3 +34,4 @@ composer.lock
 */yui/build/*/*-coverage.js
 /lib/yuilib/*/build/*/*-coverage.js
 /phpmemcacheadmin
+/local/codechecker/
