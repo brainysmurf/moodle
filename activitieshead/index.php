@@ -33,6 +33,7 @@ function output_forms($user=null) {  #"Look up by lastname, firstname, or homero
 $("#person").autocomplete({
             source: "/activitieshead/index.php",
             select: function (event, ui) {
+                console.log("select");
                 event.preventDefault();
                 $("#person").val(ui.item.label);
                 $("#powerschool").val(ui.item.value);
@@ -40,8 +41,13 @@ $("#person").autocomplete({
             change: function (event, ui) {   // TODO: determine if I really really need this
                 if (ui != null) {
                     event.preventDefault();
+                console.log("change");
                 }
-            }
+            },
+            focus: function (event, ui) {
+                event.preventDefault();
+                $("#person").val(ui.item.label);
+            },
         });
 </script>';
 }
@@ -56,7 +62,8 @@ function permit_user($userid) {
 function get_user_activity_enrollments($userid) {
     global $DB;
     return $DB->get_recordset_sql("
-select crs.id as course_id,
+select
+    crs.id as course_id,
     enrl.id as enrolid,
     usr.idnumber as idnumber,
     concat(usr.firstname, ' ', usr.lastname) as username,
@@ -80,7 +87,8 @@ where
 function get_family_activity_enrollments($familyid) {
     global $DB;
     return $DB->get_recordset_sql("
-select crs.id as course_id,
+select
+    crs.id as course_id,
     usr.idnumber as idnumber,
     concat(usr.firstname, ' ', usr.lastname) as username,
     regexp_replace(crs.fullname, '\(.*\)', '') as fullname
