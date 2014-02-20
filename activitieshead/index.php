@@ -1,20 +1,49 @@
 <?php
 
-$query = isset($_GET['query']) ? $_GET['query'] : FALSE;
+$term = isset($_GET['term']) ? $_GET['term'] : FALSE;
 require_once '../config.php';
+$PAGE->requires->jquery();
+$PAGE->requires->jquery_plugin('ui');
 require_once '../cohort/lib.php';
 define('ACTIVITIES_COHORT', 'activitiesHEAD');
 $activities_cohort = $DB->get_record('cohort', array('idnumber'=>ACTIVITIES_COHORT), 'id', MUST_EXIST);
 define('ACTIVITIES_COHORT_ID', $activities_cohort->id);
 
-function output_forms($user_idnumber) {
-    echo '<form name="user_entry" action="/activitieshead/index.php" method="get">
-    <input type="text" name="powerschool" id="person" value="'.$user_idnumber.'"/>
-    <input name="action" type="submit" value="view family"/>
-    <input name="action" type="submit" value="view child"/>
-    <input name="action" type="submit" value="enrol child"/>
-    <input name="action" type="submit" value="deenrol child"/>
-    </form><br />';
+function output_forms($user=null) {  #"Look up by lastname, firstname, or homeroom...") {
+    if (!($user)) {
+        $default_words = 'placeholder="Look up by lastname, firstname, or homeroom..." ';
+        $powerschoolID = "";
+    } else {
+        $default_words = 'value="'.$user->lastname.', '.$user->firstname.' ('.$user->department.')" ';
+        $powerschoolID = $user->idnumber;
+    }
+    echo '
+<form name="user_entry" action="/activitieshead/index.php" method="get">
+<input name="" autofocus="autofocus" size="100" onclick="this.select()"
+    style="font-size:18px;margin-bottom:5px;box-sizing: border-box;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;padding:3px;"
+    type="text" id="person" '.$default_words.'/><br />
+<input name="powerschool" type="hidden" id="powerschool" value="'.$powerschoolID.'"/>
+<input name="action" style="border:4;" type="submit" type="submit" value="view family"/>
+<input name="action" type="submit" value="view child"/>
+<input name="action" type="submit" value="enrol child"/>
+<input name="action" type="submit" value="deenrol child"/>
+</form><br />';
+    echo '
+<script>
+$("#person").autocomplete({
+            source: "/activitieshead/index.php",
+            select: function (event, ui) {
+                event.preventDefault();
+                $("#person").val(ui.item.label);
+                $("#powerschool").val(ui.item.value);
+            },
+            change: function (event, ui) {   // TODO: determine if I really really need this
+                if (ui != null) {
+                    event.preventDefault();
+                }
+            }
+        });
+</script>';
 }
 
 function permit_user($userid) {
@@ -71,24 +100,33 @@ where
     enrl.enrol = 'self'");
 }
 
-if ($query) {
+if ($term) {
+    // Taps the database for user information
     global $DB;
-
-    $suggestions = array();
-    $data = array();
-    $students = $DB->get_records_list("user", "lastname", array($query));
-
+    $term = strtolower($term);
+    $term_plain = pg_escape_literal($term);
+    $term_perc = pg_escape_literal($term.'%');
+    $results = array();
+    if (strpos($term,',') !== false) {
+        $where = "(email LIKE '%@student.ssis-suzhou.net' AND CONCAT(LOWER(lastname), ', ', LOWER(firstname)) like {$term_perc})";
+    } else {
+        $where = "(email LIKE '%@student.ssis-suzhou.net' AND (LOWER(lastname) LIKE {$term_perc} OR LOWER(firstname) LIKE {$term_perc} OR LOWER(department) = {$term_plain}))";
+    }
+    $sort = 'lastname, firstname, department';
+    $fields = 'id, idnumber, lastname, firstname, department';
+    $students = $DB->get_records_select("user", $where, null, $sort, $fields);
     foreach ($students as $row) {
-        $suggestions[] = $row->lastname.', '.$row->firstname.' '.$row->department.' ('.$row->idnumber.')';
-        $data[] = $row->idnumber;
+        if ($row->idnumber === "") {
+            continue;  // TODO: moodle for some reason can keep useless rows of students....
+        }
+        $results[] = array(
+            "label"=>$row->lastname.', '.$row->firstname.' ('.$row->department.')',
+            "value"=>$row->idnumber
+            );
+
     }
 
-    $response = array(
-        'students' => $query,
-        'suggestions' => $suggestions,
-        'data' => $data,
-    );
-    echo json_encode($response);
+    echo json_encode($results);
 
 } else {
 
@@ -126,7 +164,11 @@ if ($query) {
 
     if ( empty($action) or $action === 'view family' )  {
 
-        output_forms($user->idnumber);
+        if (empty($user)) {
+            output_forms();
+        } else {
+            output_forms($user);
+        }
 
         if (empty($powerschoolID)) {
             echo "I got nothing";
@@ -138,7 +180,7 @@ if ($query) {
 
             foreach ($results as $item) {
                 echo '<tr class="r0">';
-                echo '<td class="cell c0"><p><a href="/activitieshead/index.php?action=enrol&powerschool='.$item->idnumber.'">'.$item->username.'</a></p></td>';
+                echo '<td class="cell c0"><p><a href="/activitieshead/index.php?action=enrol+child&powerschool='.$item->idnumber.'">'.$item->username.'</a></p></td>';
                 echo '<td class="cell c1 lastcol"><p>'.$item->fullname.'</p></td>';
                 echo '</tr>';
             }
@@ -156,7 +198,7 @@ if ($query) {
             $plugin->unenrol_user($instance, $user->id);
             echo 'De-enrolled both the child and the parent (although the parent stays enrolled if there is another child enrolled). Please check';
         } else {
-            output_forms($user->idnumber);
+            output_forms($user);
 
             echo '<div>Viewing enrollments for <strong>'.$user->lastname.', '.$user->firstname.'</strong> and his/her linked parent account</div><br />';
 
@@ -177,7 +219,7 @@ if ($query) {
     } else if ($action==='enrol child') {
 
         if (substr($user->idnumber, '4') === 'P') {
-            echo "You can't enroll parents, you just enrol the child and the parent enrols automatically.";
+            echo "You can't enroll parents, you just enrol the child and the parent gets enrolled automatically.";
         }
 
         else if ($go) {
@@ -188,7 +230,7 @@ if ($query) {
             echo 'Enrolled the child and the parent account. Please check';
 
         } else {
-            output_forms($user->idnumber);
+            output_forms($user);
 
             echo '<div>Click to add enrollment for <strong>'.$user->lastname.', '.$user->firstname.'</strong> and his/her linked parent account</div><br />';
 
@@ -219,7 +261,7 @@ order by
                 echo '<tr class="r0">';
                 if (!in_array($row->id, $already_enrolled)) {
                     echo '<td class="cell c1">Click to enrol:</td>';
-                    echo '<td class="cell c1"><p><a href="/activitieshead/index.php?action=enrol&go='.$row->id.'&powerschool='.$user->idnumber.'">'.$row->fullname.'</a></p></td>';
+                    echo '<td class="cell c1"><p><a href="/activitieshead/index.php?action=enrol+child&go='.$row->id.'&powerschool='.$user->idnumber.'">'.$row->fullname.'</a></p></td>';
                 } else {
                     echo '<td class="cell c1">Already enrolled:</td>';
                     echo '<td class="cell c1"><p>'.$row->fullname.'</a></p></td>';
@@ -232,29 +274,34 @@ order by
         }
 
     } else if ($action==='deenrol child') {
-        if ($go) {
-            $enrolid = $go;
-            $instance = $DB->get_record('enrol', array('id'=>$enrolid, 'enrol'=>'self'), '*', MUST_EXIST);
-            $plugin = enrol_get_plugin('self');
-            $plugin->unenrol_user($instance, $user->id);
-            echo 'De-enrolled both the child and the parent (although the parent stays enrolled if there is another child enrolled). Please check';
+        if (substr($user->idnumber, '4') === 'P') {
+            echo "You can't de-enroll parents, you just enrol the child and the parent gets de-enrolled automatically (unless another child is still enrolled).";
         } else {
-            output_forms($user->idnumber);
 
-            echo '<div>Removing enrollment for <strong>'.$user->lastname.', '.$user->firstname.'</strong> and his/her linked parent account</div><br />';
+            if ($go) {
+                $enrolid = $go;
+                $instance = $DB->get_record('enrol', array('id'=>$enrolid, 'enrol'=>'self'), '*', MUST_EXIST);
+                $plugin = enrol_get_plugin('self');
+                $plugin->unenrol_user($instance, $user->id);
+                echo 'De-enrolled both the child and the parent (although the parent stays enrolled if there is another child enrolled). Please check';
+            } else {
+                output_forms($user);
 
-            echo $begin_table;
-            $results = get_user_activity_enrollments($user->id);
+                echo '<div>Removing enrollment for <strong>'.$user->lastname.', '.$user->firstname.'</strong> and his/her linked parent account</div><br />';
 
-            foreach ($results as $item) {
-                echo '<tr class="r0">';
-                echo '<td class="cell c0"><p>Click to de-enrol:</p></td>';
-                echo '<td class="cell c1"><p><a href="/activitieshead/index.php?action=deenrol&go='.$item->enrolid.'&powerschool='.$user->idnumber.'">'.$item->fullname.'</a></p></td>';
-                echo '</tr>';
+                echo $begin_table;
+                $results = get_user_activity_enrollments($user->id);
+
+                foreach ($results as $item) {
+                    echo '<tr class="r0">';
+                    echo '<td class="cell c0"><p>Click to de-enrol:</p></td>';
+                    echo '<td class="cell c1"><p><a href="/activitieshead/index.php?action=deenrol+child&go='.$item->enrolid.'&powerschool='.$user->idnumber.'">'.$item->fullname.'</a></p></td>';
+                    echo '</tr>';
+                }
+                $results->close();
+
+                echo $end_table;
             }
-            $results->close();
-
-            echo $end_table;
         }
     }
 }
