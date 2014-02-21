@@ -9,6 +9,22 @@
 .headermain {
 	font-family: "Calligraffitti", cursive;
 }
+	.headermain img {
+		vertical-align:middle;
+		margin-top:-10px;
+	}
+
+#page-site-index #page-header-wrapper {
+	padding: 55px 30px 55px 48px;
+}
+
+
+/* Fix Firefox */
+@-moz-document url-prefix() {
+    .headermain img {
+        margin-top:0;
+    }
+}
 
 /*
 	Make things that are currently blue ready to transition to the new color

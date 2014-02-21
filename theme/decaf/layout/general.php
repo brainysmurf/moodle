@@ -171,7 +171,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 
 					if ($heading == 'DragonNet') {
 						$height = '';
-						$heading = str_replace('DragonNet','<img src="/theme/decaf/pix/artslogo.png" alt="DragonNet" style="'.$height.' vertical-align:middle; margin-top:-10px;" />', $heading);
+						$heading = str_replace('DragonNet','<img src="/theme/decaf/pix/artslogo.png" alt="DragonNet"/>', $heading);
 						$heading .= " &hearts;s Arts Week";
 					}
 				 ?>
