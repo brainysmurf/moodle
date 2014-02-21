@@ -2,8 +2,8 @@
 
 function theme_decaf_page_init(moodle_page $page) {
     $page->requires->jquery();
-	$page->requires->jquery_plugin('ui');
-	$page->requires->jquery_plugin('ui-css');
+    $page->requires->jquery_plugin('ui');
+    $page->requires->jquery_plugin('ui-css');
 }
 
 /**
@@ -14,7 +14,7 @@ function theme_decaf_page_init(moodle_page $page) {
  * @return string
  */
 function decaf_performance_output($param) {
-	
+
     $html = '<div class="performanceinfo"><ul>';
 	if (isset($param['realtime'])) $html .= '<li><a class="red" href="#"><var>'.$param['realtime'].' secs</var><span>Load Time</span></a></li>';
 	if (isset($param['memory_total'])) $html .= '<li><a class="orange" href="#"><var>'.display_size($param['memory_total']).'</var><span>Memory Used</span></a></li>';
@@ -91,7 +91,7 @@ function decaf_set_customcss($css, $customcss) {
  * The edit buttoniser is a YUI moodle module that is located in
  *     theme/decaf/yui/editbuttons/editbuttons.js
  *
- * @param moodle_page $page 
+ * @param moodle_page $page
  */
 function decaf_initialise_editbuttons(moodle_page $page) {
     $page->requires->string_for_js('edit', 'moodle');
@@ -471,7 +471,7 @@ class decaf_expand_navigation extends global_navigation {
         $this->rootnodes['site']      = $this->add_course($SITE);
         $this->rootnodes['mycourses'] = $this->add(get_string('mycourses'), new moodle_url('/my'), self::TYPE_ROOTNODE, null, 'mycourses');
         $this->rootnodes['courses'] = $this->add(get_string('courses'), null, self::TYPE_ROOTNODE, null, 'courses');
-        
+
         if(function_exists('enrol_user_sees_own_courses')) {
             // Determine if the user is enrolled in any course.
             $enrolledinanycourse = enrol_user_sees_own_courses();
@@ -486,7 +486,7 @@ class decaf_expand_navigation extends global_navigation {
                 $this->rootnodes['courses']->isexpandable = true;
             }
         }
-        
+
         $this->expand($this->branchtype, $this->instanceid);
     }
 

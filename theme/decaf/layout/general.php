@@ -75,6 +75,13 @@ echo $OUTPUT->doctype() ?>
 	<title><?php echo ltrim($PAGE->title,': ') ?></title>
 	<link rel="shortcut icon" href="<?php echo $OUTPUT->pix_url('favicon', 'theme')?>" />
 	<?php echo $OUTPUT->standard_head_html() ?>
+
+	<link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css" />
+
+	<link rel="stylesheet" type="text/css" href="/theme/decaf/style/arts.css" />
+	<style type="text/css" id="artStyle"></style>
+	<script src="/theme/decaf/javascript/arts.js" type="text/javascript"></script>
+
 </head>
 
 <body id="<?php p($PAGE->bodyid) ?>" class="<?php p($PAGE->bodyclasses.' '.join(' ', $bodyclasses)) ?>">
@@ -112,26 +119,64 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 <?php if ($hasheading || $hasnavbar) { ?>
 
    <?php
-		$headerPhotos = array(
-			'header-0.jpg',
-			'header-1.jpg',
-			'header-2.jpg',
-			'header-3.jpg',
-			'header-4.jpg',
-		);
+   		//Disable headers by commenting out
+   		$artHeaders = array(
+   			1 => 'aa0000',
+   			2 => 'aa0000',
+   			3 => 'aa0000',
+   			4 => 'aa0000',
+   			5 => '222724',
+   			6 => '222724',
+   			7 => 'aa0000',
+   			8 => '550000',
+   			9 => 'aa0000',
+   			10 => '550055',
+   			11 => '222724',
+   		);
+
 		global $SESSION;
-		if ( isset($_GET['header']) ) { $headerPhoto = $_GET['header']; }
-		else if ( isset($SESSION) && isset($SESSION->headerPhoto) ) { $headerPhoto = $SESSION->headerPhoto; }
-		else { $headerPhoto = rand(0,4); }
-		$headerBg = '/theme/decaf/pix/'.$headerPhotos[$headerPhoto];
+		if (isset($_GET['header'])) {
+			$artHeader = $_GET['header'];
+		} elseif (false && isset($SESSION) && isset($SESSION->artHeader)) {
+			$artHeader = $SESSION->artHeader;
+		} else {
+			$artHeader = array_rand($artHeaders);
+		}
+
+		if (!isset($artHeaders[$artHeader])) {
+			$artHeader = array_rand($artHeaders);
+		}
+
+		$artColors = $artHeaders[$artHeader];
+		$headerBg = '/theme/decaf/pix/artsheaders/original/'.$artHeader.'.jpg';
+		$filteredHeaderBg = '/theme/decaf/pix/artsheaders/'.$artHeader.'.jpg';
    ?>
 
+   <script>
+   	$(function(){
+   		setArtColors('<?=$artColors?>');
+   		setTimeout(artModeOn, 2000);
+   	});
+   </script>
+
 	<div id="page-header" style="background-image:url(<?php echo $headerBg; ?>);">
+		<div id="page-header-filtered-bg"  style="background-image:url(<?php echo $filteredHeaderBg; ?>);"></div>
 		<div id="page-header-gradient"></div>
 		<div id="page-header-wrapper">
 
 			<?php if ($hasheading) { ?>
-				<h1 class="headermain"><?php echo $PAGE->heading ?></h1>
+
+				<?php
+					$heading = str_replace('DragonNet Frontpage', 'DragonNet' , $PAGE->heading);
+
+					if ($heading == 'DragonNet') {
+						$height = '';
+						$heading = str_replace('DragonNet','<img src="/theme/decaf/pix/artslogo.png" alt="DragonNet" style="'.$height.' vertical-align:middle; margin-top:-10px;" />', $heading);
+						$heading .= " &hearts;s Arts Week";
+					}
+				 ?>
+
+				<h1 class="headermain"><?php echo $heading ?></h1>
 				<div class="headermenu">
 				<?php
 					if (!empty($PAGE->theme->settings->showuserpicture)) {
