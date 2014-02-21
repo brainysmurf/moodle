@@ -2,8 +2,8 @@
 
 $term = isset($_GET['term']) ? $_GET['term'] : FALSE;
 require_once '../config.php';
-$PAGE->requires->jquery();
-$PAGE->requires->jquery_plugin('ui');
+#$PAGE->requires->jquery();
+#$PAGE->requires->jquery_plugin('ui');
 require_once '../cohort/lib.php';
 define('ACTIVITIES_COHORT', 'activitiesHEAD');
 $activities_cohort = $DB->get_record('cohort', array('idnumber'=>ACTIVITIES_COHORT), 'id', MUST_EXIST);
@@ -323,4 +323,6 @@ order by
             }
         }
     }
+
+    echo $OUTPUT->footer();
 }
