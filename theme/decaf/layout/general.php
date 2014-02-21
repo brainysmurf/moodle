@@ -122,12 +122,12 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
    		//Disable headers by commenting out
    		$artHeaders = array(
    			1 => 'aa0000',
-   			2 => 'aa0000',
-   			3 => 'aa0000',
-   			4 => 'aa0000',
-   			5 => '222724',
-   			6 => '222724',
-   			7 => 'aa0000',
+   			2 => '7D3535',
+   			3 => 'A1161E',
+   			4 => '0E6B13',
+   			5 => '171717',
+   			6 => '1F1358',
+   			7 => '984143',
    			8 => '550000',
    			9 => 'aa0000',
    			10 => '550055',
