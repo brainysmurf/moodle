@@ -14,6 +14,7 @@ function output_forms($user=null) {  #"Look up by lastname, firstname, or homero
         $default_words = 'placeholder="Look up by lastname, firstname, or homeroom..." ';
         $powerschoolID = "";
     } else {
+        // make sure the the text box displays the right thing, depending on context
         $default_words = 'value="'.$user->lastname.', '.$user->firstname.' ('.$user->department.')" ';
         $powerschoolID = $user->idnumber;
     }
@@ -143,7 +144,7 @@ if ($term) {
             continue;  // TODO: moodle for some reason can keep useless rows of students....
         }
         $results[] = array(
-            "label"=>$row->lastname.', '.$row->firstname.' ('.$row->department.')',
+            "label"=>"{$row->firstname} {$row->lastname} ({$row->department})",
             "value"=>$row->idnumber
             );
 
