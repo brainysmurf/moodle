@@ -2,138 +2,22 @@
 
 // requirements
 require_once '../../config.php';
-require_once '../../cohort/lib.php';
 require_once 'lib.php';
 
-require_login();  // put this back once you got it working
-
-// definitions
-define('ACTIVITIES_COHORT', 'activitiesHEAD');
-$activities_cohort = $DB->get_record('cohort', array('idnumber'=>ACTIVITIES_COHORT), 'id', MUST_EXIST);
-define('ACTIVITIES_COHORT_ID', $activities_cohort->id);
-
-// function declarations
-function output_forms($user=null) {  #"Look up by lastname, firstname, or homeroom...") {
-    if (!($user)) {
-        $default_words = 'placeholder="Look up by lastname, firstname, or homeroom..." ';
-        $powerschoolID = "";
-    } else {
-        // make sure the the text box displays the right thing, depending on context
-        $default_words = 'value="'.$user->lastname.', '.$user->firstname.' ('.$user->department.')" ';
-        $powerschoolID = $user->idnumber;
-    }
-    $path_to_index = derive_plugin_path_from("index.php");
-    $path_to_query = derive_plugin_path_from("query.php");
-
-    echo '
-<form name="user_entry" action="'.$path_to_index.'" method="get">
-<input name="" autofocus="autofocus" size="100" onclick="this.select()"
-    style="font-size:18px;margin-bottom:5px;box-sizing: border-box;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;padding:3px;"
-    type="text" id="person" '.$default_words.'/><br />
-<input name="powerschool" type="hidden" id="powerschool" value="'.$powerschoolID.'"/>
-<input name="action" style="border:4;" type="submit" type="submit" value="view family"/>
-<input name="action" type="submit" value="view child"/>
-<input name="action" type="submit" value="enrol child"/>
-<input name="action" type="submit" value="deenrol child"/>
-</form><br />';
-    echo '
-<script>
-$("#person").autocomplete({
-            source: "'.$path_to_query.'",
-            select: function (event, ui) {
-                console.log("select");
-                event.preventDefault();
-                $("#person").val(ui.item.label);
-                $("#powerschool").val(ui.item.value);
-            },
-            change: function (event, ui) {   // TODO: determine if I really really need this
-                if (ui != null) {
-                    event.preventDefault();
-                console.log("change");
-                }
-            },
-            focus: function (event, ui) {
-                event.preventDefault();
-                $("#person").val(ui.item.label);
-            },
-        });
-</script>';
-}
-
-function permit_user($userid) {
-    if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) {
-        return true;
-    }
-    return cohort_is_member(ACTIVITIES_COHORT_ID, $userid);
-}
-
-function get_user_activity_enrollments($userid) {
-    global $DB;
-    return $DB->get_recordset_sql("
-select
-    crs.id as course_id,
-    enrl.id as enrolid,
-    usr.idnumber as idnumber,
-    concat(usr.firstname, ' ', usr.lastname) as username,
-    regexp_replace(crs.fullname, '\(.*\)', '') as fullname
-from ssismdl_enrol enrl
-    join ssismdl_user_enrolments usrenrl
-        on usrenrl.enrolid = enrl.id
-    join ssismdl_course crs
-        on enrl.courseid = crs.id
-    join ssismdl_course_categories cat
-        on crs.category = cat.id
-    join ssismdl_user usr
-        on usrenrl.userid = usr.id
-where
-    crs.visible = 1 and
-    usr.id = ".$userid." and
-    cat.path like '/1/%' and
-    enrl.enrol = 'self'");
-}
-
-function get_family_activity_enrollments($familyid) {
-    global $DB;
-    return $DB->get_recordset_sql("
-select
-    crs.id as course_id,
-    usr.idnumber as idnumber,
-    concat(usr.firstname, ' ', usr.lastname) as username,
-    regexp_replace(crs.fullname, '\(.*\)', '') as fullname
-from ssismdl_enrol enrl
-    join ssismdl_user_enrolments usrenrl
-        on usrenrl.enrolid = enrl.id
-    join ssismdl_course crs
-        on enrl.courseid = crs.id
-    join ssismdl_course_categories cat
-        on crs.category = cat.id
-    join ssismdl_user usr
-        on usrenrl.userid = usr.id
-where
-    crs.visible = 1 and
-    usr.idnumber like '".$familyid."%' and
-    cat.path like '/1/%' and
-    enrl.enrol = 'self'");
-}
-
-
+require_login();
 
 // begin processing
 
-global $DB;
-$parent_role = $DB->get_record('role', array('shortname'=>'parent'), 'id', MUST_EXIST);
-define('PARENT_ROLE_ID', $parent_role->id);
-
-global $USER;
+//global $USER;
 
 if (!permit_user($USER->id)) {
     die('Only members of the cohort '.ACTIVITIES_COHORT.' can access this section. Contact the DragonNet administrator if you think you should have access.');
 }
 
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url('/activitieshead/index.php');
-$PAGE->set_title("Activities Head Centre");
-$PAGE->set_heading("Activities Head Centre");
+$PAGE->set_url(derive_plugin_path_from('index.php'));
+$PAGE->set_title("SSIS Activity Center");
+$PAGE->set_heading("SSIS Activity Center");
 
 echo $OUTPUT->header();
 
@@ -164,11 +48,11 @@ if ( empty($action) or $action === 'view family' )  {
         $results = get_family_activity_enrollments($family_id);
 
         echo '<div>Displaying entire family enrollments; click on student name to make any modifications.</div><br />';
-        echo $begin_table;
 
+        echo $begin_table;
         foreach ($results as $item) {
             echo '<tr class="r0">';
-            echo '<td class="cell c0"><p><a href="/activitieshead/index.php?action=enrol+child&powerschool='.$item->idnumber.'">'.$item->username.'</a></p></td>';
+            echo '<td class="cell c0"><p><a href="'.derive_plugin_path_from('index.php').'?action=enrol+child&powerschool='.$item->idnumber.'">'.$item->username.'</a></p></td>';
             echo '<td class="cell c1 lastcol"><p>'.$item->fullname.'</p></td>';
             echo '</tr>';
         }
@@ -249,7 +133,7 @@ crs.fullname");
             echo '<tr class="r0">';
             if (!in_array($row->id, $already_enrolled)) {
                 echo '<td class="cell c1">Click to enrol:</td>';
-                echo '<td class="cell c1"><p><a href="/activitieshead/index.php?action=enrol+child&go='.$row->id.'&powerschool='.$user->idnumber.'">'.$row->fullname.'</a></p></td>';
+                echo '<td class="cell c1"><p><a href="'.derive_plugin_path_from('index.php').'?action=enrol+child&go='.$row->id.'&powerschool='.$user->idnumber.'">'.$row->fullname.'</a></p></td>';
             } else {
                 echo '<td class="cell c1">Already enrolled:</td>';
                 echo '<td class="cell c1"><p>'.$row->fullname.'</a></p></td>';
@@ -283,7 +167,7 @@ crs.fullname");
             foreach ($results as $item) {
                 echo '<tr class="r0">';
                 echo '<td class="cell c0"><p>Click to de-enrol:</p></td>';
-                echo '<td class="cell c1"><p><a href="/activitieshead/index.php?action=deenrol+child&go='.$item->enrolid.'&powerschool='.$user->idnumber.'">'.$item->fullname.'</a></p></td>';
+                echo '<td class="cell c1"><p><a href="'.derive_plugin_path_from('index.php').'?action=deenrol+child&go='.$item->enrolid.'&powerschool='.$user->idnumber.'">'.$item->fullname.'</a></p></td>';
                 echo '</tr>';
             }
             $results->close();
