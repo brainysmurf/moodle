@@ -73,8 +73,9 @@ echo $OUTPUT->doctype() ?>
 <html <?php echo $OUTPUT->htmlattributes() ?>>
 <head>
 	<title><?php echo ltrim($PAGE->title,': ') ?></title>
-	<link rel="shortcut icon" href="<?php echo $OUTPUT->pix_url('favicon', 'theme')?>" />
+	<link rel="shortcut icon" href="/favicon.ico" />
 	<?php echo $OUTPUT->standard_head_html() ?>
+	<link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css" />
 </head>
 
 <body id="<?php p($PAGE->bodyid) ?>" class="<?php p($PAGE->bodyclasses.' '.join(' ', $bodyclasses)) ?>">
