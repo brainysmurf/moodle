@@ -37,7 +37,8 @@ ul.buttons a {
 	transition: color 2s linear;
 }
 
-#page-header {
+#page-header,
+.paging .btn.selected {
 	-webkit-transition: background-color 2s linear;
 	-moz-transition: background-color 2s linear;
 	-o-transition: background-color 2s linear;
