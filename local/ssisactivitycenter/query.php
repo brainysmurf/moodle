@@ -3,7 +3,11 @@
 $term = isset($_GET['term']) ? $_GET['term'] : FALSE;
 
 require_once '../../config.php';
-require_login();  // put this back once you got it working
+require_login();
+
+if (!permit_user($USER->id)) {
+    die('Only members of the cohort '.ACTIVITIES_COHORT.' can access this section. Contact the DragonNet administrator if you think you should have access.');
+}
 
 if ($term) {
 

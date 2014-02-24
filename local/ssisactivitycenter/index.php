@@ -6,10 +6,6 @@ require_once 'lib.php';
 
 require_login();
 
-// begin processing
-
-//global $USER;
-
 if (!permit_user($USER->id)) {
     die('Only members of the cohort '.ACTIVITIES_COHORT.' can access this section. Contact the DragonNet administrator if you think you should have access.');
 }

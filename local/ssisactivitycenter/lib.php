@@ -1,9 +1,10 @@
 <?php
-require_once '../../config.php';
-require_once '../../cohort/lib.php';
+require_once '../config.php';
+require_once '../cohort/lib.php';
 
 // definitions
 define('ACTIVITIES_COHORT', 'activitiesHEAD');
+global $DB;
 $activities_cohort = $DB->get_record('cohort', array('idnumber'=>ACTIVITIES_COHORT), 'id', MUST_EXIST);
 define('ACTIVITIES_COHORT_ID', $activities_cohort->id);
 
