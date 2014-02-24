@@ -114,21 +114,25 @@ if ($term) {
     global $DB;
     $term = strtolower($term);
 
-    #$term_plain = pg_escape_literal($term);
-    #$term_perc = pg_escape_literal($term.'%');
-
     $results = array();
     $params = array();
 
-    if (strpos($term,',') !== false) {
-        $where = "(email LIKE '%@student.ssis-suzhou.net' AND CONCAT(LOWER(lastname), ', ', LOWER(firstname)) like ?)";
-        $params[] = $term;
-    } else {
-        $where = "(email LIKE '%@student.ssis-suzhou.net' AND (LOWER(lastname) LIKE ? OR LOWER(firstname) LIKE ? OR LOWER(department) = ?))";
-        $params[] = $term.'%';
-        $params[] = $term.'%';
-        $params[] = $term;
-    }
+    $where = "
+(
+    email LIKE '%@student.ssis-suzhou.net' AND
+        (
+            LOWER(lastname) LIKE ? OR
+            REPLACE(LOWER(firstname), ' ', '') LIKE ? OR
+            LOWER(department) = ? OR
+            CONCAT(LOWER(firstname), ' ', LOWER(lastname)) LIKE ?
+        )
+)
+";
+    $params[] = $term.'%';
+    $params[] = $term.'%';
+    $params[] = $term;
+    $params[] = $term.'%';
+
     $sort = 'lastname, firstname, department';
     $fields = 'id, idnumber, lastname, firstname, department';
 

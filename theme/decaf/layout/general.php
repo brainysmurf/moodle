@@ -120,19 +120,22 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 
    <?php
    		//Disable headers by commenting out
+   	    //Some of these colors come from http://www.computerhope.com/htmcolor.htm
    		$artHeaders = array(
-   			1 => 'aa0000',
-   			2 => 'aa0000',
-   			3 => 'aa0000',
-   			4 => 'aa0000',
-   			5 => '222724',
-   			6 => '222724',
-   			7 => 'aa0000',
-   			8 => '550000',
-   			9 => 'aa0000',
-   			10 => '550055',
-   			11 => '222724',
+   			1 => 'C48189',   # Pink Bow
+   			2 => '7F525D',   # Dull Purple
+   			3 => '800000',   # Maroon
+   			4 => '0E6B13',   # Royal Blue     was --0E6B13
+   			5 => '171717',   # Midnight
+   			6 => '1F1358',   # Dark purple
+   			7 => '583759',   # Plum Purple
+   			8 => '550000',   # Dark Burgandy              8C001A  was 550000
+   			9 => '990012',   # Chilli pepper was aa0000
+   			10 => '25383C',  # Dark Slate Grey
+   			11 => '34282C'  # Charcoal
    		);
+   		//	12 => 'D4A017'   # Olypmic Gold
+   		//);
 
 		global $SESSION;
 		if (isset($_GET['header'])) {
