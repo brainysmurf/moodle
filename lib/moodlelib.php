@@ -4395,6 +4395,14 @@ function complete_user_login($user) {
 	{
 		$SESSION->frontpageSection = 7;
 	}
+
+	if (cohort_is_member_by_idnumber('teachersNEW', $USER->id))
+	{
+		$SESSION->frontpageSection = 11;
+	}
+
+	//var_dump(cohort_is_member_by_idnumber('teachersNEW', $USER->id));
+	//exit();
 	
     /// Select password change url
     $userauth = get_auth_plugin($USER->auth);

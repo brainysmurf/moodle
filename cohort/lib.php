@@ -301,11 +301,14 @@ function cohort_get_cohorts($contextid, $page = 0, $perpage = 25, $search = '') 
 
 function cohorts_get_all_ids()
 {
+
 	global $COHORT_CACHE;
+	//$COHORT_CACHE->purge();
 
 	if ( $cohort_ids = $COHORT_CACHE->get('all_ids') )
-	{
-		return $cohort_ids;
+	{  
+	  var_dump($cohort_ids);
+	  return $cohort_ids;
 	}
 	
 	global $DB;
