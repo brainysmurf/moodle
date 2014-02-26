@@ -38,29 +38,31 @@ $post->utp='2';
 
 $startTime = getDebugTime();
 
-#$loaderbar = new turnitintool_loaderbarclass(3);
-$tii = new turnitintool_commclass(turnitintool_getUID($user),$user->firstname,$user->lastname,$user->email,2);
-$tii->startSession();
-
-$result=$tii->createUser($post,get_string('connecttesting','turnitintool'));
-
-$rcode=$tii->getRcode();
-$rmessage=$tii->getRmessage();
-$tiiuid=$tii->getUserID();
-
-$tii->endSession();
-
-$result = array(
-	'time' => date('r'),
-	'code' => $rcode,
-	'speed' =>  debugTimeTaken($startTime)
+$results = array(
+	'startTime' => date('r'),
 );
 
-if ($rcode >= TURNITINTOOL_API_ERROR_START OR empty($rcode)) {
-	$result['status'] = 'fail';
-	mail('anthonykuske@gmail.com', 'Turnitin Broke', print_r($result, true));
-} else {
-	$result['status'] = 'ok';
+$loaderbar = null;
+$tii = new turnitintool_commclass(turnitintool_getUID($user),$user->firstname,$user->lastname,$user->email,2, $loaderbar);
+try {
+	$tii->startSession();
+	$result=$tii->createUser($post,get_string('connecttesting','turnitintool'));
+	$rcode=$tii->getRcode();
+	$rmessage=$tii->getRmessage();
+	$tiiuid=$tii->getUserID();
+	$tii->endSession();
+} catch(moodle_exception $e) {
+	$rcode = '';
 }
 
-echo json_encode($result) . "\n";
+$results['code'] = $rcode;
+$results['speed'] = debugTimeTaken($startTime);
+
+if ($rcode >= TURNITINTOOL_API_ERROR_START OR empty($rcode)) {
+	$results['status'] = 'fail';
+	mail('anthonykuske@gmail.com', 'Turnitin Broke', print_r($results, true));
+} else {
+	$results['status'] = 'ok';
+}
+
+echo json_encode($results) . "\n";
