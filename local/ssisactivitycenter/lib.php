@@ -1,6 +1,6 @@
 <?php
-require_once '../config.php';
-require_once '../cohort/lib.php';
+//require_once(dirname(dirname(__DIR__)) . '/config.php');
+require_once(dirname(dirname(__DIR__)) . '/cohort/lib.php');
 
 // definitions
 define('ACTIVITIES_COHORT', 'activitiesHEAD');
