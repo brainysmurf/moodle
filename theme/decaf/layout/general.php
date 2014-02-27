@@ -78,9 +78,9 @@ echo $OUTPUT->doctype() ?>
 
 	<link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css" />
 
-	<link rel="stylesheet" type="text/css" href="/theme/decaf/style/arts.css" />
+	<link rel="stylesheet" type="text/css" href="/theme/decaf/style/arts.css?v=2" />
 	<style type="text/css" id="artStyle"></style>
-	<script src="/theme/decaf/javascript/arts.js" type="text/javascript"></script>
+	<script src="/theme/decaf/javascript/arts.js?v=2" type="text/javascript"></script>
 
 </head>
 
@@ -174,7 +174,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 
 					if ($heading == 'DragonNet') {
 						$height = '';
-						$heading = str_replace('DragonNet','<img src="/theme/decaf/pix/artslogo.png" alt="DragonNet"/>', $heading);
+						$heading = str_replace('DragonNet','<img src="/theme/decaf/pix/artslogo2.png" alt="DragonNet"/>', $heading);
 						$heading .= " &hearts;s Arts Week";
 					}
 				 ?>

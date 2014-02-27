@@ -13,7 +13,7 @@ function setArtColors(hex) {
 
 	var css = '';
 	css += 'body.arts a, body.arts ul.buttons a { color:#' + hex +'; } ';
-	css += 'body.arts #page-header { background-color:#' + hex+ '; } ';
+	css += 'body.arts #page-header, .paging .btn.selected { background-color:#' + hex+ '; } ';
 	css += 'body.arts .tabs ul li > span.selected { background-color:#' + hex+ '; border-color:#' + hex+ ' !important; }';
 	css += 'body.arts #awesomebar li.hover, body.arts #awesomebar li.hover:hover { background-color: #' + hex+ '  !important; }';
 
