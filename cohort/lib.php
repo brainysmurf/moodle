@@ -134,7 +134,7 @@ function cohort_delete_category($category) {
     }
 
     $DB->execute($sql, $params);
-    
+
 	cohort_clear_cache();
 }
 
@@ -155,10 +155,10 @@ function cohort_add_member($cohortid, $userid) {
     $record->userid    = $userid;
     $record->timeadded = time();
     $DB->insert_record('cohort_members', $record);
-    
+
 	#cohort_clear_cache(); //Clear everything
 	$COHORT_CACHE->delete("cohort_is_member,$cohortid,$userid"); //Just clear cohort_is_member
-	
+
     events_trigger('cohort_member_added', (object)array('cohortid'=>$cohortid, 'userid'=>$userid));
 }
 
@@ -171,10 +171,10 @@ function cohort_add_member($cohortid, $userid) {
 function cohort_remove_member($cohortid, $userid) {
     global $DB, $COHORT_CACHE;
     $DB->delete_records('cohort_members', array('cohortid'=>$cohortid, 'userid'=>$userid));
-	
+
 	#cohort_clear_cache(); //Clear everything
 	$COHORT_CACHE->delete("cohort_is_member,$cohortid,$userid"); //Just clear cohort_is_member
-	
+
     events_trigger('cohort_member_removed', (object)array('cohortid'=>$cohortid, 'userid'=>$userid));
 }
 
@@ -186,9 +186,9 @@ function cohort_remove_member($cohortid, $userid) {
  */
 function cohort_is_member($cohortid, $userid) {
 	if ( !$cohortid || !$userid ) { return false; }
-	
+
 	global $COHORT_CACHE;
-    
+
     $cacheKey = "cohort_is_member,$cohortid,$userid";
     if ( $result = $COHORT_CACHE->get($cacheKey) )
     {
@@ -198,18 +198,28 @@ function cohort_is_member($cohortid, $userid) {
     global $DB;
 
     $result = $DB->record_exists('cohort_members', array('cohortid'=>$cohortid, 'userid'=>$userid));
-    
+
     $COHORT_CACHE->set($cacheKey, ($result?1:'-1') );
     return $result;
 }
 
 //Checks if a user is enrolled in a cohort (like cohort_is_member) but takes a cohort idnumber (e.g. students6) instead of 76
 function cohort_is_member_by_idnumber($cohortidnumber, $userid) {
-	
+
 	$cohort_ids = cohorts_get_all_ids();
 	if ( !$cohort_ids[$cohortidnumber] ) { return false; }
-	
+
 	return cohort_is_member($cohort_ids[$cohortidnumber], $userid);
+}
+
+/**
+ * Returns a cohort the id for the cohort with the given idnumber
+ * Note: idnumber is not the numerical ID
+ * idnumber is the user friendly name (e.g. studentsALL or teachersALL)
+ */
+function cohort_get_id($cohortidnumber) {
+    $cohort_ids = cohorts_get_all_ids();
+    return $cohort_ids[$cohortidnumber];
 }
 
 /**
@@ -307,20 +317,20 @@ function cohorts_get_all_ids()
 	{
 		return $cohort_ids;
 	}
-	
+
 	global $DB;
-	
+
 	$cohort_ids = array();
-	
+
 	//Get the id and idnumber for all cohorts
 	$result = $DB->get_records('cohort',null,'id,idnumber');
 	foreach( $result as $cohort )
 	{
 		$cohort_ids[ $cohort->idnumber ] = $cohort->id;
 	}
-	
+
 	$COHORT_CACHE->set('all_ids',$cohort_ids);
-	
+
 	return $cohort_ids;
 }
-	
+
