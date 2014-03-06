@@ -135,29 +135,29 @@ class enrol_self_plugin extends enrol_plugin {
 		if ($instance->enrol !== 'self') {
 			 throw new coding_exception('Invalid enrol instance type!');
 		}
-	  
+
 		$context = context_course::instance($instance->courseid);
 		if (has_capability('enrol/self:config', $context)) {
 			$managelink = new moodle_url('/enrol/self/edit.php', array('courseid'=>$instance->courseid, 'id'=>$instance->id));
 			$instancesnode->add($this->get_instance_name($instance), $managelink, navigation_node::TYPE_SETTING);
 		}
-		
+
 		/*
 		* We want parents to be able to unenrol their children from activities (if they were allowed to enrol them to start with)
 		* Add links to do this in the course administration menu in the awesomebar
 		*/
-		
+
 		global $SESSION;
-		
+
 		//If the current user is a parent, and the current course allows parents to enrol their children, and the current user has at least 1 child...
 		if ($SESSION->userIsParent && $instance->customint8 && count($SESSION->usersChildren) > 0) {
-			
+
 			$showEnrolMoreChildrenLink = false;
 			foreach ($SESSION->usersChildren as $child) {
-			
+
 				//Is this child enrolled in the course?
 				if(enrol_user_is_enrolled($child->userid, $instance->id)) {
-				
+
 					//If the user is enrolled, add a link for the parent to unenrol the child
 					$str = "Remove {$child->firstname} {$child->lastname} from activity";
 					$instancesnode->parent->parent->add($str, "/enrol/self/unenrolchild.php?enrolid={$instance->id}&childuserid={$child->userid}", navigation_node::TYPE_SETTING);
@@ -173,12 +173,12 @@ class enrol_self_plugin extends enrol_plugin {
 					$showEnrolMoreChildrenLink = true;
 				}
 			}
-			
+
 			if ($showEnrolMoreChildrenLink) {
 				$instancesnode->parent->parent->add('Enrol Children page', "/enrol/index.php?id={$instance->courseid}", navigation_node::TYPE_SETTING);
 			}
 		}
-		
+
 	}
 
 	/**
@@ -234,7 +234,7 @@ class enrol_self_plugin extends enrol_plugin {
 			// Can not enrol guest!!
 			return null;
 		}
-		
+
 		//Enrollments don't start yet
 		if ($instance->enrolstartdate != 0 and $instance->enrolstartdate > time()) {
 			return $OUTPUT->errorbox("Sorry, you can't join this activity until " . date('l M jS Y', $instance->enrolstartdate));
@@ -251,7 +251,7 @@ class enrol_self_plugin extends enrol_plugin {
 			// New enrols not allowed.
 			return null;
 		}
-		
+
 		//Max enrol limit specified.
 		if ($instance->customint3 > 0) {
 			$count = $DB->count_records('user_enrolments', array('enrolid'=>$instance->id));
@@ -263,15 +263,16 @@ class enrol_self_plugin extends enrol_plugin {
 
 		require_once("$CFG->dirroot/enrol/self/locallib.php");
 		require_once("$CFG->dirroot/group/lib.php");
-		
+
 		$form = new enrol_self_enrol_form(NULL, $instance);
 		$instanceid = optional_param('instance', 0, PARAM_INT);
 
 		if ($instance->id == $instanceid) {
-		
+
 			if ($data = $form->get_data()) {
+
 				//User has submitted the self enrolment form (clicked the enrol my child or join activity button)
-				
+
 				$enrol = enrol_get_plugin('self');
 				$timestart = time();
 				if ($instance->enrolperiod) {
@@ -279,32 +280,32 @@ class enrol_self_plugin extends enrol_plugin {
 				} else {
 					$timeend = 0;
 				}
-				
+
 				$userids_to_enrol = array();
-				
+
 				if (isset($data->enrolchildsubmit)) { //Parent wants to enrol their child instead of theirself
 
 					//Enrol the children
 					foreach ($data->enrolchilduserids as $userid => $one) {
 						$userids_to_enrol[] = $userid;
 					}
-					
+
 					//We also want to enrol the parent
 					//Dec 9th - don't need to explicitly do this here anymore because the parent will be enrol when the student is enrolled
 					//by the enrol_user method anyway
 					//$this->enrol_user($instance, $USER->id, 12, $timestart, $timeend);
-					
+
 				} else { //Enrol the current user
 					$userids_to_enrol[] = $USER->id;
 				}
-				
+
 
 				foreach ($userids_to_enrol as $userid_to_enrol) {
-				
+
 					 $this->enrol_user($instance, $userid_to_enrol, $instance->roleid, $timestart, $timeend);
 					 	 //TODO: There should be userid somewhere!
 					 add_to_log($instance->courseid, 'course', 'enrol', '../enrol/users.php?id='.$instance->courseid, $instance->courseid);
-					 
+
 					  if ($instance->password and $instance->customint1 and $data->enrolpassword !== $instance->password) {
 						 // it must be a group enrolment, let's assign group too
 						 $groups = $DB->get_records('groups', array('courseid'=>$instance->courseid), 'id', 'id, enrolmentkey');
@@ -318,13 +319,26 @@ class enrol_self_plugin extends enrol_plugin {
 							 }
 						 }
 					 }
-					 
+
 					// Send welcome message.
 					 if ($instance->customint4) {
 						 //$this->email_welcome_message($instance, $USER);
 					 }
 				}
-				
+
+				// Save bus preferences
+
+				// Using $_POST instead of $data because Moodle doesn't
+				// put form fields into the $data object unless they were added
+				// to the form using the API. The bus checkbox is added manually to make it
+				// appear inline next to the user.
+				if (isset($_POST['bus'])) {
+					foreach ($_POST['bus'] as $userid => $bus) {
+						$bus = (bool)$bus;
+						SSIS::setUserActivityBusRequirement($userid, $bus);
+					}
+				}
+
 				if (count($userids_to_enrol) > 0) {
 					//We want to refresh the page to show changes
 					redirect("/enrol/index.php?id={$instance->courseid}");
@@ -642,16 +656,16 @@ class enrol_self_plugin extends enrol_plugin {
 		// we do not use component in manual or self enrol.
 		role_assign($roleid, $userid, $contextid, '', 0);
 	}
-	
-	
+
+
 	public function enrol_user(stdClass $instance, $userid, $roleid = null, $timestart = 0, $timeend = 0, $status = null, $recovergrades = null)
 	{
 		//Enrol the person
 		parent::enrol_user($instance, $userid, $roleid, $timestart, $timeend, $status, $recovergrades);
-		
+
 		//If this course allows parents to enrol students, we want to enrol the parent if they're not already
 		if ($instance->customint8) {
-		
+
 			//Get the user's parents
 			$parents = get_users_parents($userid);
 			foreach ($parents as $parent) {
@@ -660,27 +674,27 @@ class enrol_self_plugin extends enrol_plugin {
 					$this->enrol_user($instance, $parent->userid, 12);
 				}
 			}
-			
+
 		}
 
 		global $OUTPUT;
 		$OUTPUT->refresh_awesomebar();
 	}
-	
+
 	public function unenrol_user(stdClass $instance, $userid)
 	{
-	
+
 		//Unenrol the person
 		parent::unenrol_user($instance, $userid);
 		// ^ doesn't return anything so we have to assume it worked
-	
+
 		//If this course allows parents to enrol students, we want to unenrol parents when their child leaves the activity
 		//(Either the parent unenrolled them or the child unenrolled theirself)
 		if ($instance->customint8) {
-		
+
 			//Get the user's parents
 			$parents = get_users_parents($userid);
-			
+
 			foreach ($parents as $parent) {
 				//Check if parent is enrolled
 				if (enrol_user_is_enrolled($parent->userid, $instance->id)) {
@@ -693,12 +707,12 @@ class enrol_self_plugin extends enrol_plugin {
 							return;
 						}
 					}
-					
+
 					//User has no children or all of their children are unenrolled - unenrol the parent
 					$this->unenrol_user($instance,$parent->userid);
 				}
 			}
-		
+
 		}
 
 		global $OUTPUT;

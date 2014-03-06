@@ -142,10 +142,12 @@ class enrol_self_edit_form extends moodleform {
         $mform->addElement('textarea', 'customtext1', get_string('customwelcomemessage', 'enrol_self'), array('cols'=>'60', 'rows'=>'8'));
         $mform->addHelpButton('customtext1', 'customwelcomemessage', 'enrol_self');
 
-		//Parents can enrol children?
+        //Parents can enrol children?
         $mform->addElement('advcheckbox', 'customint8', 'Parents can enrol their children');
-//        $mform->addHelpButton('customint8', 'sendcoursewelcomemessage', 'enrol_self');
-        
+
+        //Parents need to specify if bus is needed?
+        $mform->addElement('advcheckbox', 'customint7', 'Parents need to confirm if bus is required');
+
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'courseid');

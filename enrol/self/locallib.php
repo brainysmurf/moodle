@@ -27,49 +27,49 @@ defined('MOODLE_INTERNAL') || die();
 require_once("$CFG->libdir/formslib.php");
 
 class enrol_self_enrol_form extends moodleform {
-    protected $instance;
-    protected $toomany = false;
+	protected $instance;
+	protected $toomany = false;
 
-    /**
-     * Overriding this function to get unique form id for multiple self enrolments.
-     *
-     * @return string form identifier
-     */
-    protected function get_form_identifier() {
-        $formid = $this->_customdata->id.'_'.get_class($this);
-        return $formid;
-    }
+	/**
+	 * Overriding this function to get unique form id for multiple self enrolments.
+	 *
+	 * @return string form identifier
+	 */
+	protected function get_form_identifier() {
+		$formid = $this->_customdata->id.'_'.get_class($this);
+		return $formid;
+	}
 
-    public function definition() {
-        global $DB, $CFG, $OUTPUT, $SESSION, $USER;
+	public function definition() {
+		global $DB, $CFG, $OUTPUT, $SESSION, $USER;
 		require_once("$CFG->dirroot/cohort/lib.php");
 
-        $mform = $this->_form;
-        $instance = $this->_customdata;
-        $this->instance = $instance;
-        $plugin = enrol_get_plugin('self');
+		$mform = $this->_form;
+		$instance = $this->_customdata;
+		$this->instance = $instance;
+		$plugin = enrol_get_plugin('self');
 
-		//Enrollment requires a password - show the password box       
-        if ($instance->password) {
-            // Change the id of self enrolment key input as there can be multiple self enrolment methods.
-            $mform->addElement('passwordunmask', 'enrolpassword', get_string('password', 'enrol_self'),
-                    array('id' => 'enrolpassword_'.$instance->id));
-        } else {
-            //$mform->addElement('static', 'nokey', '', get_string('nopassword', 'enrol_self'));
-        }
+		//Enrollment requires a password - show the password box
+		if ($instance->password) {
+			// Change the id of self enrolment key input as there can be multiple self enrolment methods.
+			$mform->addElement('passwordunmask', 'enrolpassword', get_string('password', 'enrol_self'),
+					array('id' => 'enrolpassword_'.$instance->id));
+		} else {
+			//$mform->addElement('static', 'nokey', '', get_string('nopassword', 'enrol_self'));
+		}
 
 
-        //Enrollments are limited to a certain cohort
-        if ($instance->customint5) {
+		//Enrollments are limited to a certain cohort
+		if ($instance->customint5) {
 			$mustBeInCohort = $DB->get_record('cohort', array('id'=>$instance->customint5));
-	        if (!$mustBeInCohort) {
-	            return null;
-	        }
-	        $niceCohortName = strtolower($mustBeInCohort->name);
-	        $niceCohortName = preg_replace('/(^all )/i','',$niceCohortName);
-        } else {
-        	$mustBeInCohort = false;
-        }
+			if (!$mustBeInCohort) {
+				return null;
+			}
+			$niceCohortName = strtolower($mustBeInCohort->name);
+			$niceCohortName = preg_replace('/(^all )/i','',$niceCohortName);
+		} else {
+			$mustBeInCohort = false;
+		}
 
 
 		/*
@@ -81,41 +81,60 @@ class enrol_self_enrol_form extends moodleform {
 
 			if (!empty($SESSION->usersChildren) && $children = $SESSION->usersChildren) {
 				$enrollingChildren = true;
-				
+
 				$mform->addElement('header', 'enrolchildsection', 'Enrol your child in this activity');
-				
+
 				$mform->addElement('html', '<div class="helptext">Tick which of your children you want to enrol in this activity and then click <strong>Enrol My Child</strong></div>');
-				
+
+				$showBusWarning = false;
+
 				$options = array();
 				foreach($children as $child) {
-				
+
 					$name = $child->firstname.' '.$child->lastname;
-				
-					if (enrol_user_is_enrolled($child->userid, $instance->id)) { 
-						
+
+					if ($instance->customint7) {
+						// Bus checkbox
+						$busCheckbox = '<span style="margin-left:50px;"><i class="icon-truck"></i> Will ' . $name . ' use the bus?</i> ';
+							// Not selcting a choice by default, so the user has to click, thus confirming the choice.
+							$busCheckbox .= '<label>Yes <input type="radio" value="1" name="bus['. $child->userid . ']" /></label>';
+							$busCheckbox .= '<label>No <input type="radio" value="0" name="bus['. $child->userid . ']" /></label>';
+						$busCheckbox .= '</span>';
+					}
+
+					if (enrol_user_is_enrolled($child->userid, $instance->id)) {
+
 						//User is already enrolled
-						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="green"><i class="ok-sign"></i> Enrolled!&nbsp;&nbsp;(Go to the "Course Administration" menu above to remove.)</span>', array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox'));
-			
-			        } else if ($mustBeInCohort && !cohort_is_member($mustBeInCohort->id, $child->userid)) {
-			        
-			        	//Child isn't in the required cohort
-						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, "<span class=\"red\"><i class=\"icon-warning-sign\"></i> Can't be enrolled because only <strong>{$niceCohortName}</strong> can join.</span>", array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox'));
-			        
-			        } else {
-			        	
-			        	//User can be enrolled
-						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="grey"></span>', array('class'=>'enrolchildcheckbox'));
-						
-			        }
-				
+						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="green"><i class="ok-sign"></i> Enrolled!&nbsp;&nbsp;(Go to the "Course Administration" menu above to remove.)</span>' , array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox', 'data-userid' => $child->userid));
+
+					} else if ($mustBeInCohort && !cohort_is_member($mustBeInCohort->id, $child->userid)) {
+
+						//Child isn't in the required cohort
+						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, "<span class=\"red\"><i class=\"icon-warning-sign\"></i> Can't be enrolled because only <strong>{$niceCohortName}</strong> can join.</span>", array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox', 'data-userid' => $child->userid));
+
+					} else {
+
+						//User can be enrolled
+					$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="grey"></span>' . $busCheckbox , array('class'=>'enrolchildcheckbox', 'data-userid' => $child->userid));
+					$showBusWarning = true;
+
+					}
+
 				}
-				
+
+				if ($instance->customint7 && $showBusWarning) {
+					$mform->addElement('html', '<br/><div class="helptext">Please note that changing the bus setting here affects every activity in which that child is enroled.</div>');
+				}
+
 				//Enrol my child button
 				$mform->addElement('submit', 'enrolchildsubmit', get_string('enrolchild', 'enrol_self'), array('class' => 'dnet-disabled'));
-				
+
 				//A .dnet-disabled class instead of the disabled attribute is used so click events can be bound to the button
-				$mform->addElement('html', '<script>
-				
+
+				$submitjs = '<script>';
+
+					$submitjs .= '
+					// Disable the submit button until a child is ticked to enrol
 					$(document).on("change","input.enrolchildcheckbox",function()
 					{
 						var count = $("input.enrolchildcheckbox:checked").length;
@@ -125,97 +144,121 @@ class enrol_self_enrol_form extends moodleform {
 							$("#id_enrolchildsubmit").addClass("dnet-disabled");
 						}
 					});
-					
-					$(document).on("click","#id_enrolchildsubmit",function()
+
+					$(document).on("click","#id_enrolchildsubmit",function(e)
 					{
 						if ($(this).hasClass("dnet-disabled")) {
 							alert("Please tick at least one child to enrol.");
 							return false;
+						}';
+
+						if ($instance->customint7) {
+
+							$submitjs .= '
+							// Make sure the bus prefence has been selected for each user being enroled
+							$(".enrolchildcheckbox:checked").each(function() {
+
+								var userID = $(this).attr("data-userid");
+
+								if ( $(\'input[name="bus[\'+ userID + \']"]:checked\').length < 1) {
+
+									alert("Please confirm if your child will require the bus after this activity");
+									e.preventDefault();
+								}
+							});
+							';
 						}
+
+					$submitjs .= '
 					});
-				</script>');
+					';
+
+				$submitjs .= '</script>';
+				$mform->addElement('html', $submitjs);
+
 			}
+
 		}
-		
+
 		/*
 		* User enrolling self
 		*/
-		
+
 		if ($mustBeInCohort && !cohort_is_member($mustBeInCohort->id, $USER->id)) {
-        	// don't display the self-enrol section at all
-        } else {
+			// don't display the self-enrol section at all
+		} else {
 
 			$heading = 'Enrol yourself in this activity';
-	        $mform->addElement('header', 'selfheader', $heading, array('class'=>'collapsed'));
-			
-			if (enrol_user_is_enrolled($USER->id, $instance->id)) { 
-				
+			$mform->addElement('header', 'selfheader', $heading, array('class'=>'collapsed'));
+
+			if (enrol_user_is_enrolled($USER->id, $instance->id)) {
+
 				//User is already enrolled
 				$mform->addElement('html', $OUTPUT->successbox('You are already enrolled in this activity.<br/><a class="btn" href="/course/view.php?id='.$instance->courseid.'" style="font-size:0.9em; position:relative; top:5px;">Go to activity page</a>'));
 
-	        } else {
-	        
-	        	//User is allowed to enrol
+			} else {
+
+				//User is allowed to enrol
 				$this->add_action_buttons(false, get_string('enrolme', 'enrol_self'), false);
-					        
+
 			}
-		
+
 		}
 		/*
 		* End user enrolling self
 		*/
 
-        $mform->addElement('hidden', 'id');
-        $mform->setType('id', PARAM_INT);
-        $mform->setDefault('id', $instance->courseid);
+		$mform->addElement('hidden', 'id');
+		$mform->setType('id', PARAM_INT);
+		$mform->setDefault('id', $instance->courseid);
 
-        $mform->addElement('hidden', 'instance');
-        $mform->setType('instance', PARAM_INT);
-        $mform->setDefault('instance', $instance->id);
-    }
+		$mform->addElement('hidden', 'instance');
+		$mform->setType('instance', PARAM_INT);
+		$mform->setDefault('instance', $instance->id);
+	}
 
-    public function validation($data, $files) {
-        global $DB, $CFG;
+	public function validation($data, $files) {
+		global $DB, $CFG;
 
-        $errors = parent::validation($data, $files);
-        $instance = $this->instance;
+		$errors = parent::validation($data, $files);
+		$instance = $this->instance;
 
-        if ($this->toomany) {
-            $errors['notice'] = get_string('error');
-            return $errors;
-        }
+		if ($this->toomany) {
+			$errors['notice'] = get_string('error');
+			return $errors;
+		}
 
-        if ($instance->password) {
-            if ($data['enrolpassword'] !== $instance->password) {
-                if ($instance->customint1) {
-                    $groups = $DB->get_records('groups', array('courseid'=>$instance->courseid), 'id ASC', 'id, enrolmentkey');
-                    $found = false;
-                    foreach ($groups as $group) {
-                        if (empty($group->enrolmentkey)) {
-                            continue;
-                        }
-                        if ($group->enrolmentkey === $data['enrolpassword']) {
-                            $found = true;
-                            break;
-                        }
-                    }
-                    if (!$found) {
-                        // We can not hint because there are probably multiple passwords.
-                        $errors['enrolpassword'] = get_string('passwordinvalid', 'enrol_self');
-                    }
+		if ($instance->password) {
+			if ($data['enrolpassword'] !== $instance->password) {
+				if ($instance->customint1) {
+					$groups = $DB->get_records('groups', array('courseid'=>$instance->courseid), 'id ASC', 'id, enrolmentkey');
+					$found = false;
+					foreach ($groups as $group) {
+						if (empty($group->enrolmentkey)) {
+							continue;
+						}
+						if ($group->enrolmentkey === $data['enrolpassword']) {
+							$found = true;
+							break;
+						}
+					}
+					if (!$found) {
+						// We can not hint because there are probably multiple passwords.
+						$errors['enrolpassword'] = get_string('passwordinvalid', 'enrol_self');
+					}
 
-                } else {
-                    $plugin = enrol_get_plugin('self');
-                    if ($plugin->get_config('showhint')) {
-                        $hint = textlib::substr($instance->password, 0, 1);
-                        $errors['enrolpassword'] = get_string('passwordinvalidhint', 'enrol_self', $hint);
-                    } else {
-                        $errors['enrolpassword'] = get_string('passwordinvalid', 'enrol_self');
-                    }
-                }
-            }
-        }
+				} else {
+					$plugin = enrol_get_plugin('self');
+					if ($plugin->get_config('showhint')) {
+						$hint = textlib::substr($instance->password, 0, 1);
+						$errors['enrolpassword'] = get_string('passwordinvalidhint', 'enrol_self', $hint);
+					} else {
+						$errors['enrolpassword'] = get_string('passwordinvalid', 'enrol_self');
+					}
+				}
+			}
+		}
 
-        return $errors;
-    }
+		return $errors;
+	}
 }
