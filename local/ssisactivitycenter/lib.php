@@ -1,18 +1,70 @@
 <?php
-//require_once(dirname(dirname(__DIR__)) . '/config.php');
+defined('MOODLE_INTERNAL') || die();
 require_once(dirname(dirname(__DIR__)) . '/cohort/lib.php');
 
 // definitions
+// TODO: Use session data instead of these manual lookups
+// Add $user->is_activities_head as well ?
+// Although less portable
 define('ACTIVITIES_COHORT', 'activitiesHEAD');
+define('TEACHERS_COHORT', 'teachersALL');
+define('STUDENTS_COHORT', 'studentsALL');
+define('PARENTS_COHORT', 'parentsALL');
 global $DB;
 $activities_cohort = $DB->get_record('cohort', array('idnumber'=>ACTIVITIES_COHORT), 'id', MUST_EXIST);
+$parents_cohort = $DB->get_record('cohort', array('idnumber'=>PARENTS_COHORT), 'id', MUST_EXIST);
+$teachers_cohort = $DB->get_record('cohort', array('idnumber'=>TEACHERS_COHORT), 'id', MUST_EXIST);
+$students_cohort = $DB->get_record('cohort', array('idnumber'=>STUDENTS_COHORT), 'id', MUST_EXIST);
 define('ACTIVITIES_COHORT_ID', $activities_cohort->id);
+define('PARENTS_COHORT_ID', $teachers_cohort->id);
+define('TEACHERS_COHORT_ID', $teachers_cohort->id);
+define('STUDENTS_COHORT_ID', $students_cohort->id);
 
-function permit_user($userid) {
-    if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) {
-        return true;
-    }
-    return cohort_is_member(ACTIVITIES_COHORT_ID, $userid);
+function setup_page() {
+    global $PAGE;
+    global $OUTPUT;
+    $PAGE->set_context(context_system::instance());
+    $PAGE->set_url(derive_plugin_path_from('index.php'));
+    $PAGE->set_title("SSIS Activity Center");
+    $PAGE->set_heading("SSIS Activity Center");
+
+    echo $OUTPUT->header();
+}
+
+// function is_admin($userid) {
+//     if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) {
+//         return true;
+//     }
+//     return cohort_is_member(ACTIVITIES_COHORT_ID, $userid);
+// }
+
+// function is_parent($userid) {
+//     return cohort_is_member(PARENTS_COHORT_ID, $userid);
+// }
+
+// function is_teacher($userid) {
+//     return cohort_is_member(TEACHERS_COHORT_ID, $userid);
+// }
+
+// function is_student($userid) {
+//     return cohort_is_member(STUDENTS_COHORT_ID, $userid);
+//}
+
+// for convenience in debuggging
+function is_admin($userid) {
+    return true;
+}
+
+function is_parent($userid) {
+    return true;
+}
+
+function is_teacher($userid) {
+    return true;
+}
+
+function is_student($userid) {
+    return false;
 }
 
 function get_user_activity_enrollments($userid) {
@@ -69,50 +121,4 @@ function derive_plugin_path_from($stem) {
     return "/local/ssisactivitycenter/{$stem}";
 }
 
-// function declarations
-function output_forms($user=null) {  #"Look up by lastname, firstname, or homeroom...") {
-    if (!($user)) {
-        $default_words = 'placeholder="Look up by lastname, firstname, or homeroom..." ';
-        $powerschoolID = "";
-    } else {
-        // make sure the the text box displays the right thing, depending on context
-        $default_words = 'value="'.$user->lastname.', '.$user->firstname.' ('.$user->department.')" ';
-        $powerschoolID = $user->idnumber;
-    }
-    $path_to_index = derive_plugin_path_from("index.php");
-    $path_to_query = derive_plugin_path_from("query.php");
 
-    echo '
-<form name="user_entry" action="'.$path_to_index.'" method="get">
-<input name="" autofocus="autofocus" size="100" onclick="this.select()"
-    style="font-size:18px;margin-bottom:5px;box-sizing: border-box;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;padding:3px;"
-    type="text" id="person" '.$default_words.'/><br />
-<input name="powerschool" type="hidden" id="powerschool" value="'.$powerschoolID.'"/>
-<input name="action" style="border:4;" type="submit" type="submit" value="view family"/>
-<input name="action" type="submit" value="view child"/>
-<input name="action" type="submit" value="enrol child"/>
-<input name="action" type="submit" value="deenrol child"/>
-</form><br />';
-    echo '
-<script>
-$("#person").autocomplete({
-            source: "'.$path_to_query.'",
-            select: function (event, ui) {
-                console.log("select");
-                event.preventDefault();
-                $("#person").val(ui.item.label);
-                $("#powerschool").val(ui.item.value);
-            },
-            change: function (event, ui) {   // TODO: determine if I really really need this
-                if (ui != null) {
-                    event.preventDefault();
-                console.log("change");
-                }
-            },
-            focus: function (event, ui) {
-                event.preventDefault();
-                $("#person").val(ui.item.label);
-            },
-        });
-</script>';
-}
