@@ -6,7 +6,7 @@ require_once '../output.php';
 
 require_login();
 
-setup_page();
+setup_activity_center_page();
 output_tabs('Teacher');
 
 if (!is_teacher($USER->id)) {

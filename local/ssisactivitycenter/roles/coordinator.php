@@ -4,7 +4,7 @@ require_once '../../../config.php';
 require_once '../lib.php';
 require_once '../output.php';
 
-setup_page();
+setup_activity_center_page();
 output_tabs('Coordinator');
 
 if (!is_admin($USER->id)) {

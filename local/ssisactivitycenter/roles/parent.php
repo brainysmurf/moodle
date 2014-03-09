@@ -6,7 +6,7 @@ require_once '../output.php';
 
 require_login();
 
-setup_page();
+setup_activity_center_page();
 output_tabs('Parent');
 
 if (!is_parent($USER->id)) {
