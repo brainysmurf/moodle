@@ -23,6 +23,7 @@ $family_id = '3158';
 $info_string = 'This is a list of enrollments of your children into SSIS Activities.';
 $sql = "
 select
+    usr.id as userid,
     crs.id as course_id,
     cat.path as path,
     bus.bus as bus,
@@ -48,32 +49,75 @@ where
 ";
 $params = array('1', $family_id.'%', '%P', 'self');
 
-
 if (!empty($family_id)) {
     $results = $DB->get_recordset_sql($sql, $params);
     if (!empty($results)) {
+
         echo '<div class="local-alert"><i class="icon-info-sign pull-left icon-2x"></i>'.$info_string.'</div>';
         echo "<br />";
 
         echo '<table class="userinfotable htmltable" width="100%">';
         echo "<thead>";
+        echo '<tr>
+        <th class="header c0" style="" scope="col"><p>Child</p></th>
+        <th class="header c1" style="" scope="col"><p>Activity</p></th>
+        <th class="header c2" style="" scope="col"><p>Bus</p></th>
+        <th class="header c2" style="" scope="col"><p>Modifiy Bus Info</p></th>
+        </tr>
+        </thead>';
 
         foreach ($results as $item) {
             echo '<tr class="r0">';
             echo '<td class="cell c0"><p>'.$item->child.'</p></td>';
-            echo '<td class="cell c1 lastcol"><p>'.$item->fullname.'</p></td>';
+            echo '<td class="cell c1"><p>'.$item->fullname.'</p></td>';
             if ($item->path === '/1/118/122/123' or
                 $item->path === '/1/118/122/124' or
                 $item->path === '/1/118/122/125') {
-                $item->bus_string = ($item->bus ===1 ? "YES" : "NO");
+                $item_bus_string = ($item->bus === "1" ? "YES" : "NO");
+                $item_mod_string = ($item->bus === "1" ? "Change to 'NO'": "Change to 'YES'");
             } else {
                 $item_bus_string = "N/A";
+                $item_mod_string = "";
             }
-            echo '<td class="cell c1 lastcol"><p>'.$item->bus_string.'</p></td>';
+            echo '<td class="cell c0"><p>'.$item_bus_string.'</p></td>';
+            echo '<td class="cell c1 lastcol"><p><a rel="busmod" href="">'.$item_mod_string.'</a></p></td>';
 
             echo '</tr>';
         }
         $results->close();
+
+        echo '
+<script type="text/javascript">
+    $(\'a[rel="busmod"]\').bind("click", function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: "GET",
+            dataType: "json",
+            url: "../mod_user_bus_activity.php",
+            data: {
+                userid: '.$item->userid.'
+            },
+            success: function(data) {
+                console.log(data);
+                alert("Successfully modified bus information for " + data.name);
+            },
+            error: function(jqXHR, status) {
+                alert("Failed, due to " + jqXHR.statusText);
+            },
+            async: false
+            });
+        location.href = "";
+
+    });
+</script>';
+
+//         echo '
+// <script type="text/javascript">
+// $("#busmod").on("click", function () {
+//     alert("hi");
+// });
+// console.log("hi");
+// </script>';
 
     } else {
 
