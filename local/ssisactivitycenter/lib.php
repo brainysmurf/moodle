@@ -6,20 +6,6 @@ require_once(dirname(dirname(__DIR__)) . '/cohort/lib.php');
 // definitions
 // TODO: Use session data instead of these manual lookups
 // Add $user->is_activities_head as well ?
-// Although less portable
-define('ACTIVITIES_COHORT', 'activitiesHEAD');
-define('TEACHERS_COHORT', 'teachersALL');
-define('STUDENTS_COHORT', 'studentsALL');
-define('PARENTS_COHORT', 'parentsALL');
-global $DB;
-$activities_cohort = $DB->get_record('cohort', array('idnumber'=>ACTIVITIES_COHORT), 'id', MUST_EXIST);
-$parents_cohort = $DB->get_record('cohort', array('idnumber'=>PARENTS_COHORT), 'id', MUST_EXIST);
-$teachers_cohort = $DB->get_record('cohort', array('idnumber'=>TEACHERS_COHORT), 'id', MUST_EXIST);
-$students_cohort = $DB->get_record('cohort', array('idnumber'=>STUDENTS_COHORT), 'id', MUST_EXIST);
-define('ACTIVITIES_COHORT_ID', $activities_cohort->id);
-define('PARENTS_COHORT_ID', $teachers_cohort->id);
-define('TEACHERS_COHORT_ID', $teachers_cohort->id);
-define('STUDENTS_COHORT_ID', $students_cohort->id);
 
 function setup_activity_center_page() {
     global $PAGE;

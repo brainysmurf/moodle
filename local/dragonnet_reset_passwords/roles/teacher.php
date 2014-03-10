@@ -83,3 +83,6 @@ $("#reset_button").on("click", function(e) {
     }
 }
 
+echo $OUTPUT->footer();
+
+

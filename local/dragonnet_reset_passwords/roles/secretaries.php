@@ -32,7 +32,7 @@ $action = optional_param('action', '', PARAM_RAW);
 if ( empty($action) or $action === 'input' )  {
 
     if (empty($user)) {
-        output_forms(null, 'Site Admin');
+        output_forms(null, 'Start typing any staff member or student name');
     } else {
         output_forms($user, 'Site Admin');
     }

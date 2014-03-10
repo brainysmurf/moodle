@@ -101,3 +101,6 @@ Regards,</textarea>';
     }
 }
 
+echo $OUTPUT->footer();
+
+
