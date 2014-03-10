@@ -12,5 +12,5 @@ if (isloggedin()) {
         redirect(derive_plugin_path_from('roles/student.php'));
     }
 } else {
-    redirect(derive_plugin_path_from('roles/guest.php'));
+    redirect(derive_plugin_path_from('roles/parent.php'));
 }
