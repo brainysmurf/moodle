@@ -60,9 +60,18 @@ class OLPManager {
 				// Create course if it doesn't exist
 				if ($olp = $this->createOLP($user)) {
 					$this->output($user, "Created OLP course: ID {$olp->id}", 'DEBUG');
+				} else {
+					$this->output($user, 'Unable to create course', 'ERROR');
+					continue;
 				}
 			}
 
+			//Ensure the OLP course has the idnumber and shortname set correctly
+			$courseIDNumber = $this->getOLPCourseIDForUser($user);
+			if ($olp->shortname != $courseIDNumber || $olp->idnumber != $courseIDNumber) {
+				$this->output($user, "Fixing incorrect shortname ({$olp->shortname}) or idnumber ({$olp->idnumber})", 'WARNING');
+				$this->fixOLPCourseName($user, $olp);
+			}
 
 			/**
 			 * Ensure user is an editor in their OLP
@@ -151,16 +160,14 @@ class OLPManager {
 
 
 	/**
-	 * Return all the course data for a user's OLP
-	 * If one exists
+	 * Return all the course data for a user's OLP if one exists
+	 * By looking for a couse with the right idnumber
 	 */
 	public function getUsersOLP($user)
 	{
-		if (!$user->idnumber) {
+		if (!$courseIDNumber = $this->getOLPCourseIDForUser($user)) {
 			return false;
 		}
-
-		$courseIDNumber = 'OLP:' . $user->idnumber;
 
 		//Load course from the DB
 		global $DB;
@@ -168,8 +175,62 @@ class OLPManager {
 			$course = $DB->get_record('course', array('idnumber' => $courseIDNumber), '*', MUST_EXIST);
 			return $course;
 		} catch (Exception $e) {
+
+			// Try getting it by shortname 
+			if ($course = $this->getUsersOLPByShortName($user)) {
+				$this->output($user, 'OLP course was found by shortname but not idnumber', 'WARNING');
+				return $course;
+			}
+
 			return false;
 		}
+	}
+
+	private function getOLPCourseIDForUser($user)
+	{
+		if (!$user->idnumber) {
+			return false;
+		}
+
+		return 'OLP:' . $user->idnumber;
+	}
+
+	/**
+	 * Return all the course data for a user's OLP if one exists
+	 * By looking for a couse with the right shortname
+	 */
+	private function getUsersOLPByShortName($user)
+	{
+		if (!$courseIDNumber = $this->getOLPCourseIDForUser($user)) {
+			return false;
+		}
+
+		//Load course from the DB
+		global $DB;
+		try {
+			$course = $DB->get_record('course', array('shortname' => $courseIDNumber), '*', MUST_EXIST);
+			return $course;
+		} catch (Exception $e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Sets a courses idnumber and shortname to the
+	 * correct values for an OLP
+	 * (Mostly just used if a course was made manually and had the wrong info)
+	 */
+	private function fixOLPCourseName($user, $course)
+	{
+		if (!$courseIDNumber = $this->getOLPCourseIDForUser($user)) {
+			return false;
+		}
+
+		$course->idnumber = $courseIDNumber;
+		$course->shortname = $courseIDNumber;
+
+		global $DB;
+		return $DB->update_record('course', $course);
 	}
 
 
@@ -180,12 +241,14 @@ class OLPManager {
 	 */
 	public function createOLP($user)
 	{
-		$idnumber = "OLP:{$user->idnumber}";
+		if (!$courseIDNumber = $this->getOLPCourseIDForUser($user)) {
+			return false;
+		}
 
 		$courseData = new \stdClass();
 		$courseData->fullname = $user->lastname . ', ' . $user->firstname;
-		$courseData->shortname = $idnumber;
-		$courseData->idnumber = $idnumber;
+		$courseData->shortname = $courseIDNumber;
+		$courseData->idnumber = $courseIDNumber;
 		$courseData->format = 'onetopic';
 		$courseData->category = self::OLP_CATEGORY_ID;
 
@@ -328,6 +391,10 @@ class OLPManager {
 
 			case 'ERROR':
 				$foreground = 'red';
+				break;
+
+			case 'WARNING':
+				$foreground = 'light_purple';
 				break;
 
 			case 'NOTICE':
