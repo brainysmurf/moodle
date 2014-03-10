@@ -4,7 +4,6 @@ require_once '../../../config.php';
 require_once '../lib.php';
 require_once '../output.php';
 
-require_login();
 setup_account_management_page();
 
 $powerschoolID = optional_param('powerschool', '', PARAM_RAW);
@@ -41,10 +40,13 @@ if ( empty($powerschoolID) )  {
     } else {
 
         if ($email == "YES") {
-
+            global $CFG;
             echo '<div class="local-alert"><i class="icon-envelope icon-4x pull-left"></i> ';
-            echo '<p>An email has been sent to <strong>'.$user->email.'</strong>. ';
+            echo '<p>An email has been sent to <strong>'.mask_email($user->email).'</strong>. ';
             echo 'Please check and click the link to reset your password.</p><p>If you have any further difficulties, please email help@ssis-suzhou.net with your child\'s name.</p></div>';
+            echo '<ul class="buttons">';
+            echo '<a href="'.$CFG->wwwroot.'" class="btn"><i class="icon-home "></i> DragonNet Home</a>';
+            echo '</ul>';
 
         } else if ($email == "NO") {
 
@@ -53,7 +55,7 @@ if ( empty($powerschoolID) )  {
             echo '<br />';
             echo '<textarea onclick="this.select()" style="width:70%;height:200px;padding:10px;">Dear Help,
 
-I am parent with PowerSchool family id of '.$family_id.'P and I would like to reset the password to my DragonNet account. Right now, the username in DragonNet ('.$user->username.') is incorrect and needs to be changed.
+I am parent with PowerSchool family id of '.$family_id.'P and I would like to reset the password to my DragonNet account. Right now, the username in DragonNet is incorrect and needs to be changed.
 
 Please help me to reset it.
 
@@ -64,7 +66,7 @@ Regards,</textarea>';
         } else {
             $user = $DB->get_record('user', array('idnumber'=>$family_id.'P'));
 
-            output_forms($user, 'Site Admin');
+            //output_forms($user);
 
             $table = new html_table();
             $table->attributes['class'] = 'userinfobox';
@@ -80,10 +82,10 @@ Regards,</textarea>';
             $row->cells[1]->text = '<div class="username">Is this your email address?</div>';
             $row->cells[1]->text .= '<table class="userinfotable">';
 
-            foreach (array('username') as $field) {
+            foreach (array('email') as $field) {
                 $row->cells[1]->text .= '<tr>
                     <td>'.get_user_field_name($field).'</td>
-                    <td>'.s($user->{$field}).'</td>
+                    <td>'.mask_email(s($user->{$field})).'</td>
                 </tr>';
             }
 
@@ -95,6 +97,7 @@ Regards,</textarea>';
             echo '<form id="reset_password" action="" method="get">';
             echo '<a href="'.derive_plugin_path_from('roles/parent.php?email=YES&powerschool='.$user->idnumber).'" class="btn" id="reset_button"><i class="icon-thumbs-up"></i> Yes, that is my email address</a>';
             echo '<a href="'.derive_plugin_path_from('roles/parent.php?email=NO&powerschool='.$user->idnumber).'" class="btn" id="reset_button"><i class="icon-thumbs-down"></i> No, that is not my email address</a>';
+            echo '<a href="'.derive_plugin_path_from('roles/parent.php').'" class="btn" id="reset_button"><i class="icon-backward "></i> Back</a>';
             echo '</form>';
             echo '</ul>';
         }

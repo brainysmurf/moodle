@@ -41,7 +41,7 @@ function output_tabs($kind) {
 </div>';
 }
 
-function output_forms($user=null, $placeholder="Look up by lastname, firstname, or homeroom...") {
+function output_forms($user=null, $placeholder="Look up by lastname, firstname, or homeroom...", $kind="students") {
     if (!($user)) {
         // user hasn't chosen anybody yet
         $default_words = 'placeholder="'.$placeholder.'"';
@@ -52,7 +52,7 @@ function output_forms($user=null, $placeholder="Look up by lastname, firstname, 
         $powerschoolID = $user->idnumber;
     }
     $path_to_index = "";
-    $path_to_query = "../../ssisquery/query.php";
+    $path_to_query = "../../ssisquery/{$kind}.php";
 
     echo '
 <form id="user_entry" action="'.$path_to_index.'" method="get">

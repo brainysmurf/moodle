@@ -24,41 +24,68 @@ if (!empty($powerschoolID)) {
     $user = $DB->get_record('user', array('idnumber'=>$powerschoolID));
     $family_id = substr($powerschoolID, 0, 4);
 }
-$action = optional_param('action', '', PARAM_RAW);
-//$go = optional_param('go', '', PARAM_RAW);
-//if (empty($go)) { $go=false; }
-//$enrol_id = optional_param('enrolid', '', PARAM_INT);
+$reset_password = optional_param('reset_password', '', PARAM_RAW);
 
-if ( empty($action) or $action === 'input' )  {
+if ( empty($powerschoolID) )  {
+    output_forms(null, 'Start typing anyone\'s name', 'all');
+} else {
+    if ($reset_password == "YES") {
+        $newPassword = 'changeme';
+        $authplugin = get_auth_plugin($user->auth);
 
-    if (empty($user)) {
-        output_forms(null, 'Start typing any staff member or student name');
-    } else {
-        output_forms($user, 'Site Admin');
-    }
-
-    if (empty($powerschoolID)) {
-        // nothing
-     } else {
-
-        output_begin_table('Displaying entire family enrollments; click on student name to make any modifications.');
-        foreach ($results as $item) {
-            echo '<tr class="r0">';
-            echo '<td class="cell c0"><p><a href="'.derive_plugin_path_from('index.php').'?action=enrol+child&powerschool='.$item->idnumber.'">'.$item->username.'</a></p></td>';
-            echo '<td class="cell c1 lastcol"><p>'.$item->fullname.'</p></td>';
-            echo '</tr>';
+        //if ( $result = $authplugin->user_update_password($user, $newPassword) ) {
+        if (true) {
+            echo $OUTPUT->heading('Password for '.$user->firstname. ' '.$user->lastname.' Changed Successfully to "changeme"');
+        } else {
+            echo $user->firstname. ' '. $user->lastname. ' could not be changed, probably because they do not have an activated account. Contact the DragonNet administrator.';
         }
-        $results->close();
+        echo '<ul class="buttons"><li><a class="btn" href="'.derive_plugin_path_from('roles/teacher').'.php">Return</a></li></ul>';
+    } else {
+        output_forms($user, '', 'all');
 
-        output_end_table();
+        $table = new html_table();
+        $table->attributes['class'] = 'userinfobox';
 
-     }
+        $row = new html_table_row();
 
-} else if ($action==='view child') {
+        $row->cells[0] = new html_table_cell();
+        $row->cells[0]->attributes['class'] = 'left side';
+        $row->cells[0]->text = $OUTPUT->user_picture($user, array('size' => 100, 'courseid'=>1));
 
+        $row->cells[1] = new html_table_cell();
+        $row->cells[1]->attributes['class'] = 'content';
+        $row->cells[1]->text = $OUTPUT->container(fullname($user, true), 'username');
+        $row->cells[1]->text .= '<table class="userinfotable">';
 
-} else if ($action==='deenrol child') {
+        foreach (array('idnumber', 'email') as $field) {
+            $row->cells[1]->text .= '<tr>
+                <td>'.get_user_field_name($field).'</td>
+                <td>'.s($user->{$field}).'</td>
+            </tr>';
+        }
 
+        $row->cells[1]->text .= '</table>';
+
+        $table->data = array($row);
+        echo html_writer::table($table);
+        echo '<ul class="buttons">';
+        echo '<form id="reset_password" action="" method="get">';
+        echo '<input name="powerschool" type="hidden" value="'.$user->idnumber.'"/>';
+        echo '<input name="reset_password" type="hidden" id="reset_password" value="YES"/>';
+        if (strpos($user->email, '@student.ssis-suzhou.net') !== false) {
+            echo '<a href="'.derive_plugin_path_from('roles/secretaries.php?email=YES&powerschool=').$family_id.'P'.'" class="btn" id="parent_instead"><i class="icon-key"></i> Get Parent Account Instead</a>';
+        }
+        echo '<a href="#" class="btn" id="reset_button"><i class="icon-key"></i> Reset '.$user->firstname.' '.$user->lastname.'\'s password</a>';
+        echo '</form>';
+        echo '</ul>';
+        echo '
+<script>
+$("#reset_button").on("click", function(e) {
+    e.preventDefault();
+    $("#reset_password").submit();
+});
+</script>';
+    }
 }
 
 echo $OUTPUT->footer();
