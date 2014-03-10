@@ -26,7 +26,7 @@ function output_tabs($kind) {
             $pre = "<span class=\"selected\">";
             $post = "</span>";
         } else {
-            $pre = '<a href="'.derive_plugin_path_from("roles/{$label_lower}".'">');
+            $pre = '<a href="'.derive_plugin_path_from("roles/{$label_lower}".'.php">');
             $post = "</a>";
         }
         $li .= "<li id=\"tab_topic_{$i}\">{$pre}{$label}{$post}</li>";
@@ -38,8 +38,7 @@ function output_tabs($kind) {
             '.$li.'
         </ul>
     </div>
-</div>
-    ';
+</div>';
 }
 
 function output_forms($user=null, $placeholder="Look up by lastname, firstname, or homeroom...") {

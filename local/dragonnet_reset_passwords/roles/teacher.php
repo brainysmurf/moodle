@@ -33,11 +33,10 @@ if ( empty($powerschoolID) )  {
         //if ( $result = $authplugin->user_update_password($user, $newPassword) ) {
         if (true) {
             echo $OUTPUT->heading('Password for '.$user->firstname. ' '.$user->lastname.' Changed Successfully to "changeme"');
-        }
         } else {
             echo $user->firstname. ' '. $user->lastname. ' could not be changed, probably because they do not have an activated account. Contact the DragonNet administrator.';
         }
-        echo '<ul class="buttons"><li><a class="btn" href="'.derive_plugin_path_from('roles/teacher').'">Return</a></li></ul>';
+        echo '<ul class="buttons"><li><a class="btn" href="'.derive_plugin_path_from('roles/teacher').'.php">Return</a></li></ul>';
 
     } else {
 
