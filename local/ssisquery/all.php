@@ -20,11 +20,9 @@ if ($term) {
 (
     deleted = 0 AND
     idnumber != '' AND
-    email LIKE '%@student.ssis-suzhou.net' AND
         (
             LOWER(lastname) LIKE ? OR
             REPLACE(LOWER(firstname), ' ', '') LIKE ? OR
-            LOWER(department) = ? OR
             CONCAT(LOWER(firstname), ' ', LOWER(lastname)) LIKE ?
         )
 )
@@ -34,14 +32,23 @@ if ($term) {
     $params[] = $term;
     $params[] = $term.'%';
 
-    $sort = 'lastname, firstname, department';
-    $fields = 'id, idnumber, lastname, firstname, department';
+    $sort = 'lastname, firstname, email, department';
+    $fields = 'id, idnumber, lastname, firstname, email, department';
 
     // execute the query, and step through them
     $students = $DB->get_records_select("user", $where, $params, $sort, $fields);
     foreach ($students as $row) {
+        $kind = "Other";
+        if (strpos($row->email, '@student.ssis-suzhou.net') !== false) {
+            $kind = "Student, ".$row->department;
+        // We check for parent first, because some parents will use their school email address
+        } else if (strpos($row->idnumber, "P") === 4) {
+            $kind = "Parent";
+        } else if (strpos($row->email, "@ssis-suzhou.net") !== false) {
+            $kind = "Staff";
+        }
         $results[] = array(
-            "label"=>"{$row->firstname} {$row->lastname} ({$row->department})",
+            "label"=>"{$row->firstname} {$row->lastname} ({$kind})",
             "value"=>$row->idnumber
             );
 
