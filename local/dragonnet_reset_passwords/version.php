@@ -24,8 +24,8 @@
 
 
 $plugin->version = 2014022300;
-$plugin->release = '0.5 (Build: 2014022300)';
+$plugin->release = '0.6 (Build: 2014022301)';
 $plugin->requires = 2013051404;   // Moodle 2.5 January
 $plugin->cron = 0;
-$plugin->component = 'local_ssisactivitycenter';
+$plugin->component = 'local_dragonnet_reset_passwords';
 $plugin->maturity = 'MATURITY_BETA';  // _STABLE?
