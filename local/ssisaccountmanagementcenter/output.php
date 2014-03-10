@@ -15,7 +15,7 @@ function output_end_table() {
 function output_tabs($kind) {
     // output the tabs
     $li = '';
-    $kind_array = array("Guest", "Teacher", "Secretaries");
+    $kind_array = array("Parent", "Teacher", "Secretaries");
     $size =  count($kind_array);
     for ($i = 0;
         $i < $size;
@@ -42,10 +42,10 @@ function output_tabs($kind) {
     ';
 }
 
-function output_forms($user=null) {
+function output_forms($user=null, $placeholder="Look up by lastname, firstname, or homeroom...") {
     if (!($user)) {
         // user hasn't chosen anybody yet
-        $default_words = 'placeholder="Look up by lastname, firstname, or homeroom..." ';
+        $default_words = 'placeholder="'.$placeholder.'"';
         $powerschoolID = "";
     } else {
         // make sure the the text box displays the right thing, depending on context

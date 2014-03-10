@@ -22,7 +22,7 @@ if (!is_teacher($USER->id)) {
 }
 
 if ( empty($powerschoolID) )  {
-    output_forms(null, 'Site Admin');
+    output_forms(null, 'Start typing student\'s first or last name');
 } else {
 
     if ($reset_password == "YES") {
@@ -31,7 +31,7 @@ if ( empty($powerschoolID) )  {
         $authplugin = get_auth_plugin($user->auth);
 
         if ( $result = $authplugin->user_update_password($user, $newPassword) ) {
-            echo $OUTPUT->heading('Password for '.$user->firstname. ' '.$user->lastname.' Changed Successfully');
+            echo $OUTPUT->heading('Password for '.$user->firstname. ' '.$user->lastname.' Changed Successfully to "changeme"');
         } else {
             echo $user->firstname. ' '. $user->lastname. ' could not be changed, probably because they do not have an activated account. Contact the DragonNet administrator.';
         }

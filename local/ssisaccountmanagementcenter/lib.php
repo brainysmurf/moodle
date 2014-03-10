@@ -13,8 +13,8 @@ function setup_account_management_page() {
 
     $PAGE->set_context(context_system::instance());
     $PAGE->set_url(derive_plugin_path_from('index.php'));
-    $PAGE->set_title("DragonNet Account Management Center");
-    $PAGE->set_heading("DragonNet Account Management Center");
+    $PAGE->set_title("Reset DragonNet Passwords");
+    $PAGE->set_heading("Reset DragonNet Passwords");
 
     echo $OUTPUT->header();
 }
