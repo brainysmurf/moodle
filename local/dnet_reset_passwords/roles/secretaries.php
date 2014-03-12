@@ -14,14 +14,16 @@ require_login();
 
 output_tabs('Secretaries');
 
-if (!is_admin($USER->id)) {
-    echo 'Only designated Administrators can access this section.';
-    die();
+if (!is_secretary()) {
+    death('Only designated Administrators can access this section.');
 }
 
 $powerschoolID = optional_param('powerschool', '', PARAM_RAW);
 if (!empty($powerschoolID)) {
     $user = $DB->get_record('user', array('idnumber'=>$powerschoolID));
+    if (!$user) {
+        death('Something is wrong with the accounts associated with powerschool ID '.$powerschoolID.' you need to contact the DragonNet administrator.');
+    }
     $family_id = substr($powerschoolID, 0, 4);
 }
 $reset_password = optional_param('reset_password', '', PARAM_RAW);

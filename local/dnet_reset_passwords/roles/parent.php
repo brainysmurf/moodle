@@ -10,7 +10,7 @@ $powerschoolID = optional_param('powerschool', '', PARAM_RAW);
 if (!empty($powerschoolID)) {
     $user = $DB->get_record('user', array('idnumber'=>$powerschoolID));
     if (!$user) {
-        die("Sorry, it seems like there is a problem with your account. Please contact help@ssis-suzhou.net with the name of your child(ren).");
+        death("Sorry, it seems like there is a problem with your account. Please contact help@ssis-suzhou.net with the name of your child(ren).");
     }
     $family_id = substr($powerschoolID, 0, 4);
 }
@@ -19,9 +19,8 @@ $email = optional_param('email', '', PARAM_RAW);
 
 output_tabs('Parent');
 
-if (!is_admin($user->id) and isloggedin()) {
-    echo 'This section is intended for parents to look up their DragonNet details. You have to log out of DragonNet to use it.';
-    die();
+if (isloggedin() and !is_admin()) {
+    death('This section is intended for parents to look up their DragonNet username and to reset their passwords. You have to be logged out to use it.');
 }
 
 if ( empty($powerschoolID) )  {

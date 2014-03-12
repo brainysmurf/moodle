@@ -4337,6 +4337,7 @@ function complete_user_login($user) {
 	$SESSION->userIsTeacher = cohort_is_member_by_idnumber('teachersALL', $USER->id);
 	$SESSION->userIsStudent = cohort_is_member_by_idnumber('studentsALL', $USER->id);
 	$SESSION->userIsSecStudent = cohort_is_member_by_idnumber('studentsSEC', $USER->id);
+    $SESSION->userIsSecretary = cohort_is_member_by_idnumber('secretariesALL', $USER->id);
 
 
 	/*

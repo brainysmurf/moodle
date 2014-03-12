@@ -15,9 +15,8 @@ if (!empty($powerschoolID)) {
 $reset_password = optional_param('reset_password', '', PARAM_RAW);
 
 output_tabs('Teacher');
-if (!is_teacher($USER->id)) {
-    echo 'Only teacher accounts can access this section. Contact the DragonNet administrator if you think you should have access.';
-    die();
+if (!is_teacher()) {
+    death('Only teacher accounts can access this section. Contact the DragonNet administrator if you think you should have access.');
 }
 
 if ( empty($powerschoolID) )  {

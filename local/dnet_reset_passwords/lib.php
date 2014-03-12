@@ -7,6 +7,13 @@ require_once(dirname(dirname(__DIR__)) . '/cohort/lib.php');
 // TODO: Use session data instead of these manual lookups
 // Add $user->is_activities_head as well ?
 
+function death($message) {
+    echo($message);
+    global $OUTPUT;
+    echo $OUTPUT->footer();
+    die();
+}
+
 function setup_account_management_page() {
     global $PAGE;
     global $OUTPUT;
@@ -19,35 +26,37 @@ function setup_account_management_page() {
     echo $OUTPUT->header();
 }
 
-function is_admin($userid) {
+// This stuff basically manages the permissions and redirecting
+function is_admin() {
     if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) {
         return true;
     }
 }
 
-function is_teacher($userid) {
+function is_secretary() {
+    if (is_admin()) {
+        return true;
+    }
     global $SESSION;
-    global $USER;
-    if (is_admin($USER->id)) {
-        return true;
-    }
-    if ($SESSION->is_teacher) {
-        return true;
-    }
-    return false;
+    return $SESSION->userIsSecretary;
 }
 
-function is_student($userid) {
+function is_teacher() {
+    if (is_admin()) {
+        return true;
+    }
     global $SESSION;
-    global $USER;
-    if (is_admin($USER->id)) {
-        return true;
-    }
-    if ($SESSION->is_student) {
-        return true;
-    }
-    return false;
+    return $SESSION->userIsTeacher;
 }
+
+function is_student() {
+    if (is_admin()) {
+        return true;
+    }
+    global $SESSION;
+    return $SESSION->userIsStudent;
+}
+
 
 function get_user_activity_enrollments($userid) {
     global $DB;
