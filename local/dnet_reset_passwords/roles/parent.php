@@ -40,7 +40,6 @@ if ( empty($powerschoolID) )  {
         $row->used = 0;
         $DB->insert_record('dnet_pwreset_keys', $row);
         $url = $CFG->wwwroot . derive_plugin_path_from("reset_parent_password.php?userID={$user->id}&key={$key}");
-        echo $url;
         $message_header = get_string('email_msg_parent_body', 'local_dnet_reset_passwords');
         $message_footer = get_string('email_msg_parent_footer', 'local_dnet_reset_passwords');
         $message = $message_header. $url . $message_footer;
@@ -50,7 +49,7 @@ if ( empty($powerschoolID) )  {
 
         echo '<div class="local-alert"><i class="icon-envelope icon-4x pull-left"></i> ';
         echo '<p style="font-weight:bold;font-size:18px;">An email has been sent to "'.mask_email($user->email).'". </p>';
-        echo '<p>Please check and click the link to reset your password. Note that it may take a few minutes for the email to arrive. If you have any further difficulties, please email help@ssis-suzhou.net with your child(ren)\'s name.</p></div>';
+        echo '<p>Please check and click the link to reset your password. The subject is "DragonNet Password Reset Link"; be sure to check your spam inboxes. If you have any further difficulties, please email help@ssis-suzhou.net with your child(ren)\'s name.</p></div>';
         echo '<ul class="buttons">';
         echo '<a href="'.$CFG->wwwroot.'" class="btn"><i class="icon-home "></i> DragonNet Home</a>';
         echo '</ul>';

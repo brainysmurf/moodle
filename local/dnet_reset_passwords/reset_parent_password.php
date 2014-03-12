@@ -27,13 +27,13 @@ $params = array($userID, 0, $key);
 
 $row = $DB->get_record_sql($select, $params);
 
-
 if (!$row) {
     redirect('/');
 }
 
 // How long should the link be valid for (in seconds)?
-if (time() - $row->time > 86400) {
+//if (time() - $row->time > 86400) {
+if (true) {
     die("Sorry, that link has expired");
 }
 
@@ -69,7 +69,7 @@ if ( $confirm == "YES") {
 
     $('#confirm').on("click", function(e) {
         e.preventDefault();
-        alert('Remember, your current password is "changeme". You will have to enter it twice');
+        alert('Remember, your current password is "changeme". You will have to enter it twice.');
         location.href = "<?php echo derive_plugin_path_from('reset_parent_password?confirm=YES&userID='.$userID.'&key='.$key) ?>";
     });
 
