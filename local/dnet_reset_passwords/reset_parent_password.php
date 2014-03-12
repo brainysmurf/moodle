@@ -28,8 +28,7 @@ $params = array($userID, 0, $key);
 $row = $DB->get_record_sql($select, $params);
 
 if (!$row) {
-    print_object($select);
-    print_object($params);
+    redirect('/');
 }
 
 // How long should the link be valid for (in seconds)?
