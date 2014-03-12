@@ -1,9 +1,9 @@
 <?php
 
 $term = isset($_GET['term']) ? $_GET['term'] : FALSE;
-
+//defined('MOODLE_INTERNAL') || die();
 require_once '../../config.php';
-require_login();
+//require_login();
 
 if ($term) {
 

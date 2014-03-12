@@ -15,7 +15,6 @@ if (!empty($powerschoolID)) {
 $reset_password = optional_param('reset_password', '', PARAM_RAW);
 
 output_tabs('Teacher');
-
 if (!is_teacher($USER->id)) {
     echo 'Only teacher accounts can access this section. Contact the DragonNet administrator if you think you should have access.';
     die();
@@ -32,7 +31,9 @@ if ( empty($powerschoolID) )  {
 
         //if ( $result = $authplugin->user_update_password($user, $newPassword) ) {
         if (true) {
-            echo $OUTPUT->heading('Password for '.$user->firstname. ' '.$user->lastname.' Changed Successfully to "changeme"');
+            echo $OUTPUT->heading('DragonNet password for "'.$user->username.'" changed successfully to "changeme"');
+            echo '<div class="local-alert"><i class="icon-beer icon-4x pull-left"></i><p> Resetting the DragonNet password also affects <b>Student Email</b> and <b>DragonTV</b>.</p><p>';
+            echo 'They will need to change their password <b>on DragonNet first</b> in order for their Student Email and DragonTV passwords to be updated with their new password.</p></i></div>';
         } else {
             echo $user->firstname. ' '. $user->lastname. ' could not be changed, probably because they do not have an activated account. Contact the DragonNet administrator.';
         }

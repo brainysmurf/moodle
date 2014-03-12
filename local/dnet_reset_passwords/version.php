@@ -17,15 +17,15 @@
 /**
  * TODO
  *
- * @package   SSIS_ACTIVITY_CENTER
+ * @package   DragonNet Password Reset
  * @copyright Adam Morris
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 */
 
-
-$plugin->version = 2014022300;
-$plugin->release = '0.6 (Build: 2014022301)';
+$plugin->pluginname = "DragonNet Password Reset";
+$plugin->version = 2014022305;
+$plugin->release = '.8 (Build: 2014022305)';
 $plugin->requires = 2013051404;   // Moodle 2.5 January
 $plugin->cron = 0;
-$plugin->component = 'local_dragonnet_reset_passwords';
+$plugin->component = 'local_dnet_reset_passwords';
 $plugin->maturity = 'MATURITY_BETA';  // _STABLE?

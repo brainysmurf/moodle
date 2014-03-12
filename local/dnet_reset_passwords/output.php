@@ -15,7 +15,7 @@ function output_end_table() {
 function output_tabs($kind) {
     // output the tabs
     $li = '';
-    $kind_array = array("Parent", "Teacher", "Secretaries");
+    $kind_array = array("About DragonNet Passwords", "Parent", "Student", "New Student", "Teacher", "Secretaries");
     $size =  count($kind_array);
     for ($i = 0;
         $i < $size;
@@ -65,7 +65,7 @@ function output_forms($user=null, $placeholder="Look up by lastname, firstname, 
 <script>
 $("#person").autocomplete({
             source: "'.$path_to_query.'",
-            minLength: 3,
+            minLength: 2,
             select: function (event, ui) {
                 event.preventDefault();
                 $("#person").val(ui.item.label);

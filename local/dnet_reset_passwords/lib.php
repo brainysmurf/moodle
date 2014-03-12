@@ -19,41 +19,33 @@ function setup_account_management_page() {
     echo $OUTPUT->header();
 }
 
-// function is_admin($userid) {
-//     global $SESSION;
-//     if ($SESSION)
-//     if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) {
-//         return true;
-//     }
-//     return cohort_is_member(ACTIVITIES_COHORT_ID, $userid);
-// }
-
-// function is_parent($userid) {
-//     return cohort_is_member(PARENTS_COHORT_ID, $userid);
-// }
-
-// function is_teacher($userid) {
-//     return cohort_is_member(TEACHERS_COHORT_ID, $userid);
-// }
-
-// function is_student($userid) {
-//     return cohort_is_member(STUDENTS_COHORT_ID, $userid);
-//}
-
-// for convenience in debuggging
 function is_admin($userid) {
-    return true;
-}
-
-function is_parent($userid) {
-    return true;
+    if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) {
+        return true;
+    }
 }
 
 function is_teacher($userid) {
-    return true;
+    global $SESSION;
+    global $USER;
+    if (is_admin($USER->id)) {
+        return true;
+    }
+    if ($SESSION->is_teacher) {
+        return true;
+    }
+    return false;
 }
 
 function is_student($userid) {
+    global $SESSION;
+    global $USER;
+    if (is_admin($USER->id)) {
+        return true;
+    }
+    if ($SESSION->is_student) {
+        return true;
+    }
     return false;
 }
 
@@ -108,7 +100,7 @@ where
 
 function derive_plugin_path_from($stem) {
     // Moodle really really should be providing a standard way to do this
-    return "/local/dragonnet_reset_passwords/{$stem}";
+    return "/local/dnet_reset_passwords/{$stem}";
 }
 
 /**
