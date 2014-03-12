@@ -35,8 +35,7 @@ if ( empty($powerschoolID) )  {
         $newPassword = 'changeme';
         $authplugin = get_auth_plugin($user->auth);
 
-        //if ( $result = $authplugin->user_update_password($user, $newPassword) ) {
-        if (true) {
+        if ( $result = $authplugin->user_update_password($user, $newPassword) ) {
             echo $OUTPUT->heading('Password for '.$user->firstname. ' '.$user->lastname.' Changed Successfully to "changeme"');
         } else {
             echo $user->firstname. ' '. $user->lastname. ' could not be changed, probably because they do not have an activated account. Contact the DragonNet administrator.';
