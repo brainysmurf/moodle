@@ -28,7 +28,8 @@ $params = array($userID, 0, $key);
 $row = $DB->get_record_sql($select, $params);
 
 if (!$row) {
-    redirect('/');
+    print_object($select);
+    print_object($params);
 }
 
 // How long should the link be valid for (in seconds)?
@@ -38,6 +39,9 @@ if (time() - $row->time > 86400) {
 
 // Get user
 $user = $DB->get_record('user', array('id' => $userID));
+if (!$user) {
+    die("Could not find user!");
+}
 
 if ( $confirm == "YES") {
 

@@ -44,8 +44,7 @@ if ( empty($powerschoolID) )  {
         $message_footer = get_string('email_msg_parent_footer', 'local_dnet_reset_passwords');
         $message = $message_header. $url . $message_footer;
 
-        mail($user->email, "DragonNet Password Reset Link", $message);
-
+        mail($user->email, "DragonNet Password Reset Link", $message, "From:DragonNet Admin <lcssisadmin@student.ssis-suzhou.net>");
 
         echo '<div class="local-alert"><i class="icon-envelope icon-4x pull-left"></i> ';
         echo '<p style="font-weight:bold;font-size:18px;">An email has been sent to "'.mask_email($user->email).'". </p>';
