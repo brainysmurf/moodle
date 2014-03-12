@@ -20,7 +20,7 @@ output_tabs('Student');
 
 <div class="local-alert"><i class="icon-bullhorn icon-4x pull-left"></i>
 <p style="font-size:18px;font-weight:bold;">Cannot login to DragonNet?</p>
-You must ask a teacher to reset your password for you.
+You must ask a teacher to help reset your password for you.
 </div>
 
 <div class="local-alert"><i class="icon-bullhorn icon-4x pull-left"></i>

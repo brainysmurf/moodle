@@ -56,7 +56,6 @@ if ( $confirm == "YES") {
     redirect($CFG->wwwroot . '/login/');
 
 } else {
-
     // Show form to enter a new password here
     ?>
         <div class="local-alert">
@@ -70,7 +69,7 @@ if ( $confirm == "YES") {
 
     $('#confirm').on("click", function(e) {
         e.preventDefault();
-        alert('Remember, your current password is "changeme"');
+        alert('Remember, your current password is "changeme". You will have to enter it twice');
         location.href = "<?php echo derive_plugin_path_from('reset_parent_password?confirm=YES&userID='.$userID.'&key='.$key) ?>";
     });
 

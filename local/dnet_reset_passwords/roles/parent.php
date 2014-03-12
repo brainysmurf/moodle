@@ -9,6 +9,9 @@ setup_account_management_page();
 $powerschoolID = optional_param('powerschool', '', PARAM_RAW);
 if (!empty($powerschoolID)) {
     $user = $DB->get_record('user', array('idnumber'=>$powerschoolID));
+    if (!$user) {
+        die("Sorry, it seems like there is a problem with your account. Please contact help@ssis-suzhou.net with the name of your child(ren).");
+    }
     $family_id = substr($powerschoolID, 0, 4);
 }
 $reset_password = optional_param('reset_password', '', PARAM_RAW);
@@ -37,15 +40,17 @@ if ( empty($powerschoolID) )  {
         $row->used = 0;
         $DB->insert_record('dnet_pwreset_keys', $row);
         $url = $CFG->wwwroot . derive_plugin_path_from("reset_parent_password.php?userID={$user->id}&key={$key}");
-        $message_header = get_string('local_dnet_reset_passwords', 'email_msg_parent_body');
-        $message_footer = get_string('local_dnet_reset_passwords', 'email_msg_parent_footer');
+        echo $url;
+        $message_header = get_string('email_msg_parent_body', 'local_dnet_reset_passwords');
+        $message_footer = get_string('email_msg_parent_footer', 'local_dnet_reset_passwords');
         $message = $message_header. $url . $message_footer;
+
         mail($user->email, "DragonNet Password Reset Link", $message);
 
 
         echo '<div class="local-alert"><i class="icon-envelope icon-4x pull-left"></i> ';
-        echo '<p>An email has been sent to <strong>'.mask_email($user->email).'</strong>. ';
-        echo 'Please check and click the link to reset your password.</p><p>If you have any further difficulties, please email help@ssis-suzhou.net with your child\'s name.</p></div>';
+        echo '<p style="font-weight:bold;font-size:18px;">An email has been sent to "'.mask_email($user->email).'". </p>';
+        echo '<p>Please check and click the link to reset your password. Note that it may take a few minutes for the email to arrive. If you have any further difficulties, please email help@ssis-suzhou.net with your child(ren)\'s name.</p></div>';
         echo '<ul class="buttons">';
         echo '<a href="'.$CFG->wwwroot.'" class="btn"><i class="icon-home "></i> DragonNet Home</a>';
         echo '</ul>';
