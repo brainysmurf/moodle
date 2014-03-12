@@ -73,11 +73,25 @@ if ( empty($powerschoolID) )  {
         echo '<a href="#" class="btn" id="reset_button"><i class="icon-key"></i> Reset this student\'s password</a>';
         echo '</form>';
         echo '</ul>';
+        echo '<div id="dialog" title="Confirm Reset" style="display:none"> Are you sure you want to reset '.$user->firstname.' '.$user->lastname.'\'s password?</div>';
         echo '
 <script>
 $("#reset_button").on("click", function(e) {
     e.preventDefault();
-    $("#reset_password").submit();
+    $("#dialog").dialog({
+        minWidth:450,
+        draggable: false,
+        dialogClass: "no-close",
+        model: true,
+        buttons: [
+            {
+                text: "OK",
+                click: function() {
+                    $("#reset_password").submit();
+                }
+            },
+        ]
+    });
 });
 </script>';
     }
