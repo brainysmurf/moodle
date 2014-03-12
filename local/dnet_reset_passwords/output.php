@@ -57,13 +57,14 @@ function output_forms($user=null, $placeholder="Look up by lastname, firstname, 
     echo '
 <form id="user_entry" action="'.$path_to_index.'" method="get">
 <input name="" autofocus="autofocus" size="100" onclick="this.select()"
-    style="font-size:18px;margin-bottom:5px;box-sizing: border-box;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;padding:3px;"
+    style="width:100%;font-size:18px;margin-bottom:5px;box-sizing: border-box;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;padding:3px;"
     type="text" id="person" '.$default_words.'/><br />
 <input name="powerschool" type="hidden" id="powerschool" value="'.$powerschoolID.'"/>
 </form><br />';
     echo '
 <script>
 $("#person").autocomplete({
+            autoFocus: true,
             source: "'.$path_to_query.'",
             minLength: 2,
             select: function (event, ui) {

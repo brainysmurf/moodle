@@ -9,7 +9,7 @@ if ($term) {
 
     // Query is being performed
     global $DB;
-    $term = strtolower($term);
+    $term = trim(strtolower($term));
 
     $results = array();
     $params = array();
