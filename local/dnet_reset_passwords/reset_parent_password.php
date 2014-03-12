@@ -73,7 +73,7 @@ if ( $confirm == "YES") {
     $('#confirm').on("click", function(e) {
         e.preventDefault();
         alert('Remember, your current password is "changeme". You will have to enter it twice.');
-        location.href = "<?php echo derive_plugin_path_from('reset_parent_password?confirm=YES&userID='.$userID.'&key='.$key) ?>";
+        location.href = "<?php echo derive_plugin_path_from('reset_parent_password.php?confirm=YES&userID='.$userID.'&key='.$key) ?>";
     });
 
     </script>
