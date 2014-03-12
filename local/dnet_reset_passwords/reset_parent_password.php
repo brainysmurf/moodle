@@ -32,8 +32,7 @@ if (!$row) {
 }
 
 // How long should the link be valid for (in seconds)?
-//if (time() - $row->time > 86400) {
-if (true) {
+if (time() - $row->time > 86400) {
     die("Sorry, that link has expired");
 }
 
