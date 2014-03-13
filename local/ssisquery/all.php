@@ -21,15 +21,16 @@ if ($term) {
     deleted = 0 AND
     idnumber != '' AND
         (
-            LOWER(lastname) LIKE ? OR
+            REPLACE(CONCAT(LOWER(firstname), LOWER(lastname)),  ' ', '') LIKE ? OR
+            REPLACE(CONCAT(LOWER(lastname),  LOWER(firstname)), ' ', '') LIKE ? OR
             REPLACE(LOWER(firstname), ' ', '') LIKE ? OR
-            CONCAT(LOWER(firstname), ' ', LOWER(lastname)) LIKE ?
+            LOWER(lastname) LIKE ?
         )
 )
 ";
     $params[] = $term.'%';
     $params[] = $term.'%';
-    $params[] = $term;
+    $params[] = $term.'%';
     $params[] = $term.'%';
 
     $sort = 'lastname, firstname, email, department';

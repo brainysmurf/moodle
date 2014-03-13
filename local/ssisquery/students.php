@@ -22,19 +22,21 @@ if ($term) {
     idnumber != '' AND
     email LIKE '%@student.ssis-suzhou.net' AND
         (
-            LOWER(lastname) LIKE ? OR
-            REPLACE(LOWER(firstname), ' ', '') LIKE ? OR
             LOWER(department) = ? OR
-            CONCAT(LOWER(firstname), ' ', LOWER(lastname)) LIKE ?
+            REPLACE(CONCAT(LOWER(firstname), LOWER(lastname)),  ' ', '') LIKE ? OR
+            REPLACE(CONCAT(LOWER(lastname),  LOWER(firstname)), ' ', '') LIKE ? OR
+            REPLACE(LOWER(firstname), ' ', '') LIKE ? OR
+            LOWER(lastname) LIKE ?
         )
 )
 ";
-    $params[] = $term.'%';
-    $params[] = $term.'%';
     $params[] = $term;
     $params[] = $term.'%';
+    $params[] = $term.'%';
+    $params[] = $term.'%';
+    $params[] = $term.'%';
 
-    $sort = 'lastname, firstname, department';
+    $sort = 'firstname, lastname, department';
     $fields = 'id, idnumber, lastname, firstname, department';
 
     // execute the query, and step through them
