@@ -4,17 +4,25 @@ require_once '../../config.php';
 require_once 'lib.php';
 require_once 'output.php';
 
-// setup_page();
-global $PAGE;
-global $OUTPUT;
-
 require_login();
+
+function setup_student_comment_page() {
+    global $PAGE;
+    global $OUTPUT;
+
+    $PAGE->set_context(context_system::instance());
+    $PAGE->set_url(derive_plugin_path_from('index.php'));
+    $PAGE->set_title("Reset DragonNet Passwords");
+    $PAGE->set_heading("Reset DragonNet Passwords");
+
+    echo $OUTPUT->header();
+}
 
 setup_student_comment_page();
 
-output_tabs('Secretaries');
+output_tabs('Teachers');
 
-if (!is_secretary()) {
+if (!is_teacher()) {
     death('Only designated Administrators can access this section.');
 }
 

@@ -14,17 +14,17 @@ function death($message) {
     die();
 }
 
-function setup_student_comment_page() {
-    global $PAGE;
-    global $OUTPUT;
+// function setup_student_comment_page() {
+//     global $PAGE;
+//     global $OUTPUT;
 
-    $PAGE->set_context(context_system::instance());
-    $PAGE->set_url(derive_plugin_path_from('index.php'));
-    $PAGE->set_title("Reset DragonNet Passwords");
-    $PAGE->set_heading("Reset DragonNet Passwords");
+//     $PAGE->set_context(context_system::instance());
+//     $PAGE->set_url(derive_plugin_path_from('index.php'));
+//     $PAGE->set_title("Reset DragonNet Passwords");
+//     $PAGE->set_heading("Reset DragonNet Passwords");
 
-    echo $OUTPUT->header();
-}
+//     echo $OUTPUT->header();
+// }
 
 // This stuff basically manages the permissions and redirecting
 function is_admin() {
