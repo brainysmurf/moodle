@@ -61,18 +61,44 @@ if ( $confirm == "YES") {
     // Show form to enter a new password here
     ?>
         <div class="local-alert">
-        <i class="icon-4x pull-left icon-comment"></i> <p style="font-weight:bold;font-size:18px;">Your username is "<?php echo $user->username ?>". Your password is "changeme".</p>
-        <p>Click the button below. You will be prompted to login again. This time your password is "changeme".</p></div>
-        <ul class="buttons">
-            <li><a id="confirm" href="#" class="btn" id="reset_button"><i class="icon-hand-right"></i> Login again</a></li>
-        </ul>
+        <i class="icon-4x pull-left icon-user"></i> <p style="font-size:18px;">Your username is <strong><?php echo $user->username ?></strong>.</p>
+        <p>&nbsp;</p></div>
 
+        <div class="local-alert">
+        <i class="icon-4x pull-left icon-key"></i> <p style="font-size:18px;">Your temporary password is <strong>changeme</strong>.</p>
+        <p>&nbsp;</p></div>
+
+        <div class="local-alert">
+        <i class="icon-4x pull-left icon-question-sign"></i> <p style="font-weight:bold;font-size:18px;">Now login again with the above credentials.</p>
+        <p><a id="confirm" href="#" class="btn" id="reset_button"><i class="icon-hand-right"></i> Login again</a></p></div>
+
+        <div id="dialog" title="Reminder" style="display:none"> Remember, your current password is <b>changeme</b>. You will have to enter it twice.</div>
+
+
+
+<!--         <ul class="buttons">
+        <li><a id="confirm" href="#" class="btn" id="reset_button"><i class="icon-hand-right"></i> Login again</a></li>
+        </ul>
+ -->
     <script>
 
     $('#confirm').on("click", function(e) {
         e.preventDefault();
-        alert('Remember, your current password is "changeme". You will have to enter it twice.');
-        location.href = "<?php echo derive_plugin_path_from('reset_parent_password.php?confirm=YES&userID='.$userID.'&key='.$key) ?>";
+        $("#dialog").dialog({
+            minWidth: 450,
+            draggable: false,
+            model: true,
+            buttons: [
+                {
+                    text: "OK",
+                    click: function() {
+                        location.href = "<?php echo derive_plugin_path_from('reset_parent_password.php?confirm=YES&userID='.$userID.'&key='.$key) ?>";
+                    }
+                },
+            ]
+        });
+
+
     });
 
     </script>

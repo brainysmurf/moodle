@@ -39,6 +39,9 @@ if ( empty($powerschoolID) )  {
         $row->used = 0;
         $DB->insert_record('dnet_pwreset_keys', $row);
         $url = $CFG->wwwroot . derive_plugin_path_from("reset_parent_password.php?userID={$user->id}&key={$key}");
+
+        echo $url;
+
         $message_header = get_string('email_msg_parent_body', 'local_dnet_reset_passwords');
         $message_footer = get_string('email_msg_parent_footer', 'local_dnet_reset_passwords');
         $message = $message_header. $url . $message_footer;

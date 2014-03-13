@@ -70,6 +70,7 @@ $("#person").autocomplete({
             select: function (event, ui) {
                 event.preventDefault();
                 $("#person").val(ui.item.label);
+                console.log("hi");
                 $("#powerschool").val(ui.item.value);
                 $("#user_entry").submit();
             },
@@ -80,7 +81,7 @@ $("#person").autocomplete({
             },
             focus: function (event, ui) {
                 event.preventDefault();
-                $("#person").val(ui.item.label);
+                //$("#person").val(ui.item.label);
             },
         });
 </script>';
