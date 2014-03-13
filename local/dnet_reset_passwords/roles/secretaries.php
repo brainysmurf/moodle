@@ -1,7 +1,8 @@
 <?php
 
 require_once '../../../config.php';
-require_once '../lib.php';
+require_once '../../../local/ssiscommon/lib.php';
+require_once '../portables.php';
 require_once '../output.php';
 
 // setup_page();

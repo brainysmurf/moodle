@@ -1,6 +1,7 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
 require_once 'lib.php';
+require_once 'portables.php';
 
 // Some display stuff
 function output_begin_table($message) {
@@ -52,7 +53,7 @@ function output_forms($user=null, $placeholder="Look up by lastname, firstname, 
         $powerschoolID = $user->idnumber;
     }
     $path_to_index = "";
-    $path_to_query = "../../ssisquery/{$kind}.php";
+    $path_to_query = "../../ssiscommon/query/{$kind}.php";
 
     echo '
 <form id="user_entry" action="'.$path_to_index.'" method="get">
