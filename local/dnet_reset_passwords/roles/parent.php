@@ -1,11 +1,12 @@
 <?php
 
 require_once '../../../config.php';
-require_once '../../../local/ssiscommon/lib.php';
+require_once '../../../local/dnet_common/sharedlib.php';
 require_once '../portables.php';
 require_once '../output.php';
+require_once '../locallib.php';
 
-setup_account_management_page();
+setup_page();
 
 $powerschoolID = optional_param('powerschool', '', PARAM_RAW);
 if (!empty($powerschoolID)) {
@@ -47,7 +48,11 @@ if ( empty($powerschoolID) )  {
         $message_footer = get_string('email_msg_parent_footer', 'local_dnet_reset_passwords');
         $message = $message_header. $url . $message_footer;
 
-        mail($user->email, "DragonNet Password Reset Link", $message, "From:DragonNet Admin <lcssisadmin@student.ssis-suzhou.net>");
+        $from = $DB->get_record('user', array('username'=>'lcssisadmin'));
+
+        email_to_user($user, $from, "DragonNet Password Reset Link", $message);
+
+        //mail($user->email, "DragonNet Password Reset Link", $message, "From:DragonNet Admin <lcssisadmin@student.ssis-suzhou.net>");
 
         echo '<div class="local-alert"><i class="icon-envelope icon-4x pull-left"></i> ';
         echo '<p style="font-weight:bold;font-size:18px;">An email has been sent to "'.mask_email($user->email).'". </p>';
@@ -73,7 +78,9 @@ Regards,</textarea>';
 
     } else {
         $user = $DB->get_record('user', array('idnumber'=>$family_id.'P'));
-
+        if (!$user) {
+            death("Something wrong with your account. Please contact help@ssis-suzhou.net with the name of your child(ren).");
+        }
         //output_forms($user);
 
         $table = new html_table();

@@ -4,14 +4,13 @@
  *  reset_password.php
  */
 require_once '../../config.php';
-require_once 'lib.php';
+require_once 'portables.php';
 
-setup_account_management_page();
+setup_page();
 
 $key = required_param('key', PARAM_RAW);
 $userID = required_param('userID', PARAM_RAW);
 $confirm = optional_param('confirm', '', PARAM_RAW);
-
 
 // Check key is valid
 $select = '
@@ -74,12 +73,6 @@ if ( $confirm == "YES") {
 
         <div id="dialog" title="Reminder" style="display:none"> Remember, your current password is <b>changeme</b>. You will have to enter it twice.</div>
 
-
-
-<!--         <ul class="buttons">
-        <li><a id="confirm" href="#" class="btn" id="reset_button"><i class="icon-hand-right"></i> Login again</a></li>
-        </ul>
- -->
     <script>
 
     $('#confirm').on("click", function(e) {

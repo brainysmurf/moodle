@@ -54,7 +54,7 @@ function output_forms($user=null) {
         $powerschoolID = $user->idnumber;
     }
     $path_to_index = derive_plugin_path_from("index.php");
-    $path_to_query = "../../ssiscommon/query/students.php";
+    $path_to_query = "../../dnet_common/query/students.php";
 
     echo '
 <form name="user_entry" action="'.$path_to_index.'" method="get">

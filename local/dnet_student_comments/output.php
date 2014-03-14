@@ -1,6 +1,6 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
-require_once 'lib.php';
+require_once '../../local/dnet_common/sharedlib.php';
 
 // Some display stuff
 function output_begin_table($message) {
@@ -15,7 +15,7 @@ function output_end_table() {
 function output_tabs($kind) {
     // output the tabs
     $li = '';
-    $kind_array = array("About DragonNet Passwords", "Parent", "Student", "New Student", "Teacher", "Secretaries");
+    $kind_array = array("Teachers", "Admin");
     $size =  count($kind_array);
     for ($i = 0;
         $i < $size;
@@ -52,7 +52,7 @@ function output_forms($user=null, $placeholder="Look up by lastname, firstname, 
         $powerschoolID = $user->idnumber;
     }
     $path_to_index = "";
-    $path_to_query = "../../ssisquery/{$kind}.php";
+    $path_to_query = "../../local/dnet_common/query/{$kind}.php";
 
     echo '
 <form id="user_entry" action="'.$path_to_index.'" method="get">
@@ -80,7 +80,7 @@ $("#person").autocomplete({
             },
             focus: function (event, ui) {
                 event.preventDefault();
-                $("#person").val(ui.item.label);
+                //$("#person").val(ui.item.label);
             },
         });
 </script>';

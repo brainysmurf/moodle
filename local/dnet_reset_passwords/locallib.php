@@ -1,21 +1,4 @@
 <?php
-defined('MOODLE_INTERNAL') || die();
-
-// definitions
-// TODO: Use session data instead of these manual lookups
-// Add $user->is_activities_head as well ?
-
-function setup_account_management_page() {
-    global $PAGE;
-    global $OUTPUT;
-
-    $PAGE->set_context(context_system::instance());
-    $PAGE->set_url(derive_plugin_path_from('index.php'));
-    $PAGE->set_title("Reset DragonNet Passwords");
-    $PAGE->set_heading("Reset DragonNet Passwords");
-
-    echo $OUTPUT->header();
-}
 
 /**
  * method masks the username of an email address

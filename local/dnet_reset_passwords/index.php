@@ -1,7 +1,7 @@
 <?php
 require_once '../../config.php';
 require_once 'portables.php';
-require_once '../../local/ssiscommon/lib.php';
+require_once '../../local/dnet_common/sharedlib.php';
 
 if (isloggedin()) {
     if (is_secretary()) {

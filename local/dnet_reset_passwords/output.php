@@ -1,6 +1,5 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
-require_once 'lib.php';
 require_once 'portables.php';
 
 // Some display stuff
@@ -53,7 +52,7 @@ function output_forms($user=null, $placeholder="Look up by lastname, firstname, 
         $powerschoolID = $user->idnumber;
     }
     $path_to_index = "";
-    $path_to_query = "../../ssiscommon/query/{$kind}.php";
+    $path_to_query = "../../dnet_common/query/{$kind}.php";
 
     echo '
 <form id="user_entry" action="'.$path_to_index.'" method="get">
@@ -71,7 +70,6 @@ $("#person").autocomplete({
             select: function (event, ui) {
                 event.preventDefault();
                 $("#person").val(ui.item.label);
-                console.log("hi");
                 $("#powerschool").val(ui.item.value);
                 $("#user_entry").submit();
             },

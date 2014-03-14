@@ -1,7 +1,7 @@
 <?php
 
 require_once '../../../config.php';
-require_once '../../../local/ssiscommon/lib.php';
+require_once '../../../local/dnet_common/sharedlib.php';
 require_once '../portables.php';
 require_once '../output.php';
 
@@ -9,7 +9,7 @@ require_once '../output.php';
 global $PAGE;
 global $OUTPUT;
 
-setup_account_management_page();
+setup_page();
 
 require_login();
 

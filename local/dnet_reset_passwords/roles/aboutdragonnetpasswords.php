@@ -3,7 +3,7 @@
 require_once '../../../config.php';
 require_once '../output.php';
 
-setup_account_management_page();
+setup_page();
 
 $powerschoolID = optional_param('powerschool', '', PARAM_RAW);
 if (!empty($powerschoolID)) {

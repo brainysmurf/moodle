@@ -1,24 +1,12 @@
 <?php
 
 require_once '../../config.php';
-require_once '../../local/ssiscommon/lib.php';
 require_once 'output.php';
+require_once 'portables.php';
 
 require_login();
 
-function setup_student_comment_page() {
-    global $PAGE;
-    global $OUTPUT;
-
-    $PAGE->set_context(context_system::instance());
-    $PAGE->set_url(derive_plugin_path_from('index.php'));
-    $PAGE->set_title("Reset DragonNet Passwords");
-    $PAGE->set_heading("Reset DragonNet Passwords");
-
-    echo $OUTPUT->header();
-}
-
-setup_student_comment_page();
+setup_page();
 
 output_tabs('Teachers');
 
@@ -34,6 +22,7 @@ if (!empty($powerschoolID)) {
     }
     $family_id = substr($powerschoolID, 0, 4);
 }
+$save = optional_param('save', '', PARAM_RAW);
 
 if ( empty($powerschoolID) )  {
     output_forms(null, 'Start typing a student\'s name', 'students');
@@ -41,7 +30,8 @@ if ( empty($powerschoolID) )  {
     if ($save == "YES") {
         // write to the database
     } else {
-        output_forms($user, '', 'all');
+        echo '<p><a id="confirm" href="'.derive_plugin_path_from('home.php').'" class="btn" id="reset_button"><i class="icon-backward"></i> Back</a>&nbsp;';
+        echo '<a id="save" href="#" class="btn" id="reset_button"><i class="icon-file"></i> Save</a></p>';
 
         $table = new html_table();
         $table->attributes['class'] = 'userinfobox';
@@ -57,46 +47,31 @@ if ( empty($powerschoolID) )  {
         $row->cells[1]->text = $OUTPUT->container(fullname($user, true), 'username');
         $row->cells[1]->text .= '<table class="userinfotable">';
 
-        foreach (array('idnumber', 'email') as $field) {
-            $row->cells[1]->text .= '<tr>
-                <td>'.get_user_field_name($field).'</td>
-                <td>'.s($user->{$field}).'</td>
-            </tr>';
-        }
+        // foreach (array('idnumber', 'email') as $field) {
+        //     $row->cells[1]->text .= '<tr>
+        //         <td>'.get_user_field_name($field).'</td>
+        //         <td>'.s($user->{$field}).'</td>
+        //     </tr>';
+        // }
+
+        $row->cells[1]->text .= '<input autofocus="autofocus" style="width:95%;padding:6px;;" id="comment" />';
 
         $row->cells[1]->text .= '</table>';
 
         $table->data = array($row);
         echo html_writer::table($table);
-        echo '<ul class="buttons">';
-        echo '<form id="reset_password" action="" method="get">';
-        echo '<input name="powerschool" type="hidden" value="'.$user->idnumber.'"/>';
-        echo '<input name="reset_password" type="hidden" id="reset_password" value="YES"/>';
-        if (strpos($user->email, '@student.ssis-suzhou.net') !== false) {
-            echo '<a href="'.derive_plugin_path_from('roles/secretaries.php?email=YES&powerschool=').$family_id.'P'.'" class="btn" id="parent_instead"><i class="icon-key"></i> Get Parent Account Instead</a>';
-        }
-        echo '<a href="#" class="btn" id="reset_button"><i class="icon-key"></i> Reset '.$user->firstname.' '.$user->lastname.'\'s password</a>';
-        echo '</form>';
-        echo '</ul>';
-        echo '<div id="dialog" title="Confirm Reset" style="display:none"> Are you sure you want to reset '.$user->firstname.' '.$user->lastname.'\'s password?</div>';
         echo '
 <script>
-$("#reset_button").on("click", function(e) {
+$("#save").on("click", function(e) {
     e.preventDefault();
-    $("#dialog").dialog({
-        minWidth: 450,
-        draggable: false,
-        dialogClass: "no-close",
-        model: true,
-        buttons: [
-            {
-                text: "OK",
-                click: function() {
-                    $("#reset_password").submit();
-                }
-            },
-        ]
-    });
+    $.get(
+        '.derive_plugin_path_from('home.php').',
+        {save: "YES"},
+        function (e) {
+            console.log("hi");
+        },
+        "json"
+        )
 });
 </script>';
     }
