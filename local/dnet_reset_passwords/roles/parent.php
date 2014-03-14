@@ -21,7 +21,7 @@ $email = optional_param('email', '', PARAM_RAW);
 
 output_tabs('Parent');
 
-if (isloggedin() and !is_admin()) {
+if (isloggedin()) {
     death('This section is intended for parents to look up their DragonNet username and to reset their passwords. You have to be logged out to use it.');
 }
 

@@ -5,8 +5,13 @@
  */
 require_once '../../config.php';
 require_once 'portables.php';
+require_once '../../local/dnet_common/sharedlib.php';
 
 setup_page();
+
+if (isloggedin()) {
+    death("That's strange. You are trying to reset a password when you have already logged in? Fail!");
+}
 
 $key = required_param('key', PARAM_RAW);
 $userID = required_param('userID', PARAM_RAW);
@@ -57,7 +62,6 @@ if ( $confirm == "YES") {
     redirect($CFG->wwwroot . '/login/');
 
 } else {
-    // Show form to enter a new password here
     ?>
         <div class="local-alert">
         <i class="icon-4x pull-left icon-user"></i> <p style="font-size:18px;">Your username is <strong><?php echo $user->username ?></strong>.</p>
