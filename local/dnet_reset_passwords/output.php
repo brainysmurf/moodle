@@ -15,7 +15,7 @@ function output_end_table() {
 function output_tabs($kind) {
     // output the tabs
     $li = '';
-    $kind_array = array("About DragonNet Passwords", "Parent", "Student", "New Student", "Teacher", "Secretaries");
+    $kind_array = array("About DragonNet Passwords", "Student", "New Student", "Parent", "Teacher", "Secretaries");
     $size =  count($kind_array);
     for ($i = 0;
         $i < $size;
