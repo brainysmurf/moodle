@@ -27,5 +27,5 @@ $plugin->version = 2014022305;
 $plugin->release = '.8 (Build: 2014022305)';
 $plugin->requires = 2013051404;   // Moodle 2.5 January
 $plugin->cron = 0;
-$plugin->component = 'local_dnet_reset_passwords';
+$plugin->component = 'local_dnet_account_management';
 $plugin->maturity = 'MATURITY_BETA';  // _STABLE?
