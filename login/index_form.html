@@ -9,8 +9,7 @@ if (!empty($CFG->loginpasswordautocomplete)) {
 <div class="loginbox clearfix">
   <div class="loginpanel">
     <h2><?php print_string("returningtosite") ?></h2>
-    
-      <div class="login-reminder"><icon class="icon-hand-right pull-left icon-4x"></icon>Parents, if you need DragonNet details please email help@ssis-suzhou.net with details about your child.</div>
+
 
         <div class="desc">
           <?php
@@ -28,18 +27,18 @@ if (!empty($CFG->loginpasswordautocomplete)) {
         ?>
 		<div class="loginform">
         <form action="<?php echo $CFG->httpswwwroot; ?>/login/index.php" method="post" id="login" <?php echo $autocomplete; ?> >
-        
-        
+
+
         	<div class="loginform-input-row">
 				<icon class="icon-user"></icon>
         		<input type="text" name="username" id="username" size="100" placeholder="DragonNet Username" value="<?php p($frm->username) ?>" autofocus />
         	</div>
-        	
+
         	<div class="loginform-input-row">
 				<icon class="icon-key"></icon>
 				<input type="password" name="password" id="password" size="100" placeholder="DragonNet Password" value="" <?php echo $autocomplete; ?> />
 			</div>
-			
+
             <input type="submit" id="loginbtn" value="Login" />
 
 			<div class="loginform-remember-row">
@@ -47,10 +46,10 @@ if (!empty($CFG->loginpasswordautocomplete)) {
                   <input type="checkbox" name="rememberusername" id="rememberusername" value="1" <?php if ($frm->username) {echo 'checked="checked"';} ?> />
                   <label  for="rememberusername"><?php print_string('rememberusername', 'admin') ?></label>
               <?php } ?>
-			</div>             
-              
+			</div>
+
 		</form>
-	      
+<!--
 	 <?php if ($CFG->guestloginbutton and !isguestuser()) {  ?>
 	<div id="login-guest">
 		<h4>Or, if you don't have a DragonNet account...</h4>
@@ -58,20 +57,21 @@ if (!empty($CFG->loginpasswordautocomplete)) {
             <input type="hidden" name="username" value="guest" />
             <input type="hidden" name="password" value="guest" />
 	      	<input type="submit" value="<?php print_string("loginguest") ?>" />
-	      	
+
 	      	<p><icon class="icon-question-sign"></icon><a target="_blank" href="http://sites.ssis-suzhou.net/helpdesk/2013/06/16/guest-access/"> "Guest" Info</a></p>
         </form>
 	</div>
 	<?php } ?>
-	
+
 	<div id="login-forgotten">
 		<h4>Forgotten your password?</h4>
 		<form action="forgot_password.php" method="get">
 			<input type="submit" value="<?php print_string("forgotten") ?>" />
 		</form>
 	</div>
-
-
+ -->
+ <br /><br />
+      <div class="login-reminder"><icon class="icon-4x icon-question-sign pull-left "></icon><p>Forgot your password? Do not know your DragonNet details?</p><a class="btn" href="/local/dnet_account_management/">Click here</a></div>
 
 
      </div> <!-- end loginpanel -->
