@@ -6,74 +6,118 @@ if (!empty($CFG->loginpasswordautocomplete)) {
     $autocomplete = '';
 }
 ?>
-<div class="loginbox clearfix">
-  <div class="loginpanel">
-    <h2><?php print_string("returningtosite") ?></h2>
+<div id="page-content-wrapper">
+  <div id="page-content">
+    <div id="centerCol">
+      <div style="margin-top:0px;" class="loginbox clearfix">
+        <div style="margin-top:0px;" class="loginpanel">
+          <h2 style="padding-top:0px; margin-top:0px;"><?php print_string("returningtosite") ?></h2>
+            <div class="desc">
+              <?php
+                //echo '('.get_string("cookiesenabled").')';
+                //echo $OUTPUT->help_icon('cookiesenabled');
+               ?>
+            </div>
+            <?php
+              if (!empty($errormsg)) {
+                  echo html_writer::start_tag('div', array('class' => 'loginerrors'));
+                  echo html_writer::link('#', $errormsg, array('id' => 'loginerrormessage', 'class' => 'accesshide'));
+    	      echo $OUTPUT->error_text($errormsg);
+                  echo html_writer::end_tag('div');
+              }
+            ?>
+      		<div class="loginform">
+              <form action="<?php echo $CFG->httpswwwroot; ?>/login/index.php" method="post" id="login" <?php echo $autocomplete; ?> >
 
 
-        <div class="desc">
-          <?php
-            //echo '('.get_string("cookiesenabled").')';
-            //echo $OUTPUT->help_icon('cookiesenabled');
-           ?>
+              	<div class="loginform-input-row">
+      				<icon class="icon-user"></icon>
+              		<input type="text" name="username" id="username" size="100" placeholder="DragonNet Username" value="<?php p($frm->username) ?>" autofocus />
+              	</div>
+
+              	<div class="loginform-input-row">
+      				<icon class="icon-key"></icon>
+      				<input type="password" name="password" id="password" size="100" placeholder="DragonNet Password" value="" <?php echo $autocomplete; ?> />
+      			</div>
+
+                  <input type="submit" id="loginbtn" value="Login" />
+
+      			<div class="loginform-remember-row">
+                    <?php if (isset($CFG->rememberusername) and $CFG->rememberusername == 2) { ?>
+                        <input type="checkbox" name="rememberusername" id="rememberusername" value="1" <?php if ($frm->username) {echo 'checked="checked"';} ?> />
+                        <label  for="rememberusername"><?php print_string('rememberusername', 'admin') ?></label>
+                    <?php } ?>
+      			</div>
+
+      		</form>
+      <!--
+      	 <?php if ($CFG->guestloginbutton and !isguestuser()) {  ?>
+      	<div id="login-guest">
+      		<h4>Or, if you don't have a DragonNet account...</h4>
+              <form action="index.php" method="post" id="guestlogin">
+                  <input type="hidden" name="username" value="guest" />
+                  <input type="hidden" name="password" value="guest" />
+      	      	<input type="submit" value="<?php print_string("loginguest") ?>" />
+
+      	      	<p><icon class="icon-question-sign"></icon><a target="_blank" href="http://sites.ssis-suzhou.net/helpdesk/2013/06/16/guest-access/"> "Guest" Info</a></p>
+              </form>
+      	</div>
+      	<?php } ?>
+
+      	<div id="login-forgotten">
+      		<h4>Forgotten your password?</h4>
+      		<form action="forgot_password.php" method="get">
+      			<input type="submit" value="<?php print_string("forgotten") ?>" />
+      		</form>
+      	</div>
+       -->
+       <br /><br />
         </div>
-        <?php
-          if (!empty($errormsg)) {
-              echo html_writer::start_tag('div', array('class' => 'loginerrors'));
-              echo html_writer::link('#', $errormsg, array('id' => 'loginerrormessage', 'class' => 'accesshide'));
-	      echo $OUTPUT->error_text($errormsg);
-              echo html_writer::end_tag('div');
-          }
-        ?>
-		<div class="loginform">
-        <form action="<?php echo $CFG->httpswwwroot; ?>/login/index.php" method="post" id="login" <?php echo $autocomplete; ?> >
+      </div>
+    </div>
+  </div>
 
-
-        	<div class="loginform-input-row">
-				<icon class="icon-user"></icon>
-        		<input type="text" name="username" id="username" size="100" placeholder="DragonNet Username" value="<?php p($frm->username) ?>" autofocus />
-        	</div>
-
-        	<div class="loginform-input-row">
-				<icon class="icon-key"></icon>
-				<input type="password" name="password" id="password" size="100" placeholder="DragonNet Password" value="" <?php echo $autocomplete; ?> />
-			</div>
-
-            <input type="submit" id="loginbtn" value="Login" />
-
-			<div class="loginform-remember-row">
-              <?php if (isset($CFG->rememberusername) and $CFG->rememberusername == 2) { ?>
-                  <input type="checkbox" name="rememberusername" id="rememberusername" value="1" <?php if ($frm->username) {echo 'checked="checked"';} ?> />
-                  <label  for="rememberusername"><?php print_string('rememberusername', 'admin') ?></label>
-              <?php } ?>
-			</div>
-
-		</form>
+  <div id="side-post" class="block-region">
+      <div class="region-content">
+         <div  class="block list_block" role="complementary">
+          <div class="header"><div class="title">
+            <h2 >Can't login?</h2>
+            <div class="commands"></div>
+            </div>
+          </div>
+        <div class="content">
+          <ul class="unlist">
+            <li class="r0">
+              <div class="column c1">
+                <a class="btn" href="/local/dnet_account_management/roles/parent.php" >
+                  <i class="icon-hand-right"> For Parents</i>
+                </a>
+              </div>
+            </li>
+            <li class="r0">
+              <div class="column c1">
+                <a href="/local/dnet_account_management/roles/parent.php" >
+                  &nbsp;
+                </a>
+              </div>
+            </li>
+            <li class="r0">
+              <div class="column c1">
+                <a class="btn icon-question-signs" href="/local/dnet_account_management/roles/student.php" >
+                  <i class="icon-hand-right"> For Students</i>
+                </a>
+              </div>
+            </li>
 <!--
-	 <?php if ($CFG->guestloginbutton and !isguestuser()) {  ?>
-	<div id="login-guest">
-		<h4>Or, if you don't have a DragonNet account...</h4>
-        <form action="index.php" method="post" id="guestlogin">
-            <input type="hidden" name="username" value="guest" />
-            <input type="hidden" name="password" value="guest" />
-	      	<input type="submit" value="<?php print_string("loginguest") ?>" />
-
-	      	<p><icon class="icon-question-sign"></icon><a target="_blank" href="http://sites.ssis-suzhou.net/helpdesk/2013/06/16/guest-access/"> "Guest" Info</a></p>
-        </form>
-	</div>
-	<?php } ?>
-
-	<div id="login-forgotten">
-		<h4>Forgotten your password?</h4>
-		<form action="forgot_password.php" method="get">
-			<input type="submit" value="<?php print_string("forgotten") ?>" />
-		</form>
-	</div>
- -->
- <br /><br />
-      <div class="login-reminder"><icon class="icon-4x icon-question-sign pull-left "></icon><p>Forgot your password? Do not know your DragonNet details?</p><a class="btn" href="/local/dnet_account_management/">Click here</a></div>
-
-
-     </div> <!-- end loginpanel -->
-</div> <!-- end loginbox -->
-
+            <li class="r1">
+              <div class="column c1">
+              <a href="http://dragonnet.ssis-suzhou.net/blocks/configurable_reports/viewreport.php?id=24&amp;courseid=1266">
+                Students,
+              </a>
+              </div>
+            </li>
+ -->          </ul>
+        </div>
+      </div>
+     </div>
+    </div>
