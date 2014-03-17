@@ -31,9 +31,8 @@ if (!empty($_POST['password'])) {
 /**
  * Load the user's info from the database
  */
-try {
-	$user = $DB->get_record('user', array('email' => $email), '*', MUST_EXIST);
-} catch (dml_exception $e) {
+$user = $DB->get_record('user', array('email' => $email));
+if (!$user) {
 	die(json_encode(array('error' => 'User not found')));
 }
 
