@@ -11,8 +11,8 @@ function setup_page() {
 
     $PAGE->set_context(context_system::instance());
     $PAGE->set_url(derive_plugin_path_from('index.php'));
-    $PAGE->set_title("Reset DragonNet Passwords");
-    $PAGE->set_heading("Reset DragonNet Passwords");
+    $PAGE->set_title("DragonNet Account Management");
+    $PAGE->set_heading("DragonNet Account Management");
 
     echo $OUTPUT->header();
 }
