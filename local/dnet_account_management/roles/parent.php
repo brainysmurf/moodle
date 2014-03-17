@@ -48,7 +48,7 @@ if ( empty($powerschoolID) )  {
         $message_footer = get_string('email_msg_parent_footer', 'local_dnet_account_management');
         $message = $message_header. $url . $message_footer;
 
-        $from = $DB->get_record('user', array('username'=>'happystudent'));
+        $from = $DB->get_record('user', array('username'=>'lcssisadmin'));
 
         email_to_user($user, $from, "DragonNet Password Reset Link", $message);
 
