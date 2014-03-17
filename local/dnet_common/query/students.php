@@ -2,6 +2,8 @@
 
 $term = isset($_GET['term']) ? $_GET['term'] : FALSE;
 require_once '../../../config.php';
+header('Content-type: application/json');
+
 //require_login();
 
 if ($term) {
