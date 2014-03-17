@@ -17,17 +17,17 @@ output_tabs('About DragonNet Passwords');
 
 ?>
 
-<div class="local-alert"><i class="icon-bullhorn icon-4x pull-left"></i>
+<div class="local-alert"><i class="icon-info-sign icon-4x pull-left"></i>
 <p style="font-size:18px;font-weight:bold;">DragonNet passwords MUST have a symbol character, such as ! or @ or #?</p>
 This is the most common problem when attempting to login to DragonNet. The use of symbol characters is highly recommended for DragonNet and all online websites that you use. It does make it significantly more secure.
 </div>
 
-<div class="local-alert"><i class="icon-bullhorn icon-4x pull-left"></i>
+<div class="local-alert"><i class="icon-info-sign icon-4x pull-left"></i>
 <p style="font-size:18px;font-weight:bold;">How many passwords do I need for SSIS?</p>
 You only need one. The most common online tools at SSIS (DragonNet, DragonTV, and Student Email) all share the same password. Changing the DragonNet password automatically changes the password on the other two.
 </div>
 
-<div class="local-alert"><i class="icon-bullhorn icon-4x pull-left"></i>
+<div class="local-alert"><i class="icon-info-sign icon-4x pull-left"></i>
 <p style="font-size:18px;font-weight:bold;">Who can reset passwords?</p>
 Teachers can only reset students' passwords, and secretaries can reset everyone's password. DragonNet site administrators can also reset everyone's passwords.
 </div>

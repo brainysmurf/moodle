@@ -19,7 +19,7 @@ if (!empty($powerschoolID)) {
 $reset_password = optional_param('reset_password', '', PARAM_RAW);
 $email = optional_param('email', '', PARAM_RAW);
 
-output_tabs('Parent');
+output_tabs('For: Parents');
 
 if (isloggedin()) {
     death('This section is intended for parents to look up their DragonNet username and to reset their passwords. You have to be logged out to use it.');

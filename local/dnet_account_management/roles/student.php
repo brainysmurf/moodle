@@ -13,7 +13,7 @@ if (!empty($powerschoolID)) {
 $reset_password = optional_param('reset_password', '', PARAM_RAW);
 $email = optional_param('email', '', PARAM_RAW);
 
-output_tabs('Student');
+output_tabs('For: Students');
 
 ?>
 

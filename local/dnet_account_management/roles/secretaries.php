@@ -13,7 +13,7 @@ setup_page();
 
 require_login();
 
-output_tabs('Secretaries');
+output_tabs('For: Secretaries');
 
 if (!is_secretary()) {
     death('Only designated Administrators can access this section.');

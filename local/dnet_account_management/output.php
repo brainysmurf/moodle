@@ -15,13 +15,14 @@ function output_end_table() {
 function output_tabs($kind) {
     // output the tabs
     $li = '';
-    $kind_array = array("About DragonNet Passwords", "Student", "New Student", "Parent", "Teacher", "Secretaries");
+    $kind_array = array("For: Parents", "For: New Students", "For: Students", "For: Teachers", "For: Secretaries", "About Accounts", "About DragonNet Passwords");
     $size =  count($kind_array);
     for ($i = 0;
         $i < $size;
         ++$i) {
         $label = $kind_array[$i];
         $label_lower = str_replace(" ", "", strtolower($label));
+        $label_lower = str_replace("for:", "", $label_lower);
         if ($label == $kind) {
             $pre = "<span class=\"selected\">";
             $post = "</span>";
