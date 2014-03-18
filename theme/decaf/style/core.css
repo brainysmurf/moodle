@@ -664,7 +664,17 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 		padding-left:10px;
 	}
 
+	#cantLoginBox .content {
+		text-align:center;
+	}
 
+	#cantLoginBox .btn {
+		width: 101px;
+		font-size: 12px;
+		padding: 4px 8px;
+		display: inline-block;
+		margin: 0;
+	}
 
 /* Footer
 -------------------------- */
