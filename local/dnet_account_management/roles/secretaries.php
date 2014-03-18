@@ -30,6 +30,12 @@ if (!empty($powerschoolID)) {
 $reset_password = optional_param('reset_password', '', PARAM_RAW);
 
 if ( empty($powerschoolID) )  {
+    ?>
+
+    <div class="local-alert"><i class="icon-info-sign icon-4x pull-left"></i> <p style="font-weight:bold;font-size:18px;">About Resetting DragonNet accounts</p> You can reset anyone's DragonNet account. You can reset parent accounts by looking up their children first. After resetting, they will need to login to DragonNet with their login and the password "changeme".</div>
+
+    <?php
+
     output_forms(null, 'Start typing anyone\'s name', 'all');
 } else {
     if ($reset_password == "YES") {

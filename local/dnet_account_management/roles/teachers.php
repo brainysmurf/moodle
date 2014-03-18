@@ -21,6 +21,13 @@ if (!is_teacher()) {
 }
 
 if ( empty($powerschoolID) )  {
+    ?>
+
+    <div class="local-alert"><i class="icon-info-sign icon-4x pull-left"></i> <p style="font-weight:bold;font-size:18px;">About Resetting DragonNet Accounts</p> You can reset any students' DragonNet, DragonTV, and Student Email password. After resetting, they login to DragonNet with their username and the password "changeme".</div>
+
+    <?php
+
+
     output_forms(null, 'Start typing student\'s first or last name');
 } else {
 
@@ -36,7 +43,7 @@ if ( empty($powerschoolID) )  {
         } else {
             echo $user->firstname. ' '. $user->lastname. ' could not be changed, probably because they do not have an activated account. Contact the DragonNet administrator.';
         }
-        echo '<ul class="buttons"><li><a class="btn" href="'.derive_plugin_path_from('roles/teacher').'.php">Return</a></li></ul>';
+        echo '<ul class="buttons"><li><a class="btn" href="'.derive_plugin_path_from('roles/teachers').'.php">Return</a></li></ul>';
 
     } else {
 
