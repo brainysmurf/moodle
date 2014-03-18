@@ -1,6 +1,7 @@
 <?php
 require_once '../../config.php';
-require_once 'lib.php';
+require_once '../../local/dnet_common/sharedlib.php';
+require_once 'portables.php';
 
 if (isloggedin()) {
     if (is_teacher() or is_secretary()) {
