@@ -67,7 +67,7 @@ function output_forms($user=null, $placeholder="Look up by lastname, firstname, 
 $("#person").autocomplete({
             autoFocus: true,
             source: "'.$path_to_query.'",
-            minLength: 4,
+            minLength: 3,
             select: function (event, ui) {
                 event.preventDefault();
                 $("#person").val(ui.item.label);

@@ -39,7 +39,6 @@ if ( empty($powerschoolID) )  {
         echo '<ul class="buttons"><li><a class="btn" href="'.derive_plugin_path_from('roles/teacher').'.php">Return</a></li></ul>';
 
     } else {
-        echo 'hi';
         output_forms($user);
 
         $table = new html_table();
