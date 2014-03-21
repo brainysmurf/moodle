@@ -1,12 +1,11 @@
 <?php
 
 function local_dnet_syncing_cron() {
-	date_default_timezone_set('Asia/Shanghai');
 	// 24-hour format of an hour without leading zeros
 	$hour = date('G');
-var_dump($hour);
+
 	// If the current hour is 3AM
-	if ($hour == 15) {
+	if ($hour == 3) {
 		// Check when the last import was
 		$lastRun = local_dnet_syncing_last_run();
 
