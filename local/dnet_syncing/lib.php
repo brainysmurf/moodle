@@ -1,16 +1,17 @@
 <?php
 
 function local_dnet_syncing_cron() {
+	date_default_timezone_set('Asia/Shanghai');
 	// 24-hour format of an hour without leading zeros
 	$hour = date('G');
-
+var_dump($hour);
 	// If the current hour is 3AM
-	if ($hour == 3) {
+	if ($hour == 15) {
 		// Check when the last import was
 		$lastRun = local_dnet_syncing_last_run();
 
 		// If the last import was not in the last 12 hours, run...
-		if (now() - $lastRun->time >= 43200) {
+		if (true || now() - $lastRun->time >= 43200) {
 			local_dnet_syncing_run_destiny_import();
 		}
 	}
@@ -32,6 +33,10 @@ function local_dnet_syncing_run_destiny_import() {
 	require_once __DIR__ . '/destiny/Destiny.php';
 	$destiny = new Destiny();
 	$destinyData = $destiny->getOverdueBooks();
+
+	if (!$destinyData) {
+		return false;
+	}
 
 	// Clear existing data in the table
 	$DB->delete_records('dnet_destiny_imported');
