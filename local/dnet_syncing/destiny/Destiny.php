@@ -14,7 +14,8 @@ class Destiny
 	function __construct()
 	{
 		$this->config = require __DIR__ . '/config.php';
-		$this->connectToDb();
+#FIXME: Disabled for testing
+#$this->connectToDb();
 	}
 
 	/**
@@ -28,7 +29,7 @@ class Destiny
 			$this->config['DB_PASS']
 		);
 		$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE , PDO::FETCH_ASSOC);
+		$this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 	}
 
 	/**
@@ -43,6 +44,11 @@ class Destiny
 
 	public function getOverdueBooks()
 	{
+
+#FIXME: Returns stored data for testing (this file isn't in the git repo)
+require __DIR__ . '/testdata.php';
+return $destinyData;
+
 		// Original SQL
 		/*$select = "
 			cpy.CopyID,
@@ -64,7 +70,8 @@ class Destiny
 		// Tweaked to return the columns with the names neeed to store in the Moodle DB
 		$select = "
 			pat.FirstName + ' ' + pat.LastName AS 'patron_name',
-			pat.DistrictID AS 'patron_barcode',
+			pat.DistrictID AS 'patron_districtid',
+			sitepat.PatronBarcode AS 'patron_barcode',
 			cpy.DateDue AS 'due',
 			cpy.CallNumber AS 'call_number',
 			bibmstr.Title AS title
@@ -76,6 +83,8 @@ class Destiny
 			CircCatAdmin.Copy cpy
 		JOIN
 			CircCatAdmin.Patron pat ON pat.PatronID = cpy.PatronID
+		JOIN
+			CircCatAdmin.SitePatron sitepat ON sitepat.PatronID = cpy.PatronID
 		LEFT JOIN
 			CircCatAdmin.BibMaster bibmstr ON bibmstr.BibID = cpy.BibID
 		WHERE
