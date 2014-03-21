@@ -1,6 +1,7 @@
 <?php
 
-local_dnet_syncing_cront(){
+local_dnet_syncing_cron() {
+
 
 
 }
