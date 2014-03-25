@@ -7,9 +7,9 @@ if (isloggedin()) {
     if (is_secretary()) {
         redirect(derive_plugin_path_from('roles/secretaries.php'));
     } else if (is_teacher()) {
-        redirect(derive_plugin_path_from('roles/teacher.php'));
+        redirect(derive_plugin_path_from('roles/teachers.php'));
     }  else if (is_student()) {
-        redirect(derive_plugin_path_from('roles/student.php'));
+        redirect(derive_plugin_path_from('roles/students.php'));
     }
 } else {
     redirect(derive_plugin_path_from('roles/parent.php'));
