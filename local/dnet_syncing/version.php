@@ -15,18 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * TODO
- *
  * @package   DragonNet Syncing Area
  * @copyright Adam Morris
-     * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 */
-
 $plugin->pluginname = "DragonNet Syncing Area";
-$plugin->version = 2014022300;
+$plugin->version = 2014032103;
 $plugin->release = '.1 (Build: 2014022300)';
 $plugin->requires = 2013051404;   // Moodle 2.5 January
-$plugin->cron = 0;
 $plugin->component = 'local_dnet_syncing';
 $plugin->maturity = 'MATURITY_BETA';  // _STABLE?
-$plugin->cron = 3600;
+$plugin->cron = 1800; // Run cron every half hour

@@ -1182,6 +1182,11 @@ function session_loginas($userid, $context) {
     enrol_check_plugins($user);
     // set up global $USER
     session_set_user($user);
+
+	// Set SSIS stuff
+	global $CFG;
+	require_once($CFG->libdir . '/ssis.php');
+	SSIS::addUserInfoToSession($_SESSION['SESSION'], $user);
 }
 
 /**

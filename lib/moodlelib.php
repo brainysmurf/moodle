@@ -4329,78 +4329,9 @@ function complete_user_login($user) {
         return $USER;
     }
 
-    // !SSIS STUFF FOR EACH USER
-	require_once($CFG->dirroot .'/cohort/lib.php');
-
-	//These are handy to know throughout the site, but aren't used for frontpage redirects
-	$SESSION->userIsSiteAdmin = has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM));
-	$SESSION->userIsTeacher = cohort_is_member_by_idnumber('teachersALL', $USER->id);
-	$SESSION->userIsStudent = cohort_is_member_by_idnumber('studentsALL', $USER->id);
-	$SESSION->userIsSecStudent = cohort_is_member_by_idnumber('studentsSEC', $USER->id);
-    $SESSION->userIsSecretary = cohort_is_member_by_idnumber('secretariesALL', $USER->id);
-
-
-	/*
-		Decide which frontpage the user should be redirected to when they visit /index.php
-		(The redirection happens on /index.php:75)
-
-		FYI SSIS users should be enrolled into at least one cohort, the syncing software sees to that
-
-		TODO: What about users that are both parents and teachers?
-	*/
-
-	$SESSION->frontpageSection = false;
-
-	if ( $SESSION->userIsElemStudent = cohort_is_member_by_idnumber('studentsELEM', $USER->id))
-	{
-		$SESSION->frontpageSection = 10;
-	}
-
-	if ($SESSION->userIsParent = cohort_is_member_by_idnumber('parentsALL', $USER->id) )
-	{
-        $SESSION->frontpageSection = 6;
-
-        //Cache user's children in the session
-		$SESSION->usersChildren = get_users_children($USER->id);
-	} else {
-		$SESSION->usersChildren = array();
-	}
-
-
-	if ($SESSION->userIsHSStudent = cohort_is_member_by_idnumber('studentsHS', $USER->id))
-	{
-		$SESSION->frontpageSection = 2;
-	}
-
-	if ( $SESSION->userIsMSStudent = cohort_is_member_by_idnumber('studentsMS', $USER->id) )
-	{
-		$SESSION->frontpageSection = 3;
-	}
-
-	if ($SESSION->userIsSecTeacher = cohort_is_member_by_idnumber('teachersSEC', $USER->id))
-	{
-		$SESSION->frontpageSection = 5;
-	}
-
-	if ($SESSION->userIsElemTeacher = cohort_is_member_by_idnumber('teachersELEM', $USER->id))
-	{
-		$SESSION->frontpageSection = 4;
-	}
-
-	if ($SESSION->userIsSupStaff = cohort_is_member_by_idnumber('supportstaffALL', $USER->id))
-	{
-		$SESSION->frontpageSection = 8;
-	}
-
-	if ($SESSION->userIsSSISAdmin = cohort_is_member_by_idnumber('adminALL', $USER->id))
-	{
-		$SESSION->frontpageSection = 7;
-	}
-
-    if (cohort_is_member_by_idnumber('teachersNEW', $USER->id) )
-    {
-        $SESSION->frontpageSection =11;
-    }
+	// !SSIS STUFF FOR EACH USER
+	require_once($CFG->libdir . '/ssis.php');
+	SSIS::addUserInfoToSession($SESSION, $USER);
 
     /// Select password change url
     $userauth = get_auth_plugin($USER->auth);
