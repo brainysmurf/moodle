@@ -47,7 +47,7 @@ if ( empty($powerschoolID) )  {
         } else {
             echo $user->firstname. ' '. $user->lastname. ' could not be changed, probably because they do not have an activated account. Contact the DragonNet administrator.';
         }
-        echo '<ul class="buttons"><li><a class="btn" href="'.derive_plugin_path_from('roles/teacher').'.php">Return</a></li></ul>';
+        echo '<ul class="buttons"><li><a class="btn" href="'.derive_plugin_path_from('').'.php">Return</a></li></ul>';
     } else {
         output_forms($user, '', 'all');
 
