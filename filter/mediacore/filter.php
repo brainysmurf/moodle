@@ -2,112 +2,107 @@
 /**
  *       __  _____________   _______   __________  ____  ______
  *      /  |/  / ____/ __ \ /  _/   | / ____/ __ \/ __ \/ ____/
- *     / /|_/ / __/ / / / / / // /| |/ /   / / / / /_/ / __/   
- *    / /  / / /___/ /_/ /_/ // ___ / /___/ /_/ / _, _/ /___   
- *   /_/  /_/_____/_____//___/_/  |_\____/\____/_/ |_/_____/   
- *                        Content Filter
+ *     / /|_/ / __/ / / / / / // /| |/ /   / / / / /_/ / __/
+ *    / /  / / /___/ /_/ /_/ // ___ / /___/ /_/ / _, _/ /___
+ *   /_/  /_/_____/_____//___/_/  |_\____/\____/_/ |_/_____/
  *
+ * Automatic media embedding filter class.
+ *
+ * @package    filter
+ * @subpackage mediacore
+ * @copyright  2012 MediaCore Technologies
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die('Invalid access');
+global $CFG;
+require_once($CFG->dirroot . '/local/mediacore/lib.php');
+require_once($CFG->libdir . '/filelib.php');
 
-require_once($CFG->libdir.'/filelib.php');
 
 /**
- * Find instances of MediaCore.tv links and replace the link with embed code 
+ * Find instances of MediaCore.tv links and replace the link with embed code
  * from the MediaCore API.
  */
-class filter_mediacorefilter extends moodle_text_filter {
-	function filter($text, array $options = array()) {
-		global $CFG;
+class filter_mediacore extends moodle_text_filter {
 
-		if (!is_string($text) or empty($text)) {
-			// non string data can not be filtered anyway
-			return $text;
-		}
-		if (stripos($text, '</a>') === false) {
-			// performance shortcut - all regexes bellow end with the </a> tag,
-			// if not present nothing can match
-			return $text;
-		}
+    private $_mcore_client;
+    private $_mcore_media;
 
-		$newtext = $text; // we need to return the original value if regex fails!
-		
-		/**
-		 * TODO
-		 * The following doesn't work correctly; we get an array with only letters:
-		 *
-		 * [0]=>"<a href="http://link.mediacore.tv/media/video">link</a>", 
-		 * [1]=>"n", 
-		 * [2]=>"N";
-		 *
-		 * This effects the actual filter function below.
-		 *
-		 */
-		$search = '/<a\s[^>]+http:\/\/([0-9A-Za-z])+\.mediacore\.tv\/([0-9A-Za-z])[^>]+>([0-9A-Za-z])+[^>]+>/';
-		$newtext = preg_replace_callback($search, 'filter_mediacorefilter_callback', $newtext);
-		
-		if (empty($newtext) or $newtext === $text) {
-			  // error or not filtered
-			  mtrace('link empty');
-			  unset($newtext);
-			  return $text;
-		}
-		
-		return $newtext;
+    /**
+     * Constructor
+     * @param object $context
+     * @param object $localconfig
+     */
+    public function __construct($context, array $localconfig) {
+        parent::__construct($context, $localconfig);
+        $this->_mcore_client = new mediacore_client();
+        $this->_mcore_media = new mediacore_media($this->_mcore_client);
+    }
+
+    /**
+     * Filter the text
+     * @param string $html
+     * @param array $options
+     * @return string
+     */
+    public function filter($html, array $options = array()) {
+    	var_dump('mediacorefilter:' . $html);
+	if (strpos($html, '/podcasts/')) {
+	    return $html;
 	}
+        if (empty($html) || !is_string($html) || stripos($html, '</a>' === FALSE) ||
+            strpos($html, $this->_mcore_client->get_hostname()) === FALSE) { //performance hack
+                return $html;
+            }
+        $dom = new DomDocument();
+        $dom->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', "UTF-8"));
+        $xpath = new DOMXPath($dom);
+        foreach($xpath->query('//a') as $node) {
+            $href = $node->attributes->getNamedItem('href')->nodeValue;
+            if (stripos($href, $this->_mcore_client->get_hostname()) !== FALSE) {
+                $new_node  = $dom->createDocumentFragment();
+                $new_node->appendXML($this->_fetch_embed_code($href));
+                $node->parentNode->replaceChild($new_node, $node);
+            }
+        }
+        return $dom->saveHTML();
+    }
 
+    /**
+     * Change links to MediaCore into embedded MediaCore videos
+     * @TODO handle fetch error states
+     * @return string
+     */
+    private function _fetch_embed_code($href) {
+        global $COURSE;
+        $course_id = (isset($COURSE->id)) ? $COURSE->id: NULL;
+        $msg = get_string('filter_no_video_found', 'filter_mediacore');
+
+        // Parse the link so we can get to the slug and type_id (if applicable).
+        $uri_components = parse_url($href);
+        $path_arr = explode('/', $uri_components['path']);
+        $slug = end($path_arr);
+        $result = $this->_mcore_media->fetch_media_embed($slug, $course_id);
+        if (!empty($result)) {
+            return $result;
+        }
+	return $href;  // don't do an error, just return the html, because it might be a link to a landing page
+        return $this->_get_embed_error_html($msg, $result);
+    }
+
+
+    /**
+     * Get the error string
+     * TODO check $bool for NULL (no result), FALSE (conn error)
+     *      and display the appropriate message
+     * @param string $msg The error message string
+     * @return string
+     */
+    private function _get_embed_error_html($msg='', $bool) {
+        if (empty($msg)) {
+            $msg = get_string('filter_no_video_found', 'filter_mediacore');
+        }
+        return '<div class="mcore-no-video-found-error"><p>' . $msg . '</p></div>';
+    }
 }
-
-/**
- * Change links to MediaCore into embedded MediaCore videos
- *
- * @param  $link
- * @return string
- */
-function filter_mediacorefilter_callback($link) {
-
-	global $CFG;
-
-	if (filter_mediacorefilter_ignore($link[0])) {
-		return $link[0];
-	}
-	//
-	// TODO fix the regex so that we can construct the URL from the passed array
-	// since I can't make it pass us the correct variables (see above).
-	//
-	// Since the regex passes us the HTML link, first we have to parse the link 
-	// so we can get to the slug.
-	//
-	$murl = explode('href=', $link[0]);
-	$mcore = explode('"', $murl[1]);
-	$uri_elements = explode("/", $mcore[1]);
-	$slug = end($uri_elements);
-	//
-	// Then use the slug to query the MediaCore API to get the embed code
-	//
-	$media_api = $CFG->filter_mediacorefilter_url . '/api/media/get?slug=' . $slug;
-	$result = json_decode(file_get_contents($media_api));
-	if($result) {
-		$output = $result->embed;
-	} else {
-		$output = '<p><em>No video found.</em></p>';
-	}
-	return $output;
-}
-
-
-/**
- * Should the current tag be ignored in this filter?
- * @param string $tag
- * @return bool
- */
-function filter_mediacorefilter_ignore($tag) {
-	if (preg_match('/class="[^"]*nomediaplugin/i', $tag)) {
-		return true;
-	} else {
-		false;
-	}
-}
-
-

@@ -6,20 +6,17 @@
  *    / /  / / /___/ /_/ /_/ // ___ / /___/ /_/ / _, _/ /___
  *   /_/  /_/_____/_____//___/_/  |_\____/\____/_/ |_/_____/
  *
- * MediaCore filter
+ * MediaCore's filter language strings
  *
- * @package    filter_mediacore
- * @subpackage filter
+ * @package    filter
+ * @subpackage mediacore
  * @copyright  2012 MediaCore Technologies
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
  */
 
-defined('MOODLE_INTERNAL') || die('Invalid access');
+$string['filtername'] = 'MediaCore media filter';
 
-$plugin                     = new StdClass();
-$plugin->component          = 'filter_mediacore';
-$plugin->version            = 2013050100;
-$plugin->requires           = 2011033007;
-$plugin->release            = '2.0b';
-$plugin->dependencies       = array('local_mediacore' => 2013031900);
+//errors
+$string['filter_error_no_type_id'] = 'There was an error trying to locate this video.';
+$string['filter_no_type_mapping_error'] = 'This video can no longer be viewed in this course.';
+$string['filter_no_video_found'] = 'This video cannot be found.';

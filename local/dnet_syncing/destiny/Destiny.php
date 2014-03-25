@@ -14,8 +14,7 @@ class Destiny
 	function __construct()
 	{
 		$this->config = require __DIR__ . '/config.php';
-#FIXME: Disabled for testing
-#$this->connectToDb();
+		$this->connectToDb();
 	}
 
 	/**
@@ -42,7 +41,45 @@ class Destiny
 		return $q->fetchAll();
 	}
 
-	public function getOverdueBooks()
+	private function getSQL()
+	{
+		return "SELECT
+			pat.FirstName + ' ' + pat.LastName AS 'patron_name',
+			pat.DistrictID AS 'patron_districtid',
+			sitepat.PatronBarcode AS 'patron_barcode',
+			cpy.DateDue AS 'due',
+			cpy.CallNumber AS 'call_number',
+			bibmstr.Title AS title
+		FROM
+			CircCatAdmin.Copy cpy
+		JOIN
+			CircCatAdmin.Patron pat ON pat.PatronID = cpy.PatronID
+		JOIN
+			CircCatAdmin.SitePatron sitepat ON sitepat.PatronID = cpy.PatronID
+		LEFT JOIN
+			CircCatAdmin.BibMaster bibmstr ON bibmstr.BibID = cpy.BibID
+		WHERE
+			cpy.dateOut IS NOT NULL
+			AND
+			cpy.dateReturned IS NULL ";
+	}
+
+	public function getUsersCheckedOutBooks($districtID)
+	{
+		$sql = $this->getSQL();
+		$sql .= 'AND pat.DistrictID = ?';
+		return $this->select($sql, array($districtID));
+	}
+
+	public function getFamilyCheckedOutBooks($familyID)
+	{
+		$sql = $this->getSQL();
+		$sql .= "AND pat.DistrictID LIKE ?";
+		$familyID .= '%';
+		return $this->select($sql, array($familyID));
+	}
+
+	public function dumpCheckedOutBooks()
 	{
 
 #FIXME: Returns stored data for testing (this file isn't in the git repo)
