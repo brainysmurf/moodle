@@ -59,45 +59,30 @@ $renderer = $PAGE->get_renderer('format_onetopic');
 $sectionnum = optional_param('section', -1, PARAM_INT);
 $sectionid = optional_param('sectionid', -1, PARAM_INT);
 
-    //Onetopic format, section 0 is shown at the top, and section==0 was given in the URL
-    if ( $course->realcoursedisplay && $sectionnum === 0 )
-	{
-		//Redirect to /course/view.php?id=courseid
-		redirect('/course/view.php?id='.$course->id);
-	}
-
-if ( isset($sectionnum) && $sectionnum >= 0 )
-{
-        //$USER->display[$course->id] = $section;
-	$displaysection = $sectionnum;
-} 
-else if ( isset($sectionid) && $sectionid > 0 )
-{
-	// $section is set in /course/view.php:42 if a sectionid was given in the url
-	//$displaysection = $section['section'];  
-        // section is already an integer...
-	$displaysection = $section;  
+// If section 0 is shown at the top, and section=0 was specifically given in the URL
+if ($course->realcoursedisplay && $sectionnum === 0) {
+	// Redirect to /course/view.php?id=courseid
+	redirect('/course/view.php?id='.$course->id);
 }
-else
-{
-	//This takes the user back to the last section they viewed if there was no section number in the url
-    /*if (isset($USER->display[$course->id]))
-    {
-        $displaysection = $USER->display[$course->id];
-    }
-	else
-	{
-		$USER->display[$course->id] = 0;
-		$displaysection = 0;
-	}*/
-	if ( $course->realcoursedisplay ) //First section at top
-	{
-		$displaysection = 1;
-	}
-	else //First section is a tab
-	{
-		$displaysection = 0;
-	}
+
+if (isset($sectionnum) && $sectionnum >= 0) {
+
+	$displaysection = $sectionnum;
+
+} elseif (isset($sectionid) && $sectionid > 0) {
+
+	$displaysection = $section;
+
+} elseif ($course->realcoursedisplay) {
+
+	// If section 0 will be shown at the top of every tab, show section 1 by default
+	$displaysection = 1;
+
+} else {
+
+	// Otherwise show section 0 as the default tab
+	$displaysection = 0;
+
 }
 
 $renderer->print_single_section_page($course, null, null, null, null, $displaysection);

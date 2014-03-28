@@ -237,8 +237,10 @@ a:hover,a:active {color: #1662A3;}
 	border-color: #1662A3 !important;
 }
 
+/* onetopic delete section buttons */
+
 /* Delete section button */
-.tabs ul li span.selected a.btn {
+.tabs a.delete_section {
 	display:inline-block;
 	font-weight:normal;
 	margin: 0 -4px -9px 4px;
@@ -251,8 +253,12 @@ a:hover,a:active {color: #1662A3;}
 	cursor: pointer;
 }
 
-.tabs .delete_section.hide {
+.tabs a.delete_section.hide {
 	display: none !important;
+}
+
+.tabs a.delete_section.disabled {
+	cursor:not-allowed;
 }
 
 /* Subtabs */
@@ -272,8 +278,8 @@ a:hover,a:active {color: #1662A3;}
 }
 
 /* Moving tabs */
-.tabs ul.ui-sortable a,
-.tabs ul.ui-sortable span {
+.tabs ul.ui-sortable .movey a,
+.tabs ul.ui-sortable .movey span {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
