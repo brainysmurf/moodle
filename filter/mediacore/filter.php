@@ -47,7 +47,6 @@ class filter_mediacore extends moodle_text_filter {
      * @return string
      */
     public function filter($html, array $options = array()) {
-    	var_dump('mediacorefilter:' . $html);
 	if (strpos($html, '/podcasts/')) {
 	    return $html;
 	}
