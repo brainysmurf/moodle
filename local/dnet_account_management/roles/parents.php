@@ -110,9 +110,9 @@ Regards,</textarea>';
         echo html_writer::table($table);
         echo '<ul class="buttons">';
         echo '<form id="reset_password" action="" method="get">';
-        echo '<a href="'.derive_plugin_path_from('roles/parent.php?email=YES&powerschool='.$user->idnumber).'" class="btn" id="reset_button"><i class="icon-thumbs-up"></i> Yes, that is my email address</a>';
-        echo '<a href="'.derive_plugin_path_from('roles/parent.php?email=NO&powerschool='.$user->idnumber).'" class="btn" id="reset_button"><i class="icon-thumbs-down"></i> No, that is not my email address</a>';
-        echo '<a href="'.derive_plugin_path_from('roles/parent.php').'" class="btn" id="reset_button"><i class="icon-backward "></i> Back</a>';
+        echo '<a href="'.derive_plugin_path_from('roles/parents.php?email=YES&powerschool='.$user->idnumber).'" class="btn" id="reset_button"><i class="icon-thumbs-up"></i> Yes, that is my email address</a>';
+        echo '<a href="'.derive_plugin_path_from('roles/parents.php?email=NO&powerschool='.$user->idnumber).'" class="btn" id="reset_button"><i class="icon-thumbs-down"></i> No, that is not my email address</a>';
+        echo '<a href="'.derive_plugin_path_from('roles/parents.php').'" class="btn" id="reset_button"><i class="icon-backward "></i> Back</a>';
         echo '</form>';
         echo '</ul>';
     }
