@@ -71,7 +71,35 @@ function activity_box($activity, $remove=false) {
     } else {
         $cat_text = 'in '.$category->name;
     }
-    $row->cells[1]->text = '<div class="username">'.$activity->fullname.' ('. $cat_text.')</div>';
+    $dialog = '<div id="dialog_'.$activity->id.'" title="Rename" style="display:none"> Enter the new name for this activity:
+    <form id="dialog_rename_'.$activity->id.'" action="activity_mods.php" method="get">
+    <input name="activity_id" type="hidden" value="'.$activity->id.'" />
+    <input style="width:100%;margin-top:5px;" name="new_name" autofocus="autofocus" size="100" onclick="this.select()" type="text" value="'.$activity->fullname.'" />
+    </form>
+    .</div>';
+    $script = "<script>
+
+    $('#rename_".$activity->id."').on(\"click\", function(e) {
+        e.preventDefault();
+        $(\"#dialog_".$activity->id."\").dialog({
+            minWidth: 450,
+            draggable: false,
+            model: true,
+            show: { effect: \"drop\", duration: 400 },
+            buttons: [
+                {
+                    text: \"OK\",
+                    click: function() {
+                        $('#dialog_rename_".$activity->id."').submit();
+                    }
+                },
+            ]
+        });
+    });
+    </script>";
+    $edit_name = '&nbsp;&nbsp;<a id="rename_'.$activity->id.'"   href="#"><i class="icon-cog"></i></a>&nbsp;&nbsp;';
+    $row->cells[1]->text = '<div class="username">'.$activity->fullname.$edit_name.' ('. $cat_text.')</div>';
+    $row->cells[1]->text .= $dialog.$script;
     $row->cells[1]->text .= '<table class="userinfotable">';
 
     if ($remove) {
@@ -88,8 +116,6 @@ function activity_box($activity, $remove=false) {
         <a target="_new" href="'.$CFG->wwwroot.'/enrol/users.php?id='.$activity->id.'"><i class="icon-user"></i></a>&nbsp;&nbsp;&nbsp;
         </td>
     </tr>';
-
-
 
     # output some basic stats about the activity
 

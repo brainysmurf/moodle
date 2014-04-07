@@ -71,9 +71,6 @@ class enrol_self_enrol_form extends moodleform {
 			$mustBeInCohort = false;
 		}
 
-		print_object($mustBeInCohort);
-
-
 		/*
 		* Parent enrolling child
 		*/
