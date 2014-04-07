@@ -93,8 +93,6 @@ class enrol_self_enrol_form extends moodleform {
 				$options = array();
 				foreach($children as $child) {
 
-					var_dump(cohort_is_member($mustBeInCohort->id, $child->id));
-
 					$name = $child->firstname.' '.$child->lastname;
 
 					if ($instance->customint7) {
