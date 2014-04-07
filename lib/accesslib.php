@@ -4794,33 +4794,40 @@ function role_change_permission($roleid, $context, $capname, $permission) {
 */
 function get_users_children($userid)
 {
-	global $DB;
-	$usercontexts = $DB->get_records_sql("SELECT c.instanceid, c.instanceid, u.id AS userid, u.firstname, u.lastname
-        FROM {role_assignments} ra, {context} c, {user} u
-       WHERE ra.userid = ?
-             AND ra.contextid = c.id
-             AND c.instanceid = u.id
-             AND c.contextlevel = ".CONTEXT_USER, array($userid));
-	return $usercontexts;
+    global $DB;
+    $user = $DB->get_record('user', array("id"=>$userid));
+    $familyid = substr($user->idnumber, 0, 4);
+    $sql = "
+    SELECT *
+    FROM {user}
+    WHERE
+        idnumber like ? and
+        not idnumber like ?";
+    $params = array($familyid.'%', '%P');
+    return $DB->get_records_sql($sql, $params);
 }
 
 function get_users_parents($userid)
 {
-	global $DB;
-	$usercontexts = $DB->get_records_sql("
-		SELECT
-			ra.userid,
-			u.username,
-			u.firstname,
-			u.lastname
-		FROM {role_assignments} ra, {context} c, {user} u
-		WHERE 
-			c.contextlevel = ".CONTEXT_USER."
-			AND c.instanceid = ?
-			AND ra.contextid = c.id
-			AND u.id = ra.userid
-			", array($userid));
-	return $usercontexts;
+    global $DB;
+    $user = $DB->get_record('user', array("id"=>$userid));
+    $familyid = substr($user->idnumber, 0, 4);
+    return $DB->get_record('user', array("idnumber"=>$familyid.'P'));
+
+	// $usercontexts = $DB->get_records_sql("
+	// 	SELECT
+	// 		ra.userid,
+	// 		u.username,
+	// 		u.firstname,
+	// 		u.lastname
+	// 	FROM {role_assignments} ra, {context} c, {user} u
+	// 	WHERE
+	// 		c.contextlevel = ".CONTEXT_USER."
+	// 		AND c.instanceid = ?
+	// 		AND ra.contextid = c.id
+	// 		AND u.id = ra.userid
+	// 		", array($userid));
+	// return $usercontexts;
 }
 
 

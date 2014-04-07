@@ -12,7 +12,8 @@ if ($confirm == "YES") {
 
     $sql = '
 SELECT
-    crs.id, crs.fullname AS Course,
+    usr.id as user_id,
+    crs.id, crs.fullname AS course_name,
     concat(usr.firstname, \' \', usr.lastname) as user_fullname,
     rle.name as role_name
 FROM
@@ -33,20 +34,18 @@ WHERE
         fwrite($fref, 'activity id: '.$activity_id);
         $enrolment_instances = enrol_get_instances($activity_id, true);
         foreach ($enrolment_instances as $instance) {
-            fwrite($fref, "here is the instance:\n".print_r($instance, true));
             if ($instance->enrol == 'self') {
                 fwrite($fref, 'inside self enrollment!');
                 $params = array($activity_id);
+                fwrite($fref, "doing database");
                 $rows = $DB->get_records_sql($sql, $params);
-                print_object($params);
-                print_object($rows);
-                fwrite($fref, "here are the rows:\n".print_r($rows, true));
+                fwrite($fref, "done database");
                 foreach ($rows as $row) {
-                    fwrite($fref, "this one here: ".print_r($row, true));
                     if ($row->role_name == "Student") {
                         // Parents automatically get unenrolled through the self unenrollment feature
                         fwrite($fref, 'unenrolling '.$row->user_fullname.' from '.$row->course_name);
-                        //$selfenrolment->unenrol_user($instance, $row->user_id);
+                        $selfenrolment->unenrol_user($instance, $row->user_id);
+                        fwrite($fref, 'done');
                     }
                 }
             }
