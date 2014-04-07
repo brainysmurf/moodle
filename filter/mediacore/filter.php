@@ -92,7 +92,8 @@ class filter_mediacore extends moodle_text_filter {
         	#return $this->_get_embed_error_html($msg, $result);
         	return $link;
         } else {
-		return $link . '<br/>' . $result;
+        	return $result;
+		#return $link . '<br/>' . $result;
         }
     }
 
