@@ -44,8 +44,8 @@ if ( empty($powerschoolID) )  {
 
         //echo $url;
 
-        $message_header = get_string('email_msg_parent_body', 'local_dnet_reset_passwords');
-        $message_footer = get_string('email_msg_parent_footer', 'local_dnet_reset_passwords');
+        $message_header = get_string('email_msg_parent_body', 'local_dnet_account_management');
+        $message_footer = get_string('email_msg_parent_footer', 'local_dnet_account_management');
         $message = $message_header. $url . $message_footer;
 
         $from = $DB->get_record('user', array('username'=>'happystudent'));
