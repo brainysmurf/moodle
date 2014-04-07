@@ -156,11 +156,11 @@ class enrol_self_plugin extends enrol_plugin {
 			foreach ($SESSION->usersChildren as $child) {
 
 				//Is this child enrolled in the course?
-				if(enrol_user_is_enrolled($child->userid, $instance->id)) {
+				if(enrol_user_is_enrolled($child->id, $instance->id)) {
 
 					//If the user is enrolled, add a link for the parent to unenrol the child
 					$str = "Remove {$child->firstname} {$child->lastname} from activity";
-					$instancesnode->parent->parent->add($str, "/enrol/self/unenrolchild.php?enrolid={$instance->id}&childuserid={$child->userid}", navigation_node::TYPE_SETTING);
+					$instancesnode->parent->parent->add($str, "/enrol/self/unenrolchild.php?enrolid={$instance->id}&childuserid={$child->id}", navigation_node::TYPE_SETTING);
 					/*
 						About the parent->parent thing...
 						If we just used this to add the menu item:
