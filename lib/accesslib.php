@@ -4797,6 +4797,11 @@ function get_users_children($userid)
     global $DB;
     $user = $DB->get_record('user', array("id"=>$userid));
     $familyid = substr($user->idnumber, 0, 4);
+
+    if (empty($familyid)) {
+        return array();
+    }
+
     $sql = "
     SELECT *
     FROM {user}
