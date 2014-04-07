@@ -74,6 +74,10 @@ class filter_mediacore extends moodle_text_filter {
      * @return string
      */
     private function _fetch_embed_code($href) {
+
+		// Always provide a link at least
+		$link = '<a href="' . $href . '">'. $href . '</a>';
+
         global $COURSE;
         $course_id = (isset($COURSE->id)) ? $COURSE->id: NULL;
         $msg = get_string('filter_no_video_found', 'filter_mediacore');
@@ -82,12 +86,14 @@ class filter_mediacore extends moodle_text_filter {
         $uri_components = parse_url($href);
         $path_arr = explode('/', $uri_components['path']);
         $slug = end($path_arr);
+
         $result = $this->_mcore_media->fetch_media_embed($slug, $course_id);
-        if (!empty($result)) {
-            return $result;
+        if (empty($result)) {
+        	#return $this->_get_embed_error_html($msg, $result);
+        	return $link;
+        } else {
+		return $link . '<br/>' . $result;
         }
-	return $href;  // don't do an error, just return the html, because it might be a link to a landing page
-        return $this->_get_embed_error_html($msg, $result);
     }
 
 
