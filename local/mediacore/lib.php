@@ -531,6 +531,12 @@ class mediacore_media
         if (empty($result_obj)) {
             return $result_obj;
         }
+
+        // Tweak to serve embedded dragontv videos from
+        // https://dragonnet.ssis-suzhou.net/dragontv
+        // until dragontv gets ssl
+        $result_obj->embed = str_replace('http://dragontv.ssis-suzhou.net/', 'https://dragonnet.ssis-suzhou.net/dragontv/', $result_obj->embed);
+
         return ($this->_client->has_lti_config() && $course_id)
             ? $this->_get_embed_iframe_with_lti_params($result_obj->embed, $course_id)
             : $result_obj->embed;
