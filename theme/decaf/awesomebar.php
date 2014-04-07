@@ -48,7 +48,7 @@ class awesomebar
 			$this->use_cached = false;
 			$this->save_in_cache = true;
 		}
-	
+
 		//Begin ul
 		$content = html_writer::start_tag('ul', array('class' => 'dropdown dropdown-horizontal'));
 
@@ -118,27 +118,27 @@ class awesomebar
 	{
 		global $CFG, $USER, $SESSION;
 		require_once($CFG->dirroot.'/cohort/lib.php');
-			
+
 		$html = '';
 		foreach ($menu as $item) {
-			
+
 			//Restricted to certain cohorts
 			if (!empty($item['cohorts']) && !$SESSION->userIsSiteAdmin) {
-			
+
 				$canSee = false;
-				
+
 				foreach ($item['cohorts'] as $cohort) {
 					if (cohort_is_member_by_idnumber($cohort, $USER->id)) {
 						$canSee = true;
 						break;
 					}
 				}
-				
+
 				if (!$canSee) {
 					continue;
 				}
 			}
-			
+
 			//Just an <hr> tag?
 			if (!empty($item['hr'])) {
 				$html .= html_writer::empty_tag('hr');
@@ -150,7 +150,7 @@ class awesomebar
 			} else {
 				$icon = false;
 			}
-			
+
 			//A header?
 			if (!empty($item['header'])) {
 				$headerText = html_writer::tag('span', $item['header']);
@@ -234,7 +234,7 @@ class awesomebar
 			global $CFG;
 			$custommenuitems = $CFG->custommenuitems;
 		}
-		
+
 		return $this->convert_custom_menu_text_to_array($custommenuitems);
 	}
 
@@ -253,7 +253,7 @@ class awesomebar
 	 *	   The number of hyphens at the start determines the depth of the item.
 	 *
 	 * Example structure:
-	 
+
 			Search Engines Menu||icon-search
 			-Google|http://www.google.com|icon-google-plus
 			--Google Docs|http://docs.google.com|icon-paper-clip
@@ -266,22 +266,22 @@ class awesomebar
 			Another Menu||icon-home
 			-Child|http://www.example.com
 			-Another Child|http://www.example.com
-			
+
 	 * Returns an array of menu arrays
 	 * @param string $text the menu items definition
 	 * @return array
 	 */
 	public static function convert_custom_menu_text_to_array($text) {
-		
+
 		$menus = array();
-	
+
 		$lines = explode("\n", $text); //Split the text into lines
 
 		$lastDepth = 0;
 		$itemsAtDepth = array();
-		
+
 		foreach ($lines as $line) {
-		
+
 			$line = trim($line); //Remove whitespace from line
 
 			//How many dashes at the start?
@@ -290,16 +290,16 @@ class awesomebar
 			} else {
 				$depth = 0;
 			}
-			
+
 			$line = ltrim($line, '-'); //Done with the dashes now, remove them from the line
-			
+
 			$menuItem = array();
-			
+
 			$bits = explode('|', $line, 4); //Split by | (into 4 parts at most)
-			
+
 			//Title
 			if (!empty($bits[0])) {
-				
+
 				//Horizontal lines
 				if ($bits[0] == 'hr') {
 					$menuItem['hr'] = true;
@@ -308,51 +308,51 @@ class awesomebar
 				} else {
 					$menuItem['text'] = $bits[0];
 				}
-				
+
 			} else {
 				//All items must at least have a name. If no name, skip this item
 				continue;
 			}
-			
+
 			//URL
 			if (!empty($bits[1])) {
 				$menuItem['url'] = $bits[1];
 			}
-			
+
 			//Icon
 			if (!empty($bits[2])) {
 				$menuItem['icon'] = $bits[2];
 			}
-			
+
 			//Permission (who can view)
 			//Comma seperated list of cohorts
 			//If specified, only those cohorts can see it. Otherwise everyone can
 			if (!empty($bits[3])) {
 				$menuItem['cohorts'] = explode(',', $bits[3]);
 			}
-			
+
 			$menuItem['submenu'] = array();
-			
+
 			//Icons can be specified with or without the "icon-" at the start
 			//Remove icon- from icon names
 			if (isset($menuItem['icon'])) {
 				$menuItem['icon'] = preg_replace('/^(icon\-)/i', '', $menuItem['icon']);
 			}
-			
+
 			//Now add the menu item to the menu...
 			if ($depth == 0) {
-			
+
 				//Depth = 0 means a new top level menu straight on the awesomebar
 				//Just stick it at the end of the menus array
 				$menus[] = $menuItem;
-				
+
 			} else if ($depth > 0) {
-			
+
 				if ($depth > $lastDepth) {
 					//Started a new submenu
 					$itemsAtDepth[$depth] = 0;
 				}
-			
+
 				//Where do we put it...
 				//This is a bit gross. We build an array index to get a reference to the submenu element we want to add the item to
 				$path = '';
@@ -363,16 +363,16 @@ class awesomebar
 				$submenu[] = $menuItem; //Add this menu item to the submenu
 				unset($submenu); //Unlink the reference
 			}
-			
+
 			$lastDepth = $depth;
 			if (isset($itemsAtDepth[$depth])) {
 				++$itemsAtDepth[$depth];
 			} else {
 				$itemsAtDepth[$depth] = 1;
 			}
-			
+
 		}
-		
+
 		return $menus;
 	}
 
@@ -388,7 +388,7 @@ class awesomebar
 		$loggedIn = isloggedin();
 
 		if (!$loggedIn) {
-			$menu[] = array('text' => 'Login', 'icon' => 'signin', 'url' => '/login'); //Login button
+			$menu[] = array('text' => 'Login', 'icon' => 'signin', 'url' => '/login/'); //Login button
 		} else {
 			//Current user button
 			global $USER, $DB;
@@ -419,11 +419,11 @@ class awesomebar
 			$submenu = array();
 
 			if (isguestuser()) {
-			
+
 				// Any special items for guest users??
-			
+
 			} else {
-			
+
 				//Items for regular logged in users
 
 				$courseid = $this->page->course->id;
@@ -433,7 +433,7 @@ class awesomebar
 
 				if (session_is_loggedinas()) {
 					if ($this->is_beta_tester()) {
-						$submenu[] = array('header'=> 'Change Identity');				
+						$submenu[] = array('header'=> 'Change Identity');
 				 	}
 					//Undo 'login as user'
 					$submenu[] = array(
@@ -446,7 +446,7 @@ class awesomebar
 							'returnurl' => $this->page->url->out_as_local_url(false)
 						))
 					);
-					
+
 				} elseif (is_role_switched($courseid)) {
 					if ($this->is_beta_tester()) {
 						$submenu[] = array('header'=> 'Change Identity');
@@ -483,32 +483,32 @@ class awesomebar
 						);
 					}
 				}
-				
+
 				if ($this->is_beta_tester()) {
 					$submenu[] = array('header' => 'Frequent Locations');
 				}
-				
+
 				$submenu[] = array('text' => 'My DragonNet', 'icon' => 'anchor', 'url' => '/my'); //My DragonNet
 				$submenu[] = array('text' => 'Home (Front Page)', 'icon' => 'home', 'url' => '/'); //Home
-				
-				if ($this->is_beta_tester()) {							
+
+				if ($this->is_beta_tester()) {
 					$submenu[] = array('header'=> 'Account Management');
 				}
-				
+
 				//Edit Profile
 				$submenu[] = array(
 					'text' => 'Edit Profile',
 					'icon' => 'edit',
 					'url' => "/user/edit.php?id=$USER->id&course=1"
 				);
-				
+
 				//Change Password
 				$submenu[] = array(
 					'text' => 'Change Password',
 					'icon' => 'edit',
 					'url' => '/login/change_password.php?id=1'
 				);
-				
+
 			} //end if not guest user
 
 			//Logout
@@ -518,7 +518,7 @@ class awesomebar
 				'url' => '/login/logout.php?sesskey=' . sesskey()
 			);
 
-			//Add submenu to menu	
+			//Add submenu to menu
 			$menu[0]['submenu'] = $submenu;
 		}
 
@@ -607,11 +607,11 @@ class awesomebar
 		if ($this->is_beta_tester()) {
 			//Add category to menu
 
-			if ($depth == 1) {			
+			if ($depth == 1) {
 				//If this is a depth = 1 item (a category that's a direct child of a categories ON the awesomebar,
 				//show the title as a header
-				$item = array('header' => $category['name']);	
-			} else {		
+				$item = array('header' => $category['name']);
+			} else {
 				$item = array(
 					'text' => $category['name'],
 					'icon' => strtolower($category_icon),
@@ -629,14 +629,14 @@ class awesomebar
 
 		//Add static headings for the first items in the menus
 		if ($depth == 0) {
-		
+
 			switch ($category['name']) {
-			
+
 				case 'Teaching & Learning':
 					if ($this->is_beta_tester()) {
 						$item['submenu'][] = array(	'header' => 'General');
 					}
-		 		
+
 			 		//My Online Portfolio
 	 				//Add a link to the user's OLP (if they have one) at the top of the teaching and learning menu
 			 		global $USER;
@@ -647,35 +647,35 @@ class awesomebar
 							'icon' => 'certificate'
 						);
 					}
-					
+
 			 		$item['submenu'][] = array(
 			 			'text' => 'Browse All DragonNet Courses',
 			 			'url' => '/course/index.php?categoryid=50',
 			 			'icon' => 'search'
 			 		);
 					break;
-					
+
 				case 'Activities':
 					if ($this->is_beta_tester()) {
 						$item['submenu'][] = array('header' => 'General');
 						$item['submenu'][] = array(
-							'text' => 'All Activity Information', 
+							'text' => 'All Activity Information',
 							'url' => '',
 							'icon' => 'home');
 						$item['submenu'][] = array('header' => 'Signing Up');
 						$item['submenu'][] = array(
-							'text' => 'This Season\'s Handbook', 
-							'url' => '', 
+							'text' => 'This Season\'s Handbook',
+							'url' => '',
 							'icon' => 'file-text');
 						$item['submenu'][] = array(
-							'text' => 'Browse Elementary Activities', 
-							'url' => '', 
-							'icon' => 'search');						
+							'text' => 'Browse Elementary Activities',
+							'url' => '',
+							'icon' => 'search');
 						$item['submenu'][] = array(
-							'text' => 'Browse Secondary Activities', 
-							'url' => '', 
-							'icon' => 'search');						
-						
+							'text' => 'Browse Secondary Activities',
+							'url' => '',
+							'icon' => 'search');
+
 						$item['submenu'][] = array(	'header' => 'My Activities');
 					}  http://dragonnet.ssis-suzhou.net/course/view.php?id=1221
 					break;
@@ -684,16 +684,16 @@ class awesomebar
 					if ($this->is_beta_tester()) {
 						$item['submenu'][] = array('header' => 'Notice');
 						$item['submenu'][] = array(
-							'text' => 'Curriculum menu to be removed', 
-							'url' => '', 
+							'text' => 'Curriculum menu to be removed',
+							'url' => '',
 							'icon' => 'bullhorn');
 						$item['submenu'][] = array(
-							'text' => 'See Navigate menu instead', 
-							'url' => '', 
+							'text' => 'See Navigate menu instead',
+							'url' => '',
 							'icon' => 'bullhorn');
 					}
 					break;
-			}			
+			}
 		}
 
 		//Add subcategories to menu
@@ -717,7 +717,7 @@ class awesomebar
 						$course['fullname'] = trim($course['fullname']);
 					}
 				}
-				
+
 				//Remove empty parentheses
 				$course['fullname'] = str_replace('( )', '', $course['fullname']);
 			}
@@ -731,7 +731,7 @@ class awesomebar
 
 		if ($this->is_beta_tester()) {
 			if (!empty($item['header']) && !empty($item['submenu'])) {
-				// This is a header with a submenu, 
+				// This is a header with a submenu,
 				// So move anything in a header's submenu out into the parent, remove the submenu
 				// and add things non-standard-like
 
@@ -746,7 +746,7 @@ class awesomebar
 	 		} else {
 	 			// This is a normal item, add as normal
 	 			$menu[] = $item;
-	 		}	
+	 		}
 
  		} else {
  			$menu[] = $item;
@@ -779,10 +779,10 @@ class awesomebar
 	// !Course Data
 	//This shouldn't really be here because this is data stuff not presentation. But we need it for the awesomebar and Moodle sucks
 
-	/*	
+	/*
 	*	Create a category tree with only the courses the user is enrolled in
 	*	Unless they're an admin - in that case returns every course on DragonNet
-	*	
+	*
 	*	Our own version to replace the depreciated get_course_category_tree function
 	*/
 	private function get_users_course_tree()
