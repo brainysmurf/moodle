@@ -693,24 +693,22 @@ class enrol_self_plugin extends enrol_plugin {
 		if ($instance->customint8) {
 
 			//Get the user's parents
-			$parents = get_users_parents($userid);
+			$parent = get_users_parents($userid);
 
-			foreach ($parents as $parent) {
-				//Check if parent is enrolled
-				if (enrol_user_is_enrolled($parent->userid, $instance->id)) {
+			//Check if parent is enrolled
+			if (enrol_user_is_enrolled($parent->id, $instance->id)) {
 
-					//Check if the parent still has other children who are enrolled
-					$children = get_users_children($parent->userid);
-					foreach ($children as $child) {
-						if (enrol_user_is_enrolled($child->userid, $instance->id)) {
-							//Child is still enrolled - quit
-							return;
-						}
+				//Check if the parent still has other children who are enrolled
+				$children = get_users_children($parent->id);
+				foreach ($children as $child) {
+					if (enrol_user_is_enrolled($child->id, $instance->id)) {
+						//Child is still enrolled - quit
+						return;
 					}
-
-					//User has no children or all of their children are unenrolled - unenrol the parent
-					$this->unenrol_user($instance,$parent->userid);
 				}
+
+				//User has no children or all of their children are unenrolled - unenrol the parent
+				$this->unenrol_user($instance,$parent->id);
 			}
 
 		}
