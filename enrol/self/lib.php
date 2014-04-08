@@ -156,11 +156,11 @@ class enrol_self_plugin extends enrol_plugin {
 			foreach ($SESSION->usersChildren as $child) {
 
 				//Is this child enrolled in the course?
-				if(enrol_user_is_enrolled($child->id, $instance->id)) {
+				if(enrol_user_is_enrolled($child->userid, $instance->id)) {
 
 					//If the user is enrolled, add a link for the parent to unenrol the child
 					$str = "Remove {$child->firstname} {$child->lastname} from activity";
-					$instancesnode->parent->parent->add($str, "/enrol/self/unenrolchild.php?enrolid={$instance->id}&childuserid={$child->id}", navigation_node::TYPE_SETTING);
+					$instancesnode->parent->parent->add($str, "/enrol/self/unenrolchild.php?enrolid={$instance->id}&childuserid={$child->userid}", navigation_node::TYPE_SETTING);
 					/*
 						About the parent->parent thing...
 						If we just used this to add the menu item:
@@ -693,24 +693,25 @@ class enrol_self_plugin extends enrol_plugin {
 		if ($instance->customint8) {
 
 			//Get the user's parents
-			$parent = get_users_parents($userid);
+			$parents = get_users_parents($userid);
 
-			//Check if parent is enrolled
-			if (enrol_user_is_enrolled($parent->id, $instance->id)) {
+			foreach ($parents as $parent) {
+				//Check if parent is enrolled
+				if (enrol_user_is_enrolled($parent->id, $instance->id)) {
 
-				//Check if the parent still has other children who are enrolled
-				$children = get_users_children($parent->id);
-				foreach ($children as $child) {
-					if (enrol_user_is_enrolled($child->id, $instance->id)) {
-						//Child is still enrolled - quit
-						return;
+					//Check if the parent still has other children who are enrolled
+					$children = get_users_children($parent->id);
+					foreach ($children as $child) {
+						if (enrol_user_is_enrolled($child->userid, $instance->id)) {
+							//Child is still enrolled - quit
+							return;
+						}
 					}
+
+					//User has no children or all of their children are unenrolled - unenrol the parent
+					$this->unenrol_user($instance,$parent->id);
 				}
-
-				//User has no children or all of their children are unenrolled - unenrol the parent
-				$this->unenrol_user($instance,$parent->id);
 			}
-
 		}
 
 		global $OUTPUT;

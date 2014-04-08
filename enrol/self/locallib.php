@@ -96,25 +96,25 @@ class enrol_self_enrol_form extends moodleform {
 						// Bus checkbox
 						$busCheckbox = '<span style="margin-left:50px;"><i class="icon-truck"></i> Will ' . $name . ' use the bus?</i> ';
 							// Not selcting a choice by default, so the user has to click, thus confirming the choice.
-							$busCheckbox .= '<label>Yes <input type="radio" value="1" name="bus['. $child->id . ']" /></label>';
-							$busCheckbox .= '<label>No <input type="radio" value="0" name="bus['. $child->id . ']" /></label>';
+							$busCheckbox .= '<label>Yes <input type="radio" value="1" name="bus['. $child->userid . ']" /></label>';
+							$busCheckbox .= '<label>No <input type="radio" value="0" name="bus['. $child->userid . ']" /></label>';
 						$busCheckbox .= '</span>';
 					}
 
-					if (enrol_user_is_enrolled($child->id, $instance->id)) {
+					if (enrol_user_is_enrolled($child->userid, $instance->id)) {
 
 						//User is already enrolled
-						$mform->addElement('checkbox', "enrolchilduserids[{$child->id}]", $name, '<span class="green"><i class="ok-sign"></i> Enrolled!&nbsp;&nbsp;(Go to the "Course Administration" menu above to remove.)</span>' , array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox', 'data-userid' => $child->id));
+						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="green"><i class="ok-sign"></i> Enrolled!&nbsp;&nbsp;(Go to the "Course Administration" menu above to remove.)</span>' , array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox', 'data-userid' => $child->userid));
 
-					} else if ($mustBeInCohort && !cohort_is_member($mustBeInCohort->id, $child->id)) {
+					} else if ($mustBeInCohort && !cohort_is_member($mustBeInCohort->id, $child->userid)) {
 
 						//Child isn't in the required cohort
-						$mform->addElement('checkbox', "enrolchilduserids[{$child->id}]", $name, "<span class=\"red\"><i class=\"icon-warning-sign\"></i> Can't be enrolled because only <strong>{$niceCohortName}</strong> can join.</span>", array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox', 'data-userid' => $child->id));
+						$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, "<span class=\"red\"><i class=\"icon-warning-sign\"></i> Can't be enrolled because only <strong>{$niceCohortName}</strong> can join.</span>", array('disabled'=>'disabled', 'class'=>'enrolchildcheckbox', 'data-userid' => $child->userid));
 
 					} else {
 
 						//User can be enrolled
-					$mform->addElement('checkbox', "enrolchilduserids[{$child->id}]", $name, '<span class="grey"></span>' . $busCheckbox , array('class'=>'enrolchildcheckbox', 'data-userid' => $child->id));
+					$mform->addElement('checkbox', "enrolchilduserids[{$child->userid}]", $name, '<span class="grey"></span>' . $busCheckbox , array('class'=>'enrolchildcheckbox', 'data-userid' => $child->userid));
 					$showBusWarning = true;
 
 					}
