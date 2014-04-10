@@ -49,7 +49,7 @@ function activity_box($activity, $remove=false) {
     global $CFG;
 
     $table = new html_table();
-    $table->attributes['class'] = 'userinfobox';
+    $table->attributes['class'] = 'userinfobox htmltable';
     //$table->attributes['style'] = "width:45%;";   // how to make it show in rows?
 
     $row = new html_table_row();
@@ -72,9 +72,9 @@ function activity_box($activity, $remove=false) {
         $cat_text = 'in '.$category->name;
     }
     $dialog = '<div id="dialog_'.$activity->id.'" title="Rename" style="display:none"> Enter the new name for this activity:
-    <form id="dialog_rename_'.$activity->id.'" action="activity_mods.php" method="get">
+    <form id="dialog_rename_'.$activity->id.'" action="'.derive_plugin_path_from('activity_mods.php').' method="get">
     <input name="activity_id" type="hidden" value="'.$activity->id.'" />
-    <input style="width:100%;margin-top:5px;" name="new_name" autofocus="autofocus" size="100" onclick="this.select()" type="text" value="'.$activity->fullname.'" />
+    <input id="dialog_rename_input_'.$activity->id.'" style="width:100%;margin-top:5px;" name="new_name" autofocus="autofocus" size="100" onclick="this.select()" type="text" value="'.$activity->fullname.'" />
     </form>
     .</div>';
     $script = "<script>
@@ -88,13 +88,35 @@ function activity_box($activity, $remove=false) {
             show: { effect: \"drop\", duration: 400 },
             buttons: [
                 {
+                    id: 'ok_button_".$activity->id."',
                     text: \"OK\",
                     click: function() {
-                        $('#dialog_rename_".$activity->id."').submit();
+                        var formURL = \"".derive_plugin_path_from('activity_mods.php')."?activity_id=".$activity->id."&new_name=\".concat($('#dialog_rename_input_".$activity->id."').val());
+                        var formData = {};
+                        $.ajax(
+                        {
+                            url : formURL,
+                            async: true,
+                            type: \"GET\",
+                            success: function(data, textStatus, jqXHR)
+                            {
+                                $('#dialog_".$activity->id."').dialog('close');
+                                window.location.reload();
+                            },
+                            error: function(jqXHR, textStatus, errorThrown)
+                            {
+                                alert('fail');
+                            }
+                        });
                     }
                 },
-            ]
+            ],
+            open: function () {
+                $('#ok_button_".$activity->id."').focus();
+        }
+
         });
+
     });
     </script>";
     $edit_name = '&nbsp;&nbsp;<a id="rename_'.$activity->id.'"   href="#"><i class="icon-cog"></i></a>&nbsp;&nbsp;';
@@ -360,8 +382,4 @@ $("#person").autocomplete({
         });
 </script>
 <?php
-}
-
-function sign($icon, $big_text, $little_text) {
-    echo '<div class="local-alert"><i class="icon-4x icon-'.$icon.' pull-left"></i> <p style="font-size:18px;">'.$big_text.'</p>'.$little_text.'</div>';
 }

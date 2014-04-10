@@ -45,3 +45,7 @@ function is_parent() {
     global $SESSION;
     return $SESSION->userIsParent;
 }
+
+function sign($icon, $big_text, $little_text) {
+    echo '<div class="local-alert"><i class="icon-4x icon-'.$icon.' pull-left"></i> <p style="font-size:18px;font-weight:bold;">'.$big_text.'</p>'.$little_text.'</div>';
+}

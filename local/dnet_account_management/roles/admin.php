@@ -8,7 +8,7 @@ require_once '../output.php';
 require_login();
 setup_page();
 
-output_tabs('Meta');
+output_tabs('Admin');
 
 if (!is_admin()) {
     death("This section is for DragonNet administrators only.");
@@ -19,14 +19,13 @@ $table->attributes['class'] = 'userinfotable';
 $table->data = array();
 $table->head = array("User", "Date requested", "Email link clicked?");
 
-foreach ($DB->get_records('dnet_pwreset_keys', array()) as $db_row) {
+sign("info-sign", "Parent password self-reset information", "Sorted by latest activity on top.");
 
-    #print_object($db_row);
+foreach (array_reverse($DB->get_records('dnet_pwreset_keys', array(), $sort='time')) as $db_row) {
 
     $user = $DB->get_record('user', array("id"=>$db_row->userid));
 
     $row = new html_table_row();
-    $row->attributes['class'] = 'test';
 
     $row->cells[0] = new html_table_cell();
     $row->cells[0]->text .= $user->idnumber. ': '. $user->firstname . ' ' . $user->lastname;
@@ -35,7 +34,7 @@ foreach ($DB->get_records('dnet_pwreset_keys', array()) as $db_row) {
     $row->cells[1]->text .= date('F d, Y', $timestamp=$db_row->time);
 
     $row->cells[2] = new html_table_cell();
-    $row->cells[2]->text .= $timestamp=$db_row->used ? "YES" : "no";
+    $row->cells[2]->text .= $db_row->used ? "YES" : "no";
 
     $table->data[] = $row;
 
