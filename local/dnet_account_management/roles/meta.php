@@ -8,16 +8,16 @@ require_once '../output.php';
 require_login();
 setup_page();
 
+output_tabs('Meta');
+
 if (!is_admin()) {
     death("This section is for DragonNet administrators only.");
 }
 
-
 $table = new html_table();
-$table->attributes['class'] = 'userinfobox';
+$table->attributes['class'] = 'userinfotable';
 $table->data = array();
-$table->head = array("User", "Date requested");
-
+$table->head = array("User", "Date requested", "Email link clicked?");
 
 foreach ($DB->get_records('dnet_pwreset_keys', array()) as $db_row) {
 
@@ -33,6 +33,9 @@ foreach ($DB->get_records('dnet_pwreset_keys', array()) as $db_row) {
 
     $row->cells[1] = new html_table_cell();
     $row->cells[1]->text .= date('F d, Y', $timestamp=$db_row->time);
+
+    $row->cells[2] = new html_table_cell();
+    $row->cells[2]->text .= $timestamp=$db_row->used ? "YES" : "no";
 
     $table->data[] = $row;
 
