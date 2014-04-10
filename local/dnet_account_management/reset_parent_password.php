@@ -89,7 +89,7 @@ if ( $confirm == "YES") {
                 {
                     text: "OK",
                     click: function() {
-                        location.href = "<?php echo derive_plugin_path_from('reset_parent_password.php?confirm=YES&userID='.$userID.'&key='.$key) ?>";
+                        location.href = "<?= derive_plugin_path_from('reset_parent_password.php?confirm=YES&userID='.$userID.'&key='.$key) ?>";
                     }
                 },
             ]

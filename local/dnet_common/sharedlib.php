@@ -37,3 +37,11 @@ function is_student() {
     global $SESSION;
     return $SESSION->userIsStudent;
 }
+
+function is_parent() {
+    if (is_admin()) {
+        return true;
+    }
+    global $SESSION;
+    return $SESSION->userIsParent;
+}
