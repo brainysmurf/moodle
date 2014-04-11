@@ -90,7 +90,8 @@ $("#reset_button").on("click", function(e) {
         minWidth:450,
         draggable: false,
         dialogClass: "no-close",
-        model: true,
+        modal: true,
+        show: { effect: "drop", duration: 400 },
         buttons: [
             {
                 text: "OK",
