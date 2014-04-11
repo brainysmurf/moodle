@@ -141,10 +141,10 @@ if ( empty($powerschoolID) )  {
                 <td>Edit:</td>
                 <td><a id="edit_username" href="#">'.'Username & Email'.'</a></td>
             </tr>';
-            $row->cells[1]->text .= '<tr>
-                <td>Edit:</td>
-                <td><a id="edit_fullname" href="#">First & Last name</a></td>
-            </tr>';
+            // $row->cells[1]->text .= '<tr>
+            //     <td>Edit:</td>
+            //     <td><a id="edit_fullname" href="#">First & Last name</a></td>
+            // </tr>';
         }
 
 
