@@ -72,42 +72,51 @@ function activity_box($activity, $remove=false) {
         $cat_text = 'in '.$category->name;
     }
     $dialog = '<div id="dialog_'.$activity->id.'" title="Rename" style="display:none"> Enter the new name for this activity:
-    <form id="dialog_rename_'.$activity->id.'" action="'.derive_plugin_path_from('activity_mods.php').' method="get">
+    <form id="dialog_rename_'.$activity->id.'" action="'.derive_plugin_path_from('activity_mods.php').'">
     <input name="activity_id" type="hidden" value="'.$activity->id.'" />
     <input id="dialog_rename_input_'.$activity->id.'" style="width:100%;margin-top:5px;" name="new_name" autofocus="autofocus" size="100" onclick="this.select()" type="text" value="'.$activity->fullname.'" />
     </form>
     .</div>';
     $script = "<script>
 
+    $('#dialog_rename_".$activity->id."').on(\"submit\", function (e) {
+        e.preventDefault();
+        var formURL = \"".derive_plugin_path_from('activity_mods.php') . "\";
+        var formData = {
+            \"activity_id\": \"".$activity->id."\",
+            \"new_name\": $('#dialog_rename_input_".$activity->id."').val()
+        };
+        $.ajax(
+        {
+            url : formURL,
+            data: formData,
+            async: true,
+            type: \"GET\",
+            success: function(data, textStatus, jqXHR)
+            {
+                $('#dialog_".$activity->id."').dialog('close');
+                window.location.reload();
+            },
+            error: function(jqXHR, textStatus, errorThrown)
+            {
+                alert('Could not change the name for some reason... you will have to do it manually (boo!)');
+            }
+        });
+    });
+
     $('#rename_".$activity->id."').on(\"click\", function(e) {
         e.preventDefault();
         $(\"#dialog_".$activity->id."\").dialog({
             minWidth: 450,
             draggable: false,
-            model: true,
+            modal: true,
             show: { effect: \"drop\", duration: 400 },
             buttons: [
                 {
                     id: 'ok_button_".$activity->id."',
                     text: \"OK\",
                     click: function() {
-                        var formURL = \"".derive_plugin_path_from('activity_mods.php')."?activity_id=".$activity->id."&new_name=\".concat($('#dialog_rename_input_".$activity->id."').val());
-                        var formData = {};
-                        $.ajax(
-                        {
-                            url : formURL,
-                            async: true,
-                            type: \"GET\",
-                            success: function(data, textStatus, jqXHR)
-                            {
-                                $('#dialog_".$activity->id."').dialog('close');
-                                window.location.reload();
-                            },
-                            error: function(jqXHR, textStatus, errorThrown)
-                            {
-                                alert('fail');
-                            }
-                        });
+                        $('#dialog_rename_".$activity->id."').submit();
                     }
                 },
             ],
