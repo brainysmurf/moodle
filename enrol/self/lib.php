@@ -683,7 +683,6 @@ class enrol_self_plugin extends enrol_plugin {
 
 	public function unenrol_user(stdClass $instance, $userid)
 	{
-
 		//Unenrol the person
 		parent::unenrol_user($instance, $userid);
 		// ^ doesn't return anything so we have to assume it worked
@@ -697,10 +696,10 @@ class enrol_self_plugin extends enrol_plugin {
 
 			foreach ($parents as $parent) {
 				//Check if parent is enrolled
-				if (enrol_user_is_enrolled($parent->id, $instance->id)) {
+				if (enrol_user_is_enrolled($parent->userid, $instance->id)) {
 
 					//Check if the parent still has other children who are enrolled
-					$children = get_users_children($parent->id);
+					$children = get_users_children($parent->userid);
 					foreach ($children as $child) {
 						if (enrol_user_is_enrolled($child->userid, $instance->id)) {
 							//Child is still enrolled - quit
@@ -709,13 +708,17 @@ class enrol_self_plugin extends enrol_plugin {
 					}
 
 					//User has no children or all of their children are unenrolled - unenrol the parent
-					$this->unenrol_user($instance,$parent->id);
+					$this->unenrol_user($instance, $parent->userid);
+
 				}
 			}
 		}
 
-		global $OUTPUT;
-		$OUTPUT->refresh_awesomebar();
+		global $USER;
+		if ($USER->id == $userid) {
+			global $OUTPUT;
+			$OUTPUT->refresh_awesomebar();
+		}
 	}
 
 }

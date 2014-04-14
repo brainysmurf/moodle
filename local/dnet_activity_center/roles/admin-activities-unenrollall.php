@@ -12,7 +12,7 @@ if ($confirm == "YES") {
 
     $sql = '
 SELECT
-    usr.id as user_id,
+    usr.id as userid,
     crs.id, crs.fullname AS course_name,
     concat(usr.firstname, \' \', usr.lastname) as user_fullname,
     rle.name as role_name
@@ -27,19 +27,17 @@ JOIN
 JOIN
     {role} rle on ra.roleid = rle.id
 WHERE
-   crs.id = ?';
+   crs.id = ? and rle.name = ?';
 
     foreach ($SESSION->dnet_activity_center_activities as $activity_id) {
         $enrolment_instances = enrol_get_instances($activity_id, true);
         foreach ($enrolment_instances as $instance) {
             if ($instance->enrol == 'self') {
-                $params = array($activity_id);
+                $params = array($activity_id, "Student");
                 $rows = $DB->get_records_sql($sql, $params);
+
                 foreach ($rows as $row) {
-                    if ($row->role_name == "Student") {
-                        // Parents automatically get unenrolled through the self unenrollment feature
-                        $selfenrolment->unenrol_user($instance, $row->user_id);
-                    }
+                    $selfenrolment->unenrol_user($instance, $row->userid);
                 }
             }
         }

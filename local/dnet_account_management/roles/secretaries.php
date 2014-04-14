@@ -54,56 +54,68 @@ if ( empty($powerschoolID) )  {
         //dialogs and scripts used in the box output
         $default_body = "Dear ".$user->firstname.' '. $user->lastname.",\n\nAs requested, your DragonNet account has been reset.\n\nYour username is:\n".$user->username."\n\nYour password is:\nchangeme\n\nThank you.\n\nRegards,\nSSIS DragonNet";
 
-        $dialog = '<div id="dialog_email_user" title="Send email to '.$user->email.'" style="display:none;">
-        Subject:
-        <form id="email_to_user" action="'.derive_plugin_path_from('profile_mods.php').' method="get">
+        $dialog = '<div id="dialog_email_user" title="Edit and click OK to submit email" style="display:none;"><b>To:</b>
+        <form id="email_to_user" action="'.derive_plugin_path_from('profile_mods.php').'">
+        <input name="email" id="email" readonly style="width:100%;margin-top:5px;padding:5px;" value="'.$user->email.'"/ onclick="alert(\'Cannot edit the To field, because it must go to the registered email address...!\');">
+        <input name="userid" id="userid" type="hidden" value="'.$user->id.'" />
+        <p>&nbsp;</p><b>Subject:</b>
         <input name="subject" type="text" id="subject" style="width:100%;margin-top:5px;padding:5px;" value="Your DragonNet account has been reset"/>
-        <p>&nbsp;</p>Body:
-        <textarea id="content_body" name="content_body" style="width:100%;margin-top:5px;padding:5px;" rows="14"/>'.$default_body.'</textarea>
+        <p>&nbsp;</p><b>Body:</b>
+        <textarea id="text" name="text" style="width:100%;margin-top:5px;padding:5px;" rows="14"/>'.$default_body.'</textarea>
+        <input type="submit" style="display:none;" />
         </form>
         </div>';
         $script = "<script>
 
+        $('#email_to_user').on('submit', function(e) {
+            var formURL = \"".derive_plugin_path_from('email_user.php')."\";
+            var formData = {
+                \"userid\": $('#userid').val(),
+                \"text\": $('#text').val(),
+                \"subject\": $('#subject').val()
+            };
+            $.ajax(
+                {
+                    url : formURL,
+                    data: formData,
+                    modal: true,
+                    async: true,
+                    type: \"GET\",
+                    success: function(data, textStatus, jqXHR)
+                    {
+                        $('#dialog_email_user').dialog('close');
+                        alert('Email to '.concat($('#email').val()).concat(' successfully sent.'));
+                    },
+                    error: function(jqXHR, textStatus, errorThrown)
+                    {
+                        alert('Something happened that resulted in a failure. You will have to email them manually.');
+                    }
+
+                }
+
+            );
+            return false;
+        })
+
         $('#email_user').on(\"click\", function(e) {
             e.preventDefault();
             $(\"#dialog_email_user\").dialog({
-                minWidth: 450,
+                minWidth: 600,
                 draggable: false,
-                model: true,
+                modal: true,
                 show: { effect: \"drop\", duration: 400 },
                 buttons: [
                     {
                         id: 'ok_button_dialog_email_user',
                         text: \"OK\",
                         click: function() {
-                            var formURL = \"".derive_plugin_path_from('email_user.php')."\"
-                            var formData = {
-                                \"userid\": \"".$user->id."\",
-                                \"text\": $('#content_body').val(),
-                                \"subject\": $('#subject').val()
-                            };
-                            $.ajax(
-                            {
-                                url : formURL,
-                                data: formData,
-                                async: true,
-                                type: \"GET\",
-                                success: function(data, textStatus, jqXHR)
-                                {
-                                    $('#dialog_email_user').dialog('close');
-                                },
-                                error: function(jqXHR, textStatus, errorThrown)
-                                {
-                                    alert('fail');
-                                }
-                            });
+                            $('#email_to_user').submit();
                         }
                     },
                 ],
                 open: function () {
                     $('#ok_button_dialog_email_user').focus();
-            }
-
+                }
             });
 
         });
