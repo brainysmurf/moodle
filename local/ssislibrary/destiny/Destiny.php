@@ -13,7 +13,8 @@ class Destiny
 
 	function __construct()
 	{
-		$this->config = require __DIR__ . '/config.php';
+		global $CFG;
+		$this->config = $CFG->destiny; #require __DIR__ . '/config.php';
 		$this->connectToDb();
 	}
 
