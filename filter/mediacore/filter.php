@@ -50,8 +50,9 @@ class filter_mediacore extends moodle_text_filter {
 	if (strpos($html, '/podcasts/')) {
 	    return $html;
 	}
+
         if (empty($html) || !is_string($html) || stripos($html, '</a>' === FALSE) ||
-            strpos($html, $this->_mcore_client->get_hostname()) === FALSE) { //performance hack
+        	!$this->string_contains_media_url($html)) {
                 return $html;
             }
         $dom = new DomDocument();
@@ -59,14 +60,25 @@ class filter_mediacore extends moodle_text_filter {
         $xpath = new DOMXPath($dom);
         foreach($xpath->query('//a') as $node) {
             $href = $node->attributes->getNamedItem('href')->nodeValue;
-            if (stripos($href, $this->_mcore_client->get_hostname()) !== FALSE) {
+
+            if ($this->string_contains_media_url($href)) {
                 $new_node  = $dom->createDocumentFragment();
                 $new_node->appendXML($this->_fetch_embed_code($href));
                 $node->parentNode->replaceChild($new_node, $node);
             }
+
         }
         return $dom->saveHTML();
     }
+
+	private function string_contains_media_url($string)
+	{
+		if (stripos($string, $this->_mcore_client->get_hostname()) !== false) {
+			return true;
+		}
+
+		return false;
+	}
 
     /**
      * Change links to MediaCore into embedded MediaCore videos

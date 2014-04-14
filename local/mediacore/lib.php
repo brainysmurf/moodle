@@ -131,13 +131,9 @@ class mediacore_client
      */
     public function __construct() {
         global $CFG;
-
         $this->_config = new mediacore_config();
         $this->_scheme = parse_url($this->_config->get_webroot(),
             PHP_URL_SCHEME);
-        // Override this until dragontv has SSL
-        $this->_scheme = 'http';
-
         $mcore_url_components = parse_url($this->_config->get_url());
         $this->_hostname = $mcore_url_components['host'];
         if (isset($mcore_url_components['port'])) {
@@ -531,11 +527,6 @@ class mediacore_media
         if (empty($result_obj)) {
             return $result_obj;
         }
-
-        // Tweak to serve embedded dragontv videos from
-        // https://dragonnet.ssis-suzhou.net/dragontv
-        // until dragontv gets ssl
-        $result_obj->embed = str_replace('http://dragontv.ssis-suzhou.net/', 'https://dragonnet.ssis-suzhou.net/dragontv/', $result_obj->embed);
 
         return ($this->_client->has_lti_config() && $course_id)
             ? $this->_get_embed_iframe_with_lti_params($result_obj->embed, $course_id)
