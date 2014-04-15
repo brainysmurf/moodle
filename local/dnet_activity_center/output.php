@@ -241,9 +241,44 @@ function user_box($user, $remove=false) {
         </tr>';
     }
     foreach ($activities as $activity) {
+        $deenrol_button = "";
+        if ($remove=="YES") {
+            $deenrol_click = "deenrol_".$activity->course_id.'_'.$user->id;
+            $deenrol_button = ' <a id="'.$deenrol_click.'" href=""><i class="icon-minus-sign"></i></a>';
+            $deenrol_button .= '<script>
+                $("#'.$deenrol_click.'").on("click", function (e) {
+                    e.preventDefault();
+                    var formURL = "'.derive_plugin_path_from("activity_mods.php").'";
+                    var formData = {
+                        "enrol": "DEENROL",
+                        "user_id": "'.$user->id.'",
+                        "activity_id": "'.$activity->course_id.'"
+                    };
+                    $.ajax(
+                    {
+                        url : formURL,
+                        data: formData,
+                        async: true,
+                        type:  "GET",
+                        success: function(data, textStatus, jqXHR)
+                        {
+                            alert("success");
+                            window.location.reload();
+                        },
+                        error: function(jqXHR, textStatus, errorThrown)
+                        {
+                            console.log(textStatus);
+                            console.log(errorThrown);
+                            alert("fail with error \'" + textStatus + "\'");
+                        }
+                    });
+                return false;
+                });
+            </script>';
+        }
         $row->cells[1]->text .= '<tr>
             <td>Activity:</td>
-            <td>'.$activity->fullname.'</td>
+            <td>'.$activity->fullname.$deenrol_button.'</td>
         </tr>';
     }
 

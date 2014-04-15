@@ -34,4 +34,8 @@ switch ($mode) {
         include 'admin-individuals-enrol.php';
         break;
 
+    case DEENROL:
+        include 'admin-individuals-deenrol.php';
+        break;
+
 }

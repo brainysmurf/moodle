@@ -23,6 +23,9 @@ if (empty($courseid)) {
         <ul class="buttons">
         <a class="btn" href="?enrol=ENROL&activity_id=<?= $course->id ?> &mode=<?= ENROL ?>"><i class="icon-plus-sign"></i> <?= ENROL.": {$course->fullname}" ?></a>
         </ul>
+        <script>
+
+        </script>
         <?php
 
     } else {

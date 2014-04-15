@@ -7,7 +7,7 @@ function get_user_activity_enrollments($idnumber) {
 
     $sql = "
     select
-        crs.fullname, usr.idnumber
+        crs.fullname, usr.idnumber, crs.id as course_id
     from
         {enrol} enrl
     join
