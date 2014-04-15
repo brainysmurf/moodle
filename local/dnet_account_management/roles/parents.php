@@ -61,17 +61,19 @@ if ( empty($powerschoolID) )  {
 
     } else if ($email == "NO") {
 
-        echo '<div class="local-alert"><i class="icon-question-sign icon-4x pull-left"></i> ';
-        echo '<p>Please copy and paste the below text and send to <strong>help@ssis-suzhou.net</strong></p>';
-        echo '<br />';
-        echo '<textarea onclick="this.select()" style="width:70%;height:200px;padding:10px;">Dear Help,
+        sign("phone", "Please contact a school secretary", "We need to change your username, and only secretaries can do that manually. Please <a href=\"http://www.ssis-suzhou.net/contact-us/index.aspx\">go to the school website</a> for contact information. You will simply need to tell them the name of your children who attend SSIS.");
 
-I am parent with PowerSchool family id of '.$family_id.'P and I would like to reset the password to my DragonNet account. Right now, the username in DragonNet is incorrect and needs to be changed.
+//         echo '<div class="local-alert"><i class="icon-question-sign icon-4x pull-left"></i> ';
+//         echo '<p>Please copy and paste the below text and send to <strong>help@ssis-suzhou.net</strong></p>';
+//         echo '<br />';
+//         echo '<textarea onclick="this.select()" style="width:70%;height:200px;padding:10px;">Dear Help,
 
-Please help me to reset it.
+// I am parent with PowerSchool family id of '.$family_id.'P and I would like to reset the password to my DragonNet account. Right now, the username in DragonNet is incorrect and needs to be changed.
 
-Regards,</textarea>';
-        echo '</div>';
+// Please help me to reset it.
+
+// Regards,</textarea>';
+//         echo '</div>';
 
 
     } else {
