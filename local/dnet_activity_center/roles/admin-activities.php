@@ -23,6 +23,14 @@ switch ($mode) {
         sign("thumbs-up", "List cleared.", "Go to ".SELECT." to start building a new list.");
         break;
 
+    case TOGGLEENROLLMENTS:
+        include 'admin-activities-enrollments.php';
+        break;
+
+    case TOGGLEVISIBILITY:
+        include 'admin-activities-visibility.php';
+        break;
+
     case UNENROLLALL:
         include 'admin-activities-unenrollall.php';
         break;

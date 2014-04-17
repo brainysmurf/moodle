@@ -31,7 +31,14 @@ function output_tabs($kind, $tabs, $mode_name="mode") {
                 $post = "</a>";
             }
         }
-        $li .= "<li id=\"tab_topic_{$i}\">{$pre}{$label}{$post}</li>";
+
+        // TODO: Add an icon feature
+        $icon = '';
+        // $found_key = '';
+        // if ($found_key && $this_icon = constant($key.'_ICON'))  {
+        //     $icon = '<i class="icon-'.$this_icon.'"></i> ';
+        // }
+        $li .= "<li id=\"tab_topic_{$i}\">{$pre}{$icon}{$label}{$post}</li>";
     }
     echo '
 <div class="single-section">
@@ -138,7 +145,86 @@ function activity_box($activity, $remove=false) {
             <td>Remove from list:</td>
             <td><a href="?mode='.SELECT.'&courseid='.$activity->id.'&remove=YES"><i class="icon-remove"></i></a></td>
         </tr>';
+
+        $enrolment_instances = enrol_get_instances($activity->id, true);
+        foreach ($enrolment_instances as $instance) {
+            if ($instance->enrol == 'self') {
+                $allow_new_enrollments = YESno($instance->customint6);
+            }
+        }
+
+        // Visibility
+        $icon = $activity->visible ? 'icon-check' : 'icon-check-empty';
+        $visibility = YESno($activity->visible);
+        $row->cells[1]->text .= '<tr>
+            <td>'."Visible (in user's menus)".'</td>
+            <td><a id="'.$activity->id.'_toggle_vis" href=""><i class="'.$icon.'"></i></a></td>
+            <script>
+            $("#'.$activity->id.'_toggle_vis").on("click", function (e) {
+                e.preventDefault();
+                formURL = "'.derive_plugin_path_from('activity_mods.php').'";
+                formData = {
+                    "activity_id": "'.$activity->id.'",
+                    "toggle_visibility": "YES"
+                };
+                $.ajax(
+                {
+                    url : formURL,
+                    data: formData,
+                    async: true,
+                    type:  "GET",
+                    success: function(data, textStatus, jqXHR)
+                    {
+                        window.location.reload();
+                    },
+                    error: function(jqXHR, textStatus, errorThrown)
+                    {
+                        console.log(textStatus);
+                        console.log(errorThrown);
+                        alert("fail with error \'" + textStatus + "\'");
+                    }
+                });
+            });
+            </script>
+        </tr>';
+
+        // Allow new enrollments
+        $icon = $allow_new_enrollments == "YES" ? 'icon-check' : 'icon-check-empty';
+        $row->cells[1]->text .= '<tr>
+            <td>'."Allow new enrollments".'</td>
+            <td><a id="'.$activity->id.'_toggle_ne" href=""><i class="'.$icon.'"></i></a></td>
+        </tr>
+        <script>
+        $("#'.$activity->id.'_toggle_ne").on("click", function (e) {
+            e.preventDefault();
+            formURL = "'.derive_plugin_path_from('activity_mods.php').'";
+            formData = {
+                "activity_id": "'.$activity->id.'",
+                "toggle_enrollments": "YES"
+            };
+            $.ajax(
+            {
+                url : formURL,
+                data: formData,
+                async: true,
+                type:  "GET",
+                success: function(data, textStatus, jqXHR)
+                {
+                    window.location.reload();
+                },
+                error: function(jqXHR, textStatus, errorThrown)
+                {
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                    alert("fail with error \'" + textStatus + "\'");
+                }
+            });
+        });
+        </script>
+';
+
     }
+
     $row->cells[1]->text .= '<tr>
         <td>Convenient Links:</td>
         <td>
@@ -150,57 +236,49 @@ function activity_box($activity, $remove=false) {
 
     # output some basic stats about the activity
 
-    $manager_role = 1;
-    $editor_role = 3;
-    $participant_role = 5;
+    $manager_role = MANAGER_ROLE_ID;
+    $editor_role = TEACHER_ROLE_ID;
+    $participant_role = STUDENT_ROLE_ID;
 
-    $sql = '
-select
-   usr.idnumber, usr.firstname, usr.lastname, crs.id
-from
-   {user_enrolments} usr_enrl
-join
-   {user} usr
-   on
-    usr.id = usr_enrl.userid
-join
-   {enrol} enrl
-   on
-    usr_enrl.enrolid = enrl.id
-join
-   {role} rle
-   on
-    enrl.roleid = rle.id
-join
-   {course} crs
-   on
-       enrl.courseid = crs.id
-where
-    crs.id = ? and
-    enrl.roleid = ?
-';
 
     $role_info = array(
         array( "id"=>$manager_role, "name"=>"Managers:" ),
         array( "id"=>$editor_role, "name"=>"Editors:" ),
         array( "id"=>$participant_role, "name"=>"# Participants (incl parents):")
         );
+
     foreach ($role_info as $role) {
-        $params = array($activity->id, $role["id"]);
-        $users = $DB->get_records_sql($sql, $params);
+        $role_id = $role["id"];
+        $context = get_context_instance(CONTEXT_COURSE, $activity->id, true);
+        $users = get_role_users($role_id, $context);
+        $count = count($users);
         $value = '';
         if (substr($role["name"], 0, 1) == "#") {
-            $value = count($users);
+            $value = $count;
         } else {
-            foreach ($users as $user) {
-                $value .= $user->firstname. ' '. $user->lastname. '   ';
+            if ($count > 10) {
+                $value = "> 10";
+            } else {
+                $i = 1;
+                foreach ($users as $user) {
+                    $value .= $user->firstname . ' ' . $user->lastname;
+                    if ($i < $count) {
+                        $value .= '&nbsp;&nbsp;<b>&amp;</b>&nbsp;&nbsp;';
+                    }
+                    $i += 1;
+                }
             }
+        }
+        if (empty($value)) {
+            $value = '0';
         }
         $row->cells[1]->text .= '<tr>
             <td>'.$role["name"].'</td>
             <td>'.$value.'</td>
         </tr>';
+
     }
+
 
     $row->cells[1]->text .= '</table>';
 
@@ -262,7 +340,7 @@ function user_box($user, $remove=false) {
                         type:  "GET",
                         success: function(data, textStatus, jqXHR)
                         {
-                            alert("success");
+                            alert("Successfully unenrolled!");
                             window.location.reload();
                         },
                         error: function(jqXHR, textStatus, errorThrown)

@@ -20,7 +20,7 @@ if ($sub_mode == strtolower(SUBMODE_INDIVIDUALS)) {
 
 } else if ($sub_mode == strtolower(SUBMODE_ACTIVITIES)) {
 
-    output_tabs($mode, array(SELECT, ORGANIZE, CLEAR, UNENROLLALL, NEW_, START_AGAIN));
+    output_tabs($mode, array(SELECT, TOGGLEVISIBILITY, TOGGLEENROLLMENTS, UNENROLLALL, START_AGAIN));
     include 'admin-activities.php';
 
 } else {

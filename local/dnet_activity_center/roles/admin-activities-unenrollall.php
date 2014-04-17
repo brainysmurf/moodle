@@ -7,37 +7,19 @@ if ($confirm == "YES") {
 
     // step through each activity, and unenroll all the non-managers and non-editors
     // special case for students who are also enrolled as editors, what to do?
-    $participant_role = 5;
+
     $selfenrolment = enrol_get_plugin('self');
-
-    $sql = '
-SELECT
-    usr.id as userid,
-    crs.id, crs.fullname AS course_name,
-    concat(usr.firstname, \' \', usr.lastname) as user_fullname,
-    rle.name as role_name
-FROM
-    {role_assignments} ra
-JOIN
-    {context} ctx ON ra.contextid = ctx.id
-JOIN
-    {course} crs on ctx.instanceid = crs.id
-JOIN
-    {user} usr on ra.userid = usr.id
-JOIN
-    {role} rle on ra.roleid = rle.id
-WHERE
-   crs.id = ? and rle.name = ?';
-
     foreach ($SESSION->dnet_activity_center_activities as $activity_id) {
-        $enrolment_instances = enrol_get_instances($activity_id, true);
-        foreach ($enrolment_instances as $instance) {
-            if ($instance->enrol == 'self') {
-                $params = array($activity_id, "Student");
-                $rows = $DB->get_records_sql($sql, $params);
+        $context = get_context_instance(CONTEXT_COURSE, $activity_id, true);
+        foreach(array(STUDENT_ROLE_ID, PARENT_ROLE_ID) as $role_id) {
+            $users = get_role_users($role_id, $context);
+            $enrolment_instances = enrol_get_instances($activity_id, true);
 
-                foreach ($rows as $row) {
-                    $selfenrolment->unenrol_user($instance, $row->userid);
+            foreach ($enrolment_instances as $instance) {
+                if ($instance->enrol == 'self') {
+                    foreach ($users as $user) {
+                        $selfenrolment->unenrol_user($instance, $user->id);
+                    }
                 }
             }
         }

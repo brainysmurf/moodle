@@ -2,19 +2,29 @@
 require_once('../../config.php');
 require_once('../../enrol/locallib.php');
 
+require_login();
+
 $activity_id = required_param('activity_id', PARAM_RAW);
 $new_name = optional_param('new_name', '', PARAM_RAW);
 $enrol = optional_param('enrol', '', PARAM_RAW);
-echo "HEY";
+$toggle_visibility = optional_param('toggle_visibility', '', PARAM_RAW);
+$toggle_enrollments = optional_param('toggle_enrollments', '', PARAM_RAW);
 
-if ($enrol == "ENROL") {
+if ($enrol == "BULKENROL") {
+    $selfenrolment_plugin = enrol_get_plugin('self');
+
     foreach ($SESSION->dnet_activity_center_individuals as $individual) {
         $user = $DB->get_record("user", array("idnumber"=>$individual));
         if (!$user) {
             // Could get here if something strange happened ...
             continue;
         }
-        // enrol
+        $enrolment_instances = enrol_get_instances($activity_id, true);
+        foreach ($enrolment_instances as $instance) {
+            if ($instance->enrol == 'self') {
+                $selfenrolment_plugin->enrol_user($instance, $user->id);
+            }
+        }
     }
 
 } else if ($enrol == "DEENROL") {
@@ -33,7 +43,6 @@ if ($enrol == "ENROL") {
     foreach ($enrolment_instances as $instance) {
         if ($instance->enrol == 'self') {
             $selfenrolment_plugin->unenrol_user($instance, $user->id);
-            echo 'unenrolled';
         }
     }
 }
@@ -43,4 +52,26 @@ if (!empty($new_name)) {
         "id"=>$activity_id,
         "fullname"=>$new_name
         ));
+}
+
+if (!empty($toggle_visibility)) {
+    $course = $DB->get_record('course', array('id'=>$activity_id));
+    $value = $course->visible == 1 ? 0 : 1;
+    $DB->update_record('course', array(
+        'id'=>$activity_id,
+        'visible'=>$value
+        ));
+}
+
+if (!empty($toggle_enrollments)) {
+    $enrolment_instances = enrol_get_instances($activity_id, true);
+    foreach ($enrolment_instances as $instance) {
+        if ($instance->enrol == 'self') {
+            $value = $instance->customint6 == 1 ? 0 : 1;
+            $DB->update_record('enrol', array(
+                'id'=>$instance->id,
+                'customint6'=>$value
+                ));
+        }
+    }
 }

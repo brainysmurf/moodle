@@ -28,3 +28,13 @@ function get_user_activity_enrollments($idnumber) {
     $params = array("self", $idnumber);
     return $DB->get_records_sql($sql, $params);
 }
+
+
+function get_user_roles_in_activity($userid, $courseid) {
+    $context = get_context_instance(CONTEXT_COURSE, $courseid, true);
+    return get_user_roles($context, $userid, true);
+}
+
+function YESno($item) {
+    return $item == 1 ? "YES" : "no";
+}
