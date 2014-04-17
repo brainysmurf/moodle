@@ -660,7 +660,6 @@ class enrol_self_plugin extends enrol_plugin {
 
 	public function enrol_user(stdClass $instance, $userid, $roleid = null, $timestart = 0, $timeend = 0, $status = null, $recovergrades = null)
 	{
-		//Enrol the person
 		parent::enrol_user($instance, $userid, $roleid, $timestart, $timeend, $status, $recovergrades);
 
 		//If this course allows parents to enrol students, we want to enrol the parent if they're not already
@@ -677,8 +676,11 @@ class enrol_self_plugin extends enrol_plugin {
 
 		}
 
-		global $OUTPUT;
-		$OUTPUT->refresh_awesomebar();
+		global $USER;
+		if ($USER->id == $userid) {
+			global $OUTPUT;
+			$OUTPUT->refresh_awesomebar();
+		}
 	}
 
 	public function unenrol_user(stdClass $instance, $userid)
