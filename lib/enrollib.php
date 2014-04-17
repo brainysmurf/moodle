@@ -1343,10 +1343,11 @@ abstract class enrol_plugin {
             }
         }
 
-        if (!defined('CLI_SCRIPT' && $USER->id == $userid)) {
+        if ( (!defined('CLI_SCRIPT') && ($USER->id == $userid))) {
 	        //Refresh the awesomebar
     	    global $OUTPUT;
     	    if (!empty($OUTPUT)) {
+                echo 'refreshing';
 	        	$OUTPUT->refresh_awesomebar();
 	        }
         }
