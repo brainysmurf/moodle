@@ -2513,7 +2513,7 @@ EOD;
         $pagingbar->prepare($this, $this->page, $this->target);
 
         if ($pagingbar->totalcount > $pagingbar->perpage) {
-            
+
             $output .= html_writer::tag('span', get_string('page').':' );
 
             if (!empty($pagingbar->previouslink)) {
@@ -2578,12 +2578,12 @@ EOD;
     public function box($contents, $classes = 'generalbox', $id = null) {
         return $this->box_start($classes, $id) . $contents . $this->box_end();
     }
-    
+
     public function errorbox($contents, $extraclasses = '', $id = null)
     {
     	return $this->box($contents, 'generalbox errorbox ' . $extraclasses, $id);
     }
-    
+
     public function successbox($contents, $extraclasses = '', $id = null)
     {
     	return $this->box($contents, 'generalbox successbox ' . $extraclasses, $id);
@@ -3214,6 +3214,13 @@ EOD;
      */
     public function favicon() {
         return $this->pix_url('favicon', 'theme');
+    }
+
+    /**
+    * Added by ssis
+    */
+    public function refresh_awesomebar() {
+        // do nothing!
     }
 }
 
