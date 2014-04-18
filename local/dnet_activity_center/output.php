@@ -34,10 +34,11 @@ function output_tabs($kind, $tabs, $mode_name="mode") {
 
         // TODO: Add an icon feature
         $icon = '';
-        // $found_key = '';
-        // if ($found_key && $this_icon = constant($key.'_ICON'))  {
-        //     $icon = '<i class="icon-'.$this_icon.'"></i> ';
-        // }
+        if ($icon_defined = array_search($label, get_defined_constants(), true)) {
+            if ($which_icon = constant($icon_defined.'_ICON')) {
+                $icon = '<i class="icon-'.$which_icon.'"></i> ';
+            }
+        }
         $li .= "<li id=\"tab_topic_{$i}\">{$pre}{$icon}{$label}{$post}</li>";
     }
     echo '
