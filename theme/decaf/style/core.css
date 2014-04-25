@@ -30,6 +30,9 @@ a:hover,a:active {color: #1662A3;}
 	color:#A00;
 }
 
+.clear {
+	clear:both;
+}
 
 /* Header
 ------------------------- */
@@ -71,11 +74,13 @@ a:hover,a:active {color: #1662A3;}
 	Moodle automatically adds the dragonnet-local class to the body (or dragonnet-ssis-suzhou-net, from the hostname)
 */
 body.dragonnet-vagrant #page-header,
-body.dragonnet-local #page-header {
+body.dragonnet-local #page-header,
+body.dragonnet-dev #page-header {
 	background-color: #27ae60;
 }
 body.dragonnet-vagrant #page-header-gradient,
-body.dragonnet-local #page-header-gradient {
+body.dragonnet-local #page-header-gradient,
+body.dragonnet-dev #page-header-gradient {
 	background: -moz-linear-gradient(left,  rgba(39, 174, 96,1) 0%, rgba(39, 174, 96,0.7) 10%, rgba(39, 174, 96,0) 33%, rgba(39, 174, 96,0) 100%);
 	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(39, 174, 96,1)), color-stop(10%,rgba(39, 174, 96,0.7)), color-stop(33%,rgba(39, 174, 96,0)), color-stop(100%,rgba(39, 174, 96,0)));
 	background: -webkit-linear-gradient(left,  rgba(39, 174, 96,1) 0%,rgba(39, 174, 96,0.7) 10%,rgba(39, 174, 96,0) 33%,rgba(39, 174, 96,0) 100%);
