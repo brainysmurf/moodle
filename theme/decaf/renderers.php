@@ -219,8 +219,8 @@ class theme_decaf_core_renderer extends core_renderer {
 		$awesomebar = new awesomebar($this->page);
 		return $awesomebar->create();
 	}
-	
-	
+
+
 	/**
 	* Updates the cached awesomebar HTML for the current session, but doesn't display it
 	*/
@@ -409,13 +409,17 @@ class theme_decaf_topsettings_renderer extends plugin_renderer_base {
 		return '';
 	}
 
+	private function is_on_admin_page() {
+		return stripos($_SERVER['REQUEST_URI'], '/admin/') === 0;
+	}
+
 	public function navigation_tree(global_navigation $navigation) {
 		return '';
 		global $CFG;
 		global $USER;
 		//include_once($CFG->dirroot.'/calendar/lib.php');
 		//$days_ahead = 30;
-		//$cal_items = calendar_get_upcoming($this->user_courses, true, $USER->id, $days_ahead);	
+		//$cal_items = calendar_get_upcoming($this->user_courses, true, $USER->id, $days_ahead);
 		//$content .= html_writer::end_tag('ul');
 	}
 
@@ -452,7 +456,9 @@ class theme_decaf_topsettings_renderer extends plugin_renderer_base {
 				continue;
 			}
 
-			if (!($this->page->course->id === '1266') && ($name === 'Site administration')) {
+			// When to hide the Site Administration menu...
+			// (Everywhere unless we're on course 1266, or /admin)
+			if ($name === 'Site administration' && ($this->page->course->id !== '1266' && !$this->is_on_admin_page())) {
 				continue;
 			}
 
