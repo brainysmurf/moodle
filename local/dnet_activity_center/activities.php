@@ -38,3 +38,14 @@ function get_user_roles_in_activity($userid, $courseid) {
 function YESno($item) {
     return $item == 1 ? "YES" : "no";
 }
+
+function get_activity_selfenrol_instance($activity_id) {
+    $enrolment_instances = enrol_get_instances($activity_id, true);
+    $gotit = false;
+    foreach ($enrolment_instances as $instance) {
+        if ($instance->enrol == 'self') {
+            $gotit = $instance;
+        }
+    }
+    return $gotit;
+}

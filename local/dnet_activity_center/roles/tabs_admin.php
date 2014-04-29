@@ -14,7 +14,7 @@ define('ENROL_ICON', "plus-sign");
 define('DEENROL', "Bulk Unenrol");
 define('DEENROL_ICON', "minus-sign");
 define('BECOME_TEACHER', "Become Teacher");
-define('START_AGAIN', "Back to start");
+define('START_AGAIN', "Switch mode");
 define('START_AGAIN_ICON', "repeat");
 define('PLACEHOLDER', "Type first or last name of a student. Spaces don't matter");
 define('UNENROLLALL', "Bulk Unenrol Participants");

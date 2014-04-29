@@ -1,0 +1,11 @@
+.ui-autocomplete-input {
+    width:100%;
+    font-size:18px;
+    margin-bottom:5px;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    padding:10px;
+}
+
+

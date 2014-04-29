@@ -141,18 +141,15 @@ function activity_box($activity, $remove=false) {
     $row->cells[1]->text .= $dialog.$script;
     $row->cells[1]->text .= '<table class="userinfotable">';
 
+    $instance = get_activity_selfenrol_instance($activity->id);
+
     if ($remove) {
         $row->cells[1]->text .= '<tr>
             <td>Remove from list:</td>
             <td><a href="?mode='.SELECT.'&courseid='.$activity->id.'&remove=YES"><i class="icon-remove"></i></a></td>
         </tr>';
 
-        $enrolment_instances = enrol_get_instances($activity->id, true);
-        foreach ($enrolment_instances as $instance) {
-            if ($instance->enrol == 'self') {
-                $allow_new_enrollments = YESno($instance->customint6);
-            }
-        }
+        $allow_new_enrollments = YESno($instance->customint6);
 
         // Visibility
         $icon = $activity->visible ? 'icon-check' : 'icon-check-empty';
@@ -231,6 +228,7 @@ function activity_box($activity, $remove=false) {
         <td>
         <a target="_new" href="'.$CFG->wwwroot.'/course/view.php?id='.$activity->id.'"><i class="icon-rocket"></i></a>&nbsp;&nbsp;&nbsp;
         <a target="_new" href="'.$CFG->wwwroot.'/course/edit.php?id='.$activity->id.'"><i class="icon-cogs"></i></a>&nbsp;&nbsp;&nbsp;
+        <a target="_new" href="'.$CFG->wwwroot.'/enrol/self/edit.php?courseid='.$activity->id.'&id='.$instance->id.'"><i class="icon-dashboard"></i></a>&nbsp;&nbsp;&nbsp;
         <a target="_new" href="'.$CFG->wwwroot.'/enrol/users.php?id='.$activity->id.'"><i class="icon-user"></i></a>&nbsp;&nbsp;&nbsp;
         </td>
     </tr>';
@@ -406,7 +404,6 @@ function output_act_form($placeholder="Type something, dude", $kind="activities"
     ?>
 <form id="activity_user_entry" action="" method="get">
 <input name="" size="100" onclick="this.select()"
-    style="width:100%;font-size:18px;margin-bottom:5px;box-sizing: border-box;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;padding:3px;"
     type="text" autofocus="autofocus" id="activity" placeholder="<?= $placeholder ?>"/><br />
 <input name="courseid" type="hidden" id="courseid" value=""/>
 <input name="mode" type="hidden" id="select" value="<?= $mode ?>"/>
@@ -442,7 +439,6 @@ function output_act_cat_form($placeholder="Type something, dude", $kind="student
     ?>
 <form id="cat_user_entry" action="" method="get">
 <input name="" size="100" onclick="this.select()"
-    style="width:100%;font-size:18px;margin-bottom:5px;box-sizing: border-box;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;padding:3px;"
     type="text" id="activity_cat" placeholder="<?= $placeholder ?>"/><br />
 <input name="catid" type="hidden" id="catid" value=""/>
 <input name="mode" type="hidden" id="select" value="<?= $mode ?>"/>
@@ -478,7 +474,6 @@ function output_forms($placeholder="Type something, dude", $kind="students", $mo
     ?>
 <form id="user_entry" action="" method="get">
 <input name="" autofocus="autofocus" size="100" onclick="this.select()"
-    style="width:100%;font-size:18px;margin-bottom:5px;box-sizing: border-box;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;padding:3px;"
     type="text" id="person" placeholder="<?= $placeholder ?>"/><br />
 <input name="powerschool" type="hidden" id="powerschool" value=""/>
 <input name="mode" type="hidden" id="select" value="<?= $mode ?>"/>
