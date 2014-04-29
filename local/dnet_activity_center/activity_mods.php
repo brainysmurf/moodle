@@ -22,7 +22,7 @@ if ($enrol == "BULKENROL") {
         $enrolment_instances = enrol_get_instances($activity_id, true);
         foreach ($enrolment_instances as $instance) {
             if ($instance->enrol == 'self') {
-                $selfenrolment_plugin->enrol_user($instance, $user->id);
+                $selfenrolment_plugin->enrol_user($instance, $user->id, 5);
             }
         }
     }
