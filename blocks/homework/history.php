@@ -11,6 +11,7 @@ echo $hwblock->display->tabs('history');
 switch ($hwblock->mode()) {
 
 	case 'student':
+	case 'parent':
 	case 'teacher':
 
 		echo '<h2><i class="icon-time"></i>  All Homework, Sorted By Due Date (Latest At The Top)</h2>';
@@ -26,10 +27,6 @@ switch ($hwblock->mode()) {
 		$homework = $hwblock->getHomework($groupIDs, false, false, $approvedStatus, true,  $past, false, $order);
 
 		echo $hwblock->display->homeworkList($homework, 'duedate', 'Due on ');
-
-		break;
-
-	case 'parent':
 
 		break;
 

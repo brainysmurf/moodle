@@ -26,6 +26,28 @@ class Block
 	 */
 
 	/**
+	 * Returns the userID of the current user, or the user to view info for if in parent mode
+	 */
+	public function userID() {
+		global $SESSION, $USER;
+
+		if (!empty($SESSION->homeworkBlockUser)) {
+			return $SESSION->homeworkBlockUser;
+		}
+
+		$mode = $this->mode();
+
+		if ($mode == 'parent') {
+			$children = $SESSION->usersChildren;
+			$child = reset($children);
+			$SESSION->homeworkBlockUser = $child->userid;
+			return $child->userid;
+		} else {
+			return $USER->id;
+		}
+	}
+
+	/**
 	 * Returns the mode the current user is in
 	 * (The default mode for the users role if the mode hasn't been switched)
 	 */

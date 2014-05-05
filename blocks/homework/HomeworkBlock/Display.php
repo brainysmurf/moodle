@@ -5,11 +5,34 @@ namespace SSIS\HomeworkBlock;
 class Display
 {
 	private $hwblock;
+	private $possibleTabs = array( // Array of which tabs are shown in differnet modes
+		'student' => array(
+			'index' => array('index.php', 'To Do'),
+			'classes' => array('classes.php', 'By Class'),
+			'history' => array('history.php', 'History'),
+			'add' => array('add.php', 'Add Homework'),
+		),
+		'teacher' => array(
+			'index' => array('index.php', 'Pending Submissions'),
+			'classes' => array('classes.php', 'By Class'),
+			'history' => array('history.php', 'History'),
+			'add' => array('add.php', 'Add Homework'),
+		),
+		'parent' => array(
+			'index' => array('index.php', 'To Do'),
+			'classes' => array('classes.php', 'By Class'),
+			'history' => array('history.php', 'History'),
+		),
+		'pastoral' => array(
+			'index' => array('index.php', 'Home'),
+		),
+	);
 
 	public function __construct(Block $hwblock)
 	{
 		$this->hwblock = $hwblock;
 	}
+
 
 	public function modeTabs()
 	{
@@ -40,21 +63,50 @@ class Display
 		return $t;
 	}
 
-	public function tabs($current = false, $subtabs = false, $currentsubtab = false)
+	/**
+	 * Shows a tab for each of a user's children and allows them to switch between them
+	 */
+	public function parentTabs()
 	{
-		$tabs = array(
-			'index' => array('index.php', 'To Do'),
-			'classes' => array('classes.php', 'By Class'),
-			'history' => array('history.php', 'History'),
-			'add' => array('add.php', 'Add Homework'),
-		);
+		global $SESSION;
 
-		// For teachers, rename the first tab
-		if ($this->hwblock->mode() == 'teacher') {
-			$tabs['index'][1] = 'Pending Submissions';
+		$currentUser = $this->hwblock->userID();
+
+		if (!isset($SESSION->usersChildren) || !is_array($SESSION->usersChildren)) {
+			return false;
 		}
 
-		$t  = '<div class="tabs">';
+		$t = '<div class="tabs noborder">';
+		$t .= '<ul class="additional-tabs">';
+		foreach ($SESSION->usersChildren as $child) {
+			$t .= '<li>';
+			$t .= '<a ' . ($child->userid == $currentUser ? 'class="selected"': '') . 'href="changeuser.php?userid=' . $child->userid . '">' . $child->firstname . ' ' . $child->lastname . '</a>';
+			$t .= '</li>';
+		}
+		$t .= '</ul>';
+		$t .= '</div>';
+		return $t;
+	}
+
+	/**
+	 * Returns HTML for the tabs at the top of all homework pages.
+	 * Including the subtabs and mode / children tabs.
+	 */
+	public function tabs($current = false, $subtabs = false, $currentsubtab = false)
+	{
+		$tabs = $this->possibleTabs[$this->hwblock->mode()];
+
+		$t = '';
+
+		// If in parent mode, show the list of children at the top.
+		if ($this->hwblock->mode() == 'parent') {
+			$t .= $this->parentTabs();
+		}
+
+		// Show tabs for switching modes (if possible)
+		$t .= $this->modeTabs();
+
+		$t  .= '<div class="tabs">';
 		$t .= '<ul>';
 		foreach ($tabs as $name => $tab) {
 			$t .= '<li>';
@@ -75,9 +127,13 @@ class Display
 		}
 		$t .= '</div>';
 
-		return $this->modeTabs() . $t;
+		return $t;
 	}
 
+
+	/**
+	 * Index page for students
+	 */
 	public function overview($homework, $hashLinks = false)
 	{
 		$today = $this->hwblock->today;

@@ -14,13 +14,14 @@ echo $hwblock->display->tabs('index');
 switch ($hwblock->mode()) {
 
 	case 'student':
+	case 'parent':
 
 		/**
 		 * Show the timetable view of the student's homework due in the next 2 weeks
 		 */
 
 		// Get the user's group (class) IDs
-		$groupIDs = $hwblock->getUsersGroupIDs($USER->id);
+		$groupIDs = $hwblock->getUsersGroupIDs($hwblock->userID());
 
 		// Get the homework for those groups
 		$approved = true;
@@ -46,7 +47,7 @@ switch ($hwblock->mode()) {
 		echo '<p>This section shows homework that a students in your classes have submitted. Other students will <strong>not</strong> see these until approved by you.</p>';
 
 		// Get the user's group (class) IDs
-		$groupIDs = $hwblock->getUsersGroupIDs($USER->id);
+		$groupIDs = $hwblock->getUsersGroupIDs($hwblock->userID());
 
 		// Get the homework for those groups
 		$approved = false;
@@ -57,15 +58,6 @@ switch ($hwblock->mode()) {
 		echo $hwblock->display->homeworkList($homework);
 
 		break;
-
-	case 'parent':
-
-		break;
-
-	case 'pastoral':
-
-		break;
-
 }
 
 echo $OUTPUT->footer();
