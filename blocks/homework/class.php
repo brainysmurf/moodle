@@ -15,7 +15,7 @@ require_once $CFG->dirroot . '/course/lib.php';
 $courseIcon = course_get_icon($course->id);
 
 echo $OUTPUT->header();
-echo $hwblock->display->tabs();
+echo $hwblock->display->tabs(false, false, false, $group->id);
 
 $mode = $hwblock->mode();
 

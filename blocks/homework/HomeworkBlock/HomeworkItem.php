@@ -46,6 +46,13 @@ class HomeworkItem
 		return $DB->update_record('block_homework', $this->row);
 	}
 
+	public function groupName()
+	{
+		global $DB;
+		$group = $DB->get_record('groups', array('id' => $this->row->groupid));
+		return $group->name;
+	}
+
 	public function addAssignedDate($date)
 	{
 		global $DB;

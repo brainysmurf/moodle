@@ -26,6 +26,16 @@ switch ($hwblock->mode()) {
 
 	case 'pastoral':
 
+		/**
+		 * Show all classes in the school
+		 */
+		echo '<h2><i class="icon-magic"></i> All Classes</h2>';
+
+		//TODO: Where can this list come from?
+		$classes = array();
+
+		echo $hwblock->display->classList($classes);
+
 		break;
 }
 

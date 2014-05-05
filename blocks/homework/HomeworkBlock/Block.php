@@ -59,6 +59,7 @@ class Block
 		}
 
 		$possibleModes = $this->possibleModes();
+		$SESSION->homeworkBlockMode = $possibleModes[0];
 		return $possibleModes[0];
 	}
 
@@ -67,25 +68,24 @@ class Block
 	 */
 	public function possibleModes()
 	{
-		// The is_student() etc functions come from here:
 		global $CFG;
+		// The is_student() etc functions come from this file:
 		require_once $CFG->dirroot . '/local/dnet_common/sharedlib.php';
 
-		if (\is_student()) {
+		if (\is_admin()) {
+			return array('pastoral');
+		} elseif (\is_student()) {
 			return array('student');
 		} elseif (\is_parent()) {
 			return array('parent');
 		} elseif (\is_teacher()) {
 			return array('teacher', 'pastoral');
-			return 'teacher';
-		} elseif (\is_admin()) {
-			return array('teacher', 'pastoral');
 		} elseif (\is_secretary()) {
-			return array('teacher', 'pastoral');
+			return array('pastoral');
 		}
 
 		// Shouldn't get to here, but just in case...
-		return array('guest');
+		return array('pastoral');
 	}
 
 
@@ -306,5 +306,87 @@ class Block
 		}
 
 		return $return;
+	}
+
+
+	/**
+	 * Getting courses a user is in
+	 */
+
+	/**
+	 * Returns every teaching and learning course
+	 */
+	public function getAllCourses()
+	{
+		global $DB;
+		$sql = 'SELECT
+			crs.id,
+			crs.fullname
+		FROM {course} crs
+		LEFT JOIN {context} ct ON ct.instanceid = crs.id AND ct.contextlevel = 50
+		WHERE
+			ct.path LIKE \'/1/6156/%\'
+			';
+
+		$sql .= 'ORDER BY crs.fullname';
+		$values = array();
+		return $DB->get_records_sql($sql, $values);
+	}
+
+	/**
+	 * Returns all courses in the Teaching & Learning category the user is enrolled in
+	 * Not actually used now. It looks up the classes from the timetable profile field instead
+	 */
+	public function getUsersCourses($userid, $roleid = null)
+	{
+		global $DB;
+
+		$values = array(
+			$userid
+		);
+
+		$sql = 'SELECT
+			crs.id,
+			crs.fullname
+		FROM {role_assignments} ra
+		JOIN {context} ct ON ct.id = ra.contextid
+		JOIN {course} crs ON crs.id = ct.instanceid
+		WHERE
+			ra.userid = ?
+			AND
+			ct.path LIKE \'/1/6156/%\'
+			';
+
+		if (!is_null($roleid)) {
+			$sql .= ' AND ra.roleid = ? ';
+			$values[] = $roleid;
+		}
+
+		$sql .= 'ORDER BY crs.fullname';
+
+		return $DB->get_records_sql($sql, $values);
+	}
+
+	/**
+	 * Returns all course IDs that the user is enrolled in
+	 */
+	public function getUsersCourseIDs($userid, $roleid = null)
+	{
+		$courses = $this->getUsersCourses($userid, $roleid);
+		$ids = array();
+		foreach ($courses as $course) {
+			$ids[] = intval($course->id);
+		}
+		return $ids;
+	}
+
+	public function getUsersTaughtCourses($userid)
+	{
+		return $this->getUsersCourses($userid, 3);
+	}
+
+	public function getUsersTaughtCourseIDs($userid)
+	{
+		return $this->getUsersCourseIDs($userid, 3);
 	}
 }

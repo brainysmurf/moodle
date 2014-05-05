@@ -2,6 +2,8 @@
 
 /**
  * Display a list of the courses the user is enrolled in
+ * It is preferable to use the classes.php page which shows groups instead.
+ * This is just here in case it's needed someday
  */
 
 require 'include/header.php';
@@ -10,36 +12,33 @@ echo $OUTPUT->header();
 echo $hwblock->display->tabs('courses');
 
 switch ($hwblock->mode()) {
+
 	case 'student':
-
-		/**
-		 * Show the timetable view of the student's homework due in the next 2 weeks
-		 */
-
-		//TODO: Change to new timetable courses instead of everything?
+	case 'parent':
 
 		echo '<h2><i class="icon-magic"></i> My Courses</h2>';
-		$courses = $hwblock->getUsersCourses($USER->id);
-		echo $hwblock->display->courseList($courses, $USER->id);
+		$courses = $hwblock->getUsersCourses($hwblock->userID());
+		echo $hwblock->display->courseList($courses);
 
 		break;
 
 	case 'teacher':
 
-		//TODO: Change to new timetable courses instead of everything?
-
-		echo '<h2><i class="icon-magic"></i> Classes I Teach</h2>';
+		echo '<h2><i class="icon-magic"></i> Courses I Teach</h2>';
 		$teacherRoleID = 3;
-		$courses = $hwblock->getUsersCourses($USER->id, $teacherRoleID);
+		$courses = $hwblock->getUsersCourses($hwblock->userID(), $teacherRoleID);
 		echo $hwblock->display->courseList($courses);
 
 		break;
 
-	case 'parent':
-
-		break;
-
 	case 'pastoral':
+
+		 // Show all courses in the school
+		echo '<h2><i class="icon-magic"></i> All Courses</h2>';
+
+		$courses = $hwblock->getAllCourses();
+
+		echo $hwblock->display->courseList($courses);
 
 		break;
 }

@@ -1,6 +1,14 @@
 <?php
 	// Get all the user's classes
 	$groups = $hwblock->getUsersGroups($USER->id);
+
+	$selectedCourseID = '';
+	$selectedGroupID = '';
+	if (isset($editItem)) {
+		$selectedGroupID = $editItem->groupid;
+	} elseif ($_GET['groupid']) {
+		$selectedGroupID = $_GET['groupid'];
+	}
 ?>
 
 <div class="alert alert-info"><i class="icon-info-sign"></i> As a student, any homework you add will be visible to the entire class. But it must be approved by a teacher.</div>
@@ -12,7 +20,6 @@
 	<?php } ?>
 
 	<input type="hidden" name="action" value="<?=(FORMACTION == 'edit' ? 'saveedit' : 'save')?>" />
-	<input type="hidden" name="courseid" value="<?=(FORMACTION == 'edit' ? $editItem->courseid : '')?>" />
 
 	<div class="form-group">
 		<label for="assigned" class="col-md-3 control-label">Class <i class="icon-magic"></i></label>
@@ -20,30 +27,27 @@
 			<select name="groupid" class="form-control" id="groupIDSelelect">
 				<option value="">Please select...</option>
 			<?php
-
-				$selectedGroupID = '';
-				if (isset($editItem)) {
-					$selectedGroupID = $editItem->groupid;
+			foreach ($groups as $courseID => $enrollment) {
+				foreach ($enrollment['groups'] as $groupID => $group) {
+					// TODO: Ability to pass courseid in the URL and select the first group in the course
+					//(isset($courseid) && $course->id == $courseid ? 'selected': '')
+					echo '<option value="' . $groupID . '" data-courseid="' . $courseID . '" ' . ($groupID == $selectedGroupID ? 'selected' : '') . '>';
+						echo $enrollment['course']->fullname;
+						if (trim($group['teacher'])) {
+							echo ' (' . $group['teacher'] . '\'s Class)';
+						} else {
+							echo ' (' . $group['name'] . ')';
+						}
+						if ($groupID == $selectedGroupID) {
+							$selectedCourseID = $courseID;
+						}
+					echo '</option>';
 				}
-
-				foreach ($groups as $courseID => $enrollment) {
-
-					foreach ($enrollment['groups'] as $groupID => $group) {
-						// TODO: Ability to pass courseid in the URL and select the first group in the course
-						//(isset($courseid) && $course->id == $courseid ? 'selected': '')
-						echo '<option value="' . $groupID . '" data-courseid="' . $courseID . '" ' . ($groupID == $selectedGroupID ? 'selected' : '') . '>';
-							echo $enrollment['course']->fullname;
-							if (trim($group['teacher'])) {
-								echo ' (' . $group['teacher'] . '\'s Class)';
-							} else {
-								echo ' (' . $group['name'] . ')';
-							}
-						echo '</option>';
-					}
-				}
-
+			}
 			?>
 			</select>
+			<input type="hidden" name="courseid" value="<?=(FORMACTION == 'edit' ? $editItem->courseid : $selectedCourseID)?>" />
+
 		</div>
 	</div>
 

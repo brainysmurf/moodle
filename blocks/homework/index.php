@@ -13,6 +13,7 @@ echo $hwblock->display->tabs('index');
 
 switch ($hwblock->mode()) {
 
+	case 'pastoral-student':
 	case 'student':
 	case 'parent':
 
@@ -56,6 +57,13 @@ switch ($hwblock->mode()) {
 
 		// Show the list
 		echo $hwblock->display->homeworkList($homework);
+
+		break;
+
+	case 'pastoral':
+
+		//TODO: What should pastroal mode show on the from page. Some stats maybe?
+		echo 'Hello.';
 
 		break;
 }
