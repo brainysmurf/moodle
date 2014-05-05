@@ -120,5 +120,4 @@ class SSIS
 			return $DB->insert_record('user_activity_bus', $row);
 		}
 	}
-
 }

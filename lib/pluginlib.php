@@ -1178,6 +1178,18 @@ class available_update_checker {
      */
     protected function get_response() {
         global $CFG;
+
+        // If $CFG->fakeupdatecheck is set, don't actually send a request, just pretend there's no updates
+        if (!empty($CFG->fakeupdatecheck)) {
+        	$response = array(
+			'status' => 'OK',
+			'apiver' => '1.2',
+			'forbranch' => moodle_major_version(true),
+			'updates' => array()
+		);
+        	return $response;
+        }
+
         require_once($CFG->libdir.'/filelib.php');
 
         $curl = new curl(array('proxy' => true));
