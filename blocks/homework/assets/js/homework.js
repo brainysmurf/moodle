@@ -1,0 +1,285 @@
+$.localScroll({
+	duration:500,
+	hash:true,
+	offset:{top:-50}
+});
+
+function nl2br(str, is_xhtml) {
+    var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';
+    return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
+}
+
+$(document).on('click', '.approveHomeworkButton', function(e){
+	e.preventDefault();
+
+	var btn = $(this);
+	if (btn.hasClass('loading')) {
+		return false;
+	}
+
+	var hw = btn.closest('.homework');
+	var id = hw.attr('data-id');
+
+	btn.addClass('loading');
+	btn.children('i').removeClass().addClass('icon-spinner icon-spin');
+
+	$.post('/blocks/homework/ajax/manage.php', {homeworkid:id, action:'approve'}, function(res){
+
+		btn.removeClass('loading');
+		btn.children('i').removeClass().addClass('icon-ok');
+
+		if (res.success) {
+			hw.slideUp();
+		} else {
+			alert("Unable to approve.");
+		}
+
+	});
+});
+
+$(document).on('click', '.editHomeworkButton', function(e){
+
+	e.preventDefault();
+
+	var hw = $(this).closest('.homework');
+
+	var desc = hw.find('p');
+	var text = desc.text();
+	var textarea = $('<textarea/>').val(text);
+
+	hw.data('originalText', desc.html());
+
+	desc.replaceWith(textarea);
+
+	hw.find('.approveHomeworkButton, .editHomeworkButton, .deleteHomeworkButton').hide();
+	hw.find('.deleteHomeworkButton').after('<a class="saveEditHomeworkButton btn btn-success"><i class="icon-save"></i> Save</a><a class="cancelEditHomeworkButton btn btn-danger"><i class="icon-remove"></i> Cancel Changes</a>');
+
+});
+
+$(document).on('click', '.cancelEditHomeworkButton', function(e){
+	e.preventDefault();
+	var hw = $(this).closest('.homework');
+	closeHomeworkEditing(hw, true);
+});
+
+$(document).on('click', '.saveEditHomeworkButton', function(e){
+	e.preventDefault();
+	var hw = $(this).closest('.homework');
+
+	e.preventDefault();
+
+	var btn = $(this);
+	if (btn.hasClass('loading')) {
+		return false;
+	}
+
+	var hw = btn.closest('.homework');
+	var id = hw.attr('data-id');
+
+	btn.addClass('loading');
+	btn.children('i').removeClass().addClass('icon-spinner icon-spin');
+
+	var text = hw.find('textarea').val();
+
+	$.post('/blocks/homework/ajax/manage.php', {homeworkid:id, action:'edit', description:text}, function(res){
+
+		btn.removeClass('loading');
+		btn.children('i').removeClass().addClass('icon-save');
+
+		if (res.success) {
+			closeHomeworkEditing(hw, false);
+		} else {
+			alert("Unable to save.");
+		}
+
+	});
+
+});
+
+function closeHomeworkEditing(hw, reset) {
+	var textarea = hw.find('textarea');
+
+	var p = $('<p/>');
+
+	if (reset) {
+		// Put the original text back
+		p.html(hw.data('originalText'));
+	} else {
+		// Use the new text
+		var text = textarea.val();
+		p.text(text);
+		p.html(nl2br(p.html()));
+	}
+
+	textarea.replaceWith(p);
+	hw.find('.approveHomeworkButton, .editHomeworkButton, .deleteHomeworkButton').show();
+	hw.find('.cancelEditHomeworkButton, .saveEditHomeworkButton').remove();
+}
+
+$(document).on('click', '.deleteHomeworkButton', function(e){
+	e.preventDefault();
+	var btn = $(this);
+	if (btn.hasClass('loading')) {
+		return false;
+	}
+
+	var hw = btn.closest('.homework');
+	var id = hw.attr('data-id');
+
+	if (!confirm("Are you sure you want to delete this?")) {
+		return false;
+	}
+
+	btn.addClass('loading');
+	btn.children('i').removeClass().addClass('icon-spinner icon-spin');
+
+	$.post('/blocks/homework/ajax/manage.php', {homeworkid:id, action:'delete'}, function(res){
+
+		btn.removeClass('loading');
+		btn.children('i').removeClass().addClass('icon-trash');
+
+		if (res.success) {
+			hw.slideUp();
+		} else {
+			alert("Unable to delete.");
+		}
+	});
+});
+
+
+/**
+* Add homework form
+*/
+function ensureFieldHasValue(field, errorText)
+{
+	var value = field.val();
+	if (value) {
+		return true;
+	}
+	field.closest('.form-group').addClass('has-error');
+	field.after('<p class="help-block error">' + errorText + '</p>');
+	return false;
+}
+
+$(document).on('change', '.addHomeworkForm select[name=groupid]', function(){
+	var option = $(this).find(':selected');
+	var courseID = $(option).attr('data-courseid');
+	$(this).closest('.addHomeworkForm').find('input[name=courseid]').val(courseID);
+});
+
+$(document).on('submit', '.addHomeworkForm', function(e){
+
+	$(this).find('.has-error').removeClass('has-error');
+	$(this).find('.help-block.error').remove();
+	var errors = false;
+
+	if (!ensureFieldHasValue($(this).find('select[name=groupid]'), 'Please select a course.')) {
+		errors = true;
+	}
+
+	if (!ensureFieldHasValue($(this).find('textarea[name=description]'), 'Please enter a description.')) {
+		errors = true;
+	}
+
+	if (!ensureFieldHasValue($(this).find('input[name=startdate]'), 'Please enter a start date.')) {
+		errors = true;
+	}
+
+	if (!ensureFieldHasValue($(this).find('input[name=duedate]'), 'Please enter a due date.')) {
+		errors = true;
+	}
+
+	if (!ensureFieldHasValue($(this).find('input[name=assigneddates]'), 'Please pick which days this homework is assigned for.')) {
+		errors = true;
+	}
+
+	if (errors) {
+		e.preventDefault();
+		return false;
+	}
+
+});
+
+Date.prototype.addDays = function(days) {
+    var dat = new Date(this.valueOf());
+    dat.setDate(dat.getDate() + days);
+    return dat;
+};
+
+function getDateRange(startDate, stopDate) {
+    var dateArray = [];
+    var currentDate = startDate;
+    while (currentDate <= stopDate) {
+        dateArray.push(new Date(currentDate));
+        currentDate = currentDate.addDays(1);
+    }
+    return dateArray;
+}
+
+function setPossibleDays() {
+
+	var startDate = $('input[name=startdate]').val();
+	var dueDate = $('input[name=duedate]').val();
+
+	if (!startDate || !dueDate) {
+		return false;
+	}
+
+	startDate = new Date(startDate);
+	dueDate = new Date(dueDate);
+
+	var possibleDates = getDateRange(startDate, dueDate);
+	possibleDates.pop(); //Remove the last date as it's the date it needs to be turned in
+
+	if (possibleDates.length < 2) {
+		$('#assignedDatesGroup').slideUp();
+		$('#assigneddates').val(formatDate('Y-m-d', startDate));
+		return;
+	} else {
+		$('#assignedDatesGroup').slideDown();
+	}
+
+	var div = $('#possibleDays');
+	var html = '';
+
+	var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+	for (var day in days) {
+		html += '<li><span>' + days[day] + '</span></li>';
+	}
+
+	for (var i in possibleDates) {
+		var date = possibleDates[i];
+
+		if (i === '0' && formatDate('N', date) !== '1') {
+			for (pad = 1; pad < parseInt(formatDate('N', date)); pad++) {
+				html += '<li></li>';
+			}
+		}
+
+		var selected = homeworkFormAssignedDates.indexOf(formatDate('Y-m-d', date)) != -1;
+
+		html += '<li><a class="btn btn-block ' + (selected ? 'active btn-primary' : '') + '" data-date="' + formatDate('Y-m-d', date) + '">' + formatDate('M jS', date) + '</a></li>';
+	}
+
+
+	div.html(html);
+	updateSelectedDates();
+}
+
+if (typeof(homeworkFormAssignedDates) === 'undefined') {
+	var homeworkFormAssignedDates = [];
+} else {
+	$(document).ready(setPossibleDays);
+}
+function updateSelectedDates() {
+	homeworkFormAssignedDates = [];
+	$('#possibleDays .btn.active').each(function(){
+		homeworkFormAssignedDates.push($(this).attr('data-date'));
+	});
+	$('#assigneddates').val(homeworkFormAssignedDates.join(','));
+}
+
+$(document).on('click', '#possibleDays .btn', function() {
+	$(this).toggleClass('active btn-primary');
+	updateSelectedDates();
+});
