@@ -157,8 +157,18 @@ switch ($action) {
 		break;
 }
 
+switch ($hwblock->mode()) {
+
+	case 'student': $explanation = 'You may add homework for everyone in your class, but the teacher will have to approve it before it appears on DragonNet.';
+	break;
+
+	case 'teacher': $explanation = 'You may directly add homework for every student in a class. It does not need to approved separately.';
+	break;
+}
+
 if (defined('FORMACTION')) {
-	echo '<h2><i class="icon-plus"></i> Add Homework</h2>';
+	echo $hwblock->display->sign('plus-sign', 'Add Homework', $explanation);
+	// echo '<h2><i class="icon-plus"></i> Add Homework</h2>';
 	include 'include/add_form.php';
 }
 

@@ -7,29 +7,29 @@ class Display
 	private $hwblock;
 	private $possibleTabs = array( // Array of which tabs are shown in differnet modes
 		'student' => array(
-			'index' => array('index.php', 'To Do'),
-			'classes' => array('classes.php', 'By Class'),
-			'history' => array('history.php', 'History'),
-			'add' => array('add.php', 'Add Homework'),
+			'index' => array('index.php', '<i class="icon-tasks"></i> To Do'),
+			'classes' => array('classes.php', '<i class="icon-list-ul"></i> By Class'),
+			'history' => array('history.php', '<i class="icon-list-alt"></i> History'),
+			'add' => array('add.php', '<i class="icon-plus-sign"></i> Add Homework'),
 		),
 		'pastoral-student' => array( // When a pastoral user clicks on a student (same as parent mode)
-			'index' => array('index.php', 'To Do'),
-			'classes' => array('classes.php', 'By Class'),
-			'history' => array('history.php', 'History'),
+			'index' => array('index.php', '<i class="icon-tasks"></i> To Do'),
+			'classes' => array('classes.php', '<i class="icon-list-ul"></i> By Class'),
+			'history' => array('history.php', '<i class="icon-list-alt"></i> History'),
 		),
 		'teacher' => array(
-			'index' => array('index.php', 'Pending Submissions'),
-			'classes' => array('classes.php', 'By Class'),
-			'history' => array('history.php', 'History'),
-			'add' => array('add.php', 'Add Homework'),
+			'index' => array('index.php', '<i class="icon-check"></i> Pending Submissions'),
+			'classes' => array('classes.php', '<i class="icon-list-ul"></i> By Class'),
+			'history' => array('history.php', '<i class="icon-list-alt"></i> History'),
+			'add' => array('add.php', '<i class="icon-plus-sign"></i> Add Homework'),
 		),
 		'parent' => array(
-			'index' => array('index.php', 'To Do'),
-			'classes' => array('classes.php', 'By Class'),
-			'history' => array('history.php', 'History'),
+			'index' => array('index.php', '<i class="icon-tasks"></i> To Do'),
+			'classes' => array('classes.php', '<i class="icon-list-ul"></i> By Class'),
+			'history' => array('history.php', '<i class="icon-list-alt"></i> History'),
 		),
 		'pastoral' => array(
-			'index' => array('index.php', 'Home'),
+			'index' => array('index.php', '<i class="icon-home"></i> Home'),
 			'classes' => array('classes.php', 'Classes'),
 			'courses' => array('courses.php', 'Courses'),
 			'grades' => array('grades.php', 'Grades'),
@@ -51,8 +51,8 @@ class Display
 		$modeLabels = array(
 			'student' => 'Student Mode',
 			'parent' => 'Parent Mode',
-			'teacher' => 'Teacher Mode',
-			'pastoral' => 'Pastoral Mode',
+			'teacher' => '<i class="icon-magic"></i> Teacher Mode',
+			'pastoral' => '<i class="icon-heart"></i> Pastoral Mode',
 		);
 
 		if ($currentMode == 'pastoral-student') {
@@ -227,10 +227,15 @@ class Display
 						$r .= '<i class="icon-' . $icon . '"></i> ';
 					}
 					$r .= $enrollment['course']->fullname;
-					if (trim($group['teacher'])) {
-						$r .= '<span>' . $group['teacher'] . '\'s Class</span>';
-					} else {
-						$r .= '<span>' . $group['name'] . '</span>';
+
+					echo $this->hwblock->mode;
+
+					if ($this->hwblock->mode == 'teacher') {
+						if (trim($group['teacher'])) {
+							$r .= '<span>' . $group['teacher'] . '\'s Class</span>';
+						} else {
+							$r .= '<span>' . $group['name'] . '</span>';
+						}
 					}
 				$r .= '</a></div>';
 			}
@@ -287,6 +292,16 @@ class Display
 		$r .= '<div class="clear"></div>';
 		$r .= '</div>';
 		return $r;
+	}
+
+	/**
+	Returns HTML for a dragonnet-like explanation
+	**/
+	public function sign($icon, $big_text, $little_text)
+	{
+	    return '<div class="alert alert-info">
+	    <i class="icon-4x icon-'.$icon.' pull-left"></i>
+	    <p style="font-size:18px;font-weight:bold;">'.$big_text.'</p>'.$little_text.'</div>';
 	}
 
 

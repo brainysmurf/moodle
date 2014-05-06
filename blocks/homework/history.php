@@ -14,7 +14,9 @@ switch ($hwblock->mode()) {
 	case 'parent':
 	case 'teacher':
 
-		echo '<h2><i class="icon-time"></i>  All Homework, Sorted By Due Date (Latest At The Top)</h2>';
+
+		echo $hwblock->display->sign('list-alt', 'History', 'All Homework, Sorted By Due Date (Latest At The Top)');
+		// echo '<h2><i class="icon-time"></i>  All Homework, Sorted By Due Date (Latest At The Top)</h2>';
 
 
 		// Get the user's group (class) IDs

@@ -21,6 +21,8 @@ switch ($hwblock->mode()) {
 		 * Show the timetable view of the student's homework due in the next 2 weeks
 		 */
 
+		echo $hwblock->display->sign('tasks', 'To Do', 'This page presents a two-week overview of your homework.');
+
 		// Get the user's group (class) IDs
 		$groupIDs = $hwblock->getUsersGroupIDs($hwblock->userID());
 
@@ -44,8 +46,9 @@ switch ($hwblock->mode()) {
 		 * Pending homework approval page
 		 */
 
-		echo '<h2><i class="icon-pause"></i> Pending Homework</h2>';
-		echo '<p>This section shows homework that a students in your classes have submitted. Other students will <strong>not</strong> see these until approved by you.</p>';
+		echo $hwblock->display->sign('check', 'Pending Submissions', 'This section shows homework that a students in your classes have submitted. Other students will NOT see these until approved by you.');
+		// echo '<h2><i class="icon-list"></i> Pending Homework</h2>';
+		// echo '<p>This section shows homework that a students in your classes have submitted. Other students will <strong>not</strong> see these until approved by you.</p>';
 
 		// Get the user's group (class) IDs
 		$groupIDs = $hwblock->getUsersGroupIDs($hwblock->userID());
@@ -63,7 +66,7 @@ switch ($hwblock->mode()) {
 	case 'pastoral':
 
 		//TODO: What should pastroal mode show on the from page. Some stats maybe?
-		echo 'Hello.';
+		echo 'This area is still under development.';
 
 		break;
 }

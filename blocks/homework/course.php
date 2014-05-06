@@ -27,7 +27,7 @@ echo '<h2>' . $course->fullname . '</h2>';
 
 if ($mode == 'teacher' || $mode == 'pastoral') {
 	$pendingHomework = $hwblock->getHomework(false, array($course->id), false, false);
-	echo '<h3><i class="icon-pause"></i> Pending Homework For This Course</h3>';
+	echo '<h3><i class="icon-list"></i> Pending Homework For This Course</h3>';
 	echo $hwblock->display->homeworkList($pendingHomework, false, false, false, true);
 }
 

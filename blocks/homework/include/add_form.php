@@ -11,8 +11,6 @@
 	}
 ?>
 
-<div class="alert alert-info"><i class="icon-info-sign"></i> As a student, any homework you add will be visible to the entire class. But it must be approved by a teacher.</div>
-
 <form class="form form-horizontal addHomeworkForm" role="form" method="post">
 
 	<?php if (FORMACTION == 'edit') { ?>
