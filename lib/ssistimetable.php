@@ -69,6 +69,9 @@ class Timetable
 
 			foreach ($groups as $groupName) {
 
+				//Until new groups are added
+				$groupName = rtrim($groupName, '-abc');
+
 				// Load the group info
 				$group = $DB->get_record('groups', array('name' => $groupName), 'id, name');
 
