@@ -115,7 +115,7 @@
 		<label for="duration" class="col-md-3 control-label">Duration <i class="icon-time"></i></label>
 		<div class="col-md-9">
 			<p class="help-block">How long should students spend on the task on each assigned day? Drag the two ends of the slider to change.</p>
-			<input type="hidden" name="duration" class="form-control" value="<?=(FORMACTION == 'edit' ? $editItem->duration : '')?>" />
+			<input type="hidden" name="duration" class="form-control" value="" />
 			<span class="help-text" id="duration-help"></span>
 			<div id="duration-slider"></div>
 
@@ -148,18 +148,30 @@
 
 					$('input[name=duration]').val(min + '-' + max);
 				}
-				setDuration(0, 30);
+
+				<?php
+					if (FORMACTION == 'edit') {
+						$duration = explode('-', $editItem->duration);
+						$initialMinDuration = $duration[0];
+						$initialMaxDuration = $duration[1];
+					} else {
+						$initialMinDuration = 0;
+						$initialMaxDuration = 30;
+					}
+				?>
 
 				$('#duration-slider').slider({
 					range: true,
 					min: 0,
 					step: 15,
 					max: 180,
-					values: [0, 30],
+					values: [<?=$initialMinDuration?>, <?=$initialMaxDuration?>],
 					slide: function(event, ui) {
 						setDuration(ui.values[0], ui.values[1]);
 					}
 				});
+
+				setDuration(<?=$initialMinDuration?>, <?=$initialMaxDuration?>);
 			});
 			</script>
 		</div>

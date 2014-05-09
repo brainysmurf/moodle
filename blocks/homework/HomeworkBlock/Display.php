@@ -295,13 +295,15 @@ class Display
 	}
 
 	/**
-	Returns HTML for a dragonnet-like explanation
-	**/
-	public function sign($icon, $big_text, $little_text)
+	* Returns HTML for a dragonnet-like explanation
+	*/
+	public function sign($icon, $bigText, $littleText)
 	{
 	    return '<div class="alert alert-info">
-	    <i class="icon-4x icon-'.$icon.' pull-left"></i>
-	    <p style="font-size:18px;font-weight:bold;">'.$big_text.'</p>'.$little_text.'</div>';
+	    		<i class="icon-4x icon-' . $icon . ' pull-left"></i>
+	    		<h4>' . $bigText . '</h4>
+	    		<p>' . $littleText . '</p>
+	    	</div>';
 	}
 
 
