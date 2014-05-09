@@ -427,6 +427,8 @@ class Display
 
 	private function showDuration($duration)
 	{
+		$r .= '';
+
 		list($min, $max) = explode('-', $duration);
 
 		if ($min == 0 && $max) {
