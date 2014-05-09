@@ -199,12 +199,16 @@ h3 {
 	font-size:20px;
 }
 
+.assignedDatesJSON {
+	display:none;
+}
+
 .homeworkList {
 	list-style:none;
 	margin:0 0 90px 0;
 	padding:0;
 }
-	.homeworkList li {
+	.homework {
 		display:block;
 		padding:15px;
 		margin-bottom:15px;
@@ -214,24 +218,24 @@ h3 {
 		-moz-border-radius:3px;
 		border-radius:3px;
 	}
-		.homeworkList li:last-child {
+		.homework:last-child {
 			margin-bottom:0;
 		}
 
-		.homeworkList li:nth-child(even) {
+		.homework:nth-child(even) {
 			background:rgba(22,98,163,.1);
 		}
 
-		.homeworkList li.past {
+		.homework.past {
 			background:rgba(223, 240, 216, 1);
 		}
 
-		.homeworkList li.unapproved {
+		.homework.unapproved {
 			background:#fcf8e3;
 			border-color: #faebcc;
 		}
 
-		.homeworkList textarea {
+		.homework textarea {
 			display: block;
 			width: 100%;
 			-webkit-box-sizing: border-box;
@@ -332,6 +336,15 @@ h3 {
 	.homeworkList h5.dates {
 		float:right;
 	}
+		/* When you click on '2 more dates...' and the list of assigned dates is expanded */
+		.homework .assignedDates {
+			margin:0;
+			list-style:none;
+			text-align:right;
+		}
+			.homework .assignedDates li {
+				margin-bottom: 2px;
+			}
 
 	#duration-slider {
 		margin-left: 15px;

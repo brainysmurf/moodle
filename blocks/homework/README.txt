@@ -9,8 +9,5 @@ To Do:
 	Ability to put links to upload/submission/some resource on DragonNet in the description
 
 Bugs:
-	Teacher editing page says "as a student"
-	When editing, duration slider is wrong.
 	After saving edits, add homework tab is highlighted when it shouldn't be
-	http://ctrlv.in/327589
 

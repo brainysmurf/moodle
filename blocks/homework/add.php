@@ -157,18 +157,22 @@ switch ($action) {
 		break;
 }
 
-switch ($hwblock->mode()) {
-
-	case 'student': $explanation = 'You may add homework for everyone in your class, but the teacher will have to approve it before it appears on DragonNet.';
-	break;
-
-	case 'teacher': $explanation = 'You may directly add homework for every student in a class. It does not need to approved separately.';
-	break;
-}
-
 if (defined('FORMACTION')) {
-	echo $hwblock->display->sign('plus-sign', 'Add Homework', $explanation);
-	// echo '<h2><i class="icon-plus"></i> Add Homework</h2>';
+
+	if (FORMACTION === 'edit') {
+
+		echo $hwblock->display->sign('edit-sign', 'Edit Homework', 'Click the Submit button at the bottom to save your changes.');
+
+	} else if (FORMACTION === 'add' && $mode == 'student') {
+
+		echo $hwblock->display->sign('plus-sign', 'Add Homework', 'You may add homework for everyone in your class, but the teacher will have to approve it before it appears on DragonNet.');
+
+	} else if (FORMACTION === 'add' && $mode == 'teacher') {
+
+		echo $hwblock->display->sign('play-sign', 'Add Homework', 'You may directly add homework for every student in a class. It does not need to approved separately.');
+
+	}
+
 	include 'include/add_form.php';
 }
 

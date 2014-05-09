@@ -1,3 +1,6 @@
+/**
+ * Setup smooth scrolling internal links
+ */
 $.localScroll({
 	duration:500,
 	hash:true,
@@ -8,6 +11,39 @@ function nl2br(str, is_xhtml) {
     var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';
     return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
 }
+
+
+/**
+ * Show all assigned dates when the list has been limited to 2
+ */
+$(document).on('click', '.showAllHomeworkDates', function(e){
+	e.preventDefault();
+
+	// Get the hidden json
+	var item = $(this).closest('.homework');
+	var json = item.find('.assignedDatesJSON').text();
+	var dates = $.parseJSON(json);
+
+	var duedate = item.attr('data-duedate');
+
+	var ul = '<ul class="assignedDates">';
+
+		ul += '<li><i class="icon-pushpin"></i> <strong>To do on...</strong></li>';
+
+		for (var i in dates) {
+			var date = dates[i];
+			ul += '<li>' + formatDate('D M jS', new Date(date)) + '</li>';
+		}
+
+		ul += '<li><i class="icon-bell"></i> <strong>Due on...</strong></li>';
+		ul += '<li>' + formatDate('D M jS', new Date(duedate)) + '</li>';
+
+	ul += '</ul>';
+
+	item.find('.dates').html(ul);
+
+});
+
 
 $(document).on('click', '.approveHomeworkButton', function(e){
 	e.preventDefault();
@@ -37,6 +73,11 @@ $(document).on('click', '.approveHomeworkButton', function(e){
 	});
 });
 
+
+/**
+ * Editing homework descriptions inline - no longer used and a bit broken now because the 'you should spend' text is inside the <p> with the description
+ */
+/*
 $(document).on('click', '.editHomeworkButton', function(e){
 
 	e.preventDefault();
@@ -114,7 +155,7 @@ function closeHomeworkEditing(hw, reset) {
 	textarea.replaceWith(p);
 	hw.find('.approveHomeworkButton, .editHomeworkButton, .deleteHomeworkButton').show();
 	hw.find('.cancelEditHomeworkButton, .saveEditHomeworkButton').remove();
-}
+} */
 
 $(document).on('click', '.deleteHomeworkButton', function(e){
 	e.preventDefault();

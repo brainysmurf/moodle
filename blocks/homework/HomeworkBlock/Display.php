@@ -310,41 +310,48 @@ class Display
 	/**
 	 * Returns HTML to display a list of homework to do,
 	 * optionally organised with headings for a certain field
+	 *
+	 * @param headingsForField 	Watch this field in each homework item, if the contents of this field is not the same as the last one, a new header will be shown. This should be a field containing a date that can be parsed by strtotime()
+	 * @param headingPrefix	Show this text before each heading
+	 * @param headingDateFormat	The format to show the date from the headingsForField field
+	 * @param showClassName	true or false to show the class (group) name each item is assigned in
 	 */
-	public function homeworkList($homework, $headingsForField = false, $headingPrefix = false, $headingDateFormat = 'l M jS Y', $showClassName = false)
-	{
+	public function homeworkList(
+		$homework,
+		$headingsForField = false,
+		$headingPrefix = false,
+		$headingDateFormat = 'l M jS Y',
+		$showClassName = false,
+		$showAssignedDates = false
+	) {
 		if (count($homework) < 1) {
 			return '<div class="nothing">
 				<i class="icon-smile"></i> Nothing to show here.
 			</div>';
 		}
 
-		$lastHeadingFieldValue = 0;
-		$inList = false;
-		$r = '<div class="homeworkListContainer">';
+		$r = '<div class="homeworkListContainer">'; //container
 
-		if (!$headingsForField) {
-			#$r .= '<div>';
+		if ($headingsForField) {
+			$inList = false;
+			$lastHeadingFieldValue = 0;
+		} else {
+			// If the headingsForField headings are NOT used, start the list here
 			$r .= '<ul class="homeworkList">';
 			$inList = true;
 		}
 
 		foreach ($homework as $hw) {
 
+			// If the headingsForField headers are used, check if it's time for a new heading and start a new list
 			if ($headingsForField && $hw->{$headingsForField} != $lastHeadingFieldValue) {
 
 				if ($inList) {
 					$r .= '</ul>';
-					#$r .= '</div>';
-					#$r .= '<hr />';
 				}
 
-				#$r .= '<div>';
-
 				$r .= '<h3 id="' . $hw->{$headingsForField} . '">';
-					#$r .= '<a href="day.php?date=' . date('Y-m-d', strtotime($hw->{$headingsForField})) . '">';
-						$r .= $headingPrefix . date($headingDateFormat, strtotime($hw->{$headingsForField}));
-					#$r .= '</a>';
+					$r .= $headingPrefix . date($headingDateFormat, strtotime($hw->{$headingsForField}));
 				$r .= '</h3>';
 
 				$r .= '<ul class="homeworkList">';
@@ -352,13 +359,11 @@ class Display
 				$lastHeadingFieldValue = $hw->{$headingsForField};
 			}
 
-			$r .= $this->homeworkItem($hw, $showClassName);
+			$r .= $this->homeworkItem($hw, $showClassName, $showAssignedDates);
 		}
 
-		$r .= '</ul>';
-		#$r .= '</div>';
-
-		$r .= '</div>';
+		$r .= '</ul>'; // end list
+		$r .= '</div>'; // end container
 
 		return $r;
 	}
@@ -366,12 +371,15 @@ class Display
 	/**
 	 * Returns the HTML to display a single homework item
 	 */
-	private function homeworkItem($hw, $showClassName = false)
+	private function homeworkItem($hw, $showClassName = false, $showAssignedDates = false)
 	{
+		// Should we show the edit / delete buttons?
 		$canEdit = $this->hwblock->canApproveHomework($hw->courseid);
+
+		// Is this due in the past?
 		$past = $hw->duedate < $this->hwblock->today;
 
-		$r  = '<li class="homework ' . ($hw->approved ? 'approved' : 'unapproved') . ($canEdit ? ' canedit' : '') . ($past ? ' past' : '') . '" data-id="' . $hw->id . '">';
+		$r  = '<li class="homework ' . ($hw->approved ? 'approved' : 'unapproved') . ($canEdit ? ' canedit' : '') . ($past ? ' past' : '') . '" data-id="' . $hw->id . '" data-duedate="'. $hw->duedate . '">';
 
 		if (!$hw->approved) {
 			$r .= '<span class="approvalButtons">';
@@ -385,7 +393,6 @@ class Display
 		// Edit buttons
 		if ($canEdit) {
 			$r .= '<span class="editButtons">';
-				#$r .= '<a class="editHomeworkButton btn-mini btn btn-info" href="#" title="Edit"><i class="icon-pencil"></i> Edit</a>';
 				$r .= '<a class="btn-mini btn btn-info" href="add.php?action=edit&editid=' . $hw->id . '" title="Edit"><i class="icon-pencil"></i> Edit</a>';
 				$r .= '<a class="deleteHomeworkButton btn-mini btn btn-danger" href="#" title="Delete"><i class="icon-trash"></i> Delete</a>';
 			$r .= '</span>';
@@ -394,37 +401,74 @@ class Display
 		$icon = course_get_icon($hw->courseid);
 		$r .= '<h5 class="dates">';
 
-			$assignedDates = $hw->getAssignedDates();
-
-			#$r .= '<i class="icon-calendar"></i> Set ' . date('D M jS', strtotime($hw->startdate));
-			#$r .= ' &nbsp; <i class="icon-arrow-right"></i> &nbsp; ';
-			#$r .= 'Do this on ';
-
-			$assigned = '';
-			foreach ($assignedDates as $date) {
-				 $assigned .= '' . date('D M jS', strtotime($date)) . ' &nbsp; <i class="icon-plus"></i>  &nbsp; ';
+			// List of assigned dates
+			if ($showAssignedDates) {
+				$r .= $this->showAssignedDates($hw->getAssignedDates());
+				$r .= ' &nbsp; <i class="icon-arrow-right"></i> &nbsp; ';
 			}
-			$r .= rtrim($assigned, '  &nbsp; <i class="icon-plus"></i>  &nbsp; ');
 
-			$r .= ' &nbsp; <i class="icon-arrow-right"></i> &nbsp; ';
-			$r .= '<i class="icon-bell"></i> Due on ' . date('D M jS', strtotime($hw->duedate));
+			// Due date
+			$r .= '<i class="icon-bell"></i> <strong>Due on</strong> ' . date('D M jS', strtotime($hw->duedate));
+
 		$r .= '</h5>';
 
-		#$r .= '<h4>' . ($icon ? '<i class="icon-' . $icon . '"></i> ' : '') . $hw->coursename . '</h4>';
+		// Course name with link
 		$r .= '<h4><a href="class.php?groupid=' . $hw->groupid . '">' . ($icon ? '<i class="icon-' . $icon . '"></i> ' : '') . $hw->coursename . '</a></h4>';
 
+		// Class (group) name
 		if ($showClassName) {
 			$r .= '<h4>' . $hw->groupName() . '</h4>';
 		}
 
-		$desc = htmlentities($hw->description, ENT_COMPAT, 'UTF-8', false);
-		$desc = nl2br($desc);
-		$r .= '<p>' . $desc;
-		$r .= '<span class="duration"><i class="icon-time"></i> You should spend ' . $this->showDuration($hw->duration) . ' on this.</span>';
+		// Description
+		$r .= '<p>';
+
+			$desc = htmlentities($hw->description, ENT_COMPAT, 'UTF-8', false);
+			$desc = nl2br($desc);
+			$r .= $desc;
+
+			// Duration
+			$r .= '<span class="duration"><i class="icon-time"></i> You should spend ' . $this->showDuration($hw->duration) . ' on this.</span>';
+
 		$r .= '</p>';
 
 		$r .= '</li>';
 		return $r;
+	}
+
+	private function showAssignedDates($dates)
+	{
+		$output = '<strong>To Do On</strong> &nbsp;';
+		$count = count($dates);
+
+		$joiner = ' &nbsp;<strong class="ampersand-icon">&amp;</strong>&nbsp; ';
+
+		// Show the first two dates
+		// or three if there are only three
+		// but only two if there are more than three
+		foreach ($dates as $i => $date) {
+
+			if ($i > 0) {
+				$output .= $joiner;
+			}
+
+			$output .= date('D M jS', strtotime($date));
+
+			// If there are more than 3 dates and this is the 2nd one, stop
+			if ($count > 3 && $i >= 1) {
+				break;
+			}
+		}
+
+		// Show a 'more' link if there are more than 3 dates
+		if ($count > 3) {
+			$overflow = $count - $i - 1;
+			$output .= $joiner . '<a href="#" class="showAllHomeworkDates">' . $overflow . ' more days...</a>';
+			// This is lame but how else to get the json to the page?
+			$output .= '<span class="assignedDatesJSON">' . json_encode($dates) . '</span>';
+		}
+
+		return $output;
 	}
 
 	private function showDuration($duration)
