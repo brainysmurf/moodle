@@ -72,14 +72,15 @@ class Block
 		// The is_student() etc functions come from this file:
 		require_once $CFG->dirroot . '/local/dnet_common/sharedlib.php';
 
-		if (\is_admin()) {
+
+		if (\is_teacher()) {
+			return array('teacher', 'pastoral');
+		} else if (\is_admin()) {
 			return array('pastoral');
 		} elseif (\is_student()) {
 			return array('student');
 		} elseif (\is_parent()) {
 			return array('parent');
-		} elseif (\is_teacher()) {
-			return array('teacher', 'pastoral');
 		} elseif (\is_secretary()) {
 			return array('pastoral');
 		}
