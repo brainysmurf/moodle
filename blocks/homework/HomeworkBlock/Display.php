@@ -299,7 +299,7 @@ class Display
 	*/
 	public function sign($icon, $bigText, $littleText)
 	{
-	    return '<div class="alert alert-info">
+	    return '<div class="blueAlert alert alert-info">
 	    		<i class="icon-4x icon-' . $icon . ' pull-left"></i>
 	    		<h4>' . $bigText . '</h4>
 	    		<p>' . $littleText . '</p>
