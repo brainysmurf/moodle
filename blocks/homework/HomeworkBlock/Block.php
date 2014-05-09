@@ -68,20 +68,19 @@ class Block
 	 */
 	public function possibleModes()
 	{
-		global $CFG;
+		global $CFG, $SESSION;
 		// The is_student() etc functions come from this file:
 		require_once $CFG->dirroot . '/local/dnet_common/sharedlib.php';
 
-
-		if (\is_teacher()) {
+		if ($SESSION->userIsTeacher) {
 			return array('teacher', 'pastoral');
-		} else if (\is_admin()) {
-			return array('pastoral');
-		} elseif (\is_student()) {
+		} elseif ($SESSION->userIsStudent) {
 			return array('student');
-		} elseif (\is_parent()) {
+		} elseif ($SESSION->userIsParent) {
 			return array('parent');
-		} elseif (\is_secretary()) {
+		} elseif ($SESSION->userIsSecretary) {
+			return array('pastoral');
+		} elseif (\is_admin()) {
 			return array('pastoral');
 		}
 
