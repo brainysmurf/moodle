@@ -230,7 +230,7 @@ class Display
 
 					echo $this->hwblock->mode;
 
-					if ($this->hwblock->mode == 'teacher') {
+					if ($this->hwblock->mode != 'student') {
 						if (trim($group['teacher'])) {
 							$r .= '<span>' . $group['teacher'] . '\'s Class</span>';
 						} else {

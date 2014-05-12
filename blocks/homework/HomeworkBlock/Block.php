@@ -166,6 +166,56 @@ class Block
 	}
 
 	/**
+	 * Return every group (class) in the school
+	 * TODO: This needs to come from somewhere better
+	 */
+	public function getAllGroups()
+	{
+		global $DB;
+
+		$classes = array();
+		$courses = array();
+
+		$groups = $DB->get_records('groups');
+
+		foreach ($groups as $group) {
+
+			$courseID = $group->courseid;
+
+			if (isset($courses[$courseID])) {
+				// Use the cached course
+				$course = $courses[$courseID];
+			} else {
+				// Load the course info
+				$course = $DB->get_record('course', array('id' => $courseID), 'id, fullname');
+				// Save the course info
+				// (or remember 'false' that we couldn't find this course)
+				$courses[$courseID] = $course;
+			}
+
+			if (!$course) {
+				continue;
+			}
+
+			if (!isset($classes[$course->id])) {
+				$classes[$course->id] = array();
+				$classes[$course->id]['course'] = $course;
+				$classes[$course->id]['groups'] = array();
+			}
+
+			// Get the teacher's name
+			$classes[$course->id]['groups'][$group->id] = array(
+				'id' => $group->id,
+				'name' => $group->name,
+			);
+		}
+
+		return $classes;
+	}
+
+
+
+	/**
 	 * Getting homework
 	 * @param array groupIDs (optional) Limit to homework assigned in the given groupIDs
 	 * @param array courseIDs (optional) Limit to homework assigned in the given courseIDs

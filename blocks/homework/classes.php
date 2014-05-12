@@ -31,10 +31,7 @@ switch ($hwblock->mode()) {
 		 * Show all classes in the school
 		 */
 		echo '<h2><i class="icon-group"></i> All Classes</h2>';
-
-		//TODO: Where can this list come from?
-		$classes = array();
-
+		$classes = $hwblock->getAllGroups();
 		echo $hwblock->display->classList($classes);
 
 		break;
