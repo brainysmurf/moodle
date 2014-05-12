@@ -30,10 +30,10 @@ class Display
 		),
 		'pastoral' => array(
 			'index' => array('index.php', '<i class="icon-home"></i> Home'),
-			'classes' => array('classes.php', 'Classes'),
-			'courses' => array('courses.php', 'Courses'),
-			'grades' => array('grades.php', 'Grades'),
-			'students' => array('students.php', 'Students'),
+			'classes' => array('classes.php', '<i class="icon-group"></i> Classes'),
+			'courses' => array('courses.php', '<i class="icon-magic"></i> Courses'),
+			'grades' => array('grades.php', '<i class="icon-sitemap"></i> Grades'),
+			'students' => array('students.php', '<i class="icon-user"></i> Students'),
 		),
 	);
 
