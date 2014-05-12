@@ -47,8 +47,6 @@ switch ($hwblock->mode()) {
 		 */
 
 		echo $hwblock->display->sign('check', 'Pending Submissions', 'This section shows homework that a students in your classes have submitted. Other students will NOT see these until approved by you.');
-		// echo '<h2><i class="icon-list"></i> Pending Homework</h2>';
-		// echo '<p>This section shows homework that a students in your classes have submitted. Other students will <strong>not</strong> see these until approved by you.</p>';
 
 		// Get the user's group (class) IDs
 		$groupIDs = $hwblock->getUsersGroupIDs($hwblock->userID());
@@ -59,14 +57,20 @@ switch ($hwblock->mode()) {
 		$homework = $hwblock->getHomework($groupIDs, false, false, $approved, $distinct);
 
 		// Show the list
-		echo $hwblock->display->homeworkList($homework);
+		echo $hwblock->display->homeworkList($homework, false, false, false, false, true);
 
 		break;
 
 	case 'pastoral':
 
-		//TODO: What should pastroal mode show on the from page. Some stats maybe?
-		echo 'The pastoral homework area is still under development.';
+		echo $hwblock->display->sign('calendar', 'Whole School Overview', 'This page shows all homework assigned this week.');
+
+		/**
+		 * Who school week overview
+		 */
+
+		$stats = new \SSIS\HomeworkBlock\HomeworkStats($hwblock);
+		echo $hwblock->display->weekStats($stats);
 
 		break;
 }

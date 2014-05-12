@@ -19,10 +19,11 @@ class Block
 		$this->display = new Display($this);
 
 		require __DIR__ . '/HomeworkItem.php';
+		require __DIR__ . '/HomeworkStats.php';
 	}
 
 	/**
-	 * Viewing modes
+	 * Viewing modes...
 	 */
 
 	/**
@@ -87,7 +88,6 @@ class Block
 		// Shouldn't get to here, but just in case...
 		return array('pastoral');
 	}
-
 
 	public function changeMode($newMode)
 	{
@@ -165,8 +165,6 @@ class Block
 		return array_keys($groups);
 	}
 
-
-
 	/**
 	 * Getting homework
 	 * @param array groupIDs (optional) Limit to homework assigned in the given groupIDs
@@ -187,6 +185,8 @@ class Block
 	 *                  If distinct is true, "past" means that the item's due date is in the past.
 	 *                  If distinct is false, "past" means that the assigned day is in the past.
 	 * @param string (Y-m-d)	dueDate	(optional) get only items due on a specific day (Y-m-d format)
+	 * @param string (Y-m-d)	assignedRangeStart	(optional) Get items assigned for this date and on
+	 * @param string (Y-m-d)	assignedRangeEnd	(optional) Get items assigned for this date or before
 	 */
 	public function getHomework(
 		$groupIDs = false,
@@ -196,7 +196,9 @@ class Block
 		$distinct = true,
 		$past = false,
 		$dueDate = false,
-		$order = 'days.date ASC, hw.approved ASC, hw.duedate ASC'
+		$order = null,
+		$assignedRangeStart = null,
+		$assignedRangeEnd = null
 	) {
 		global $DB;
 		$params = array();
@@ -295,6 +297,24 @@ class Block
 		}
 
 
+		if (!is_null($assignedRangeStart)) {
+			$sql .= ($where ? ' AND' : ' WHERE');
+			$where = true;
+			$sql .= ' days.date >= ?';
+			$params[] = $assignedRangeStart;
+		}
+
+		if (!is_null($assignedRangeEnd)) {
+			$sql .= ($where ? ' AND' : ' WHERE');
+			$where = true;
+			$sql .= ' days.date <= ?';
+			$params[] = $assignedRangeEnd;
+		}
+
+		if (is_null($order)) {
+			$order = 'days.date ASC, hw.approved ASC, hw.duedate ASC';
+		}
+
 		if ($order) {
 			$sql .= ' ORDER BY ' . $order;
 		}
@@ -305,12 +325,16 @@ class Block
 			$return[] = new HomeworkItem($record);
 		}
 
+		#print_object($sql);
+		#print_object($params);
+		#print_object($return);
+
 		return $return;
 	}
 
 
 	/**
-	 * Getting courses a user is in
+	 * Getting courses a user is in...
 	 */
 
 	/**
@@ -367,17 +391,22 @@ class Block
 		return $DB->get_records_sql($sql, $values);
 	}
 
+	public function coursesToIDs($courses)
+	{
+		$ids = array();
+		foreach ($courses as $course) {
+			$ids[] = intval($course->id);
+		}
+		return $ids;
+	}
+
 	/**
 	 * Returns all course IDs that the user is enrolled in
 	 */
 	public function getUsersCourseIDs($userid, $roleid = null)
 	{
 		$courses = $this->getUsersCourses($userid, $roleid);
-		$ids = array();
-		foreach ($courses as $course) {
-			$ids[] = intval($course->id);
-		}
-		return $ids;
+		return $this->coursesToIDs($courses);
 	}
 
 	public function getUsersTaughtCourses($userid)

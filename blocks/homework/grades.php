@@ -19,7 +19,7 @@ switch ($hwblock->mode()) {
 		for ($grade = 1; $grade <= 12; $grade++) {
 
 			echo '<li>';
-				echo '<a class="btn" href="#">Grade ' . $grade . '</a>';
+				echo '<a class="btn" href="grade.php?grade=' . $grade . '">Grade ' . $grade . '</a>';
 			echo '</li>';
 
 		}

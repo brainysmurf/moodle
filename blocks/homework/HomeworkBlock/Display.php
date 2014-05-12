@@ -471,24 +471,36 @@ class Display
 		return $output;
 	}
 
-	private function showDuration($duration)
+	private function showDuration($duration, $short = false)
 	{
 		$r .= '';
 
 		list($min, $max) = explode('-', $duration);
 
 		if ($min == 0 && $max) {
-			$r .= 'up to ' . $this->displayMinutes($max);
+
+			$r .= 'up to ' . $this->displayMinutes($max, $short);
+
 		} elseif ($max) {
-			$r .= 'between ' . $this->displayMinutes($min) . ' and ' . $this->displayMinutes($max);
+
+			$r .= $short ? '' : 'between ';
+
+			$r .= $this->displayMinutes($min, $short);
+
+			$r .= $short ? ' to ' : ' and ';
+
+			$r .= $this->displayMinutes($max, $short);
+
 		} else {
-			$r .= $this->displayMinutes($min);
+
+			$r .= $this->displayMinutes($min, $short);
+
 		}
 
 		return $r;
 	}
 
-	private function displayMinutes($mins)
+	private function displayMinutes($mins, $short = false)
 	{
 		$hours = floor($mins / 60);
 		$mins = $mins % 60;
@@ -496,14 +508,18 @@ class Display
 		$str = '';
 
 		if ($hours) {
-			$str .= $hours . ' hour' . $this->s($hours);
+			$str .= $hours;
+			$str .= $short ? 'hr' : ' hour';
+			$str .= $this->s($hours);
 		}
 
 		if ($mins) {
 			if ($hours) {
 				$str .= ' ';
 			}
-			$str .= $mins . ' minute' . $this->s($mins);
+			$str .= $mins;
+			$str .= $short ? 'min' : ' minute';
+			$str .= $this->s($mins);
 		}
 
 		return $str;
@@ -515,5 +531,63 @@ class Display
 	private function s($num)
 	{
 		return $num == 1 ? '' : 's';
+	}
+
+
+	/**
+	 * Weekly stats view for pastoral staff
+	 */
+	public function weekStats(HomeworkStats $stats)
+	{
+		//Build an array of dates for the next fortnight
+		$dates = array();
+
+		$date = clone $stats->getStartDate();
+
+		$dateInterval = $date->diff($stats->getEndDate());
+
+		for ($i = 0; $i < $dateInterval->d; $i++) {
+
+			if ($date->format('l') != 'Saturday' && $date->format('l') != 'Sunday') {
+				$dates[$date->format('Y-m-d')] = array();
+			}
+
+			$date->modify('+1 day');
+		}
+
+		$homework = $stats->getHomework();
+
+		// Sort the homework into the days it's assigned for
+		foreach ($homework as $hw) {
+			if (isset($dates[$hw->assigneddate])) {
+				$dates[$hw->assigneddate][] = $hw;
+			}
+		}
+
+		$r = '<ul class="weekOverview pastoralWeekOverview row">';
+
+		foreach ($dates as $date => $hw) {
+			++$i;
+			$past = $date < $today;
+			$r .= '<li class="col-md-2 ' . ($past ? 'past' : '') . '">
+				<span class="day row">
+
+				<h4>' . date('l M jS', strtotime($date)) . '</h4>';
+
+				foreach ($hw as $item) {
+					$icon = course_get_icon($item->courseid);
+					$r .= '<p class="col-md-4"><a href="class.php?groupid=' . $item->groupid . '">';
+						$r .= ($icon ? '<i class="icon-' . $icon . '"></i> ' : '') . $item->coursename;
+						$r .= ' <strong>' . $this->showDuration($item->duration, true) . '</strong>';
+					$r .= '</a></p>';
+				}
+
+			$r .= '</span>
+			</li>';
+		}
+
+		$r .= '</ul>';
+		$r .= '<div class="clear"></div>';
+		return $r;
 	}
 }

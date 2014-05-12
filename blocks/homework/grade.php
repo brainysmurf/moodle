@@ -16,14 +16,25 @@ switch ($hwblock->mode()) {
 
 	case 'pastoral':
 
-		echo '<h2><i class="icon-group"></i> Grade ' . $grade . ' Overview</h2>';
+		echo $hwblock->display->sign('calendar', "Grade {$grade} Overview", "This page shows homework assigned this week for grade {$grade} classes.");
 
-		?><p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-		tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-		quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-		consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-		cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-		proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p><?php
+		// Get all courses in this grade
+		$sql = 'SELECT crs.id, crs.fullname
+		FROM {course} crs
+		JOIN {course_ssis_metadata} crsmd ON crsmd.courseid = crs.id
+		WHERE
+			(crsmd.field = \'grade\' AND crsmd.value = ?)
+			OR
+			(crsmd.field = \'grade2\' AND crsmd.value = ?)
+		';
+
+		$courses = $DB->get_records_sql($sql, array($grade, $grade));
+		$courseIDs = $hwblock->coursesToIDs($courses);
+
+		$stats = new \SSIS\HomeworkBlock\HomeworkStats($hwblock);
+		$stats->setCourseIDs($courseIDs);
+
+		echo $hwblock->display->weekStats($stats);
 
 		break;
 }

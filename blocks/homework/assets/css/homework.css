@@ -81,6 +81,58 @@ h3 {
 				letter-spacing: 0.3px;
 			}
 
+@media (min-width: 992px) {
+	.weekOverview li {
+		width:20%;
+		border-right-width:0;
+	}
+
+	.weekOverview li:nth-child(5n) {
+		border-right-width:1px;
+	}
+
+	ul.weekOverview:nth-of-type(2) li {
+		border-bottom-width:1px;
+	}
+
+	.weekOverview .past {
+		display:block;
+		opacity:.2;
+		background:none;
+	}
+
+	.weekOverview .day {
+		min-height:120px;
+	}
+
+	.homeworkList h5.dates {
+		float:right;
+	}
+		/* When you click on '2 more dates...' and the list of assigned dates is expanded */
+		.homework .assignedDates {
+			margin:0;
+			list-style:none;
+			text-align:right;
+		}
+			.homework .assignedDates li {
+				margin-bottom: 2px;
+			}
+
+	#duration-slider {
+		margin-left: 15px;
+	}
+}
+
+.pastoralWeekOverview li {
+	width:100%;
+	border-bottom-width:0;
+}
+	.pastoralWeekOverview li:hover {
+		opacity:1;
+	}
+	.pastoralWeekOverview li:last-child {
+		border-bottom-width:1px;
+	}
 
 .courseList {
 	margin-bottom:30px;
@@ -296,44 +348,4 @@ h3 {
 	padding-top:30px;
 }
 
-@media (min-width: 992px) {
-	.weekOverview li {
-		width:20%;
-		border-right-width:0;
-	}
 
-	.weekOverview li:nth-child(5n) {
-		border-right-width:1px;
-	}
-
-	ul.weekOverview:nth-of-type(2) li {
-		border-bottom-width:1px;
-	}
-
-	.weekOverview .past {
-		display:block;
-		opacity:.2;
-		background:none;
-	}
-
-	.weekOverview .day {
-		min-height:120px;
-	}
-
-	.homeworkList h5.dates {
-		float:right;
-	}
-		/* When you click on '2 more dates...' and the list of assigned dates is expanded */
-		.homework .assignedDates {
-			margin:0;
-			list-style:none;
-			text-align:right;
-		}
-			.homework .assignedDates li {
-				margin-bottom: 2px;
-			}
-
-	#duration-slider {
-		margin-left: 15px;
-	}
-}

@@ -22,7 +22,7 @@ $mode = $hwblock->mode();
 // echo '<h2 style="float:right; margin:17px 10px 0;"><i class="icon-group"></i> ' . $group->name . '</h2>';
 // echo '<h2>' . ($courseIcon ? '<i class="icon-' . $courseIcon . '"></i> ' : '') . $course->fullname . '</h2>';
 
-echo $hwblock->display->sign($courseIcon, 'Now viewing '.$course->fullname, 'See below for upcoming and due homework.');
+echo $hwblock->display->sign($courseIcon, 'Now viewing ' . $course->fullname, '<small style="float:right;">Class: ' . $group->name . '</small> See below for upcoming and due homework.');
 
 if ($mode == 'teacher' || $mode == 'pastoral') {
 	$pendingHomework = $hwblock->getHomework(array($group->id), false, false, false);
