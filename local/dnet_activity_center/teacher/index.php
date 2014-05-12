@@ -12,7 +12,6 @@ echo $OUTPUT->sign('ok-sign', 'Your Activities', 'These are the activities you c
 
 $managedActivities = $activityCenter->data->getActivitiesManaged(false, $activityCenter->userID());
 
-print_object($managedActivities);
 echo $activityCenter->display->activityList($managedActivities);
 
 include '../roles/common_end.php';
