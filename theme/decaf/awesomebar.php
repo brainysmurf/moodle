@@ -253,20 +253,20 @@ class awesomebar
 	 *	   The number of hyphens at the start determines the depth of the item.
 	 *
 	 * Example structure:
-
-			Search Engines Menu||icon-search
-			-Google|http://www.google.com|icon-google-plus
-			--Google Docs|http://docs.google.com|icon-paper-clip
-			--Google Maps|http://maps.google.com|icon-map-marker
-			---UK|http://maps.google.co.uk|icon-map-marker
-			---HK|http://mail.google.com.hk|icon-map-marker
-			--Google Mail|http://mail.google.com|icon-envelope
-			-Microsoft|http://www.microsoft.com|icon-desktop
-			--Bing|http://www.bing.com|icon-search
-			Another Menu||icon-home
-			-Child|http://www.example.com
-			-Another Child|http://www.example.com
-
+	 *
+	 *		Search Engines Menu||icon-search
+	 *		-Google|http://www.google.com|icon-google-plus
+	 *		--Google Docs|http://docs.google.com|icon-paper-clip
+	 *		--Google Maps|http://maps.google.com|icon-map-marker
+	 *		---UK|http://maps.google.co.uk|icon-map-marker
+	 *		---HK|http://mail.google.com.hk|icon-map-marker
+	 *		--Google Mail|http://mail.google.com|icon-envelope
+	 *		-Microsoft|http://www.microsoft.com|icon-desktop
+	 *		--Bing|http://www.bing.com|icon-search
+	 *		Another Menu||icon-home
+	 *		-Child|http://www.example.com
+	 *		-Another Child|http://www.example.com
+	 *
 	 * Returns an array of menu arrays
 	 * @param string $text the menu items definition
 	 * @return array
@@ -575,13 +575,13 @@ class awesomebar
 				continue;
 			}
 
-			$this->add_category_to_menu($menu, $category);
+			$this->add_category_to_menu($menu, $category, 0, array($category['id']));
 		}
 
 		return $menu;
 	}
 
-	private function add_category_to_menu(&$menu, $category, $depth=0)
+	private function add_category_to_menu(&$menu, $category, $depth = 0, $categoryPath = array())
 	{
 
 		if (!$this->is_beta_tester()) {
@@ -698,7 +698,8 @@ class awesomebar
 
 		//Add subcategories to menu
 		foreach ($category['categories'] as $subcategory) {
-			$this->add_category_to_menu($item['submenu'], $subcategory, $depth+1);
+			$categoryPath[] = $subcategory['id'];
+			$this->add_category_to_menu($item['submenu'], $subcategory, $depth + 1, $categoryPath);
 		}
 
 		//Add courses to menu
@@ -708,7 +709,8 @@ class awesomebar
 			$course_icon = strtolower($course_icon);
 
 			//For courses in the Activities category, replace text in (parentheses) with an "icon" on the right
-			if ($category['id'] == 1) {
+			#if ($category['id'] == 1) {
+			if ($categoryPath[0] == 1) {
 				//Match specific text in parentheses
 				if (preg_match_all('/\((S1|S2|S3|ALL|FULL)\)/i', $course['fullname'], $matches)) {
 					foreach ($matches[0] as $i => $matchedText) {
