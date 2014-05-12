@@ -1347,7 +1347,6 @@ abstract class enrol_plugin {
 	        //Refresh the awesomebar
     	    global $OUTPUT;
     	    if (!empty($OUTPUT)) {
-                echo 'refreshing';
 	        	$OUTPUT->refresh_awesomebar();
 	        }
         }

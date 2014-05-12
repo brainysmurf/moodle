@@ -66,7 +66,6 @@ class Display
 			return false;
 		}
 
-
 		$t = '<div class="tabs noborder">';
 		$t .= '<ul class="additional-tabs">';
 		foreach ($possibleModes as $mode) {

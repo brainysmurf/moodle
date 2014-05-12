@@ -391,6 +391,15 @@ class theme_decaf_core_renderer extends core_renderer {
 		return $ul;
 	}
 
+	public function sign($icon, $bigText, $littleText)
+	{
+	    return '<div class="blueAlert alert alert-info">
+	    		<i class="icon-4x icon-' . $icon . ' pull-left"></i>
+	    		<h4>' . $bigText . '</h4>
+	    		<p>' . $littleText . '</p>
+	    	</div>';
+	}
+
 }
 
 
