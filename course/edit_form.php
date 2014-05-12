@@ -294,15 +294,18 @@ class course_edit_form extends moodleform {
 		$SSISMETADATA = new ssismetadata();
 	}
     $course->ssismetadata = $SSISMETADATA->getCourseFields($course->id);
-    
+
     	//Set form fields
-        $mform->addElement('header','ssismetadatasection', 'Extra');
-        
-        $mform->addElement('text', 'ssismetadata[icon]', 'Course Icon', 'maxlength="100" size="20"');
-        $mform->setType('ssismetadata[icon]', PARAM_TEXT);
-		$mform->addHelpButton('ssismetadata[icon]', 'iconhelp', 'moodle');
-        
-//--------------------------------------------------------------------------------                
+	$mform->addElement('header','ssismetadatasection', 'Extra');
+
+	$mform->addElement('text', 'ssismetadata[icon]', 'Course Icon', 'maxlength="100" size="20"');
+	$mform->setType('ssismetadata[icon]', PARAM_TEXT);
+	$mform->addHelpButton('ssismetadata[icon]', 'iconhelp', 'moodle');
+
+	$mform->addElement('text', 'ssismetadata[grade]', 'Grade', 'maxlength="100" size="20"');
+	$mform->setType('ssismetadata[grade]', PARAM_INT);
+
+//--------------------------------------------------------------------------------
 //End SSIS Metadata
 
 //--------------------------------------------------------------------------------

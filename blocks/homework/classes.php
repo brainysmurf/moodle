@@ -18,7 +18,7 @@ switch ($hwblock->mode()) {
 		 * Show the timetable view of the student's homework due in the next 2 weeks
 		 */
 
-		echo $hwblock->display->sign('list-ul', 'By Class', 'Find a summary of homework information (including upcoming and due) by class only.');
+		echo $hwblock->display->sign('group', 'By Class', 'Find a summary of homework information (including upcoming and due) by class only.');
 		// echo '<h2><i class="icon-magic"></i> Classes</h2>';
 		$classes = $hwblock->getUsersGroups($hwblock->userID());
 		echo $hwblock->display->classList($classes);
@@ -30,7 +30,7 @@ switch ($hwblock->mode()) {
 		/**
 		 * Show all classes in the school
 		 */
-		echo '<h2><i class="icon-magic"></i> All Classes</h2>';
+		echo '<h2><i class="icon-group"></i> All Classes</h2>';
 
 		//TODO: Where can this list come from?
 		$classes = array();
