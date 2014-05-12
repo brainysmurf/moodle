@@ -69,11 +69,12 @@ class Timetable
 
 			foreach ($groups as $groupName) {
 
-				//Until new groups are added
-				$groupName = rtrim($groupName, '-abc');
+
+				//FIXME: Remove this once new groups are made
+				$group = $this->getGroupByNewName($groupName);
 
 				// Load the group info
-				$group = $DB->get_record('groups', array('name' => $groupName), 'id, name');
+				#$group = $DB->get_record('groups', array('name' => $groupName), 'id, name');
 
 				if (!$group) {
 					// Log an error maybe?
@@ -92,15 +93,43 @@ class Timetable
 					'name' => $group->name,
 				);
 
-				if (isset($this->timetable->teacher_names) && is_array($this->timetable->teacher_names->{$groupName})) {
+				if (isset($this->timetable->teacher_names) && is_array($this->timetable->teacher_names->{$group->name})) {
 					$classes[$course->id]['groups'][$group->id]['teacher'] =
-						$this->timetable->teacher_names->{$groupName}[0]->first
+						$this->timetable->teacher_names->{$group->name}[0]->first
 						 . ' '
-						 . $this->timetable->teacher_names->{$groupName}[0]->last;
+						 . $this->timetable->teacher_names->{$group->name}[0]->last;
 				}
 			}
 		}
 
 		return $classes;
+	}
+
+	private function getGroupByNewName($groupName)
+	{
+		global $DB;
+
+		$groupName = rtrim($groupName, '-abc');
+
+		if ($group = $DB->get_record('groups', array('name' => $groupName), 'id, name')) {
+			return $group;
+		}
+
+		if (substr($groupName, -4) == '1112') {
+
+			$groupNameStub = substr($groupName, 0, -4);
+
+			$groupName = $groupNameStub . '11';
+			if ($group = $DB->get_record('groups', array('name' => $groupName), 'id, name')) {
+				return $group;
+			}
+
+			$groupName = $groupNameStub . '12';
+			if ($group = $DB->get_record('groups', array('name' => $groupName), 'id, name')) {
+				return $group;
+			}		
+		}
+
+		return false;
 	}
 }
