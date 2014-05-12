@@ -33,7 +33,7 @@ class Display
 			'classes' => array('classes.php', '<i class="icon-group"></i> Classes'),
 			'courses' => array('courses.php', '<i class="icon-magic"></i> Courses'),
 			'grades' => array('grades.php', '<i class="icon-sitemap"></i> Grades'),
-			'students' => array('students.php', '<i class="icon-user"></i> Students'),
+			'students' => array('students.php', '<i class="icon-user"></i> Student Lookup'),
 		),
 	);
 
@@ -49,8 +49,8 @@ class Display
 		$possibleModes = $this->hwblock->possibleModes();
 
 		$modeLabels = array(
-			'student' => 'Student Mode',
-			'parent' => 'Parent Mode',
+			'student' => '<i class="icon-user"></i> Student Mode',
+			'parent' => '<i class="icon-male"></i> Parent Mode',
 			'teacher' => '<i class="icon-magic"></i> Teacher Mode',
 			'pastoral' => '<i class="icon-heart"></i> Pastoral Mode',
 		);
@@ -287,7 +287,7 @@ class Display
 		$PAGE->requires->js('/blocks/homework/assets/js/filter.js');
 
 		$r  = '<div class="courseList userList">';
-		$r .= '<input type="text" class="filter" placeholder="Enter a student\'s name to search..." />';
+		$r .= '<input type="text" class="filter" placeholder="Type part of a student\'s name or their whole PowerSchool ID to search..." />';
 		$r .= '<div class="row courses"></div>';
 		$r .= '<div class="clear"></div>';
 		$r .= '</div>';
