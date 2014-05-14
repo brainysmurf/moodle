@@ -213,7 +213,7 @@ CSS for cleaner tab markup than the Moodle default
 
 .tabs {
 	padding-bottom:9px;
-	border-bottom: 1px solid #CBCBCB;
+	border-bottom: 1px solid #DDD;
 	margin-bottom:12px !important;
 }
 	.tabs.noborder {
