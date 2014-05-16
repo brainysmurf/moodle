@@ -85,7 +85,7 @@ class Display
 				if (count($managerNames) > 0 ) {
 					$r .= '<span class="green">' . implode(', ', $managerNames) . '</span>';
 				} else {
-					$r .= '<span class="red"><em>No managers</em></span>';
+					$r .= '<span class="red"><em>No supervisors</em></span>';
 				}
 			$r .= '</a></div>';
 		}
