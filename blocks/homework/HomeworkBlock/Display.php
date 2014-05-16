@@ -188,8 +188,15 @@ class Display
 			<a class="day" href="'. ($hashLinks ? '#' . $date : 'day.php?date=' . $date) . '">';
 			$r .= '<h4>' . date('l M jS', strtotime($date)) . '</h4>';
 			foreach ($hw as $item) {
-				$icon = course_get_icon($item->courseid);
-				$r .= '<p>' . ($icon ? '<i class="icon-' . $icon . '"></i> ' : '') . $item->coursename . '</p>';
+				if ($item->courseid) {
+					$icon = course_get_icon($item->courseid);
+					$text = $item->coursename;
+				} else {
+					$icon = 'pushpin';
+					$text = $this->truncate($item->description, 30);
+				}
+
+				$r .= '<p>' . ($icon ? '<i class="icon-' . $icon . '"></i> ' : '') . $text . '</p>';
 			}
 			$r .= '</a>
 			</li>';
@@ -321,7 +328,7 @@ class Display
 		$headingPrefix = false,
 		$headingDateFormat = 'l M jS Y',
 		$showClassName = false,
-		$showAssignedDates = false
+		$showAssignedDates = true
 	) {
 		if (count($homework) < 1) {
 			return '<div class="nothing">
@@ -372,20 +379,30 @@ class Display
 	 */
 	private function homeworkItem($hw, $showClassName = false, $showAssignedDates = false)
 	{
+		$future = $hw->startdate > $this->hwblock->today;
+
 		// Should we show the edit / delete buttons?
-		$canEdit = $this->hwblock->canApproveHomework($hw->courseid);
+		// TODO: Allow students to eddit their private items
+		$canEdit = $this->hwblock->canEditHomeworkItem($hw);
 
 		// Is this due in the past?
 		$past = $hw->duedate < $this->hwblock->today;
 
-		$r  = '<li class="homework ' . ($hw->approved ? 'approved' : 'unapproved') . ($canEdit ? ' canedit' : '') . ($past ? ' past' : '') . '" data-id="' . $hw->id . '" data-duedate="'. $hw->duedate . '">';
+		$r  = '<li class="homework ' . ($hw->approved ? 'approved' : 'unapproved') . ($canEdit ? ' canedit' : '') . ($past ? ' past' : '') . ($future ? ' future' : '') . ($hw->private ? ' private' : '') . '" data-id="' . $hw->id . '" data-duedate="'. $hw->duedate . '">';
 
-		if (!$hw->approved) {
+		if (!$hw->approved && !$hw->private) {
+			// Only teachers should be seeing this
 			$r .= '<span class="approvalButtons">';
 				$r .= '<span><i class="icon-user"></i> Submitted by ' . $hw->userfirstname . ' ' . $hw->userlastname . ' &nbsp;&nbsp; <i class="icon-warning-sign"></i> Not visible to students until approved</span> &nbsp;';
 				if ($canEdit) {
 					$r .= '<a class="approveHomeworkButton btn-mini btn btn-success" href="#"><i class="icon-ok"></i> Approve</a>';
 				}
+			$r .= '</span>';
+		}
+
+		if ($future) {
+			$r .= '<span class="approvalButtons">';
+				$r .= '<span><i class="icon-pause"></i> Will not appear to students until ' . date('l M jS Y', strtotime($hw->startdate)) . '</span>';
 			$r .= '</span>';
 		}
 
@@ -407,7 +424,7 @@ class Display
 			}
 
 			// Due date
-			$r .= '<i class="icon-bell"></i> <strong>Due on</strong> ' . date('D M jS', strtotime($hw->duedate));
+			$r .= '<i class="icon-bell"></i> <strong>Due on</strong> ' . date('D M jS Y', strtotime($hw->duedate));
 
 		$r .= '</h5>';
 
@@ -427,7 +444,7 @@ class Display
 			$r .= $desc;
 
 			// Duration
-			$r .= '<span class="duration"><i class="icon-time"></i> You should spend ' . $this->showDuration($hw->duration) . ' on this.</span>';
+			$r .= '<span class="duration"><i class="icon-time"></i> This should take ' . $this->showDuration($hw->duration) . ' in total.</span>';
 
 		$r .= '</p>';
 
@@ -492,7 +509,7 @@ class Display
 
 		} else {
 
-			$r .= $this->displayMinutes($min, $short);
+			$r .= 'up to ' . $this->displayMinutes($min, $short);
 
 		}
 
@@ -574,9 +591,15 @@ class Display
 				<h4>' . date('l M jS', strtotime($date)) . '</h4>';
 
 				foreach ($hw as $item) {
-					$icon = course_get_icon($item->courseid);
+					if ($item->courseid) {
+						$icon = course_get_icon($item->courseid);
+						$text = $item->coursename;
+					} else {
+						$icon = 'pushpin';
+						$text = $this->truncate($item->description, 30);
+					}
 					$r .= '<p class="col-md-4"><a href="class.php?groupid=' . $item->groupid . '">';
-						$r .= ($icon ? '<i class="icon-' . $icon . '"></i> ' : '') . $item->coursename;
+						$r .= ($icon ? '<i class="icon-' . $icon . '"></i> ' : '') . $text;
 						$r .= ' <strong>' . $this->showDuration($item->duration, true) . '</strong>';
 					$r .= '</a></p>';
 				}
@@ -588,5 +611,17 @@ class Display
 		$r .= '</ul>';
 		$r .= '<div class="clear"></div>';
 		return $r;
+	}
+
+	function truncate($string, $limit , $append = '...')
+	{
+		if ($limit < 1) {
+			return '';
+		}
+		if (strlen($string) > $limit) {
+			return substr($string, 0, $limit - 3) . $append;
+		} else {
+			return $string;
+		}
 	}
 }

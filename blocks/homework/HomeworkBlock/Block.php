@@ -107,6 +107,15 @@ class Block
 	 * Capability checks
 	 */
 
+	public function canEditHomeworkItem($homeworkItem)
+	{
+		if ($homeworkItem->private) {
+			return $homeworkItem->userid == $this->userID();
+		} else {
+			return $this->canApproveHomework($homeworkItem->courseid);
+		}
+	}
+
 	/**
 	 * Is the logged in user allowed to add homework to a course?
 	 */
@@ -248,7 +257,8 @@ class Block
 		$dueDate = false,
 		$order = null,
 		$assignedRangeStart = null,
-		$assignedRangeEnd = null
+		$assignedRangeEnd = null,
+		$includePrivate = false
 	) {
 		global $DB;
 		$params = array();
@@ -265,14 +275,33 @@ class Block
 			usr.firstname AS userfirstname,
 			usr.lastname AS userlastname
 		FROM {block_homework} hw
-		JOIN {course} crs ON crs.id = hw.courseid
+		LEFT JOIN {course} crs ON crs.id = hw.courseid
 		JOIN {block_homework_assign_dates} days ON days.homeworkid = hw.id
 		LEFT JOIN {user} usr ON usr.id = hw.userid';
 
 		$where = false;
 
-		// Group IDs
-		if (is_array($groupIDs) && count($groupIDs) > 0) {
+		if ($includePrivate && is_array($groupIDs) && count($groupIDs) > 0) {
+
+			$sql .= ' WHERE (';
+			$where = true;
+
+			$sql .= ' (private = 1 AND userID = ?)';
+			$params[] = $this->userID();
+
+			$sql .= ' OR (private = 0 AND hw.groupid IN (' . implode(',', $groupIDs) . ') )';
+
+			$sql .= ')';
+
+		} elseif ($includePrivate) {
+
+			$sql .= ($where ? ' AND' : ' WHERE');
+			$where = true;
+			$sql .= ' private = 1 AND userID = ?';
+			$params[] = $this->userID();
+
+		} elseif (is_array($groupIDs) && count($groupIDs) > 0) {
+			// Group IDs
 			$sql .= ($where ? ' AND' : ' WHERE');
 			$where = true;
 
@@ -297,6 +326,15 @@ class Block
 			}
 		}
 
+		// Show only stuff that has a start date (visible date) of today or earlier
+		if ($this->mode() != 'teacher' && $this->mode() != 'pastroal') {
+			$sql .= ($where ? ' AND' : ' WHERE');
+			$where = true;
+
+			$sql .= ' hw.startdate <= ?';
+			$params[] = $this->today;
+		}
+
 		// Assigned dates
 		if (is_array($assignedFor)) {
 
@@ -318,7 +356,7 @@ class Block
 			$where = true;
 
 			if ($approved) {
-				$sql .= ' approved = 1';
+				$sql .= ' (approved = 1 OR private = 1)';
 			} else {
 				$sql .= ' approved = 0';
 			}
@@ -374,10 +412,6 @@ class Block
 		foreach ($records as $record) {
 			$return[] = new HomeworkItem($record);
 		}
-
-		#print_object($sql);
-		#print_object($params);
-		#print_object($return);
 
 		return $return;
 	}

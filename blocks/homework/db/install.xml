@@ -16,6 +16,7 @@
         <FIELD NAME="startdate" TYPE="text" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="duedate" TYPE="text" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="duration" TYPE="text" LENGTH="10" SEQUENCE="false"/>
+        <FIELD NAME="private" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -27,6 +28,7 @@
         <!--<INDEX NAME="startdate" UNIQUE="false" FIELDS="startdate"/>
         <INDEX NAME="duedate" UNIQUE="false" FIELDS="duedate"/>-->
         <INDEX NAME="approved" UNIQUE="false" FIELDS="approved"/>
+        <INDEX NAME="private" UNIQUE="false" FIELDS="approved"/>
       </INDEXES>
     </TABLE>
 

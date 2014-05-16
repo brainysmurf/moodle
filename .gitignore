@@ -35,3 +35,4 @@ composer.lock
 /lib/yuilib/*/build/*/*-coverage.js
 /phpmemcacheadmin
 /local/codechecker/
+filter/variables

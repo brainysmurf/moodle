@@ -13,6 +13,11 @@ $homeworkID = required_param('homeworkid', PARAM_RAW);
 
 $hw = \SSIS\HomeworkBlock\HomeworkItem::load($homeworkID);
 
+// Check permissions
+if (!$hwblock->canEditHomeworkItem($hw)) {
+	die("You don't have permission to edit that piece of homework.");
+}
+
 switch ($action) {
 
 	case 'approve':

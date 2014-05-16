@@ -122,7 +122,8 @@ h3 {
 			}
 
 	#duration-slider {
-		margin-left: 15px;
+		margin-left: 18px;
+		margin-right: 18px;
 	}
 }
 
@@ -178,6 +179,14 @@ h3 {
 		font-weight: bold;
 	}
 
+.addHomeworkPrivateToggle .btn {
+	font-size:13px;
+	padding:10px 0 7px;
+}
+	.addHomeworkPrivateToggle .btn i {
+		font-size:25px;
+	}
+
 .form-group {
 	clear:both;
 	padding-top: 30px;
@@ -187,7 +196,7 @@ h3 {
 	width:100%;
 }
 	#duration-help {
-		padding:10px;
+		padding: 5px 10px 10px;
 		font-size:13px;
 		display:block;
 	}
@@ -221,6 +230,10 @@ h3 {
 	.ui-datepicker {
 		z-index:2 !important;
 	}
+		button.ui-datepicker-close {
+			display: none;
+		}
+		​
 
 	#assignedDatesGroup {
 		display:none;
@@ -284,6 +297,16 @@ h3 {
 		}
 
 		.homework.unapproved {
+			background:#F2DEDE;
+			border-color: #EBCCD1;
+		}
+
+		.homework.private {
+			background:#D3BFF0;
+			border-color:#D3BFF0;
+		}
+
+		.homework.future {
 			background:#fcf8e3;
 			border-color: #faebcc;
 		}

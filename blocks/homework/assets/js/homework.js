@@ -65,7 +65,8 @@ $(document).on('click', '.approveHomeworkButton', function(e){
 		btn.children('i').removeClass().addClass('icon-ok');
 
 		if (res.success) {
-			hw.slideUp();
+			$(hw).removeClass('unapproved');
+			$(hw).find('.approvalButtons').remove();
 		} else {
 			alert("Unable to approve.");
 		}
@@ -180,7 +181,7 @@ $(document).on('click', '.deleteHomeworkButton', function(e){
 		btn.children('i').removeClass().addClass('icon-trash');
 
 		if (res.success) {
-			hw.slideUp();
+			$('.homework[data-id=' + id + ']').slideUp();
 		} else {
 			alert("Unable to delete.");
 		}
@@ -191,6 +192,21 @@ $(document).on('click', '.deleteHomeworkButton', function(e){
 /**
 * Add homework form
 */
+$(document).on('click', '.addHomeworkPrivateToggle a', function(e) {
+	e.preventDefault();
+	$(this).closest('.addHomeworkPrivateToggle').find('a').removeClass('active btn-primary');
+	$(this).addClass('active btn-primary');
+	var value = $(this).attr('data-value');
+	$(this).closest('form').find('input[name=private]').val(value);
+
+	if (value == 1) {
+		$('#groupIDSelelect').append('<option value="-1">Other / Not Applicable</option>');
+	} else {
+		$('#groupIDSelelect').find('option[value=-1]').remove();
+	}
+});
+
+
 function ensureFieldHasValue(field, errorText)
 {
 	var value = field.val();
@@ -325,6 +341,92 @@ $(document).on('click', '#possibleDays .btn', function() {
 	updateSelectedDates();
 });
 
+// Datepicker tweaks
+
+// When you click on 'Today', select today
+$.datepicker._gotoToday = function(id) {
+    var target = $(id);
+    var inst = this._getInst(target[0]);
+    if (this._get(inst, 'gotoCurrent') && inst.currentDay) {
+            inst.selectedDay = inst.currentDay;
+            inst.drawMonth = inst.selectedMonth = inst.currentMonth;
+            inst.drawYear = inst.selectedYear = inst.currentYear;
+    }
+    else {
+            var date = new Date();
+            inst.selectedDay = date.getDate();
+            inst.drawMonth = inst.selectedMonth = date.getMonth();
+            inst.drawYear = inst.selectedYear = date.getFullYear();
+            // the below two lines are new
+            this._setDateDatepicker(target, date);
+            this._selectDate(id, this._getDateDatepicker(target));
+    }
+    this._notifyChange(inst);
+    this._adjustDate(target);
+};
+
+// Add 'tomorrow' button to datepicker
+
+	$.datepicker._generateHTML_old = $.datepicker._generateHTML;
+	$.datepicker._generateHTML = function (inst) {
+		var html = this._generateHTML_old(inst);
+
+		// The button to add
+		var tomorrowButton = '<button type="button" class="ui-datepicker-tomorrow ui-state-default ui-priority-secondary ui-corner-all">Tomorrow</button>';
+
+		// Gonna put our button before this ...
+		var doneButton = "<button type='button' class='ui-datepicker-close";
+
+		console.log(html);
+
+		var position = html.indexOf(doneButton);
+
+		console.log(position);
+
+		if (position !== -1) {
+			// Add the button into the html
+			html = [html.slice(0, position), tomorrowButton, html.slice(position)].join('');
+		}
+
+		return html;
+	};
+
+
+$(document).on('click', '.ui-datepicker-tomorrow', function(e){
+	e.preventDefault();
+
+	var tomorrow = new Date();
+	tomorrow.setDate(tomorrow.getDate() +1);
+
+	// Which element is the datepicker open for?
+	// http://stackoverflow.com/questions/16674019/how-to-tell-which-datepicker-the-widget-is-open-for
+	var id = '#' + $.datepicker._curInst.id;
+	var input = $(id);
+
+	var year = tomorrow.getFullYear();
+	var month = tomorrow.getMonth() + 1;
+	var day = tomorrow.getDate();
+
+	var tomorrowString = year + '-' + month + '-' + day;
+
+	$(input).datepicker('setDate', tomorrowString);
+	$(input).datepicker('hide');
+	$(input).blur();
+});
+
+
+/*function datepickerAddTomorrowButtton(element) {
+
+	console.log('ui', element);
+	var widget = $(element).datepicker('widget');
+	console.log('widget', widget);
+
+	if (widget.find('.ui-datepicker-tomorrow').length < 1) {
+		widget.find('.ui-datepicker-current').after('<button type="button" class="ui-datepicker-tomorrow ui-state-default ui-priority-secondary ui-corner-all">Tomorrow</button>');
+	}
+}*/
+
+
 // Student search
 function studentSearch() {
 	var q = $('.userList input').val();
@@ -357,4 +459,6 @@ function studentSearch() {
 		div.find('.courses').html(html);
 	});
 }
-$('.userList input[type=text]').bindWithDelay('keyup', studentSearch, 500);
+if ($('.userList').length > 0) {
+	$('.userList input[type=text]').bindWithDelay('keyup', studentSearch, 500);
+}

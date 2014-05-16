@@ -1,4 +1,7 @@
 <?php
+
+	$mode = $hwblock->mode();
+
 	// Get all the user's classes
 	$groups = $hwblock->getUsersGroups($USER->id);
 
@@ -18,6 +21,32 @@
 	<?php } ?>
 
 	<input type="hidden" name="action" value="<?=(FORMACTION == 'edit' ? 'saveedit' : 'save')?>" />
+
+	<?php if ($mode == 'student') {
+
+		if (FORMACTION == 'edit' && $editItem->private) {
+			$private = 1;
+		} else {
+			$private = 0;
+		}
+
+	?>
+	<div class="form-group">
+		<label for="shared" class="col-md-3 control-label">Add For <i class="icon-user"></i></label>
+		<div class="col-md-9">
+			<div class="row addHomeworkPrivateToggle">
+				<div class="col-md-6">
+					<a class="btn btn-block <?=(!$private ? 'btn-primary active' : '')?>" data-value="0" href="#"><i class="icon-group"></i><br/>Everybody In The Class</a>
+				</div>
+				<div class="col-md-6">
+					<a class="btn btn-block  <?=($private ? 'btn-primary active' : '')?>" data-value="1" href="#"><i class="icon-user"></i><br/>Just Me</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<? } ?>
+	<input type="hidden" name="private" value="<?=$private?>" />
+
 
 	<div class="form-group">
 		<label for="assigned" class="col-md-3 control-label">Class <i class="icon-magic"></i></label>
@@ -42,6 +71,9 @@
 					echo '</option>';
 				}
 			}
+			if ($private) {
+				echo '<option value="-1" ' . ($private && !$selectedGroupID ? 'selected' : '') . '>Other / Not Applicable</option>';
+			}
 			?>
 			</select>
 			<input type="hidden" name="courseid" value="<?=(FORMACTION == 'edit' ? $editItem->courseid : $selectedCourseID)?>" />
@@ -56,15 +88,25 @@
 		</div>
 	</div>
 
-	<div class="form-group">
-		<label for="assigned" class="col-md-3 control-label">Start Date <i class="icon-play-circle"></i></label>
+	<?php
+	if ($mode == 'student') {
+		// Visible date hidden for students
+		$hideStartDate = true;
+	} else {
+		$hideStartDate = false;
+	}
+	?>
+	<div class="form-group" <?=($hideStartDate ? 'style="display:none;"' : '')?>>
+		<label for="assigned" class="col-md-3 control-label">Visible From <i class="icon-play-circle"></i></label>
 		<div class="col-md-9">
+			<p class="help-block">Students won't see this on their page until this date</p>
 			<input type="text" id="startdate" name="startdate" class="form-control" value="<?=(FORMACTION == 'edit' ? $editItem->startdate : date('Y-m-d'))?>" />
 			<script>
 			$(function(){
 				$('#startdate').datepicker({
-					minDate: -7,
+					minDate: 0,
 					maxDate: "+1Y",
+					showButtonPanel: true,
 					dateFormat: 'yy-mm-dd',
 					numberOfMonths: 2,
 					onSelect: setPossibleDays,
@@ -81,12 +123,13 @@
 	<div class="form-group">
 		<label for="due" class="col-md-3 control-label">Due Date <i class="icon-bell"></i></label>
 		<div class="col-md-9">
-			<input type="text" id="duedate" name="duedate" class="form-control" placeholder="Enter a date the assignment should be handed in by." value="<?=(FORMACTION == 'edit' ? $editItem->duedate : '')?>" />
+			<input type="text" id="duedate" name="duedate" class="form-control" placeholder="Enter a date the assignment should be handed in by. (YYYY-MM-DD)" value="<?=(FORMACTION == 'edit' ? $editItem->duedate : '')?>" />
 			<script>
 			$(function(){
 				$('#duedate').datepicker({
 					minDate: 0,
 					maxDate: "+1Y",
+					showButtonPanel: true,
 					dateFormat: 'yy-mm-dd',
 					numberOfMonths: 2,
 					onSelect: setPossibleDays
@@ -97,7 +140,7 @@
 		</div>
 	</div>
 
-	<div class="form-group" id="assignedDatesGroup">
+	<div class="form-group" id="assignedDatesGroup" style="display:none;">
 		<label for="assigned" class="col-md-3 control-label">Assigned Days <i class="icon-calendar"></i></label>
 		<div class="col-md-9">
 			<p class="help-block">Which days should students work on this task?</p>
@@ -114,7 +157,6 @@
 	<div class="form-group">
 		<label for="duration" class="col-md-3 control-label">Duration <i class="icon-time"></i></label>
 		<div class="col-md-9">
-			<p class="help-block">How long should students spend on the task on each assigned day? Drag the two ends of the slider to change.</p>
 			<input type="hidden" name="duration" class="form-control" value="" />
 			<span class="help-text" id="duration-help"></span>
 			<div id="duration-slider"></div>
@@ -138,48 +180,57 @@
 					180: '3 or more hours',
 				};
 
-				function setDuration(min, max) {
+				function setDuration(mins) {
 					//Set the label
-					if (min == max) {
-						$('#duration-help').html('<strong>' + durationLabels[min] + '</strong>');
-					} else {
-						$('#duration-help').html('Between <strong>' + durationLabels[min] + '</strong> and <strong>' + durationLabels[max] + '</strong>');
+					var dur = durationLabels[mins];
+					if (mins < 180) {
+						dur = 'up to ' + dur;
 					}
-
-					$('input[name=duration]').val(min + '-' + max);
+					$('#duration-help').html('This task should take <strong>' +  dur + '</strong> in total.');
+					$('input[name=duration]').val(mins);
 				}
 
 				<?php
 					if (FORMACTION == 'edit') {
-						$duration = explode('-', $editItem->duration);
-						$initialMinDuration = $duration[0];
-						$initialMaxDuration = $duration[1];
+						#$duration = explode('-', $editItem->duration);
+						$initialMinDuration = $duration;
+						#$initialMaxDuration = $duration[1];
 					} else {
-						$initialMinDuration = 0;
-						$initialMaxDuration = 30;
+						$initialMinDuration = 30;
+						#$initialMaxDuration = 30;
 					}
 				?>
 
 				$('#duration-slider').slider({
-					range: true,
+					//range: true,
 					min: 0,
 					step: 15,
 					max: 180,
-					values: [<?=$initialMinDuration?>, <?=$initialMaxDuration?>],
+					values: [<?=$initialMinDuration?>],
 					slide: function(event, ui) {
-						setDuration(ui.values[0], ui.values[1]);
+						setDuration(ui.values);
 					}
 				});
 
-				setDuration(<?=$initialMinDuration?>, <?=$initialMaxDuration?>);
+				setDuration(<?=$initialMinDuration?>); //, <?=$initialMaxDuration?>);
 			});
 			</script>
 		</div>
 	</div>
 
+	<?php
+	if ($mode == 'teacher' && FORMACTION == 'edit' && !$editItem->approved) {
+		$label = 'Save and Approve';
+	} elseif (FORMACTION == 'edit') {
+		$label = 'Save Changes';
+	} else {
+		$label = 'Submit';
+	}
+	?>
+
 	<div class="form-group">
 		<div class="col-md-offset-3 col-md-5">
-			<button type="submit" class="btn btn-lg">Submit</button>
+			<button type="submit" class="btn btn-lg"><?=$label?></button>
 		</div>
 	</div>
 

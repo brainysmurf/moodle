@@ -25,7 +25,7 @@ switch ($hwblock->mode()) {
 
 		$homework = $hwblock->getHomework($groupIDs, false, false, $approvedStatus, true,  $past, false, $order);
 
-		echo $hwblock->display->homeworkList($homework, 'duedate', 'Due on ', 'l M jS Y', false, true);
+		echo $hwblock->display->homeworkList($homework);
 
 		break;
 

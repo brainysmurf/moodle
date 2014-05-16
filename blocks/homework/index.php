@@ -29,14 +29,26 @@ switch ($hwblock->mode()) {
 		// Get the homework for those groups
 		$approved = true;
 		$distinct = false;
-		$homework = $hwblock->getHomework($groupIDs, false, false, $approved, $distinct);
+		$homework = $hwblock->getHomework(
+			$groupIDs, //$groupIDs = false,
+			false, //$courseIDs = false,
+			false, //$assignedFor = false,
+			$approved, //$approved = true,
+			$distinct ,//$distinct = true,
+			false, //$past = false,
+			false, //$dueDate = false,
+			null, //$order = null,
+			null, //$assignedRangeStart = null,
+			null, //$assignedRangeEnd = null,
+			true //$includePrivate = false
+		);
 
 		echo $hwblock->display->overview($homework, true);
 
 		echo '<br/><br/>';
 
 		// Show the list
-		echo $hwblock->display->homeworkList($homework, 'assigneddate', 'To Do On ');
+		echo $hwblock->display->homeworkList($homework, 'assigneddate', 'To Do On ', 'l M jS Y', false, false);
 
 		break;
 
@@ -57,7 +69,7 @@ switch ($hwblock->mode()) {
 		$homework = $hwblock->getHomework($groupIDs, false, false, $approved, $distinct);
 
 		// Show the list
-		echo $hwblock->display->homeworkList($homework, false, false, false, false, true);
+		echo $hwblock->display->homeworkList($homework);
 
 		break;
 
