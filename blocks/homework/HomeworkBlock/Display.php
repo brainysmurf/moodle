@@ -598,9 +598,17 @@ class Display
 						$icon = 'pushpin';
 						$text = $this->truncate($item->description, 30);
 					}
+
+					$assignedDates = $item->getAssignedDates();
+					if ($assignedDates) {
+						$averageDuration = $item->duration / count($assignedDates);
+					} else {
+						$averageDuration = $item->duration;
+					}
+
 					$r .= '<p class="col-md-4"><a href="class.php?groupid=' . $item->groupid . '">';
 						$r .= ($icon ? '<i class="icon-' . $icon . '"></i> ' : '') . $text;
-						$r .= ' <strong>' . $this->showDuration($item->duration, true) . '</strong>';
+						$r .= '<br/><strong>' . $this->displayMinutes($item->duration, true) . ' total (' . $this->displayMinutes($averageDuration, true) . ' today)</strong>';
 					$r .= '</a></p>';
 				}
 
