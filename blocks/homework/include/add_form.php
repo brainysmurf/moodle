@@ -104,6 +104,7 @@
 			<script>
 			$(function(){
 				$('#startdate').datepicker({
+					firstDay: 1,
 					minDate: 0,
 					maxDate: "+1Y",
 					showButtonPanel: true,
@@ -127,6 +128,7 @@
 			<script>
 			$(function(){
 				$('#duedate').datepicker({
+					firstDay: 1,
 					minDate: 0,
 					maxDate: "+1Y",
 					showButtonPanel: true,
