@@ -14,7 +14,7 @@ switch ($hwblock->mode()) {
 	case 'parent':
 	case 'teacher':
 
-		echo $hwblock->display->sign('th-list', 'Homework History', 'All Homework, Sorted By Due Date (Latest At The Top)');
+		echo $hwblock->display->sign('th-list', 'View History', 'All Homework, Sorted By Due Date (Latest At The Top)');
 
 		// Get the user's group (class) IDs
 		$groupIDs = $hwblock->getUsersGroupIDs($USER->id);

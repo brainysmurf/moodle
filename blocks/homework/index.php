@@ -58,7 +58,7 @@ switch ($hwblock->mode()) {
 		 * Pending homework approval page
 		 */
 
-		echo $hwblock->display->sign('check', 'Pending Submissions', 'This section shows homework that a students in your classes have submitted. Other students will NOT see these until approved by you.');
+		echo $hwblock->display->sign('check', 'Manage Submissions', 'This section shows homework that a students in your classes have submitted. Other students will NOT see these until approved by you.');
 
 		// Get the user's group (class) IDs
 		$groupIDs = $hwblock->getUsersGroupIDs($hwblock->userID());
@@ -75,7 +75,7 @@ switch ($hwblock->mode()) {
 
 	case 'pastoral':
 
-		echo $hwblock->display->sign('calendar', 'Whole School Overview', 'This page shows all homework assigned this week.');
+		echo $hwblock->display->sign('calendar', 'Overview', 'This page shows all homework assigned this week.');
 
 		/**
 		 * Who school week overview

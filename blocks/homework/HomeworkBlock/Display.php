@@ -8,28 +8,28 @@ class Display
 	private $possibleTabs = array( // Array of which tabs are shown in differnet modes
 		'student' => array(
 			'index' => array('index.php', '<i class="icon-calendar"></i> To Do'),
-			'classes' => array('classes.php', '<i class="icon-group"></i> By Class'),
-			'history' => array('history.php', '<i class="icon-th-list"></i> History'),
+			'classes' => array('classes.php', '<i class="icon-group"></i> View by Class'),
+			'history' => array('history.php', '<i class="icon-th-list"></i> View History'),
 			'add' => array('add.php', '<i class="icon-plus-sign"></i> Add Homework'),
 		),
 		'pastoral-student' => array( // When a pastoral user clicks on a student (same as parent mode)
 			'index' => array('index.php', '<i class="icon-calendar"></i> To Do'),
-			'classes' => array('classes.php', '<i class="icon-group"></i> By Class'),
-			'history' => array('history.php', '<i class="icon-th-list"></i> History'),
+			'classes' => array('classes.php', '<i class="icon-group"></i> View by Class'),
+			'history' => array('history.php', '<i class="icon-th-list"></i> View History'),
 		),
 		'teacher' => array(
-			'index' => array('index.php', '<i class="icon-check"></i> Pending Submissions'),
-			'classes' => array('classes.php', '<i class="icon-group"></i> By Class'),
-			'history' => array('history.php', '<i class="icon-th-list"></i> History'),
+			'index' => array('index.php', '<i class="icon-check"></i> Manage Submissions'),
+			'classes' => array('classes.php', '<i class="icon-group"></i> View by Class'),
+			'history' => array('history.php', '<i class="icon-th-list"></i> View History'),
 			'add' => array('add.php', '<i class="icon-plus-sign"></i> Add Homework'),
 		),
 		'parent' => array(
 			'index' => array('index.php', '<i class="icon-calendar"></i> To Do'),
-			'classes' => array('classes.php', '<i class="icon-group"></i> By Class'),
-			'history' => array('history.php', '<i class="icon-th-list"></i> History'),
+			'classes' => array('classes.php', '<i class="icon-group"></i> View by Class'),
+			'history' => array('history.php', '<i class="icon-th-list"></i> View History'),
 		),
 		'pastoral' => array(
-			'index' => array('index.php', '<i class="icon-home"></i> Home'),
+			'index' => array('index.php', '<i class="icon-home"></i> Overview'),
 			'classes' => array('classes.php', '<i class="icon-group"></i> Classes'),
 			'courses' => array('courses.php', '<i class="icon-magic"></i> Courses'),
 			'grades' => array('grades.php', '<i class="icon-sitemap"></i> Grades'),
