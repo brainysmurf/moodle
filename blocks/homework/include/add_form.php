@@ -49,7 +49,7 @@
 
 
 	<div class="form-group">
-		<label for="assigned" class="col-md-3 control-label">Class <i class="icon-magic"></i></label>
+		<label for="assigned" class="col-md-3 control-label">Class:</label>
 		<div class="col-md-9">
 			<select name="groupid" class="form-control" id="groupIDSelelect">
 				<option value="">Please select...</option>
@@ -82,7 +82,7 @@
 	</div>
 
 	<div class="form-group">
-		<label for="description" class="col-md-3 control-label">Description <i class="icon-edit"></i></label>
+		<label for="description" class="col-md-3 control-label">Description:</i></label>
 		<div class="col-md-9">
 			<textarea name="description" class="form-control" placeholder="What is the homework?" rows="10"><?=(FORMACTION == 'edit' ? $editItem->description : '')?></textarea>
 		</div>
@@ -97,10 +97,10 @@
 	}
 	?>
 	<div class="form-group" <?=($hideStartDate ? 'style="display:none;"' : '')?>>
-		<label for="assigned" class="col-md-3 control-label">Visible From <i class="icon-play-circle"></i></label>
+		<label for="assigned" class="col-md-3 control-label">Visible From:</label>
 		<div class="col-md-9">
-			<p class="help-block">Students won't see this on their page until this date</p>
 			<input type="text" id="startdate" name="startdate" class="form-control" value="<?=(FORMACTION == 'edit' ? $editItem->startdate : date('Y-m-d'))?>" />
+			<p class="help-block">(Students won't see this on their page until this date)</p>
 			<script>
 			$(function(){
 				$('#startdate').datepicker({
@@ -122,7 +122,7 @@
 	</div>
 
 	<div class="form-group">
-		<label for="due" class="col-md-3 control-label">Due Date <i class="icon-bell"></i></label>
+		<label for="due" class="col-md-3 control-label">Due Date:</label>
 		<div class="col-md-9">
 			<input type="text" id="duedate" name="duedate" class="form-control" placeholder="Enter a date the assignment should be handed in by. (YYYY-MM-DD)" value="<?=(FORMACTION == 'edit' ? $editItem->duedate : '')?>" />
 			<script>
@@ -143,7 +143,7 @@
 	</div>
 
 	<div class="form-group" id="assignedDatesGroup" style="display:none;">
-		<label for="assigned" class="col-md-3 control-label">Assigned Days <i class="icon-calendar"></i></label>
+		<label for="assigned" class="col-md-3 control-label">Assigned Days:</label>
 		<div class="col-md-9">
 			<p class="help-block">Which days should students work on this task?</p>
 			<input id="assigneddates" type="hidden" name="assigneddates" value="" />
@@ -157,11 +157,11 @@
 	} ?>
 
 	<div class="form-group">
-		<label for="duration" class="col-md-3 control-label">Duration <i class="icon-time"></i></label>
+		<label for="duration" class="col-md-3 control-label">Duration:</label>
 		<div class="col-md-9">
 			<input type="hidden" name="duration" class="form-control" value="" />
-			<span class="help-text" id="duration-help"></span>
 			<div id="duration-slider"></div>
+			<span class="help-block" id="duration-help"></span>
 
 			<script>
 			$(function() {
@@ -188,7 +188,7 @@
 					if (mins < 180) {
 						dur = 'up to ' + dur;
 					}
-					$('#duration-help').html('This task should take <strong>' +  dur + '</strong> in total.');
+					$('#duration-help').html('(This task should take <strong>' +  dur + '</strong> in total.)');
 					$('input[name=duration]').val(mins);
 				}
 
