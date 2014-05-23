@@ -75,6 +75,95 @@ $(document).on('click', '.approveHomeworkButton', function(e){
 });
 
 
+
+/**
+ * Homework Notes
+ */
+$(document).on('click', '.editNotes', function(e){
+	e.preventDefault();
+
+	var hw = $(this).closest('.homework');
+
+	var notesP = hw.find('.notes');
+	var text = notesP.text();
+	var textarea = $('<textarea/>').val(text);
+
+	// Remember the text that was there first
+	hw.data('originalNotes', notesP.html());
+
+	$(notesP).html(textarea);
+	$(notesP).show();
+
+	hw.find('.editNotes').hide();
+	hw.find('.saveNotes, .cancelNotes').show();
+
+});
+
+function closeHomeworkNoteEditing(hw, reset) {
+
+	var textarea = hw.find('.notes textarea');
+
+	var notesP = hw.find('.notes');
+
+	if (reset) {
+		// Put the original text back
+		notesP.html(hw.data('originalNotes'));
+	} else {
+		// Use the new text
+		var text = textarea.val();
+		notesP.text(text);
+		notesP.html(nl2br(notesP.html()));
+	}
+
+	if (notesP.text().length < 1) {
+		notesP.hide();
+	}
+
+	hw.find('.editNotes').show();
+	hw.find('.saveNotes, .cancelNotes').hide();
+}
+
+$(document).on('click', '.cancelNotes', function(e){
+	e.preventDefault();
+	var hw = $(this).closest('.homework');
+	closeHomeworkNoteEditing(hw, true);
+});
+
+$(document).on('click', '.saveNotes', function(e){
+	e.preventDefault();
+	var hw = $(this).closest('.homework');
+
+	e.preventDefault();
+
+	var btn = $(this);
+	if (btn.hasClass('loading')) {
+		return false;
+	}
+
+	var hw = btn.closest('.homework');
+	var id = hw.attr('data-id');
+
+	btn.addClass('loading');
+	btn.children('i').removeClass().addClass('icon-spinner icon-spin');
+
+	var text = hw.find('textarea').val();
+
+	$.post('/blocks/homework/ajax/notes.php', {homeworkid:id, action:'save', notes:text}, function(res){
+
+		btn.removeClass('loading');
+		btn.children('i').removeClass().addClass('icon-save');
+
+		if (res.success) {
+			closeHomeworkNoteEditing(hw, false);
+		} else {
+			alert("Unable to save notes.");
+		}
+
+	});
+
+});
+
+
 /**
  * Editing homework descriptions inline - no longer used and a bit broken now because the 'you should spend' text is inside the <p> with the description
  */

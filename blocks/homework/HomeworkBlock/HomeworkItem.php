@@ -9,6 +9,7 @@ class HomeworkItem
 
 	private static $table = 'block_homework';
 	private static $assignedDaysTable = 'block_homework_assign_dates';
+	private static $notesTable = 'block_homework_notes';
 
 	public function __construct($row = null)
 	{
@@ -47,6 +48,40 @@ class HomeworkItem
 		global $DB;
 		$group = $DB->get_record('groups', array('id' => $this->row->groupid));
 		return $group->name;
+	}
+
+	/**
+	 * Get notes made about this item by the given user ID
+	 */
+	public function getNotes($userID)
+	{
+		global $DB;
+		$notes = $DB->get_field(self::$notesTable, 'notes', array('userid' => $userID, 'homeworkid' => $this->row->id));
+		return $notes;
+	}
+
+	/**
+	 * Save a user's notes about this item
+	 */
+	public function setNotes($userID, $notes)
+	{
+		global $DB;
+
+		if ($record = $DB->get_record(self::$notesTable, array('userid' => $userID, 'homeworkid' => $this->row->id))) {
+
+			$record->notes = $notes;
+			return $DB->update_record(self::$notesTable, $record);
+
+		} else {
+
+			$record = new \stdClass();
+			$record->homeworkid = $this->row->id;
+			$record->userid = $userID;
+			$record->notes = $notes;
+			return $DB->insert_record(self::$notesTable, $record);
+
+		}
+
 	}
 
 
