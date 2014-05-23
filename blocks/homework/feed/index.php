@@ -16,7 +16,7 @@ $user = $DB->get_record('user', array('username' => $username), '*', MUST_EXIST)
 require dirname(__DIR__) . '/HomeworkBlock/Block.php';
 $hwblock = new \SSIS\HomeworkBlock\Block;
 
-$hwblock->userID = $user->ID;
+$hwblock->userID = $user->id;
 
 // Check the key
 if ($key != $hwblock->generateFeedKey($user)) {
