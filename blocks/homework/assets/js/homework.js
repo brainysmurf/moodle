@@ -85,21 +85,28 @@ $(document).on('click', '.editNotes', function(e){
 	var hw = $(this).closest('.homework');
 
 	var notesP = hw.find('.notes');
-	var text = notesP.text();
-	var textarea = $('<textarea/>').val(text);
 
 	// Remember the text that was there first
 	hw.data('originalNotes', notesP.html());
 
+	notesP.find('a').each(function(){
+		$(this).replaceWith($(this).attr('href'));
+	});
+
+	var text = notesP.text();
+	var textarea = $('<textarea/>').val(text);
+
 	$(notesP).html(textarea);
 	$(notesP).show();
+
+	$('.notes textarea').autosize();
 
 	hw.find('.editNotes').hide();
 	hw.find('.saveNotes, .cancelNotes').show();
 
 });
 
-function closeHomeworkNoteEditing(hw, reset) {
+function closeHomeworkNoteEditing(hw, reset, text) {
 
 	var textarea = hw.find('.notes textarea');
 
@@ -110,9 +117,13 @@ function closeHomeworkNoteEditing(hw, reset) {
 		notesP.html(hw.data('originalNotes'));
 	} else {
 		// Use the new text
-		var text = textarea.val();
-		notesP.text(text);
-		notesP.html(nl2br(notesP.html()));
+		if (text) {
+			notesP.html(text);
+		} else {
+			text = textarea.val();
+			notesP.text(text);
+			notesP.html(nl2br(notesP.html()));
+		}
 	}
 
 	if (notesP.text().length < 1) {
@@ -154,7 +165,7 @@ $(document).on('click', '.saveNotes', function(e){
 		btn.children('i').removeClass().addClass('icon-save');
 
 		if (res.success) {
-			closeHomeworkNoteEditing(hw, false);
+			closeHomeworkNoteEditing(hw, false, res.text);
 		} else {
 			alert("Unable to save notes.");
 		}

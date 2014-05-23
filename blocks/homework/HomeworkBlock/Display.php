@@ -446,9 +446,7 @@ class Display
 				$r .= '<strong>' . $hw->title . '</strong><br/>';
 			}
 
-			$desc = htmlentities($hw->description, ENT_COMPAT, 'UTF-8', false);
-			$desc = nl2br($desc);
-			$r .= $desc;
+			$r .= $this->filterText($hw->description);
 
 			// Duration
 			$r .= '<span class="duration"><i class="icon-time"></i> This should take ' . $this->showDuration($hw->duration) . ' in total.</span>';
@@ -457,9 +455,7 @@ class Display
 
 		// Notes
 		if ($notes = $hw->getNotes($this->hwblock->userID())) {
-
-			$notes = htmlentities($notes, ENT_COMPAT, 'UTF-8', false);
-			$notes = nl2br($notes);
+			$notes = $this->filterText($notes);
 		} else  {
 			$notes = '';
 		}
@@ -571,14 +567,6 @@ class Display
 		return $str;
 	}
 
-	/**
-	* Returns an s to pluralize a word depending on if the given number is greater than 1
-	*/
-	private function s($num)
-	{
-		return $num == 1 ? '' : 's';
-	}
-
 
 	/**
 	 * Weekly stats view for pastoral staff
@@ -651,15 +639,85 @@ class Display
 		return $r;
 	}
 
-	function truncate($string, $limit , $append = '...')
+
+	/**
+	 * Utility functions...
+	 */
+
+	/**
+	* Returns an s to pluralize a word depending on if the given number is greater than 1
+	*/
+	private function s($num)
+	{
+		return $num == 1 ? '' : 's';
+	}
+
+	public function filterText($text)
+	{
+		$text = htmlentities($text, ENT_COMPAT, 'UTF-8', false);
+		$text = nl2br($text);
+		$text = $this->parseURLs($text);
+		return $text;
+	}
+
+	public function truncate($text, $limit, $append = '...')
 	{
 		if ($limit < 1) {
 			return '';
 		}
-		if (strlen($string) > $limit) {
-			return substr($string, 0, $limit - 3) . $append;
+		if (strlen($text) > $limit) {
+			return substr($text, 0, $limit - 3) . $append;
 		} else {
-			return $string;
+			return $text;
 		}
 	}
+
+	//Shows beginning and end of URL. Cuts out the middle
+	function truncateURL($text, $limit, $append = '...')
+	{
+		if ($limit < 1) {
+			return '';
+		}
+
+		$offset1 = ceil(0.65 * $limit) - 2;
+		$offset2 = ceil(0.30 * $limit) - 1;
+
+		if (strlen($text) > $limit) {
+			return substr($text, 0, $offset1) . '...' . substr($text, -$offset2);
+		} else {
+			return $text;
+		}
+	}
+
+	/**
+	 * Turn URLs into anchor tags, and images into images
+	 */
+	public function parseURLs($text, $maxurl_len = 50, $target = "_blank", $embedImages = true)
+	{
+		if (preg_match_all('/((ht|f)tps?:\/\/([\w\.]+\.)?[\w-]+(\.[a-zA-Z]{2,4})?[^\s\r\n"\'<>]+)/si', $text, $urls)) {
+
+			foreach (array_unique($urls[1]) as $url) {
+
+				$urltext = $this->truncateURL($url, $maxurl_len);
+
+				// Images
+				if ($embedImages && $this->isURLImage($url)) {
+					$text = str_replace($url, '<a href="' . $url . '" target="' . $target . '" class="embeddedPhoto"><img src="' . $url . '"  /></a>', $text);
+					continue;
+				}
+
+				$text = str_replace($url, '<a href="' . $url . '" target="' . $target . '" title="' . $url . '" rel="nofollow">' . $urltext . '</a>', $text);
+
+			}
+		}
+
+		return $text;
+	}
+
+	private function isURLImage($url)
+	{
+		$ext = strtolower(substr($url, strrpos($url, '.')));
+		return $ext == '.jpg' || $ext == '.png' || $ext == '.gif' || $ext == '.bmp';
+	}
+
 }

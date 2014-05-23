@@ -14,6 +14,7 @@ $PAGE->requires->css('/blocks/homework/assets/css/homework.css');
 $PAGE->requires->jquery();
 $PAGE->requires->js('/blocks/homework/assets/js/jquery.scrollTo.min.js');
 $PAGE->requires->js('/blocks/homework/assets/js/jquery.localScroll.min.js');
+$PAGE->requires->js('/blocks/homework/assets/js/jquery.autosize.min.js');
 $PAGE->requires->js('/blocks/homework/assets/js/date.js');
 $PAGE->requires->js('/blocks/homework/assets/js/homework.js?v=' . time());
 

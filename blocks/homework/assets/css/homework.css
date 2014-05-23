@@ -322,6 +322,11 @@ h3 {
 			-webkit-border-radius:3px;
 			-moz-border-radius:3px;
 			border-radius:3px;
+
+			-o-transition: height 0.2s;
+			-webkit-transition: height 0.2s;
+			-moz-transition: height 0.2s;
+			transition: height 0.2s;
 		}
 
 		.homework .buttons {

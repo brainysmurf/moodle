@@ -82,7 +82,6 @@ switch ($action) {
 		// Auto approve when a teacher edits
 		if ($mode == 'teacher' && !$homeworkItem->private) {
 			$homeworkItem->approved = 1;
-			print_object($homeworkItem);
 		}
 
 		if ($DB->update_record('block_homework', $homeworkItem)) {

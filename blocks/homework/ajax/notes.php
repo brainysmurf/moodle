@@ -18,7 +18,10 @@ $hw = \SSIS\HomeworkBlock\HomeworkItem::load($homeworkID);
 switch ($action) {
 
 	case 'save':
-		$success = $hw->setNotes($hwblock->userID(), $notes);
+		$response = array(
+			'success' => $hw->setNotes($hwblock->userID(), $notes),
+			'text' => $hwblock->display->filterText($notes)
+		);
 		break;
 
 }
@@ -26,4 +29,4 @@ switch ($action) {
 header('Cache-Control: no-cache, must-revalidate');
 header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 header('Content-type: application/json');
-echo json_encode(array('success' => $success));
+echo json_encode($response);
