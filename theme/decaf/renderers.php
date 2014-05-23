@@ -120,6 +120,14 @@ class theme_decaf_core_renderer extends core_renderer {
 		return $this->single_button($url, $editstring);
 	}
 
+	public function larrow() {
+		return '<i class="icon-caret-left"></i>';
+	}
+
+	public function rarrow() {
+		return '<i class="icon-caret-right"></i>';
+	}
+
 	public function set_really_editing($editing) {
 		$this->really_editing = $editing;
 	}
