@@ -17,6 +17,7 @@ class Display
 			'index' => array('index.php', '<i class="icon-calendar"></i> To Do'),
 			'classes' => array('classes.php', '<i class="icon-group"></i> View by Class'),
 			'history' => array('history.php', '<i class="icon-th-list"></i> View History'),
+			'icalfeed' => array('icalfeed.php', '<i class="icon-rss"></i> iCal'),
 		),
 		'teacher' => array(
 			'index' => array('index.php', '<i class="icon-check"></i> Manage Submissions'),
@@ -28,6 +29,7 @@ class Display
 			'index' => array('index.php', '<i class="icon-calendar"></i> To Do'),
 			'classes' => array('classes.php', '<i class="icon-group"></i> View by Class'),
 			'history' => array('history.php', '<i class="icon-th-list"></i> View History'),
+			'icalfeed' => array('icalfeed.php', '<i class="icon-rss"></i> iCal'),
 		),
 		'pastoral' => array(
 			'index' => array('index.php', '<i class="icon-home"></i> Overview'),
