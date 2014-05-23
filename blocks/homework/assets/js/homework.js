@@ -234,9 +234,13 @@ $(document).on('submit', '.addHomeworkForm', function(e){
 		errors = true;
 	}
 
-	if (!ensureFieldHasValue($(this).find('textarea[name=description]'), 'Please enter a description.')) {
+	if (!ensureFieldHasValue($(this).find('input[name=title]'), 'Please enter a title.')) {
 		errors = true;
 	}
+
+	/*if (!ensureFieldHasValue($(this).find('textarea[name=description]'), 'Please enter a description.')) {
+		errors = true;
+	}*/
 
 	if (!ensureFieldHasValue($(this).find('input[name=startdate]'), 'Please enter a start date.')) {
 		errors = true;

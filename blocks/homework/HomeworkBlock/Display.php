@@ -433,11 +433,15 @@ class Display
 
 		// Class (group) name
 		if ($showClassName) {
-			$r .= '<h4>' . $hw->groupName() . '</h4>';
+			$r .= '<h4>' . $hw->getGroupName() . '</h4>';
 		}
 
 		// Description
 		$r .= '<p>';
+
+			if ($hw->title) {
+				$r .= '<strong>' . $hw->title . '</strong><br/>';
+			}
 
 			$desc = htmlentities($hw->description, ENT_COMPAT, 'UTF-8', false);
 			$desc = nl2br($desc);

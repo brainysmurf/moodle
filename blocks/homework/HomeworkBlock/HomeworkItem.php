@@ -37,6 +37,21 @@ class HomeworkItem
 		return $this-row;
 	}
 
+	public function getTitle()
+	{
+		return !empty($this->row->title)  ? $this->row->title : $this->row->coursename;
+	}
+
+	public function getGroupName()
+	{
+		global $DB;
+		$group = $DB->get_record('groups', array('id' => $this->row->groupid));
+		return $group->name;
+	}
+
+
+
+
 	/**
 	 * Save any modifications to this object back to the database
 	 */
@@ -46,12 +61,6 @@ class HomeworkItem
 		return $DB->update_record('block_homework', $this->row);
 	}
 
-	public function groupName()
-	{
-		global $DB;
-		$group = $DB->get_record('groups', array('id' => $this->row->groupid));
-		return $group->name;
-	}
 
 	public function addAssignedDate($date)
 	{
