@@ -41,6 +41,43 @@ class theme_decaf_core_renderer extends core_renderer {
 			}); </script>';
 	}
 
+	public function rarrow() {
+		return '<i class="icon-caret-right"></i> ';
+	}
+
+	public function larrow() {
+		return '<i class="icon-caret-left"></i> ';
+	}
+
+	private function get_accesshide($text, $elem='span', $class='', $attrs='') {
+	    return "<$elem class=\"accesshide $class\" $attrs>$text</$elem>";
+	}
+
+	private function my_get_separator($text='/', $url='', $accesshide=true, $addclass='sep') {
+	    $arrowclass = 'arrow ';
+	    if (! $url) {
+	        $arrowclass .= $addclass;
+	    }
+	    $arrow = '<span class="'.$arrowclass.'"></span>';
+	    $htmltext = '';
+	    if ($text) {
+	        $htmltext = '<span class="arrow_text">'.$text.'</span>&nbsp;';
+	        if ($accesshide) {
+	            $htmltext = $this->get_accesshide($htmltext);
+	        }
+        }
+
+	    if ($url) {
+	        $class = 'arrow_link';
+	        if ($addclass) {
+	            $class .= ' '.$addclass;
+	        }
+	        return '<a class="'.$class.'" href="'.$url.'" title="'.preg_replace('/<.*?>/','',$text).'">'.$htmltext.$arrow.'</a>';
+	    }
+        return ' '.$arrow.$htmltext.' ';
+	}
+
+
 	/*
 		Breadcrumbs
 		SSIS modifies this to only include coures name followed by whatever activity after that
@@ -49,7 +86,7 @@ class theme_decaf_core_renderer extends core_renderer {
 	{
 		global $CFG;
 
-		$separator = get_separator();
+		$separator = $this->my_get_separator();
 
 		//Array of our items on the bar (<li> tags)
 		$listitems = array();
@@ -60,6 +97,7 @@ class theme_decaf_core_renderer extends core_renderer {
 
 		// Iterate the navarray and display each node
 		$items = $this->page->navbar->get_items();
+
 		foreach ( $items as $item )
 		{
 			if (!$item->parent) { continue; }
@@ -118,14 +156,6 @@ class theme_decaf_core_renderer extends core_renderer {
 		}
 
 		return $this->single_button($url, $editstring);
-	}
-
-	public function larrow() {
-		return '<i class="icon-caret-left"></i>';
-	}
-
-	public function rarrow() {
-		return '<i class="icon-caret-right"></i>';
 	}
 
 	public function set_really_editing($editing) {
