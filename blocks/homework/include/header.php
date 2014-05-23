@@ -11,14 +11,14 @@ require dirname(__DIR__) . '/HomeworkBlock/Block.php';
 $hwblock = new \SSIS\HomeworkBlock\Block;
 
 $PAGE->requires->css('/blocks/homework/assets/bootstrap/css/bootstrap.css');
-$PAGE->requires->css('/blocks/homework/assets/css/homework.css');
+$PAGE->requires->css('/blocks/homework/assets/css/homework.css?v=2');
 
 $PAGE->requires->jquery();
 $PAGE->requires->js('/blocks/homework/assets/js/jquery.scrollTo.min.js');
 $PAGE->requires->js('/blocks/homework/assets/js/jquery.localScroll.min.js');
 $PAGE->requires->js('/blocks/homework/assets/js/jquery.autosize.min.js');
 $PAGE->requires->js('/blocks/homework/assets/js/date.js');
-$PAGE->requires->js('/blocks/homework/assets/js/homework.js?v=' . time());
+$PAGE->requires->js('/blocks/homework/assets/js/homework.js?v=2');
 
 $PAGE->set_title(get_string('pagetitle', 'block_homework'));
 $PAGE->set_heading(get_string('pagetitle', 'block_homework'));
