@@ -563,6 +563,8 @@ function studentSearch() {
 		div.find('.courses').html(html);
 	});
 }
-if ($('.userList').length > 0) {
-	$('.userList input[type=text]').bindWithDelay('keyup', studentSearch, 500);
-}
+$(document).ready(function(){
+	if ($('.userList').length > 0) {
+		$('.userList input[type=text]').bindWithDelay('keyup', studentSearch, 500);
+	}
+});
