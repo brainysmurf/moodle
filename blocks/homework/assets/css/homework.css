@@ -400,4 +400,14 @@ h3 {
 	padding-top:30px;
 }
 
+.feedLink input {
+	display: block;
+	width: 100%;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	padding:3px;
+	margin-top:20px;
+}
+
 

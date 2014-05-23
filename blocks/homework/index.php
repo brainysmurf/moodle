@@ -50,6 +50,8 @@ switch ($hwblock->mode()) {
 		// Show the list
 		echo $hwblock->display->homeworkList($homework, 'assigneddate', 'To Do On ', 'l M jS Y', false, false);
 
+		echo $hwblock->display->icalFeedBox();
+
 		break;
 
 	case 'teacher':

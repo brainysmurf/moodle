@@ -11,6 +11,7 @@ class Display
 			'classes' => array('classes.php', '<i class="icon-group"></i> View by Class'),
 			'history' => array('history.php', '<i class="icon-th-list"></i> View History'),
 			'add' => array('add.php', '<i class="icon-plus-sign"></i> Add Homework'),
+			'icalfeed' => array('icalfeed.php', '<i class="icon-rss"></i> iCal'),
 		),
 		'pastoral-student' => array( // When a pastoral user clicks on a student (same as parent mode)
 			'index' => array('index.php', '<i class="icon-calendar"></i> To Do'),
@@ -110,6 +111,11 @@ class Display
 	 */
 	public function tabs($current = false, $subtabs = false, $currentsubtab = false, $groupid = false)
 	{
+		global $USER;
+		if (!$USER->id) {
+			return '';
+		}
+
 		$tabs = $this->possibleTabs[$this->hwblock->mode()];
 
 		$t = '';
@@ -515,9 +521,14 @@ class Display
 
 	private function showDuration($duration, $short = false)
 	{
-		$r .= '';
+		$r = '';
 
-		list($min, $max) = explode('-', $duration);
+		if (stripos('-', $duration)) {
+			list($min, $max) = explode('-', $duration);
+		} else {
+			$min = $duration;
+			$max = null;
+		}
 
 		if ($min == 0 && $max) {
 
@@ -639,6 +650,20 @@ class Display
 		return $r;
 	}
 
+
+	function icalFeedBox($button = true)
+	{
+		// Feed link
+		$r = '<div class="feedLink">';
+		$text = 'You can see due dates for your homework in iCal by adding this URL.';
+		if ($button) {
+			$text .= ' <a class="btn btn-mini btn-primary" href="icalfeed.php">Click here to learn how</a>';
+		}
+		$text .= '<input type="text" readonly="readonly" value="' . $this->hwblock->generateFeedURL() . '"/>';
+		$r .= $this->sign('calendar', 'iCal Feed', $text);
+		$r .= '</dv>';
+		return $r;
+	}
 
 	/**
 	 * Utility functions...

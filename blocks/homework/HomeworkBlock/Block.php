@@ -6,6 +6,7 @@ class Block
 {
 	public $today;
 	public $display;
+	public $userID;
 
 	public function __construct()
 	{
@@ -29,7 +30,12 @@ class Block
 	/**
 	 * Returns the userID of the current user, or the user to view info for if in parent mode
 	 */
-	public function userID() {
+	public function userID()
+	{
+		if ($this->userID) {
+			return $userID;
+		}
+
 		global $SESSION, $USER;
 
 		if (!empty($SESSION->homeworkBlockUser)) {
@@ -47,6 +53,39 @@ class Block
 			return $USER->id;
 		}
 	}
+
+	public function generateFeedKey($user)
+	{
+		global $DB;
+
+		$key = sha1($user->id . $user->username . $user->firstaccess . $user->timecreated);
+
+		return $key;
+	}
+
+	public function generateFeedURL($userID = false)
+	{
+		global $DB, $CFG;
+
+		if ($userID === false) {
+			$userID = $this->userID();
+		}
+		$user = $DB->get_record('user', array('id' => $userID));
+
+		$key = $this->generateFeedKey($user);
+
+		$url = $CFG->wwwroot . '/blocks/homework/feed/?';
+
+		$query = array(
+			'u' => $user->username,
+			'k' => $key
+		);
+
+		$url .= http_build_query($query);
+
+		return $url;
+	}
+
 
 	/**
 	 * Returns the mode the current user is in
@@ -270,6 +309,7 @@ class Block
 		$sql = 'SELECT ' . ($distinct ? 'DISTINCT' : 'CONCAT(hw.id, \'-\', days.id) AS key,') . '
 			hw.*,
 			days.date AS assigneddate,
+			crs.id AS courseid,
 			crs.fullname AS coursename,
 			usr.username AS username,
 			usr.firstname AS userfirstname,

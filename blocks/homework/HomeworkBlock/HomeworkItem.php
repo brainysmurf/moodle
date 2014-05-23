@@ -13,7 +13,7 @@ class HomeworkItem
 
 	public function __construct($row = null)
 	{
-		$this->row = $row ? $row : new stdClass();
+		$this->row = $row ? $row : new \stdClass();
 	}
 
 	public function __get($key)
@@ -161,12 +161,36 @@ class HomeworkItem
 	/**
 	 * Loads a HomeworkItem instance with info from the database for the given ID
 	 */
-	public static function load($homeworkid)
+	public static function load($homeworkid, $simple = false)
 	{
 		global $DB;
-		$row = $DB->get_record(self::$table, array(
-			'id' => $homeworkid
-		), '*', MUST_EXIST);
+		if ($simple) {
+			$row = $DB->get_record(self::$table, array(
+				'id' => $homeworkid
+			), '*', MUST_EXIST);
+		} else {
+
+			$sql = 'SELECT hw.*,
+				crs.id AS courseid,
+				crs.fullname AS coursename,
+				usr.username AS username,
+				usr.firstname AS userfirstname,
+				usr.lastname AS userlastname
+			FROM {block_homework} hw
+			LEFT JOIN {course} crs ON crs.id = hw.courseid
+			LEFT JOIN {user} usr ON usr.id = hw.userid
+			WHERE hw.id = ?';
+			$params = array(
+				'id' => $homeworkid
+			);
+
+			$rows = $DB->get_records_sql($sql, $params);
+			if (count($rows) < 1) {
+				throw new \Exception("Couldn't find that piece of homework");
+			}
+			$row = reset($rows);
+
+		}
 		return new HomeworkItem($row);
 	}
 }
