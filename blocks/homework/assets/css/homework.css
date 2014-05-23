@@ -322,33 +322,39 @@ h3 {
 			-webkit-border-radius:3px;
 			-moz-border-radius:3px;
 			border-radius:3px;
+
+			-o-transition: height 0.2s;
+			-webkit-transition: height 0.2s;
+			-moz-transition: height 0.2s;
+			transition: height 0.2s;
 		}
 
-		.approvalButtons,
-		.editButtons {
+		.homework .buttons {
 			display: block;
 			text-align: right;
 			margin-left: 10px;
 			position: relative;
 			top: -3px;
 			float:right;
+			margin-top:0;
 		}
-			.approvalButtons {
-				text-align:right;
+			.homework .approvalButtons {
 				float:none;
 				position:static;
 				margin-bottom:10px;
 			}
 
-			.approvalButtons a,
-			.editButtons a {
-				font-size:13px;
+			.homework .noteButtons {
+				float:none;
+				margin:15px 0 0 0;
+			}
+
+			.homework .buttons a {
 				margin-left:5px;
 				padding: 0 6px;
 				font-size: 11px;
 			}
-			.approvalButtons span,
-			.editButtons span {
+			.homework .buttons span {
 				font-size: 12px;
 				text-align: right;
 				margin-bottom:10px;
@@ -371,6 +377,15 @@ h3 {
 			font-family: Georgia, serif;
 			letter-spacing: 0.3px;
 			font-size:15px;
+		}
+
+		.homework .notes {
+			margin-left:100px;
+			margin-bottom:0;
+		}
+
+		.homeworkList p strong {
+			margin-bottom:7px;
 		}
 
 		.homeworkList .duration {

@@ -379,10 +379,12 @@ class Display
 	 */
 	private function homeworkItem($hw, $showClassName = false, $showAssignedDates = false)
 	{
+		// Is this item only visible to students in the future?
 		$future = $hw->startdate > $this->hwblock->today;
 
 		// Should we show the edit / delete buttons?
-		// TODO: Allow students to eddit their private items
+		// true if the item is a user's private item,
+		// or it's not private and the user is a techer for the course
 		$canEdit = $this->hwblock->canEditHomeworkItem($hw);
 
 		// Is this due in the past?
@@ -390,9 +392,10 @@ class Display
 
 		$r  = '<li class="homework ' . ($hw->approved ? 'approved' : 'unapproved') . ($canEdit ? ' canedit' : '') . ($past ? ' past' : '') . ($future ? ' future' : '') . ($hw->private ? ' private' : '') . '" data-id="' . $hw->id . '" data-duedate="'. $hw->duedate . '">';
 
+		// Button for teachers to approve pending homework
 		if (!$hw->approved && !$hw->private) {
 			// Only teachers should be seeing this
-			$r .= '<span class="approvalButtons">';
+			$r .= '<span class="buttons approvalButtons">';
 				$r .= '<span><i class="icon-user"></i> Submitted by ' . $hw->userfirstname . ' ' . $hw->userlastname . ' &nbsp;&nbsp; <i class="icon-warning-sign"></i> Not visible to students until approved</span> &nbsp;';
 				if ($canEdit) {
 					$r .= '<a class="approveHomeworkButton btn-mini btn btn-success" href="#"><i class="icon-ok"></i> Approve</a>';
@@ -401,14 +404,14 @@ class Display
 		}
 
 		if ($future) {
-			$r .= '<span class="approvalButtons">';
+			$r .= '<span class="buttons approvalButtons">';
 				$r .= '<span><i class="icon-pause"></i> Will not appear to students until ' . date('l M jS Y', strtotime($hw->startdate)) . '</span>';
 			$r .= '</span>';
 		}
 
 		// Edit buttons
 		if ($canEdit) {
-			$r .= '<span class="editButtons">';
+			$r .= '<span class="buttons editButtons">';
 				$r .= '<a class="btn-mini btn btn-info" href="add.php?action=edit&editid=' . $hw->id . '" title="Edit"><i class="icon-pencil"></i> Edit</a>';
 				$r .= '<a class="deleteHomeworkButton btn-mini btn btn-danger" href="#" title="Delete"><i class="icon-trash"></i> Delete</a>';
 			$r .= '</span>';
@@ -433,20 +436,43 @@ class Display
 
 		// Class (group) name
 		if ($showClassName) {
-			$r .= '<h4>' . $hw->groupName() . '</h4>';
+			$r .= '<h4>' . $hw->getGroupName() . '</h4>';
 		}
 
 		// Description
 		$r .= '<p>';
 
-			$desc = htmlentities($hw->description, ENT_COMPAT, 'UTF-8', false);
-			$desc = nl2br($desc);
-			$r .= $desc;
+			if ($hw->title) {
+				$r .= '<strong>' . $hw->title . '</strong><br/>';
+			}
+
+			$r .= $this->filterText($hw->description);
 
 			// Duration
 			$r .= '<span class="duration"><i class="icon-time"></i> This should take ' . $this->showDuration($hw->duration) . ' in total.</span>';
 
 		$r .= '</p>';
+
+		// Notes
+		if ($notes = $hw->getNotes($this->hwblock->userID())) {
+			$notes = $this->filterText($notes);
+		} else  {
+			$notes = '';
+		}
+
+		$r .= '<p class="notes" ' . ($notes ? '' : 'style="display:none;"') . '>' . $notes . '</p>';
+
+
+		if ($this->hwblock->mode() == 'teacher' || $this->hwblock->mode() == 'student') {
+			// Edit notes button
+			$r .= '<span class="buttons noteButtons">';
+				$r .= '<a class="btn-mini btn btn-primary editNotes" href="#"><i class="icon-comment"></i> Add Notes</a>';
+				$r .= '<a class="btn-mini btn btn-danger cancelNotes" href="#" style="display:none;"><i class="icon-remove"></i> Cancel</a>';
+				$r .= '<a class="btn-mini btn btn-success saveNotes" href="#" style="display:none;"><i class="icon-save"></i> Save Notes</a>';
+			$r .= '</span>';
+		}
+
+		$r .= '<div class="clear"></div>';
 
 		$r .= '</li>';
 		return $r;
@@ -541,14 +567,6 @@ class Display
 		return $str;
 	}
 
-	/**
-	* Returns an s to pluralize a word depending on if the given number is greater than 1
-	*/
-	private function s($num)
-	{
-		return $num == 1 ? '' : 's';
-	}
-
 
 	/**
 	 * Weekly stats view for pastoral staff
@@ -621,15 +639,85 @@ class Display
 		return $r;
 	}
 
-	function truncate($string, $limit , $append = '...')
+
+	/**
+	 * Utility functions...
+	 */
+
+	/**
+	* Returns an s to pluralize a word depending on if the given number is greater than 1
+	*/
+	private function s($num)
+	{
+		return $num == 1 ? '' : 's';
+	}
+
+	public function filterText($text)
+	{
+		$text = htmlentities($text, ENT_COMPAT, 'UTF-8', false);
+		$text = nl2br($text);
+		$text = $this->parseURLs($text);
+		return $text;
+	}
+
+	public function truncate($text, $limit, $append = '...')
 	{
 		if ($limit < 1) {
 			return '';
 		}
-		if (strlen($string) > $limit) {
-			return substr($string, 0, $limit - 3) . $append;
+		if (strlen($text) > $limit) {
+			return substr($text, 0, $limit - 3) . $append;
 		} else {
-			return $string;
+			return $text;
 		}
 	}
+
+	//Shows beginning and end of URL. Cuts out the middle
+	function truncateURL($text, $limit, $append = '...')
+	{
+		if ($limit < 1) {
+			return '';
+		}
+
+		$offset1 = ceil(0.65 * $limit) - 2;
+		$offset2 = ceil(0.30 * $limit) - 1;
+
+		if (strlen($text) > $limit) {
+			return substr($text, 0, $offset1) . '...' . substr($text, -$offset2);
+		} else {
+			return $text;
+		}
+	}
+
+	/**
+	 * Turn URLs into anchor tags, and images into images
+	 */
+	public function parseURLs($text, $maxurl_len = 50, $target = "_blank", $embedImages = true)
+	{
+		if (preg_match_all('/((ht|f)tps?:\/\/([\w\.]+\.)?[\w-]+(\.[a-zA-Z]{2,4})?[^\s\r\n"\'<>]+)/si', $text, $urls)) {
+
+			foreach (array_unique($urls[1]) as $url) {
+
+				$urltext = $this->truncateURL($url, $maxurl_len);
+
+				// Images
+				if ($embedImages && $this->isURLImage($url)) {
+					$text = str_replace($url, '<a href="' . $url . '" target="' . $target . '" class="embeddedPhoto"><img src="' . $url . '"  /></a>', $text);
+					continue;
+				}
+
+				$text = str_replace($url, '<a href="' . $url . '" target="' . $target . '" title="' . $url . '" rel="nofollow">' . $urltext . '</a>', $text);
+
+			}
+		}
+
+		return $text;
+	}
+
+	private function isURLImage($url)
+	{
+		$ext = strtolower(substr($url, strrpos($url, '.')));
+		return $ext == '.jpg' || $ext == '.png' || $ext == '.gif' || $ext == '.bmp';
+	}
+
 }

@@ -32,7 +32,7 @@
 
 	?>
 	<div class="form-group">
-		<label for="shared" class="col-md-3 control-label">Add For <i class="icon-user"></i></label>
+		<label for="shared" class="col-md-3 control-label">Add For:</label>
 		<div class="col-md-9">
 			<div class="row addHomeworkPrivateToggle">
 				<div class="col-md-6">
@@ -82,7 +82,14 @@
 	</div>
 
 	<div class="form-group">
-		<label for="description" class="col-md-3 control-label">Description:</i></label>
+		<label for="title" class="col-md-3 control-label">Title:</label>
+		<div class="col-md-9">
+			<input type="text" id="title" name="title" class="form-control" placeholder="Title of the assignment" value="<?=(FORMACTION == 'edit' ? $editItem->title : '')?>" />
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label for="description" class="col-md-3 control-label">Description:</label>
 		<div class="col-md-9">
 			<textarea name="description" class="form-control" placeholder="What is the homework?" rows="10"><?=(FORMACTION == 'edit' ? $editItem->description : '')?></textarea>
 		</div>
@@ -194,17 +201,13 @@
 
 				<?php
 					if (FORMACTION == 'edit') {
-						#$duration = explode('-', $editItem->duration);
-						$initialMinDuration = $duration;
-						#$initialMaxDuration = $duration[1];
+						$initialMinDuration = $editItem->duration;
 					} else {
 						$initialMinDuration = 30;
-						#$initialMaxDuration = 30;
 					}
 				?>
 
 				$('#duration-slider').slider({
-					//range: true,
 					min: 0,
 					step: 15,
 					max: 180,
@@ -214,7 +217,7 @@
 					}
 				});
 
-				setDuration(<?=$initialMinDuration?>); //, <?=$initialMaxDuration?>);
+				setDuration(<?=$initialMinDuration?>);
 			});
 			</script>
 		</div>

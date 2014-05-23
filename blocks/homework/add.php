@@ -51,7 +51,8 @@ switch ($action) {
 		$courseid = required_param('courseid', PARAM_INT);
 		$private = optional_param('private', null, PARAM_INT);
 		$groupid = optional_param('groupid', null, PARAM_INT);
-		$description = required_param('description', PARAM_RAW);
+		$title = required_param('title', PARAM_RAW);
+		$description = optional_param('description', '', PARAM_RAW);
 		$startdate = required_param('startdate', PARAM_RAW);
 		$assigneddates = required_param('assigneddates', PARAM_RAW);
 		$duedate = optional_param('duedate', null, PARAM_RAW);
@@ -72,11 +73,13 @@ switch ($action) {
 
 		$homeworkItem->courseid = $courseid;
 		$homeworkItem->groupid = $groupid;
+		$homeworkItem->title = $title;
 		$homeworkItem->description = $description;
 		$homeworkItem->startdate = $startdate;
 		$homeworkItem->duedate = $duedate;
 		$homeworkItem->duration = $duration;
 
+		// Auto approve when a teacher edits
 		if ($mode == 'teacher' && !$homeworkItem->private) {
 			$homeworkItem->approved = 1;
 		}
@@ -114,7 +117,8 @@ switch ($action) {
 		if ($groupid == -1) {
 			$groupid = 0;
 		}
-		$description = required_param('description', PARAM_RAW);
+		$title = required_param('title', PARAM_RAW);
+		$description = optional_param('description', '', PARAM_RAW);
 		$startdate = required_param('startdate', PARAM_RAW);
 		$assigneddates = required_param('assigneddates', PARAM_RAW);
 		$duedate = optional_param('duedate', null, PARAM_RAW);
@@ -129,6 +133,7 @@ switch ($action) {
 
 		$homeworkItem->courseid = $courseid;
 		$homeworkItem->groupid = $groupid;
+		$homeworkItem->title = $title;
 		$homeworkItem->description = $description;
 		$homeworkItem->startdate = $startdate;
 		$homeworkItem->duedate = $duedate;
