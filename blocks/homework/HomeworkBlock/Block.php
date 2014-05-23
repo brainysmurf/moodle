@@ -33,7 +33,7 @@ class Block
 	public function userID()
 	{
 		if ($this->userID) {
-			return $userID;
+			return $this->userID;
 		}
 
 		global $SESSION, $USER;
@@ -542,4 +542,42 @@ class Block
 	{
 		return $this->getUsersCourseIDs($userid, 3);
 	}
+
+
+/**
+ * select distinct(usr.*)
+* from ssismdl_groups_members grpmbr
+* join ssismdl_user usr on usr.id = grpmbr.userid
+* join ssismdl_groups grp on grp.id = grpmbr.groupid
+* join ssismdl_context ctx on ctx.instanceid = grp.courseid and ctx.contextlevel = 50
+* join ssismdl_role_assignments ra on ra.contextid = ctx.id
+* where groupid = 789
+ */
+	/*public function getTeacherForGroupID($groupID)
+	{
+		global $DB;
+
+
+
+		$teachers = $DB->get_records_sql($sql, $params);
+	}*/
+
+	/**
+	 * Email alerts
+	 */
+	/*public function emailTeacherOnNewHomework($homeworkItem, $from)
+	{
+		$subject = "Homework submitted for " . $homeworkItem->coursename;
+		$teachers = $this->getTeacherForGroupID($homeworkItem->groupid);
+
+		$messagehtml = 'Hello!';
+
+		$messagetext = strip_tags($messagehtml);
+
+		foreach ($teachers as $teacher) {
+
+			email_to_user($user, $from, $subject, $messagetext, $messagehtml);
+
+		}
+	}*/
 }

@@ -170,6 +170,9 @@ switch ($action) {
 				// Unapproved homework
 				echo '<div class="alert alert-success"><i class="icon-ok"></i> The homework has been submitted successfully and will become visible to everybody in the class once a teacher approves it.</div>';
 
+				// Email the teacher
+				#$hwblock->emailTeacherOnNewHomework($homeworkItem, $USER);
+
 			}
 
 			echo '<hr/>';
