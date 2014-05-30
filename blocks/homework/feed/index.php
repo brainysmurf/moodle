@@ -1,5 +1,9 @@
 <?php
 
+// Allow caching for 30 minutes
+session_cache_expire(30);
+session_cache_limiter('public');
+
 /**
  * Return an iCal compatible feed of a user's homework
  */
