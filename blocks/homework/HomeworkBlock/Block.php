@@ -213,6 +213,57 @@ class Block
 		return array_keys($groups);
 	}
 
+	public function getAllGroupsFromTimeable($grade = null)
+	{
+		global $DB;
+
+		$sql = 'SELECT
+			DISTINCT(tt.name) AS name,
+			grp.id AS id,
+			crs.id AS courseid,
+			crs.fullname AS coursename,
+			CONCAT(teacher.firstname, \' \', teacher.lastname) AS teacher
+		FROM {ssis_timetable_info} tt
+		JOIN {groups} grp ON grp.name = tt.name
+		JOIN {course} crs ON crs.id = grp.courseid
+		JOIN {user} teacher ON teacher.id = tt.teacheruserid
+		WHERE tt.active = 1';
+		$params = array();
+
+		if (!is_null($grade)) {
+			$sql .= ' AND ? = ANY (string_to_array(grade, \',\'))';
+			$params[] = $grade;
+		}
+
+		$sql .= ' ORDER BY coursename, tt.name';
+
+		$groups = $DB->get_records_sql($sql, $params);
+
+		//Put it into the format expected
+
+		foreach ($groups as $group) {
+
+			if (!isset($classes[$group->courseid])) {
+				$classes[$group->courseid] = array();
+
+				$course = new \stdClass();
+				$course->id = $group->courseid;
+				$course->fullname = $group->coursename;
+
+				$classes[$group->courseid]['course'] = $course;
+				$classes[$group->courseid]['groups'] = array();
+			}
+
+			$classes[$group->courseid]['groups'][$group->id] = array(
+				'id' => $group->id,
+				'name' => $group->name,
+				'teacher' => $group->teacher
+			);
+		}
+
+		return $classes;
+	}
+
 	/**
 	 * Return every group (class) in the school
 	 * TODO: This needs to come from somewhere better

@@ -36,6 +36,14 @@ switch ($hwblock->mode()) {
 
 		echo $hwblock->display->weekStats($stats);
 
+		// Show classes in this grade
+
+		echo '<hr/>';
+
+		echo '<h2><i class="icon-group"></i> Grade ' . $grade . ' Classes</h2>';
+		$classes = $hwblock->getAllGroupsFromTimeable($grade);
+		echo $hwblock->display->classList($classes);
+
 		break;
 }
 

@@ -242,11 +242,9 @@ class Display
 					}
 					$r .= $enrollment['course']->fullname;
 
-					echo $this->hwblock->mode;
-
-					if ($this->hwblock->mode != 'student') {
-						if (trim($group['teacher'])) {
-							$r .= '<span>' . $group['teacher'] . '\'s Class</span>';
+					if ($this->hwblock->mode() != 'student') {
+						if (!empty($group['teacher'])) {
+							$r .= '<span>' . $group['teacher'] . ' <span style="font-size:9px;">' . $group['name'] . '</span></span>';
 						} else {
 							$r .= '<span>' . $group['name'] . '</span>';
 						}

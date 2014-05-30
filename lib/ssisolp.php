@@ -281,9 +281,6 @@ class OLPManager {
 
 	/**
 	 * Enrol the given user as an editor (Teacher) in the given OLP course
-	 * @return int 1 if the user was already enroled
-	 * @return int 2 if the user has been enroled now
-	 * @return int false if the user is not enrolled
 	 */
 	public function enrolStudentInOLP($user, $course)
 	{
