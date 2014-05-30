@@ -176,7 +176,7 @@ class OLPManager {
 			return $course;
 		} catch (Exception $e) {
 
-			// Try getting it by shortname 
+			// Try getting it by shortname
 			if ($course = $this->getUsersOLPByShortName($user)) {
 				$this->output($user, 'OLP course was found by shortname but not idnumber', 'WARNING');
 				return $course;
@@ -280,7 +280,7 @@ class OLPManager {
 
 
 	/**
-	 * Return the given user as an editor (Teacher) in the given OLP course
+	 * Enrol the given user as an editor (Teacher) in the given OLP course
 	 * @return int 1 if the user was already enroled
 	 * @return int 2 if the user has been enroled now
 	 * @return int false if the user is not enrolled
