@@ -113,7 +113,7 @@ class Display
 		$ret .= $starttable;
 		$ret .= $startrow;
 		$ret .= '<td style="color:#eee;background-color:#eee;"></td>';
-		$ret .= '<th colspan=3>For reference, which is your preference on engaging your chosen PD? (not binding)</th>';
+		$ret .= '<th>Survey: How would you prefer to engage on your chosen PD? (non-binding)</th>';
 		$ret .= $endrow;
 
 		$ret .= $startrow;
@@ -125,9 +125,11 @@ class Display
 			array('text'=>' Skill Share', 'value'=>'Skill Share')
 			);
 
+		$ret .= '<td>';
 		foreach ($subchoices as $area) {
-			$ret .= '<td><input type="radio" name="group2" value="'.$area['value'].'">'.$area['text'].'</td>';
+			$ret .= '<input type="radio" name="group2" value="'.$area['value'].'">'.$area['text'].'<br/>';
 		}
+		$ret .= '</td>';
 
 		$ret .= $endrow;
 		$ret .= $endtable;
@@ -196,7 +198,13 @@ class Display
 			}
 			$season = $matches[1];
 			$name = trim(preg_split($pattern, $course->fullname)[1]);
-			$info_by_seasons[$season][] = $name;
+			if ($season == 'ALL') {
+				foreach (array("S1", "S2", "S3") as $this_season) {
+					$info_by_seasons[$this_season][] = $name;
+				}
+			} else {
+				$info_by_seasons[$season][] = $name;
+			}
 		}
 		$pd_data = json_decode($pd->data);
 
