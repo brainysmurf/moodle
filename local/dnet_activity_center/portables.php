@@ -11,8 +11,8 @@ function setup_page() {
 
     $PAGE->set_context(context_system::instance());
     $PAGE->set_url(derive_plugin_path_from('index.php'));
-    $PAGE->set_title("DragonNet Activities Management Center");
-    $PAGE->set_heading("DragonNet Activities Management Center");
+    $PAGE->set_title("Activities Center");
+    $PAGE->set_heading("Activities Center");
 
     echo $OUTPUT->header();
 }

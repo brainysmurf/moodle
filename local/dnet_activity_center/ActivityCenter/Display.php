@@ -12,7 +12,8 @@ class Display
 	private $tabs = array( // Array of which tabs are shown in differnet modes
 		'teacher' => array(
 			'overview' => array('index.php', '<i class="icon-ok-sign"></i> Overview'),
-			'all' => array('all.php', '<i class="icon-rocket"></i> Pick Activities'),
+			'all-elem' => array('all-elem.php', '<i class="icon-rocket"></i> Pick Elementary Activities'),
+			'all-sec' => array('all-sec.php', '<i class="icon-rocket"></i> Pick Secondary Activities'),
 			'suggest' => array('suggest.php', '<i class="icon-plus-sign"></i> Suggest A New Activity'),
 			'pdframework' => array('pd-framework.php', '<i class="icon-rocket"></i> Choose PD Strand'),
 		),
