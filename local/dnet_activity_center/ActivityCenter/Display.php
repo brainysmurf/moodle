@@ -159,7 +159,7 @@ class Display
 			            success: function(data, textStatus, jqXHR)
 			            {
 			                $("#dialog").dialog("open");
-			                window.location.href="https://dragonnet.ssis-suzhou.net/local/dnet_activity_center/teacher/index.html";
+			                window.location.reload();
 			            },
 			            error: function(jqXHR, textStatus, errorThrown)
 			            {
