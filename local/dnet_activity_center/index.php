@@ -19,11 +19,11 @@ if (is_admin()) {
 
 } else if (is_teacher()) {
 
-	redirect('teacher/my.php');
+	redirect('teacher/index.php');
 
 }  else if (is_student()) {
 
-	redirect('student/my.php');
+	redirect('student/index.php');
 
 }  else if (is_parent()) {
 
