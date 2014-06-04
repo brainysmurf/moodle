@@ -11,9 +11,10 @@ class Display
 	private $activityCenter;
 	private $tabs = array( // Array of which tabs are shown in differnet modes
 		'teacher' => array(
-			'myactivities' => array('index.php', '<i class="icon-ok-sign"></i> My Activities'),
+			'overview' => array('index.php', '<i class="icon-ok-sign"></i> Overview'),
 			'all' => array('all.php', '<i class="icon-rocket"></i> Pick Activities'),
 			'suggest' => array('suggest.php', '<i class="icon-plus-sign"></i> Suggest A New Activity'),
+			'pdframework' => array('pd-framework.php', '<i class="icon-rocket"></i> Choose PD Strand'),
 		),
 	);
 
@@ -21,7 +22,8 @@ class Display
 	{
 		$this->activityCenter = $activityCenter;
 
-		global $PAGE;
+		global $PAGE, $OUTPUT;
+		$this->output = $OUTPUT;
 		$PAGE->requires->css('/blocks/homework/assets/bootstrap/css/bootstrap.css');
 		$PAGE->requires->css('/blocks/homework/assets/css/homework.css');
 		$PAGE->requires->jquery();
@@ -44,6 +46,215 @@ class Display
 	}
 
 
+	public function PDSelection($pdchoice)
+	{
+		if (!$pdchoice){
+			echo 'No PD data to display<br />';
+			return;
+		}
+
+		echo $pdchoice->data;
+	}
+
+	public function displayPDFramework($stuff)
+	{
+		if (empty($stuff->data)) {
+			return "Nothing to see";
+		}
+		return $stuff->data;
+	}
+
+	public function displayPDFrameworkChoices($userid)
+	{
+
+		$ret = '<form id="choice_form" action="#">';
+
+		$choices = array(
+			array('text'=>' Learning Engagements (Inquiry)', 'value'=>'(S1) Learning Engagement'),
+			array('text'=>' Assessment & Feedback', 'value'=>'(S2) Assessment & Feedback'),
+			array('text'=>' Differentiation', 'value'=>'(S3) Differentiation')
+			);
+
+		$ret .= '
+		<style type="text/css">
+		.tftable {font-size:18px;color:#333333;width:100%;border-width: 1px;border-color: #729ea5;border-collapse: collapse;}
+		.tftable th {font-size:18px;color:#eee;background-color:#1662A3;border-width: 1px;padding: 8px;border-style: solid;border-color: #000;text-align:left;}
+		.tftable tr {background-color:#d4e3e5;}
+		.tftable td {font-size:18px;border-width: 1px;padding: 8px;border-style: solid;border-color: #729ea5;}
+		</style>';
+
+		$starttable = '<table class="tftable" border="1">';
+		$startrow = '<tr>';
+		$endrow = '</tr>';
+		$endtable = '</table>';
+		$seasons = array(
+			"S1"=>"Season 1",
+			"S2"=>"Season 2",
+			"S3"=>"Season 3"
+			);
+
+		$ret .= $starttable;
+		$ret .= $startrow;
+		$ret .= '<td style="color:#eee;background-color:#eee;"></td>';
+		foreach ($seasons as $season) {
+			$ret .= '<th>'.$season.'</th>';
+		}
+		$ret .= $endrow;
+
+		$ret .= $startrow;
+		$ret .= '<td><b>Choose PD:</b></td>';
+		foreach ($choices as $area) {
+			$ret .= '<td><input type="radio" name="group1" value="'.$area['value'].'">'.$area['text'].'</td>';
+		}
+		$ret .= $endrow;
+		$ret .= $endtable;
+
+		$ret .= '<br />';
+		$ret .= $starttable;
+		$ret .= $startrow;
+		$ret .= '<td style="color:#eee;background-color:#eee;"></td>';
+		$ret .= '<th colspan=3>For reference, which is your preference on engaging your chosen PD? (not binding)</th>';
+		$ret .= $endrow;
+
+		$ret .= $startrow;
+		$ret .= '<td><b>Choose How:</b></td>';
+
+		$subchoices = array(
+			array('text'=>' School Improvement Teams', 'value'=>'SIT'),
+			array('text'=>' Reflective Teaching', 'value'=>'Reflective'),
+			array('text'=>' Skill Share', 'value'=>'Skill Share')
+			);
+
+		foreach ($subchoices as $area) {
+			$ret .= '<td><input type="radio" name="group2" value="'.$area['value'].'">'.$area['text'].'</td>';
+		}
+
+		$ret .= $endrow;
+		$ret .= $endtable;
+
+		$ret .= '</form>';
+
+        $ret .= '<ul class="buttons"><br />';
+        $ret .= '<a id="submit_button" href="'.$CFG->wwwroot.'" class="btn"><i class="icon-plus-sign "></i> (Re-)submit This Choice</a>';
+        $ret .= '</ul>';
+		$ret .= '
+			<script>
+				$("#submit_button").bind("click", function(e) {
+        			e.preventDefault();
+			        var formURL = "submit_choice.php";
+			        var formData = {
+			            "category": $("input[name=group1]:radio:checked").val(),
+			            "implementation": $("input[name=group2]:radio:checked").val(),
+			            "userid": "'.$userid.'"
+			        };
+			        $.ajax(
+			        {
+			            url : formURL,
+			            data: formData,
+			            async: true,
+			            type: "GET",
+			            success: function(data, textStatus, jqXHR)
+			            {
+			                $("#dialog").dialog("open");
+			                window.location.href="https://dragonnet.ssis-suzhou.net/local/dnet_activity_center/teacher/index.html";
+			            },
+			            error: function(jqXHR, textStatus, errorThrown)
+			            {
+			                alert(\'Something wrong, did you not select two choices?\');
+			            }
+			        });
+        		});
+        	</script>';
+
+		return $ret;
+	}
+
+
+	public function overview($courses, $pd)
+	{
+		?>
+
+		<style type="text/css">
+		.tftable {font-size:18px;color:#333333;width:100%;border-width: 1px;border-color: #729ea5;border-collapse: collapse;}
+		.tftable th {font-size:18px;color:#eee;background-color:#1662A3;border-width: 1px;padding: 8px;border-style: solid;border-color: #000;text-align:left;}
+		.tftable tr {background-color:#d4e3e5;}
+		.tftable td {font-size:18px;border-width: 1px;padding: 8px;border-style: solid;border-color: #729ea5;}
+		</style>
+
+		<?php
+
+		$info_by_seasons = array(
+			"S1" => array(),
+			"S2" => array(),
+			"S3" => array()
+			);
+		$pattern = '/^\((.*?)\)/';  # start of string has a parens
+		foreach ($courses as $course) {
+			$season = preg_match($pattern, $course->fullname, $matches);
+			if (!$season) {
+				continue;
+			}
+			$season = $matches[1];
+			$name = trim(preg_split($pattern, $course->fullname)[1]);
+			$info_by_seasons[$season][] = $name;
+		}
+		$pd_data = json_decode($pd->data);
+
+		$conflict = false;
+		if ($pd_data->season and $something = $info_by_seasons[$pd_data->season]) {
+			echo $this->output->sign('question-sign', 'PD and Activities Conflict?', 'Are you sure you want to double-book yourself like that?');
+			$conflict = $pd_data->season;
+		}
+
+		$starttable = '<table class="tftable" border="1">';
+		$startrow = '<tr>';
+		$endrow = '</tr>';
+		$endtable = '</table>';
+		$seasons = array(
+			"S1"=>"Season 1",
+			"S2"=>"Season 2",
+			"S3"=>"Season 3"
+			);
+
+		echo $starttable;
+		echo $startrow;
+		echo '<td style="color:#eee;background-color:#eee;"></td>';
+		foreach ($seasons as $season) {
+			echo '<th>'.$season.'</th>';
+		}
+		echo $endrow;
+
+		echo $startrow;
+		echo '<td><b>Activities</b></td>';
+		foreach ($info_by_seasons as $items) {
+			echo '<td>';
+			foreach ($items as $item) {
+				echo $item.'<br />';
+			}
+			echo '</td>';
+		}
+		echo $endrow;
+
+		echo $startrow;
+		echo '<td><b>PD</b></td>';
+		foreach ($seasons as $season=>$data) {
+			echo '<td>';
+
+			if ($pd_data->season == $season) {
+				if ($conflict) {
+					echo '<b>'.$pd_data->strand.'</b>';
+				} else {
+					echo $pd_data->strand;
+				}
+			}
+			echo '</td>';
+		}
+		echo $endrow;
+
+		echo $endtable;
+
+	}
+
 	/**
 	 * Show an array of courses as buttons, with a filter box
 	 */
@@ -57,11 +268,9 @@ class Display
 
 		$r  = '<div class="courseList ' . $listClasses . '">';
 		$r .= '<input type="text" class="filter" placeholder="Type here to filter by name..." />';
-
 		$r .= '<div class="row courses">';
 
 		foreach ($courses as $course) {
-
 			// Find the activity manager
 			$managers = $this->activityCenter->data->getActivitiesManaged($course->id);
 			$managerNames = array();
