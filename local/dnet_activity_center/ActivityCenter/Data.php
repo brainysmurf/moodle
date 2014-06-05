@@ -28,6 +28,17 @@ class Data
 		return $info;
 	}
 
+	public function getUserGoal($userid = false)
+	{
+		if (!$userid) {
+			return false;
+		}
+		global $DB;
+		$field = $DB->get_record('user_info_field', array('shortname'=>'goal20145'), '*', MUST_EXIST);
+		$info = $DB->get_record('user_info_data', array('userid'=>$userid, 'fieldid'=>$field->id));
+		return $info;
+	}
+
 	/**
 	 * Return all pd the given user ID is signed up for
 	 */
