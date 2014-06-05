@@ -256,7 +256,7 @@ class Display
 				$info_by_seasons[$season][] = $name;
 			}
 		}
-		$pd_data = json_decode($pd->data);
+
 
 		$conflict = false;
 		if ($pd_data->season and $something = $info_by_seasons[$pd_data->season]) {
