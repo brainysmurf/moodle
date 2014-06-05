@@ -15,7 +15,7 @@ class Display
 			'all-elem' => array('all-elem.php', '<i class="icon-rocket"></i> Pick Elementary Activities'),
 			'all-sec' => array('all-sec.php', '<i class="icon-rocket"></i> Pick Secondary Activities'),
 			'pdframework' => array('pd-framework.php', '<i class="icon-star"></i> Choose PD Strand'),
-			'goals' => array('goals.php', '<i class="icon-pencil"></i> Enter Your Goal'),
+			'goals' => array('goals.php', '<i class="icon-pencil"></i> Enter Your Goals'),
 		),
 	);
 
@@ -52,10 +52,35 @@ class Display
 
 	public function displayEnterComment($userid, $text)
 	{
+		global $CFG;
+		$info = json_decode($text->data);
+
 		$ret = '<div class="courseList">';   # this is needed just for the CSS
-		$ret .= '<textarea id="goal_info" class="filter" rows="3" style="font-size:18px;" />';
-		$ret .= $text->data;
+
+		$ret .= '<p margin-top:10px;><b>Department Goal(s):</b>';
+		$ret .= ' (These goals come directly from your Department.)</p>';
+		$ret .= '<textarea id="department_goal" class="filter" rows="3" style="font-size:18px;" />';
+		$ret .= $info->department;
 		$ret .= '</textarea>';
+
+		$ret .= '<br/><p><b>Individual Goal(s):</b>';
+		$ret .= ' (Forumlate a goal according to the listed items 1-5 in the linked document.)</p>';
+		$ret .= '<textarea id="individual_goal" class="filter" rows="3" style="font-size:18px;" />';
+		$ret .= $info->individual;
+		$ret .= '</textarea>';
+
+		$ret .= '<br/><p><b>Pastoral or Leadership Goal(s)</b>' ;
+		$ret .= ' (Those who are not PoRs formulate a SMART goal relevant to their role of supporting student well-being. Those who are PoRs formulate a leadership SMART goal relevant to their development as leaders.)</p>';
+		$ret .= '<textarea id="pastleadership_goal" class="filter" rows="3" style="font-size:18px;" />';
+		$ret .= $info->pastleadership;
+		$ret .= '</textarea>';
+
+		$ret .= '<br/><p><b>Additional Individual Goal(s):</b>';
+		$ret .= ' (Addtitional goals that do not fit in the above headings <i>e.g.</i> some initiative.)</p>';
+		$ret .= '<textarea id="additional_goal" class="filter" rows="3" style="font-size:18px;" />';
+		$ret .= $info->additional;
+		$ret .= '</textarea>';
+
         $ret .= '<ul class="buttons"><br />';
         $ret .= '<a id="submit_button" href="'.$CFG->wwwroot.'" class="btn"><i class="icon-plus-sign "></i> (Re-)submit This Goal</a>';
         $ret .= '</ul>';
@@ -65,7 +90,10 @@ class Display
         			e.preventDefault();
 			        var formURL = "submit_goal.php";
 			        var formData = {
-			            "text": $("#goal_info").val(),
+			            "department": $("#department_goal").val(),
+			            "individual": $("#individual_goal").val(),
+			            "pastleadership": $("#pastleadership_goal").val(),
+			            "additional": $("#additional_goal").val(),
 			            "userid": "'.$userid.'"
 			        };
 			        $.ajax(
@@ -234,7 +262,6 @@ class Display
 
 		<?php
 
-
 		$info_by_seasons = array(
 			"S1" => array(),
 			"S2" => array(),
@@ -264,12 +291,22 @@ class Display
 			$conflict = $pd_data->season;
 		}
 
-		if (!$goal) {
+		$goal_data = json_decode($goal->data);
+
+		if (!$goal_data) {
 			echo $this->output->sign("plus-sign", 'No Goal Entered', 'Click "Enter Your Goal" tab to enter it.');
 		} else {
-			echo '<p style="font-size:18px;margin:50px;"><b>Goal: </b>';
-			echo $goal->data;
-			echo '</p>';
+			foreach (array(
+				array('var'=>'department', 'name'=>'Department Goals'),
+				array('var'=>'individual', 'name'=>'Individual Goal(s)'),
+				array('var'=>'pastleadership', 'name'=>'Pastoral or Leadership Goal(s)'),
+				array('var'=>'additional', 'name'=>'Additional Goal(s)')) as $item) {
+
+				echo '<p style="font-size:18px;margin-left:50px;padding-top:10px;"><b>'.$item['name'].':</b> <br />';
+				$variable = $item['var'];
+				echo $goal_data->$variable;
+				echo '</p>';
+			}
 		}
 
 		$starttable = '<table class="tftable" border="1">';
