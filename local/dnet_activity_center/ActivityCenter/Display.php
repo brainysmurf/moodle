@@ -14,8 +14,8 @@ class Display
 			'overview' => array('index.php', '<i class="icon-ok-sign"></i> Overview'),
 			'all-elem' => array('all-elem.php', '<i class="icon-rocket"></i> Pick Elementary Activities'),
 			'all-sec' => array('all-sec.php', '<i class="icon-rocket"></i> Pick Secondary Activities'),
-			'suggest' => array('suggest.php', '<i class="icon-plus-sign"></i> Suggest A New Activity'),
-			'pdframework' => array('pd-framework.php', '<i class="icon-rocket"></i> Choose PD Strand'),
+			'pdframework' => array('pd-framework.php', '<i class="icon-star"></i> Choose PD Strand'),
+			'goals' => array('goals.php', '<i class="icon-pencil"></i> Enter Your Goal'),
 		),
 	);
 
@@ -25,6 +25,10 @@ class Display
 
 		global $PAGE, $OUTPUT;
 		$this->output = $OUTPUT;
+		// Loading JS from the homework block!
+		$PAGE->requires->js('/blocks/homework/assets/js/bindWithDelay.js');
+		$PAGE->requires->js('/blocks/homework/assets/js/filter.js');
+
 		$PAGE->requires->css('/blocks/homework/assets/bootstrap/css/bootstrap.css');
 		$PAGE->requires->css('/blocks/homework/assets/css/homework.css');
 		$PAGE->requires->jquery();
@@ -44,6 +48,50 @@ class Display
 			$t .= '</ul>';
 		$t .= '</div>';
 		return $t;
+	}
+
+	public function displayEnterComment($userid, $text)
+	{
+		$ret = '<div class="courseList">';   # this is needed just for the CSS
+		$ret .= '<textarea id="goal_info" class="filter" rows="3" style="font-size:18px;" />';
+		$ret .= $text->data;
+		$ret .= '</textarea>';
+        $ret .= '<ul class="buttons"><br />';
+        $ret .= '<a id="submit_button" href="'.$CFG->wwwroot.'" class="btn"><i class="icon-plus-sign "></i> (Re-)submit This Goal</a>';
+        $ret .= '</ul>';
+		$ret .= '
+			<script>
+					$("#submit_button").bind("click", function(e) {
+        			e.preventDefault();
+			        var formURL = "submit_goal.php";
+			        var formData = {
+			            "text": $("#goal_info").val(),
+			            "userid": "'.$userid.'"
+			        };
+			        $.ajax(
+			        {
+			            url : formURL,
+			            data: formData,
+			            async: true,
+			            type: "GET",
+			            success: function(data, textStatus, jqXHR)
+			            {
+			                $("#dialog").dialog("open");
+			                window.location.reload();
+			            },
+			            error: function(jqXHR, textStatus, errorThrown)
+			            {
+			                alert(\'Something wrong!\');
+			            }
+			        });
+        		});
+        	</script>';
+		return $ret;
+	}
+
+	public function displayComment($userid)
+	{
+
 	}
 
 
@@ -173,7 +221,7 @@ class Display
 	}
 
 
-	public function overview($courses, $pd)
+	public function overview($goal, $courses, $pd)
 	{
 		?>
 
@@ -185,6 +233,7 @@ class Display
 		</style>
 
 		<?php
+
 
 		$info_by_seasons = array(
 			"S1" => array(),
@@ -207,12 +256,20 @@ class Display
 				$info_by_seasons[$season][] = $name;
 			}
 		}
-		$pd_data = json_decode($pd->data);
+
 
 		$conflict = false;
 		if ($pd_data->season and $something = $info_by_seasons[$pd_data->season]) {
 			echo $this->output->sign('question-sign', 'PD and Activities Conflict?', 'Are you sure you want to double-book yourself like that?');
 			$conflict = $pd_data->season;
+		}
+
+		if (!$goal) {
+			echo $this->output->sign("plus-sign", 'No Goal Entered', 'Click "Enter Your Goal" tab to enter it.');
+		} else {
+			echo '<p style="font-size:18px;margin:50px;"><b>Goal: </b>';
+			echo $goal->data;
+			echo '</p>';
 		}
 
 		$starttable = '<table class="tftable" border="1">';
@@ -270,10 +327,6 @@ class Display
 	public function activityList($courses, $url = '/course/view.php?id=', $listClasses = '')
 	{
 		global $PAGE;
-
-		// Loading JS from the homework block!
-		$PAGE->requires->js('/blocks/homework/assets/js/bindWithDelay.js');
-		$PAGE->requires->js('/blocks/homework/assets/js/filter.js');
 
 		$r  = '<div class="courseList ' . $listClasses . '">';
 		$r .= '<input type="text" class="filter" placeholder="Type here to filter by name..." />';

@@ -36,5 +36,3 @@ if (!$exists) {
         )
     );
 }
-
-echo 'yo';
