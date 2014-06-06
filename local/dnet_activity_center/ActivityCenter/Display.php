@@ -32,7 +32,7 @@ class Display
 		$PAGE->requires->css('/blocks/homework/assets/bootstrap/css/bootstrap.css');
 		$PAGE->requires->css('/blocks/homework/assets/css/homework.css');
 		$PAGE->requires->jquery();
-		$PAGE->requires->js(ActivityCenter::ACTIVITY_CENTER_PATH . 'assets/js/activitycenter.js');
+		$PAGE->requires->js(ActivityCenter::PATH . 'assets/js/activitycenter.js');
 	}
 
 	public function showTabs($mode, $current)

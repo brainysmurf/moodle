@@ -6,7 +6,7 @@ class ActivityCenter
 {
 	public $data;
 	public $display;
-	const ACTIVITY_CENTER_PATH = '/local/dnet_activity_center/';
+	const PATH = '/local/dnet_activity_center/';
 
 	function __construct()
 	{

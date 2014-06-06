@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Display all activities so a teacher can pick which ones they want to manage
+ * Allow teachers to sign up for PD
  */
 
 include '../roles/common_top.php';

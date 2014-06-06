@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * Save a teacher's PD choices in the database
+ */
+
 require_once('../../../config.php');
 
 $category = required_param('category', PARAM_RAW);

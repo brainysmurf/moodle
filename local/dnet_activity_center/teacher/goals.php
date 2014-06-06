@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Allows teachers to add/edit their desired goals
+ */
+
 include '../roles/common_top.php';
 
 echo $activityCenter->display->showTabs('teacher', 'goals');

@@ -1,8 +1,14 @@
 <?php
 
+/**
+ * Enrol the current user as a manager into an activity
+ */
+
 require '../../../../config.php';
 
 require_login();
+
+// FIXME: No permission checks here!
 
 $courseID = required_param('courseid', PARAM_RAW);
 $action = required_param('action', PARAM_RAW);
