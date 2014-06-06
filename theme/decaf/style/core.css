@@ -892,7 +892,7 @@ table#categoryquestions .iconcol {width:21px;}
 body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questioncategories .commands > img.iconsmall {display:none;}
 
 
-/* Blue Alerts (from bootstrap's alert-inf)o*/
+/* Blue Alerts (from bootstrap's alert-info)*/
 .blueAlert {
 	padding: 15px;
 	margin-bottom: 20px;
@@ -915,6 +915,14 @@ body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questionca
 	.blueAlert p {
 		margin-top:1px;
 	}
+
+/* Red Alert (like bootstrap alert-danger)
+include the .blueAlert class on .redAlerts too! this just changes the colour */
+.redAlert {
+	background-color: #F2DEDE;
+	border-color: #EBCCD1;
+	color: #A94442;
+}
 
 /* Original dragonnet alerts */
 .local-alert,

@@ -297,7 +297,7 @@ class Display
 
 		$conflict = false;
 		if ($pd_data->season and $something = $info_by_seasons[$pd_data->season]) {
-			echo $this->output->sign('question-sign', 'PD and Activities Conflict?', 'Are you sure you want to double-book yourself like that?');
+			echo $this->output->sign('question-sign', 'Note: PD and Activities Conflict', 'Are you sure you want to double-book yourself like that? Please double check your choices', 'redAlert alert-danger');
 			$conflict = $pd_data->season;
 		}
 
@@ -376,7 +376,7 @@ class Display
 
 			if ($pd_data->season == $season) {
 				if ($conflict) {
-					echo '<b>'.$pd_data->strand.'</b>';
+					echo '<strong class="red">'.$pd_data->strand.'</strong>';
 				} else {
 					echo $pd_data->strand;
 				}
