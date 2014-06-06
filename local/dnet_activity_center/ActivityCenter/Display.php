@@ -274,7 +274,8 @@ class Display
 				continue;
 			}
 			$season = $matches[1];
-			$name = trim(preg_split($pattern, $course->fullname)[1]);
+			$name = preg_split($pattern, $course->fullname);
+			$name = trim($name[1]);
 			if ($season == 'ALL') {
 				foreach (array("S1", "S2", "S3") as $this_season) {
 					$info_by_seasons[$this_season][] = $name;
