@@ -291,23 +291,6 @@ class Display
 			$conflict = $pd_data->season;
 		}
 
-		$goal_data = json_decode($goal->data);
-
-		if (!$goal_data) {
-			echo $this->output->sign("plus-sign", 'No Goal Entered', 'Click "Enter Your Goal" tab to enter it.');
-		} else {
-			foreach (array(
-				array('var'=>'department', 'name'=>'Department Goals'),
-				array('var'=>'individual', 'name'=>'Individual Goal(s)'),
-				array('var'=>'pastleadership', 'name'=>'Pastoral or Leadership Goal(s)'),
-				array('var'=>'additional', 'name'=>'Additional Goal(s)')) as $item) {
-
-				echo '<p style="font-size:18px;margin-left:50px;padding-top:10px;"><b>'.$item['name'].':</b> <br />';
-				$variable = $item['var'];
-				echo $goal_data->$variable;
-				echo '</p>';
-			}
-		}
 
 		$starttable = '<table class="tftable" border="1">';
 		$startrow = '<tr>';
@@ -318,6 +301,45 @@ class Display
 			"S2"=>"Season 2",
 			"S3"=>"Season 3"
 			);
+		$goal_array = array(
+				array('var'=>'department', 'name'=>'Department Goals'),
+				array('var'=>'individual', 'name'=>'Individual Goal(s)'),
+				array('var'=>'pastleadership', 'name'=>'Pastoral or Leadership Goal(s)'),
+				array('var'=>'additional', 'name'=>'Additional Goal(s)')
+				);
+
+		$goal_data = json_decode($goal->data);
+
+		if (!$goal_data) {
+			echo $this->output->sign("plus-sign", 'No Goal Entered', 'Click "Enter Your Goal" tab to enter it.');
+		} else {
+			echo $starttable;
+			foreach ($goal_array as $item) {
+				echo $startrow;
+
+				echo '<th style="width:160px;">';
+				echo $item['name'];
+				echo '</th>';
+
+				echo '<td>';
+				$variable = $item['var'];
+				echo $goal_data->$variable;
+				echo '</td>';
+
+				echo $endrow;
+			}
+
+			// echo $startrow;
+			// foreach ($goal_array as $item) {
+			// 	echo '<td>';
+			// 	$variable = $item['var'];
+			// 	echo $goal_data->$variable;
+			// 	echo '</td>';
+			// }
+			// echo $endrow;
+			echo $endtable;
+		}
+
 
 		echo $starttable;
 		echo $startrow;
