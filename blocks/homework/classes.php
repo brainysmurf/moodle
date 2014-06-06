@@ -31,8 +31,7 @@ switch ($hwblock->mode()) {
 		 * Show all classes in the school
 		 */
 		echo '<h2><i class="icon-group"></i> All Classes</h2>';
-		#$classes = $hwblock->getAllGroups();
-		$classes = $hwblock->getAllGroupsFromTimeable();
+		$classes = $hwblock->getAllGroups();
 		echo $hwblock->display->classList($classes);
 
 		break;

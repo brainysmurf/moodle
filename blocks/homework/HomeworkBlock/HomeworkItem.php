@@ -85,8 +85,6 @@ class HomeworkItem
 	}
 
 
-
-
 	/**
 	 * Save any modifications to this object back to the database
 	 */

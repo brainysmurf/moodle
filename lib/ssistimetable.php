@@ -1,8 +1,7 @@
 <?php
 
 /**
-* Timetable functions,
-* from the timetable stored in the custom profile field
+* For reading data from the ssis_timetable_data table
 */
 
 namespace SSIS;
@@ -14,122 +13,70 @@ class Timetable
 	private $userid;
 	private $timetable;
 
-	public function __construct($userid)
+	public function __construct($userid = false)
 	{
 		$this->userid = $userid;
-
-		// Load the json from the db and parse it
-		$this->timetable = $this->load();
 	}
 
-	private function load()
+	private function query($activeOnly = false, $where = array(), $grade = null)
 	{
 		global $DB;
-		$field = $DB->get_field('user_info_data', 'data', array(
-			'userid' => $this->userid,
-			'fieldid' => self::$timetableProfileFieldID
-		));
-		$timetable = json_decode($field);
-		return $timetable;
-	}
+		$sql = 'SELECT
+			DISTINCT(tt.name) AS name,
+			grp.id AS id,
+			crs.id AS courseid,
+			crs.fullname AS coursename,
+			CONCAT(teacher.firstname, \' \', teacher.lastname) AS teacher
+		FROM {ssis_timetable_info} tt
+		JOIN {groups} grp ON grp.name = tt.name
+		JOIN {course} crs ON crs.id = grp.courseid
+		JOIN {user} teacher ON teacher.id = tt.teacheruserid';
 
-	/**
-	 * Parse the 'enrollments' item of the user's json timetable into useful
-	 * information, e.g. the course and group ids and teacher names
-	 * @return  array of nice enrollment info
-	 */
-	public function getClasses()
-	{
-		global $DB;
+		if ($activeOnly) {
+			$where['active'] = 1;
+		}
 
-		$enrollments = $this->timetable->enrollments;
+		$and = false;
+		$params = array();
 
-		// Array of data to be returned
-		$classes = array();
+		if (count($where) > 0) {
 
-		// Cache of course data
-		$courses = array();
+			foreach ($where as $key => $value) {
 
-		foreach ($enrollments as $courseIDNumber => $groups) {
+				$sql .= $and ? ' AND' : ' WHERE';
 
-			if (isset($courses[$courseIDNumber])) {
-				// Use the cached course
-				$course = $courses[$courseIDNumber];
-			} else {
-				// Load the course info
-				$course = $DB->get_record('course', array('idnumber' => $courseIDNumber), 'id, fullname');
-				// Save the course info
-				// (or remember 'false' that we couldn't find this course)
-				$courses[$courseIDNumber] = $course;
-			}
+				$sql .= ' ' . $key .' = ?';
+				$params[] = $value;
 
-			if (empty($course)) {
-				continue;
-			}
-
-			foreach ($groups as $groupName) {
-
-
-				//FIXME: Remove this once new groups are made
-				$group = $this->getGroupByNewName($groupName);
-
-				// Load the group info
-				#$group = $DB->get_record('groups', array('name' => $groupName), 'id, name');
-
-				if (!$group) {
-					// Log an error maybe?
-					continue;
-				}
-
-				if (empty($classes[$course->id])) {
-					$classes[$course->id] = array();
-					$classes[$course->id]['course'] = $course;
-					$classes[$course->id]['groups'] = array();
-				}
-
-				// Get the teacher's name
-				$classes[$course->id]['groups'][$group->id] = array(
-					'id' => $group->id,
-					'name' => $group->name,
-				);
-
-				if (isset($this->timetable->teacher_names) && is_array($this->timetable->teacher_names->{$group->name})) {
-					$classes[$course->id]['groups'][$group->id]['teacher'] =
-						$this->timetable->teacher_names->{$group->name}[0]->first
-						 . ' '
-						 . $this->timetable->teacher_names->{$group->name}[0]->last;
-				}
+				$and = true;
 			}
 		}
 
-		return $classes;
+		if (!is_null($grade)) {
+			$sql .= $and ? ' AND' : ' WHERE';
+			$sql .= ' ? = ANY (string_to_array(grade, \',\'))';
+			$and = true;
+			$params[] = $grade;
+		}
+
+		$sql .= ' ORDER BY coursename, tt.name';
+
+		$rows = $DB->get_records_sql($sql, $params);
+		return $rows;
 	}
 
-	private function getGroupByNewName($groupName)
+	public function getTeacherClasses($activeOnly = false)
 	{
-		global $DB;
+		return $this->query($activeOnly, array('teacheruserid' => $this->userid));
+	}
 
-		$groupName = rtrim($groupName, '-abc');
+	public function getStudentClasses($activeOnly = false)
+	{
+		return $this->query($activeOnly, array('studentuserid' => $this->userid));
+	}
 
-		if ($group = $DB->get_record('groups', array('name' => $groupName), 'id, name')) {
-			return $group;
-		}
-
-		if (substr($groupName, -4) == '1112') {
-
-			$groupNameStub = substr($groupName, 0, -4);
-
-			$groupName = $groupNameStub . '11';
-			if ($group = $DB->get_record('groups', array('name' => $groupName), 'id, name')) {
-				return $group;
-			}
-
-			$groupName = $groupNameStub . '12';
-			if ($group = $DB->get_record('groups', array('name' => $groupName), 'id, name')) {
-				return $group;
-			}		
-		}
-
-		return false;
+	public function getAllClasses($activeOnly = false, $grade = null)
+	{
+		return $this->query($activeOnly, array(), $grade);
 	}
 }

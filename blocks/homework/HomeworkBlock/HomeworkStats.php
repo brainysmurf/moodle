@@ -9,6 +9,7 @@ namespace SSIS\HomeworkBlock;
 class HomeworkStats
 {
 	private $courseIDs;
+	private $groupIDs;
 	private $startDate;
 	private $endDate;
 	private $hwblock;
@@ -28,6 +29,16 @@ class HomeworkStats
 	function getCourseIDs()
 	{
 		return $this->courseIDs;
+	}
+
+	function setGroupIDs($groupIDs)
+	{
+		$this->groupIDs = $groupIDs;
+	}
+
+	function getGroupIDs()
+	{
+		return $this->groupIDs;
 	}
 
 	/**
@@ -57,7 +68,7 @@ class HomeworkStats
 		$assignedRangeEnd = $this->endDate->format('Y-m-d');
 		$distinct = false;
 		$homework = $this->hwblock->getHomework(
-			false, //groupIDs
+			$this->groupIDs, //groupIDs
 			$this->courseIDs, //courseIDs
 			null, //assignedFor
 			true, //approved

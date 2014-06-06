@@ -34,7 +34,7 @@ class Display
 		'pastoral' => array(
 			'index' => array('index.php', '<i class="icon-home"></i> Overview'),
 			'classes' => array('classes.php', '<i class="icon-group"></i> Classes'),
-			'courses' => array('courses.php', '<i class="icon-magic"></i> Courses'),
+			#'courses' => array('courses.php', '<i class="icon-magic"></i> Courses'),
 			'grades' => array('grades.php', '<i class="icon-sitemap"></i> Grades'),
 			'students' => array('students.php', '<i class="icon-user"></i> Student Lookup'),
 		),
@@ -242,13 +242,16 @@ class Display
 					}
 					$r .= $enrollment['course']->fullname;
 
-					if ($this->hwblock->mode() != 'student') {
-						if (!empty($group['teacher'])) {
-							$r .= '<span>' . $group['teacher'] . ' <span style="font-size:9px;">' . $group['name'] . '</span></span>';
-						} else {
-							$r .= '<span>' . $group['name'] . '</span>';
+					if (!empty($group['teacher'])) {
+						$r .= '<span>' . $group['teacher'];
+						if ($this->hwblock->mode() != 'student') {
+							$r .= ' <span style="font-size:9px;">' . $group['name'] . '</span>';
 						}
+						$r .= '</span>';
+					} else {
+						$r .= '<span>' . $group['name'] . '</span>';
 					}
+
 				$r .= '</a></div>';
 			}
 		}

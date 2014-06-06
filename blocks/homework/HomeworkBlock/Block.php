@@ -193,10 +193,17 @@ class Block
 	/**
 	 * Get all classes (groups) a user is in
 	 */
-	public function getUsersGroups($userid)
+	public function getUsersGroups($userid, $activeOnly = false)
 	{
 		$timetable = new \SSIS\Timetable($userid);
-		$classes = $timetable->getClasses();
+
+		if ($this->mode() == 'teacher') {
+			$classes = $timetable->getTeacherClasses($activeOnly);
+		} else {
+			$classes = $timetable->getStudentClasses($activeOnly);
+		}
+
+		$classes = $this->formatTimetableData($classes);
 		return $classes;
 	}
 
@@ -206,6 +213,11 @@ class Block
 	public function getUsersGroupIDs($userid)
 	{
 		$classes = $this->getUsersGroups($userid);
+		return $this->extractGroupIDsFromTimetable($classes);
+	}
+
+	public function extractGroupIDsFromTimetable($timetableData)
+	{
 		$groups = array();
 		foreach ($classes as $class) {
 			$groups += $class['groups'];
@@ -213,35 +225,25 @@ class Block
 		return array_keys($groups);
 	}
 
-	public function getAllGroupsFromTimeable($grade = null)
+	/**
+	 * Return every group (class) in the school
+	 */
+	public function getAllGroups($grade = false)
 	{
-		global $DB;
+		$timetable = new \SSIS\Timetable();
+		$classes = $timetable->getAllClasses(true, $grade);
+		return $this->formatTimetableData($classes);
+	}
 
-		$sql = 'SELECT
-			DISTINCT(tt.name) AS name,
-			grp.id AS id,
-			crs.id AS courseid,
-			crs.fullname AS coursename,
-			CONCAT(teacher.firstname, \' \', teacher.lastname) AS teacher
-		FROM {ssis_timetable_info} tt
-		JOIN {groups} grp ON grp.name = tt.name
-		JOIN {course} crs ON crs.id = grp.courseid
-		JOIN {user} teacher ON teacher.id = tt.teacheruserid
-		WHERE tt.active = 1';
-		$params = array();
+	/**
+	 * Takes the rows from the timetable in the database and puts it into the format used
+	 * by the block
+	 */
+	private function formatTimetableData($rows)
+	{
+		$classes = array();
 
-		if (!is_null($grade)) {
-			$sql .= ' AND ? = ANY (string_to_array(grade, \',\'))';
-			$params[] = $grade;
-		}
-
-		$sql .= ' ORDER BY coursename, tt.name';
-
-		$groups = $DB->get_records_sql($sql, $params);
-
-		//Put it into the format expected
-
-		foreach ($groups as $group) {
+		foreach ($rows as $group) {
 
 			if (!isset($classes[$group->courseid])) {
 				$classes[$group->courseid] = array();
@@ -258,54 +260,6 @@ class Block
 				'id' => $group->id,
 				'name' => $group->name,
 				'teacher' => $group->teacher
-			);
-		}
-
-		return $classes;
-	}
-
-	/**
-	 * Return every group (class) in the school
-	 * TODO: This needs to come from somewhere better
-	 */
-	public function getAllGroups()
-	{
-		global $DB;
-
-		$classes = array();
-		$courses = array();
-
-		$groups = $DB->get_records('groups');
-
-		foreach ($groups as $group) {
-
-			$courseID = $group->courseid;
-
-			if (isset($courses[$courseID])) {
-				// Use the cached course
-				$course = $courses[$courseID];
-			} else {
-				// Load the course info
-				$course = $DB->get_record('course', array('id' => $courseID), 'id, fullname');
-				// Save the course info
-				// (or remember 'false' that we couldn't find this course)
-				$courses[$courseID] = $course;
-			}
-
-			if (!$course) {
-				continue;
-			}
-
-			if (!isset($classes[$course->id])) {
-				$classes[$course->id] = array();
-				$classes[$course->id]['course'] = $course;
-				$classes[$course->id]['groups'] = array();
-			}
-
-			// Get the teacher's name
-			$classes[$course->id]['groups'][$group->id] = array(
-				'id' => $group->id,
-				'name' => $group->name,
 			);
 		}
 

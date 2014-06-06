@@ -18,21 +18,14 @@ switch ($hwblock->mode()) {
 
 		echo $hwblock->display->sign('calendar', "Grade {$grade} Overview", "This page shows homework assigned this week for grade {$grade} classes.");
 
-		// Get all courses in this grade
-		$sql = 'SELECT crs.id, crs.fullname
-		FROM {course} crs
-		JOIN {course_ssis_metadata} crsmd ON crsmd.courseid = crs.id
-		WHERE
-			(crsmd.field = \'grade\' AND crsmd.value = ?)
-			OR
-			(crsmd.field = \'grade2\' AND crsmd.value = ?)
-		';
+		// Load classes in this grade
 
-		$courses = $DB->get_records_sql($sql, array($grade, $grade));
-		$courseIDs = $hwblock->coursesToIDs($courses);
+		$groups = $hwblock->getAllGroups($grade);
+		$groupIDs = $hwblock->extractGroupIDsFromTimetable($groups);
+		#print_object($groupIDs);
 
 		$stats = new \SSIS\HomeworkBlock\HomeworkStats($hwblock);
-		$stats->setCourseIDs($courseIDs);
+		$stats->setGroupIDs($groupIDs);
 
 		echo $hwblock->display->weekStats($stats);
 
@@ -41,7 +34,7 @@ switch ($hwblock->mode()) {
 		echo '<hr/>';
 
 		echo '<h2><i class="icon-group"></i> Grade ' . $grade . ' Classes</h2>';
-		$classes = $hwblock->getAllGroupsFromTimeable($grade);
+		$classes = $hwblock->getAllGroups($grade);
 		echo $hwblock->display->classList($classes);
 
 		break;

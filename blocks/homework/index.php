@@ -24,7 +24,7 @@ switch ($hwblock->mode()) {
 		echo $hwblock->display->sign('calendar', 'To Do', 'This page presents a two-week overview of your homework.');
 
 		// Get the user's group (class) IDs
-		$groupIDs = $hwblock->getUsersGroupIDs($hwblock->userID());
+		$groupIDs = $hwblock->getUsersGroupIDs($hwblock->userID(), true);
 
 		// Get the homework for those groups
 		$approved = true;
@@ -63,7 +63,7 @@ switch ($hwblock->mode()) {
 		echo $hwblock->display->sign('check', 'Manage Submissions', 'This section shows homework that a students in your classes have submitted. Other students will NOT see these until approved by you.');
 
 		// Get the user's group (class) IDs
-		$groupIDs = $hwblock->getUsersGroupIDs($hwblock->userID());
+		$groupIDs = $hwblock->getUsersGroupIDs($hwblock->userID(), true);
 
 		// Get the homework for those groups
 		$approved = false;
@@ -80,7 +80,7 @@ switch ($hwblock->mode()) {
 		echo $hwblock->display->sign('calendar', 'Overview', 'This page shows all homework assigned this week.');
 
 		/**
-		 * Who school week overview
+		 * Whole school week overview
 		 */
 
 		$stats = new \SSIS\HomeworkBlock\HomeworkStats($hwblock);

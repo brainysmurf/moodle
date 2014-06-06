@@ -3,7 +3,7 @@
 	$mode = $hwblock->mode();
 
 	// Get all the user's classes
-	$groups = $hwblock->getUsersGroups($USER->id);
+	$groups = $hwblock->getUsersGroups($USER->id, true);
 
 	$selectedCourseID = '';
 	$selectedGroupID = '';
@@ -39,7 +39,7 @@
 					<a class="btn btn-block <?=(!$private ? 'btn-primary active' : '')?>" data-value="0" href="#"><i class="icon-group"></i><br/><b>Everybody in the Class</b><br/>(Everyone can see after teacher approves)</a>
 				</div>
 				<div class="col-md-6">
-					<a class="btn btn-block  <?=($private ? 'btn-primary active' : '')?>" data-value="1" href="#"><i class="icon-user"></i><br/><b>Just Me</b><br/>(Only you see it, no teacher approval.)</a>
+					<a class="btn btn-block  <?=($private ? 'btn-primary active' : '')?>" data-value="1" href="#"><i class="icon-user"></i><br/><b>Just Me</b><br/>(Only you see it, no teacher approval needed)</a>
 				</div>
 			</div>
 		</div>

@@ -28,7 +28,7 @@ if ($key != $hwblock->generateFeedKey($user)) {
 }
 
 // Get the user's group (class) IDs
-$groupIDs = $hwblock->getUsersGroupIDs($user->id);
+$groupIDs = $hwblock->getUsersGroupIDs($user->id, true);
 
 $homework = $hwblock->getHomework(
 	$groupIDs, //$groupIDs = false,
