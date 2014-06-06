@@ -19,7 +19,6 @@ switch ($hwblock->mode()) {
 		 */
 
 		echo $hwblock->display->sign('group', 'View by Class', 'Find a summary of homework information (including upcoming and due) by class only.');
-		// echo '<h2><i class="icon-magic"></i> Classes</h2>';
 		$classes = $hwblock->getUsersGroups($hwblock->userID());
 		echo $hwblock->display->classList($classes);
 

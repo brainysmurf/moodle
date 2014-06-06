@@ -22,7 +22,6 @@ switch ($hwblock->mode()) {
 
 		$groups = $hwblock->getAllGroups($grade);
 		$groupIDs = $hwblock->extractGroupIDsFromTimetable($groups);
-		#print_object($groupIDs);
 
 		$stats = new \SSIS\HomeworkBlock\HomeworkStats($hwblock);
 		$stats->setGroupIDs($groupIDs);

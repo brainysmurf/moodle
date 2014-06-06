@@ -228,7 +228,7 @@ class Block
 	/**
 	 * Return every group (class) in the school
 	 */
-	public function getAllGroups($grade = false)
+	public function getAllGroups($grade = null)
 	{
 		$timetable = new \SSIS\Timetable();
 		$classes = $timetable->getAllClasses(true, $grade);
