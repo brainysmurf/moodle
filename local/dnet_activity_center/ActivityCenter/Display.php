@@ -349,15 +349,6 @@ class Display
 			echo $endtable;
 		}
 
-		$starttable = '<table class="tftable" border="1">';
-		$startrow = '<tr>';
-		$endrow = '</tr>';
-		$endtable = '</table>';
-		$seasons = array(
-			"S1"=>"Season 1",
-			"S2"=>"Season 2",
-			"S3"=>"Season 3"
-			);
 
 		echo $starttable;
 		echo $startrow;
