@@ -48,15 +48,34 @@ class Data
 		return $info;
 	}
 
+	/**
+	 * Returns the goals entered by every user
+	 */
 	public function getAllUsersGoals()
 	{
 		global $DB;
 
-		//$sql = 'SELECT usr'
+		$choiceField = $this->getPDChoiceField();
+		$goalField = $this->getPDGoalField();
 
-		$field = $this->getPDGoalField();
-		$info = $DB->get_record('user_info_data', array('fieldid' => $field->id));
-		return $info;
+		$sql = 'select
+usr.username,
+usr.firstname,
+usr.lastname,
+(select infodata.data from {user_info_data} infodata where infodata.userid = usr.id and infodata.fieldid = ' . $goalField->id . ') as goals,
+(select infodata.data from {user_info_data} infodata where infodata.userid = usr.id and infodata.fieldid = ' . $choiceField->id . ') as pd
+from {user} usr
+where usr.email like \'%@ssis-suzhou.net\'
+order by goals desc';
+
+		$rows = $DB->get_records_sql($sql);
+		return $rows;
+	}
+
+	private function getPDChoiceField()
+	{
+		global $DB;
+		return $DB->get_record('user_info_field', array('shortname' => 'pdchoices20145'), '*', MUST_EXIST);
 	}
 
 	/**
