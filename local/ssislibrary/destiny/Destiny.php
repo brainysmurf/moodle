@@ -65,7 +65,10 @@ class Destiny
 		WHERE
 			cpy.dateOut IS NOT NULL
 			AND
-			cpy.dateReturned IS NULL ";
+			cpy.dateReturned IS NULL
+			AND
+			cpy.DateLost IS NULL
+		";
 	}
 
 	public function getUsersCheckedOutBooks($userDistrictID)
