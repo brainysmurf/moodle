@@ -143,13 +143,19 @@ class Display
 
 	public function displayPDFrameworkChoices($userid)
 	{
+		if ($userid) {
+			// Load the user's previous info to show what they had selected previously
+			$usersChoices = $this->activityCenter->data->getUserPDSelection($userid, true);
+		} else {
+			$usersChoices = new \stdClass();
+		}
 
 		$ret = '<form id="choice_form" action="#">';
 
 		$choices = array(
-			array('text'=>' Learning Engagements (Inquiry)', 'value'=>'(S1) Learning Engagement'),
-			array('text'=>' Assessment & Feedback', 'value'=>'(S2) Assessment & Feedback'),
-			array('text'=>' Differentiation', 'value'=>'(S3) Differentiation')
+			array('text' => 'Learning Engagements (Inquiry)', 'value' => '(S1) Learning Engagement'),
+			array('text' => 'Assessment & Feedback', 'value' => '(S2) Assessment & Feedback'),
+			array('text' => 'Differentiation', 'value' => '(S3) Differentiation')
 			);
 
 		$ret .= '
@@ -158,6 +164,7 @@ class Display
 		.tftable th {font-size:18px;color:#eee;background-color:#1662A3;border-width: 1px;padding: 8px;border-style: solid;border-color: #000;text-align:left;}
 		.tftable tr {background-color:#d4e3e5;}
 		.tftable td {font-size:18px;border-width: 1px;padding: 8px;border-style: solid;border-color: #729ea5;}
+		.tftable label {font-weight:normal; font-size:14px;}
 		</style>';
 
 		$starttable = '<table class="tftable" border="1">';
@@ -165,9 +172,9 @@ class Display
 		$endrow = '</tr>';
 		$endtable = '</table>';
 		$seasons = array(
-			"S1"=>"Season 1",
-			"S2"=>"Season 2",
-			"S3"=>"Season 3"
+			"S1" => "Season 1",
+			"S2" => "Season 2",
+			"S3" => "Season 3"
 			);
 
 		$ret .= $starttable;
@@ -181,7 +188,8 @@ class Display
 		$ret .= $startrow;
 		$ret .= '<td><b>Choose PD:</b></td>';
 		foreach ($choices as $area) {
-			$ret .= '<td><input type="radio" name="group1" value="'.$area['value'].'">'.$area['text'].'</td>';
+			$selected = !empty($usersChoices->strand) && $usersChoices->strand == $area['text'];
+			$ret .= '<td><label><input type="radio" name="group1" value="'.$area['value'].'" '. ($selected ? 'checked="checked"' : '') . '> '.$area['text'].'</label></td>';
 		}
 		$ret .= $endrow;
 		$ret .= $endtable;
@@ -204,7 +212,8 @@ class Display
 
 		$ret .= '<td>';
 		foreach ($subchoices as $area) {
-			$ret .= '<input type="radio" name="group2" value="'.$area['value'].'">'.$area['text'].'<br/>';
+			$selected = !empty($usersChoices->choice) && $usersChoices->choice == $area['value'];
+			$ret .= '<label><input type="radio" name="group2" value="' . $area['value'] . '" '. ($selected ? 'checked="checked"' : '') . '>' . $area['text'] . '</label><br/>';
 		}
 		$ret .= '</td>';
 
@@ -292,22 +301,52 @@ class Display
 			$conflict = $pd_data->season;
 		}
 
+		$starttable = '<table class="tftable" border="1">';
+		$startrow = '<tr>';
+		$endrow = '</tr>';
+		$endtable = '</table>';
+		$seasons = array(
+			"S1"=>"Season 1",
+			"S2"=>"Season 2",
+			"S3"=>"Season 3"
+			);
+		$goal_array = array(
+				array('var'=>'department', 'name'=>'Department Goals'),
+				array('var'=>'individual', 'name'=>'Individual Goal(s)'),
+				array('var'=>'pastleadership', 'name'=>'Pastoral or Leadership Goal(s)'),
+				array('var'=>'additional', 'name'=>'Additional Goal(s)')
+				);
+
 		$goal_data = json_decode($goal->data);
 
 		if (!$goal_data) {
 			echo $this->output->sign("plus-sign", 'No Goal Entered', 'Click "Enter Your Goal" tab to enter it.');
 		} else {
-			foreach (array(
-				array('var'=>'department', 'name'=>'Department Goals'),
-				array('var'=>'individual', 'name'=>'Individual Goal(s)'),
-				array('var'=>'pastleadership', 'name'=>'Pastoral or Leadership Goal(s)'),
-				array('var'=>'additional', 'name'=>'Additional Goal(s)')) as $item) {
+			echo $starttable;
+			foreach ($goal_array as $item) {
+				echo $startrow;
 
-				echo '<p style="font-size:18px;margin-left:50px;padding-top:10px;"><b>'.$item['name'].':</b> <br />';
+				echo '<th style="width:280px;">';
+				echo $item['name'];
+				echo '</th>';
+
+				echo '<td>';
 				$variable = $item['var'];
 				echo $goal_data->$variable;
-				echo '</p>';
+				echo '</td>';
+
+				echo $endrow;
 			}
+
+			// echo $startrow;
+			// foreach ($goal_array as $item) {
+			// 	echo '<td>';
+			// 	$variable = $item['var'];
+			// 	echo $goal_data->$variable;
+			// 	echo '</td>';
+			// }
+			// echo $endrow;
+			echo $endtable;
 		}
 
 		$starttable = '<table class="tftable" border="1">';

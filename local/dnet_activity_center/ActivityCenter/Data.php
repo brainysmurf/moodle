@@ -17,14 +17,23 @@ class Data
 		$this->activityCenter = $activityCenter;
 	}
 
-	public function getUserPDSelection($userid = false)
+	public function getUserPDSelection($userid = false, $decode = false)
 	{
 		if (!$userid) {
 			return false;
 		}
 		global $DB;
-		$field = $DB->get_record('user_info_field', array('shortname'=>'pdchoices20145'), '*', MUST_EXIST);
-		$info = $DB->get_record('user_info_data', array('userid'=>$userid, 'fieldid'=>$field->id));
+		$field = $DB->get_record('user_info_field', array('shortname' => 'pdchoices20145'), '*', MUST_EXIST);
+		$info = $DB->get_record('user_info_data', array('userid' => $userid, 'fieldid' => $field->id));
+
+		if ($decode) {
+			if (empty($info)) {
+				return false;
+			}
+			$info = $info->data;
+			return json_decode($info);
+		}
+
 		return $info;
 	}
 
@@ -34,9 +43,29 @@ class Data
 			return false;
 		}
 		global $DB;
-		$field = $DB->get_record('user_info_field', array('shortname'=>'goal20145'), '*', MUST_EXIST);
-		$info = $DB->get_record('user_info_data', array('userid'=>$userid, 'fieldid'=>$field->id));
+		$field = $this->getPDGoalField();
+		$info = $DB->get_record('user_info_data', array('userid' => $userid, 'fieldid' => $field->id));
 		return $info;
+	}
+
+	public function getAllUsersGoals()
+	{
+		global $DB;
+
+		//$sql = 'SELECT usr'
+
+		$field = $this->getPDGoalField();
+		$info = $DB->get_record('user_info_data', array('fieldid' => $field->id));
+		return $info;
+	}
+
+	/**
+	 * Returns the custom profile field that contains the user's PD goals
+	 */
+	private function getPDGoalField()
+	{
+		global $DB;
+		return $DB->get_record('user_info_field', array('shortname' => 'goal20145'), '*', MUST_EXIST);
 	}
 
 	/**

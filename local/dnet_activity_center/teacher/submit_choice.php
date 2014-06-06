@@ -8,9 +8,10 @@ $userid = required_param('userid', PARAM_INT);
 $pattern = '/^\((.*?)\)/';  # start of string has a parens
 $season = preg_match($pattern, $category, $matches);
 if (!empty($season)) {
+	$name = preg_split($pattern, $category);
     $data = json_encode(array(
             'season'=>$matches[1],
-            'strand'=>trim(preg_split($pattern, $category)[1]),
+            'strand'=>trim($name[1]),
             'choice'=>$implementation
     ));
 } else {
