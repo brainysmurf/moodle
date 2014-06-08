@@ -59,12 +59,11 @@
 					// TODO: Ability to pass courseid in the URL and select the first group in the course
 					//(isset($courseid) && $course->id == $courseid ? 'selected': '')
 					echo '<option value="' . $groupID . '" data-courseid="' . $courseID . '" ' . ($groupID == $selectedGroupID ? 'selected' : '') . '>';
+
 						echo $enrollment['course']->fullname;
-						if (trim($group['teacher'])) {
-							echo ' (' . $group['teacher'] . '\'s Class)';
-						} else {
-							echo ' (' . $group['name'] . ')';
-						}
+
+						echo ' - ' . $group['classname'];
+
 						if ($groupID == $selectedGroupID) {
 							$selectedCourseID = $courseID;
 						}

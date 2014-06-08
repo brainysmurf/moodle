@@ -203,7 +203,6 @@ class Block
 			$classes = $timetable->getStudentClasses($activeOnly);
 		}
 
-		$classes = $this->formatTimetableData($classes);
 		return $classes;
 	}
 
@@ -231,42 +230,8 @@ class Block
 	public function getAllGroups($grade = null)
 	{
 		$timetable = new \SSIS\Timetable();
-		$classes = $timetable->getAllClasses(true, $grade);
-		return $this->formatTimetableData($classes);
+		return $timetable->getAllClasses(true, $grade);
 	}
-
-	/**
-	 * Takes the rows from the timetable in the database and puts it into the format used
-	 * by the block
-	 */
-	private function formatTimetableData($rows)
-	{
-		$classes = array();
-
-		foreach ($rows as $group) {
-
-			if (!isset($classes[$group->courseid])) {
-				$classes[$group->courseid] = array();
-
-				$course = new \stdClass();
-				$course->id = $group->courseid;
-				$course->fullname = $group->coursename;
-
-				$classes[$group->courseid]['course'] = $course;
-				$classes[$group->courseid]['groups'] = array();
-			}
-
-			$classes[$group->courseid]['groups'][$group->id] = array(
-				'id' => $group->id,
-				'name' => $group->name,
-				'teacher' => $group->teacher
-			);
-		}
-
-		return $classes;
-	}
-
-
 
 	/**
 	 * Getting homework
