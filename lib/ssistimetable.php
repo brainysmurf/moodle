@@ -28,7 +28,7 @@ class Timetable
 			crs.fullname AS coursename,
 			CONCAT(teacher.firstname, \' \', teacher.lastname) AS teacher
 		FROM {ssis_timetable_info} tt
-		JOIN {groups} grp ON grp.name = tt.name
+		JOIN {groups} grp ON grp.name = regexp_replace(tt.name, \'-[a-z]$\', \'\') OR grp.name = tt.name
 		JOIN {course} crs ON crs.id = grp.courseid
 		JOIN {user} teacher ON teacher.id = tt.teacheruserid';
 
