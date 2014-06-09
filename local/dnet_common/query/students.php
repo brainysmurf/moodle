@@ -46,6 +46,8 @@ $params = array(
     $sort = 'firstname, lastname, department';
     $fields = 'id, idnumber, lastname, firstname, department';
 
+    $results = array();
+
     // execute the query, and step through them
     $students = $DB->get_records_select("user", $where, $params, $sort, $fields);
     foreach ($students as $row) {
