@@ -32,7 +32,7 @@ switch ($action) {
 		$shortname = str_replace(' ', '', $shortname);
 
 		$courseData = new \stdClass();
-		$courseData->fullname = $seasonString . $name;
+		$courseData->fullname = '(' . $seasonString . ') ' . $name;
 		$courseData->shortname = $shortname;
 		$courseData->summary = $summary;
 		$courseData->format = 'onetopic';
