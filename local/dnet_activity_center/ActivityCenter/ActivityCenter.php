@@ -17,10 +17,15 @@ class ActivityCenter
 		$this->display = new Display($this);
 	}
 
+	public function getPath()
+	{
+		return self::PATH;
+	}
+
 	/**
 	 * Returns the userID of the current user, or the user we are viewing information about
 	 */
-	public function userID() {
+	public function getUserID() {
 		global $SESSION, $USER;
 
 		if (!empty($SESSION->activityCenterUserID)) {
@@ -30,10 +35,69 @@ class ActivityCenter
 		return $USER->id;
 	}
 
-	public function possibleModes()
+
+
+	/**
+	 * Modes
+	 * (admin / teacher / student)
+	 */
+
+	public function setCurrentMode($mode)
 	{
-		//TODO: Return array of possible modes here
+		global $SESSION;
+		$allowedModes = $this->getPossibleModes();
+
+		if (!in_array($mode, $allowedModes)) {
+			die("Invalid mode");
+		}
+
+		$SESSION->activityCenterMode = $mode;
 	}
+
+	public function getCurrentMode()
+	{
+		global $SESSION;
+
+		if (isset($SESSION->activityCenterMode)) {
+			return $SESSION->activityCenterMode;
+		}
+
+		$possibleModes = $this->getPossibleModes();
+		return $possibleModes[0];
+	}
+
+	/**
+	 * Returns an array of the modes the current user is allowed to use
+	 */
+	public function getPossibleModes()
+	{
+		global $SESSION, $USER;
+
+		require_once dirname(dirname(__DIR__)) . '/dnet_common/sharedlib.php';
+
+		if (is_admin()) {
+			return array('admin', 'teacher');
+		} elseif (is_teacher()) {
+			return array('teacher');
+		} elseif (is_student()) {
+			return array('student');
+		}
+
+		return array();
+	}
+
+	/**
+	 * Returns the name of the first tab in the given mode
+	 */
+	public function defaultViewForMode($mode)
+	{
+		$tabs = $this->display->tabs[$mode];
+		reset($tabs);
+		return key($tabs);
+	}
+
+
+
 
 	/**
 	 * Enrol a user as a manager to a course using the manual enrolment method

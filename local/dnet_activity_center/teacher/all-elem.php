@@ -6,6 +6,8 @@
 
 include '../roles/common_top.php';
 
+$activityCenter->setCurrentMode('teacher');
+
 echo $activityCenter->display->showTabs('teacher', 'all-elem');
 
 echo $OUTPUT->sign('rocket', 'All Elementary Activities', 'This page shows all the activities available. Click on an Activity you would like to supervise.');
