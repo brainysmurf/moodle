@@ -3,6 +3,28 @@
 	<input type="hidden" name="action" value="<?=FORMACTION?>" />
 
 	<div class="form-group">
+		<label for="shared" class="col-md-3 control-label">Category</label>
+		<div class="col-md-9">
+			<select name="categoryid" class="form-control" >
+				<?php
+
+				//load categories in activity category
+				$activityCategory = coursecat::get(1);
+				$activitySubcategores = $activityCategory->get_children();
+
+				foreach ($activitySubcategores as $subcategory) {
+					$selcted = FORMACTION == 'edit' && $editItem->categoryid == $subcategory->id;
+
+					echo '<option value="' . $subcategory->id . '"' . ($selected ? ' selected="selected"' : '').'>' . $subcategory->name . '</option>';
+				}
+
+				?>
+			</select>
+
+		</div>
+	</div>
+
+	<div class="form-group">
 		<label for="shared" class="col-md-3 control-label">Activity Name</label>
 		<div class="col-md-9">
 			<input type="text" id="title" name="name" class="form-control" placeholder="Name of the activity" value="<?=(FORMACTION == 'edit' ? $editItem->name : '')?>" />
@@ -31,7 +53,7 @@
 		<label for="shared" class="col-md-3 control-label">How many supervisors does this activity need?</label>
 		<div class="col-md-9">
 
-			<p><input type="number" class="form-control" name="supervisors" value="<?=(FORMACTION == 'edit' ? $editItem->activitysupervisors : 0)?>" /></p>
+			<p><input type="text" class="form-control" name="supervisors" value="<?=(FORMACTION == 'edit' ? $editItem->activitysupervisors : 0)?>" /></p>
 
 		</div>
 	</div>

@@ -20,6 +20,7 @@ switch ($action) {
 		}
 
 		$name = required_param('name', PARAM_RAW);
+		$categoryID = required_param('categoryid', PARAM_INT);
 		$summary = required_param('summary', PARAM_RAW);
 		$season = required_param('season', PARAM_RAW);
 		$supervisors = optional_param('supervisors', 0, PARAM_INT);
@@ -36,7 +37,7 @@ switch ($action) {
 		$courseData->shortname = $shortname;
 		$courseData->summary = $summary;
 		$courseData->format = 'onetopic';
-		$courseData->category = $activityCenter->activityCourseCategory;
+		$courseData->category = $categoryID;
 
 		require_once $CFG->dirroot . '/course/lib.php';
 		$course = create_course($courseData);
