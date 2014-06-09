@@ -12,12 +12,21 @@
 				$activityCategory = coursecat::get(1);
 				$activitySubcategores = $activityCategory->get_children();
 
-				foreach ($activitySubcategores as $subcategory) {
-					$selcted = FORMACTION == 'edit' && $editItem->categoryid == $subcategory->id;
+function displayCategories($categories)
+{
+	global $editItem;
+	foreach ($categories as $category) {
+		// For elementary we have to go deeper...
+		if ($category->id == 118) {
+			displayCategories($category->get_children());
+			continue;
+		}
+		$selcted = FORMACTION == 'edit' && $editItem->categoryid == $category->id;
+		echo '<option value="' . $category->id . '"' . ($selected ? ' selected="selected"' : '').'>' . $category->name . '</option>';
+	}
+}
 
-					echo '<option value="' . $subcategory->id . '"' . ($selected ? ' selected="selected"' : '').'>' . $subcategory->name . '</option>';
-				}
-
+				displayCategories($activitySubcategores);
 				?>
 			</select>
 
