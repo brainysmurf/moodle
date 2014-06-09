@@ -555,7 +555,7 @@ function studentSearch() {
 				var user = res.users[i];
 				html += '<div class="col-sm-3"><a href="changeuser.php?userid=' + user.id + '" class="btn">';
 					html += user.firstname + ' ' + user.lastname;
-					html += '<span>' + user.idnumber + '&nbsp;</span>';
+					//html += '<span>' + user.idnumber + '&nbsp;</span>';
 				html += '</a></div>';
 			}
 

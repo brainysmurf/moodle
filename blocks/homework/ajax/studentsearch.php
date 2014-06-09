@@ -10,21 +10,32 @@ $hwblock = new \SSIS\HomeworkBlock\Block;
 
 $q = required_param('q', PARAM_RAW);
 
-$sql = 'SELECT id, idnumber, firstname, lastname
+$sql = "SELECT id, idnumber, firstname, lastname
 FROM {user}
 WHERE
-	(id = ?
-	OR idnumber = ?
-	OR LOWER(CONCAT(firstname, \' \', lastname)) LIKE ?)
+	email LIKE '%@student.ssis-suzhou.net'
+	AND (
+		id = ?
+		OR idnumber = ?
+		OR LOWER(department) = ?
+		OR REPLACE(CONCAT(LOWER(firstname), LOWER(lastname)),  ' ', '') LIKE ?
+		OR REPLACE(CONCAT(LOWER(lastname),  LOWER(firstname)), ' ', '') LIKE ?
+		OR LOWER(lastname) LIKE ?
+	)
 	AND deleted = 0
-ORDER BY firstname, lastname ASC';
+ORDER BY firstname, lastname ASC";
 
 $words = explode(' ', $q);
+$wildq = strtolower('%' . implode('%', $words) . '%');
 
 $values = array(
-	intval($q),
-	intval($q),
-	strtolower('%' . implode('%', $words) . '%')
+	intval($q), // userID
+	intval($q), // idnumber
+	strtolower($q), // department
+	$wildq,
+	$wildq,
+	$wildq,
+	$wildq,
 );
 $records = $DB->get_records_sql($sql, $values);
 
