@@ -1,10 +1,9 @@
-<form class="form" action="#">
+<form class="form" method="post" action="<?=$activityCenter->getPath()?>actions/saveactivity.php">
 
-	<!-- Activity or PD -->
-	<input type="hidden" name="type" value="<?=$itemType?>" />
+	<input type="hidden" name="action" value="<?=FORMACTION?>" />
 
 	<div class="form-group">
-		<label for="shared" class="col-md-3 control-label">Name</label>
+		<label for="shared" class="col-md-3 control-label">Activity Name</label>
 		<div class="col-md-9">
 			<input type="text" id="title" name="name" class="form-control" placeholder="Name of the activity" value="<?=(FORMACTION == 'edit' ? $editItem->name : '')?>" />
 		</div>
@@ -13,7 +12,7 @@
 	<div class="form-group">
 		<label for="shared" class="col-md-3 control-label">Description</label>
 		<div class="col-md-9">
-			<textarea name="description" class="form-control" placeholder="What is the homework?" rows="10"><?=(FORMACTION == 'edit' ? $editItem->description : '')?></textarea>
+			<textarea name="summary" class="form-control" placeholder="Enter a description of the activity, including which days it runs?" rows="10"><?=(FORMACTION == 'edit' ? $editItem->summary : '')?></textarea>
 		</div>
 	</div>
 
@@ -28,8 +27,21 @@
 		</div>
 	</div>
 
+	<div class="form-group">
+		<label for="shared" class="col-md-3 control-label">How many supervisors does this activity need?</label>
+		<div class="col-md-9">
+
+			<p><input type="number" class="form-control" name="supervisors" value="<?=(FORMACTION == 'edit' ? $editItem->activitysupervisors : 0)?>" /></p>
+
+		</div>
+	</div>
+
 	<?php
-	$label = 'Add Activity';
+	if (FORMACTION == 'edit') {
+		$label = 'Save Changes';
+	} else {
+		$label = 'Add Activity';
+	}
 	?>
 
 	<div class="form-group">

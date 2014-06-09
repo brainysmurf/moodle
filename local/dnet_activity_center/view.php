@@ -11,6 +11,9 @@ $activityCenter = new \SSIS\ActivityCenter\ActivityCenter();
 
 $view = optional_param('view', false, PARAM_RAW);
 
+if (!$activityCenter->isValidView($view)) {
+	$view = false;
+}
 
 if (!$view) {
 	$view = $view ? $view : $activityCenter->defaultViewForMode($mode);
@@ -18,7 +21,7 @@ if (!$view) {
 	exit();
 }
 
-$activityCenter->mode = $mode;
+$mode = $activityCenter->getCurrentMode();
 
 $PAGE->set_title('Activity Center');
 $PAGE->set_heading('Activity Center');
@@ -30,6 +33,6 @@ echo $OUTPUT->header();
 // Show mode switching tabs
 echo $activityCenter->display->showTabs($mode, $view);
 
-include "./views/{$mode}/{$view}.php"; //FIXME: don't leave this like this
+include "./views/{$mode}/{$view}.php";
 
 echo $OUTPUT->footer();

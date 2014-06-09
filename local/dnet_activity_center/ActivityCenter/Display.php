@@ -11,6 +11,8 @@ class Display
 	private $activityCenter;
 	public $tabs = array( // Array of which tabs are shown in differnet modes
 		'admin' => array(
+			'activities' => array('session_mod.php?submode=activities&value=YES', '<i class="icon-rocket"></i> Modify Activities'),
+			'individuals' => array('session_modephp?submode=individuals&value=YES', '<i class="icon-user"></i> Manage Individuals'),
 			'newactivity' => array('view.php?view=admin/newactivity', '<i class="icon-plus-sign"></i> Create New Activity')
 		),
 		'teacher' => array(
@@ -64,9 +66,6 @@ class Display
 
 	private function modeTabs()
 	{
-		// This isn't used (yet?)
-		return false;
-
 		$possibleModes = $this->activityCenter->getPossibleModes();
 		$currentMode = $this->activityCenter->getCurrentMode();
 

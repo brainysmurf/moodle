@@ -263,4 +263,20 @@ order by goals desc';
 		print_object($users);
 	}
 
+	public function addSelfEnrolmentToActivityCourse($course)
+	{
+		//Load the cohort sync enrolment plugin
+		$plugin = enrol_get_plugin('self');
+
+		//Enrol teachers as students (disabled by default)
+		return $plugin->add_instance(
+			$course,
+			array(
+				'name' => 'Self Enrolment (Student)',
+				'roleid' => self::STUDENT_ROLE_ID,
+				'status' => ENROL_INSTANCE_ENABLED
+			)
+		);
+	}
+
 }

@@ -7,6 +7,7 @@ class ActivityCenter
 	public $data;
 	public $display;
 	const PATH = '/local/dnet_activity_center/';
+	public $activityCourseCategory = 1;
 
 	function __construct()
 	{
@@ -45,13 +46,22 @@ class ActivityCenter
 	public function setCurrentMode($mode)
 	{
 		global $SESSION;
-		$allowedModes = $this->getPossibleModes();
 
-		if (!in_array($mode, $allowedModes)) {
-			die("Invalid mode");
+		$possibleModes = $this->getPossibleModes();
+		if (!in_array($mode, $possibleModes)) {
+			return false;
+		}
+
+		// Backward compatability
+		if ($mode == 'teacher') {
+			$SESSION->dnet_activity_center_submode = 'becometeacher';
+		} else {
+			$SESSION->dnet_activity_center_submode = '';
 		}
 
 		$SESSION->activityCenterMode = $mode;
+
+		return true;
 	}
 
 	public function getCurrentMode()
@@ -94,6 +104,14 @@ class ActivityCenter
 		$tabs = $this->display->tabs[$mode];
 		reset($tabs);
 		return key($tabs);
+	}
+
+	public function isValidView($view)
+	{
+		$mode = $this->getCurrentMode();
+		$view = preg_replace("/[^a-zA-Z0-9]+/", '', $view);
+		$file = dirname(__DIR__) . '/views/' . $mode . '/' . $view . '.php';
+		return file_exists($file);
 	}
 
 

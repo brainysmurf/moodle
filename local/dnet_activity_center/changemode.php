@@ -9,8 +9,11 @@ $activityCenter = new ActivityCenter();
 
 $mode = required_param('mode', PARAM_RAW);
 
-if ($activityCenter->getCurrentMode($mode)) {
+if ($activityCenter->setCurrentMode($mode)) {
 	redirect(ActivityCenter::PATH);
+
 } else {
+
 	die('Invalid mode.');
+
 }

@@ -379,12 +379,20 @@ function output_submode_choice($kind, $tabs, $mode_name="mode") {
             case "individuals":
                 $icon = "user";
                 break;
+            case 'createnewactivity':
+                $icon = "plus-sign";
+                $url = '../view.php?view=newactivity';
+                break;
             case "becometeacher":
                 $icon = "magic";
                 break;
         }
 
-        $pre = '<li><a class="btn" href="'.derive_plugin_path_from("session_mod.php?submode=".$label_lower."&value=YES").'">';
+        if (!$url) {
+            $url = derive_plugin_path_from("session_mod.php?submode=".$label_lower."&value=YES");
+        }
+
+        $pre = '<li><a class="btn" href="'.$url.'">';
         $post = "</a></li>";
 
         $li .= "{$pre}<i class=\"icon-".$icon."\"></i> {$label}{$post}
