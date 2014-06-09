@@ -17,10 +17,10 @@ class Display
 		),
 		'teacher' => array(
 			'overview' => array('teacher/index.php', '<i class="icon-ok-sign"></i> Overview'),
-			'all-elem' => array('teacher/all-elem.php', '<i class="icon-rocket"></i> Pick Elementary Activities'),
-			'all-sec' => array('teacher/all-sec.php', '<i class="icon-rocket"></i> Pick Secondary Activities'),
-			'pdframework' => array('teacher/pd-framework.php', '<i class="icon-star"></i> Choose PD Strand'),
 			'goals' => array('teacher/goals.php', '<i class="icon-pencil"></i> Enter Your Goals'),
+			'pdframework' => array('teacher/pd-framework.php', '<i class="icon-star"></i> Choose PD Strand'),
+			'all-sec' => array('teacher/all-sec.php', '<i class="icon-rocket"></i> Pick Secondary Activities'),
+			'all-elem' => array('teacher/all-elem.php', '<i class="icon-rocket"></i> Pick Elementary Activities'),
 		),
 	);
 
@@ -99,26 +99,26 @@ class Display
 
 		$ret = '<div class="courseList">';   # this is needed just for the CSS
 
-		$ret .= '<p margin-top:10px;><b>Department Goal(s):</b>';
-		$ret .= ' (These goals come directly from your Department.)</p>';
+		$ret .= '<p margin-top:10px;><b>A. Department Goal(s):</b>';
+		$ret .= ' (Heads of Department/Subject Leaders <b>only</b>, enter the department goals here..)</p>';
 		$ret .= '<textarea id="department_goal" class="filter" rows="3" style="font-size:18px;" />';
 		$ret .= $info->department;
 		$ret .= '</textarea>';
 
-		$ret .= '<br/><p><b>Individual Goal(s):</b>';
-		$ret .= ' (Forumlate a goal according to the listed items 1-5 in the linked document.)</p>';
+		$ret .= '<br/><p><b>B. Individual Goal(s):</b>';
+		$ret .= ' (Enter one or two goals based on the Approaches to Teaching, see Goal Setting Guidance.)</p>';
 		$ret .= '<textarea id="individual_goal" class="filter" rows="3" style="font-size:18px;" />';
 		$ret .= $info->individual;
 		$ret .= '</textarea>';
 
-		$ret .= '<br/><p><b>Pastoral or Leadership Goal(s)</b>' ;
-		$ret .= ' (Those who are not PoRs formulate a SMART goal relevant to their role of supporting student well-being. Those who are PoRs formulate a leadership SMART goal relevant to their development as leaders.)</p>';
+		$ret .= '<br/><p><b>C. Pastoral or Leadership Goal(s)</b>' ;
+		$ret .= ' (Enter only one goal. Write. PoRs enter a SMART goal relevant to your leaders role.  Non-PoRs enter a goal relevant to your role of supporting student well-being.)</p>';
 		$ret .= '<textarea id="pastleadership_goal" class="filter" rows="3" style="font-size:18px;" />';
 		$ret .= $info->pastleadership;
 		$ret .= '</textarea>';
 
-		$ret .= '<br/><p><b>Additional Individual Goal(s):</b>';
-		$ret .= ' (Addtitional goals that do not fit in the above headings <i>e.g.</i> some initiative.)</p>';
+		$ret .= '<br/><p><b>D. Additional Individual Goal(s):</b>';
+		$ret .= ' (<b>Optional</b>. Additional goals that do not fit in the above headings e.g. some initiative, see guidance.)</p>';
 		$ret .= '<textarea id="additional_goal" class="filter" rows="3" style="font-size:18px;" />';
 		$ret .= $info->additional;
 		$ret .= '</textarea>';
@@ -240,7 +240,7 @@ class Display
 		$ret .= $starttable;
 		$ret .= $startrow;
 		$ret .= '<td style="color:#eee;background-color:#eee;"></td>';
-		$ret .= '<th>Survey: How would you prefer to engage on your chosen PD? (non-binding)</th>';
+		$ret .= '<th>Survey: How would you prefer to engage in your chosen PD? (non-binding)</th>';
 		$ret .= $endrow;
 
 		$ret .= $startrow;
@@ -249,7 +249,7 @@ class Display
 		$subchoices = array(
 			array('text'=>' School Improvement Teams', 'value'=>'SIT'),
 			array('text'=>' Reflective Teaching', 'value'=>'Reflective'),
-			array('text'=>' Skill Share', 'value'=>'Skill Share')
+			array('text'=>' Skills Share /  Teacher-led Workshop', 'value'=>'Skill Share')
 			);
 
 		$ret .= '<td>';
