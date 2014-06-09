@@ -471,7 +471,7 @@ class Display
 
 			$r .= '<div class="col-sm-3"><a href="' . ($url ?  $url . $course->id : '#') . '" class="btn ' . ($color ? 'btn-' . $color : '') . '" data-courseid="'. $course->id . '" data-fullname="' . $course->fullname . '">';
 
-				if (preg_match_all('/\((S1|S2|S3|ALL|FULL)\)/i', $course->fullname, $matches)) {
+				if (preg_match_all('/\((([S1|S2|S3|ALL|FULL],?)+)\)/i', $course->fullname, $matches)) {
 
 					foreach ($matches[0] as $i => $matchedText) {
 
