@@ -42,11 +42,13 @@ class theme_decaf_core_renderer extends core_renderer {
 	}
 
 	public function rarrow() {
-		return '<i class="icon-caret-right"></i> ';
+		return '&raquo;';
+		//return '<i class="icon-caret-right"></i> ';
 	}
 
 	public function larrow() {
-		return '<i class="icon-caret-left"></i> ';
+		return '&laquo;';
+		//return '<i class="icon-caret-left"></i> ';
 	}
 
 	private function get_accesshide($text, $elem='span', $class='', $attrs='') {
