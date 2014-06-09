@@ -186,12 +186,14 @@ order by goals desc';
 	 * @param search Search for activities with this string in the name
 	 * @param userID Return activities the given user ID is enroled as a Manager in
 	 */
-	public function getActivities($search = false, $userID = false, $path='/1/%')
+	public function getActivities($search = false, $userID = false, $path = '/1/%')
 	{
 		global $DB;
 
 		$sql = "SELECT
-			crs.fullname, crs.id
+			crs.fullname,
+			crs.id,
+			crs.summary
 		FROM
 			{course} crs
 		JOIN
@@ -223,7 +225,9 @@ order by goals desc';
 		global $DB;
 
 		$sql = "SELECT
-			crs.fullname, crs.id
+			crs.fullname,
+			crs.id,
+			crs.summary
 		FROM
 			{course} crs
 		JOIN
@@ -257,6 +261,22 @@ order by goals desc';
 		$users = get_enrolled_users($context, 'enrol/manual:enrol');
 
 		print_object($users);
+	}
+
+	public function addSelfEnrolmentToActivityCourse($course)
+	{
+		//Load the cohort sync enrolment plugin
+		$plugin = enrol_get_plugin('self');
+
+		//Enrol teachers as students (disabled by default)
+		return $plugin->add_instance(
+			$course,
+			array(
+				'name' => 'Self Enrolment (Student)',
+				'roleid' => self::STUDENT_ROLE_ID,
+				'status' => ENROL_INSTANCE_ENABLED
+			)
+		);
 	}
 
 }

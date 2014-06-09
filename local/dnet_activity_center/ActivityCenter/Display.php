@@ -9,13 +9,18 @@ namespace SSIS\ActivityCenter;
 class Display
 {
 	private $activityCenter;
-	private $tabs = array( // Array of which tabs are shown in differnet modes
+	public $tabs = array( // Array of which tabs are shown in differnet modes
+		'admin' => array(
+			'activities' => array('session_mod.php?submode=activities&value=YES', '<i class="icon-rocket"></i> Modify Activities'),
+			'individuals' => array('session_modephp?submode=individuals&value=YES', '<i class="icon-user"></i> Manage Individuals'),
+			'newactivity' => array('view.php?view=admin/newactivity', '<i class="icon-plus-sign"></i> Create New Activity')
+		),
 		'teacher' => array(
-			'overview' => array('index.php', '<i class="icon-ok-sign"></i> Overview'),
-			'all-elem' => array('all-elem.php', '<i class="icon-rocket"></i> Pick Elementary Activities'),
-			'all-sec' => array('all-sec.php', '<i class="icon-rocket"></i> Pick Secondary Activities'),
-			'pdframework' => array('pd-framework.php', '<i class="icon-star"></i> Choose PD Strand'),
-			'goals' => array('goals.php', '<i class="icon-pencil"></i> Enter Your Goals'),
+			'overview' => array('teacher/index.php', '<i class="icon-ok-sign"></i> Overview'),
+			'all-elem' => array('teacher/all-elem.php', '<i class="icon-rocket"></i> Pick Elementary Activities'),
+			'all-sec' => array('teacher/all-sec.php', '<i class="icon-rocket"></i> Pick Secondary Activities'),
+			'pdframework' => array('teacher/pd-framework.php', '<i class="icon-star"></i> Choose PD Strand'),
+			'goals' => array('teacher/goals.php', '<i class="icon-pencil"></i> Enter Your Goals'),
 		),
 	);
 
@@ -32,21 +37,58 @@ class Display
 		$PAGE->requires->css('/blocks/homework/assets/bootstrap/css/bootstrap.css');
 		$PAGE->requires->css('/blocks/homework/assets/css/homework.css');
 		$PAGE->requires->jquery();
-		$PAGE->requires->js(ActivityCenter::PATH . 'assets/js/activitycenter.js');
+		$PAGE->requires->js(ActivityCenter::PATH . 'assets/js/activitycenter.js?v=3');
 	}
 
+	/**
+	 * Displays the tabs at the top of a page for switching mode and view (page)
+	 */
 	public function showTabs($mode, $current)
 	{
 		$tabs = $this->tabs[$mode];
-		$t = '<div class="tabs">';
+
+		$t = '';
+
+		$t .= $this->modeTabs();
+
+		$t .= '<div class="tabs">';
 			$t .= '<ul>';
 			foreach ($tabs as $name => $tab) {
 				$t .= '<li>';
-					$t .= '<a ' . ($name == $current ? 'class="selected"': '') . 'href="' . $tab[0] . '">' . $tab[1] . '</a>';
+					$t .= '<a ' . ($name == $current ? 'class="selected"': '') . 'href="' . $this->activityCenter->getPath() . $tab[0] . '">' . $tab[1] . '</a>';
 				$t .= '</li>';
 			}
 			$t .= '</ul>';
 		$t .= '</div>';
+
+		return $t;
+	}
+
+	private function modeTabs()
+	{
+		$possibleModes = $this->activityCenter->getPossibleModes();
+		$currentMode = $this->activityCenter->getCurrentMode();
+
+		if (count($possibleModes) < 2) {
+			return false;
+		}
+
+		$modeLabels = array(
+			'admin' => '<i class="icon-wrench"></i> Activity Admin Mode',
+			'teacher' => '<i class="icon-magic"></i> Teacher Mode',
+			'student' => '<i class="icon-user"></i> Student Mode',
+		);
+
+		$t = '<div class="tabs noborder">';
+		$t .= '<ul class="additional-tabs">';
+		foreach ($possibleModes as $mode) {
+			$t .= '<li>';
+			$t .= '<a ' . ($mode == $currentMode ? 'class="selected"': '') . 'href="' . $this->activityCenter->getPath() . 'changemode.php?mode=' . $mode . '">' . $modeLabels[$mode] . '</a>';
+			$t .= '</li>';
+		}
+		$t .= '</ul>';
+		$t .= '</div>';
+
 		return $t;
 	}
 
@@ -188,7 +230,7 @@ class Display
 		$ret .= $startrow;
 		$ret .= '<td><b>Choose PD:</b></td>';
 		foreach ($choices as $area) {
-			$selected = !empty($usersChoices->strand) && $usersChoices->strand == $area['text'];
+			$selected = !empty($usersChoices->strand) && $usersChoices->strand == $area['value'];
 			$ret .= '<td><label><input type="radio" name="group1" value="'.$area['value'].'" '. ($selected ? 'checked="checked"' : '') . '> '.$area['text'].'</label></td>';
 		}
 		$ret .= $endrow;
@@ -396,38 +438,64 @@ class Display
 	 */
 	public function activityList($courses, $url = '/course/view.php?id=', $listClasses = '')
 	{
-		global $PAGE;
+		global $PAGE, $CFG;
+
+		require_once $CFG->libdir . '/ssismetadata.php';
+		$courseMetatdata = new \ssismetadata();
 
 		$r  = '<div class="courseList ' . $listClasses . '">';
 		$r .= '<input type="text" class="filter" placeholder="Type here to filter by name..." />';
 		$r .= '<div class="row courses">';
 
 		foreach ($courses as $course) {
+
 			// Find the activity manager
-			$managers = $this->activityCenter->data->getActivitiesManaged($course->id);
-			$managerNames = array();
-			foreach ($managers as $manager) {
-				$managerNames[] = $manager->firstname . ' ' . $manager->lastname;
+			$supervisors = $this->activityCenter->data->getActivitiesManaged($course->id);
+			$supervisorNames = array();
+			foreach ($supervisors as $supervisor) {
+				$supervisorNames[] = $supervisor->firstname . ' ' . $supervisor->lastname;
 			}
 
+			$supervisorCount = count($supervisors);
+			$supervisorsNeeded = $courseMetatdata->getCourseField($course->id, 'activitysupervisors');
+
 			$icon = course_get_icon($course->id);
-			$r .= '<div class="col-sm-3"><a href="' . ($url ?  $url . $course->id : '#') . '" class="btn" data-courseid="'. $course->id . '" data-fullname="' . $course->fullname . '">';
+
+			if ($supervisorsNeeded > 0 && $supervisorCount >= $supervisorsNeeded) {
+				$color = 'danger';
+			} elseif ($supervisorsNeeded > 0) {
+				$color = 'success';
+			} else {
+				$color = '';
+			}
+
+			$r .= '<div class="col-sm-3"><a href="' . ($url ?  $url . $course->id : '#') . '" class="btn ' . ($color ? 'btn-' . $color : '') . '" data-courseid="'. $course->id . '" data-fullname="' . $course->fullname . '">';
 
 				if (preg_match_all('/\((S1|S2|S3|ALL|FULL)\)/i', $course->fullname, $matches)) {
+
 					foreach ($matches[0] as $i => $matchedText) {
+
+						if ($matches[1][$i] === 'ALL') {
+							$matches[1][$i] = 'S1,S2,S3';
+						}
+
 						$icon = '<i class="pull-right icon-text">' . $matches[1][$i] . '</i>';
 						$course->fullname = str_replace($matchedText, $icon, $course->fullname);
 						$course->fullname = trim($course->fullname);
 					}
+
 				}
 
 				$r .= $course->fullname;
 
-				if (count($managerNames) > 0 ) {
-					$r .= '<span class="green">' . implode(', ', $managerNames) . '</span>';
+				if ($supervisorsNeeded) {
+					$r .= '<span>' . $supervisorCount . '/' . $supervisorsNeeded . ' supervisors (full)</span>';
 				} else {
-					$r .= '<span class="red"><em>No supervisors</em></span>';
+					$r .= '<span>No supervisors needed</span>';
 				}
+
+				$r .= '<span class="desc" style="display:none;">' . htmlentities($course->summary) . '</span>';
+
 			$r .= '</a></div>';
 		}
 

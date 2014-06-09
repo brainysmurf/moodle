@@ -26,7 +26,7 @@ if ($sub_mode == strtolower(SUBMODE_INDIVIDUALS)) {
 } else {
 
     sign("question-sign", "Which mode?", "Are you making changes to activities, or to individuals? Or do you need to access this area as a regular teacher?");
-    output_submode_choice("", array(SUBMODE_ACTIVITIES, SUBMODE_INDIVIDUALS, BECOME_TEACHER));
+    output_submode_choice("", array(SUBMODE_ACTIVITIES, SUBMODE_INDIVIDUALS, NEW_ACTIVITY, BECOME_TEACHER));
 
 }
 

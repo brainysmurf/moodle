@@ -19,7 +19,7 @@ $activityCenter = new \SSIS\ActivityCenter\ActivityCenter();
 switch ($action) {
 	case 'enrol':
 
-		$success = $activityCenter->addManager($courseID, $activityCenter->userID());
+		$success = $activityCenter->addManager($courseID, $activityCenter->getUserID());
 
 		break;
 }

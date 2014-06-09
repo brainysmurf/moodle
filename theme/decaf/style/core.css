@@ -500,6 +500,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 }
 .block .content{ padding:0; margin:12px; }
 	.block.block_html .content .no-overflow { padding:0; }
+	.block .no-overflow { overflow:hidden; }
 .block .content .buttons{margin-top:2px;}
 .block_login label{font-size:0.85em;display:block;}
 .block_login .fld input{width:95%;margin:1px 0 5px;padding:2px;}
@@ -718,10 +719,9 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 	}
 
 	#cantLoginBox .btn {
-		width: 101px;
 		font-size: 12px;
 		padding: 4px 8px;
-		display: inline-block;
+		display: block;
 		margin: 0;
 	}
 

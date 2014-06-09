@@ -15,12 +15,12 @@ if ($PAGE->course->id != 1 && isloggedin()) {   # if not frontpage
 		if (empty($PAGE->course->id) || $PAGE->course->id == 1395) {
 
 			//Frontpage or "Frontpage" course
-			$placeholder = 'Search All of DragonNet';
+			$placeholder = 'Search DragonNet';
 
 		} else {
 
 			//Search within a course
-			$placeholder = 'Search Within This Course';
+			$placeholder = 'Search DragonNet';
 
 			echo html_writer::empty_tag('input', array(
 				'type' => 'hidden',
