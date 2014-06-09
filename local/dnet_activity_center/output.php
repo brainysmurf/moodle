@@ -241,14 +241,15 @@ function activity_box($activity, $remove=false) {
 
 
     $role_info = array(
-        array( "id"=>$manager_role, "name"=>"Managers:" ),
+        array( "id"=>$manager_role, "name"=>"Supervisors:" ),
         array( "id"=>$editor_role, "name"=>"Editors:" ),
         array( "id"=>$participant_role, "name"=>"# Participants (incl parents):")
         );
 
+    $context = get_context_instance(CONTEXT_COURSE, $activity->id, true);
+
     foreach ($role_info as $role) {
         $role_id = $role["id"];
-        $context = get_context_instance(CONTEXT_COURSE, $activity->id, true);
         $users = get_role_users($role_id, $context);
         $count = count($users);
         $value = '';
@@ -278,6 +279,143 @@ function activity_box($activity, $remove=false) {
 
     }
 
+    $max_participants = $DB->get_field('enrol', 'customint3', array('courseid'=>$activity->id, 'enrol'=>'self'));
+
+    $dialog = '<div id="dialog_adjust_max_participants_'.$activity->id.'" title="Edit Max Participants" style="display:none"> Enter the maximum number of participants:
+    <form id="dialog_adjust_max_participants_'.$activity->id.'" action="'.derive_plugin_path_from('activity_mods.php').'">
+    <input name="activity_id" type="hidden" value="'.$activity->id.'" />
+    <input id="dialog_adjust_max_participants_input_'.$activity->id.'" style="width:100%;margin-top:5px;" name="new_name" autofocus="autofocus" size="100" onclick="this.select()" type="text" value="'.$max_participants.'" />
+    </form>
+    .</div>';
+    $script = "<script>
+
+    $('#dialog_adjust_max_participants_".$activity->id."').on(\"submit\", function (e) {
+        e.preventDefault();
+        var formURL = \"".derive_plugin_path_from('activity_mods.php') . "\";
+        var formData = {
+            \"activity_id\": \"".$activity->id."\",
+            \"max_participants\": $('#dialog_adjust_max_participants_input_".$activity->id."').val()
+        };
+        $.ajax(
+        {
+            url : formURL,
+            data: formData,
+            async: true,
+            type: \"GET\",
+            success: function(data, textStatus, jqXHR)
+            {
+                $('#dialog_max_participants_".$activity->id."').dialog('close');
+                window.location.reload();
+            },
+            error: function(jqXHR, textStatus, errorThrown)
+            {
+                alert('Could not change the name for some reason... you will have to do it manually (boo!)');
+            }
+        });
+    });
+
+    $('#adjust_max_participants_".$activity->id."').on(\"click\", function(e) {
+        e.preventDefault();
+        $(\"#dialog_adjust_max_participants_".$activity->id."\").dialog({
+            minWidth: 450,
+            draggable: false,
+            modal: true,
+            show: { effect: \"drop\", duration: 400 },
+            buttons: [
+                {
+                    id: 'ok_button_".$activity->id."',
+                    text: \"OK\",
+                    click: function() {
+                        $('#dialog_adjust_max_participants_".$activity->id."').submit();
+                    }
+                },
+            ],
+            open: function () {
+                $('#ok_button_".$activity->id."').focus();
+        }
+
+        });
+
+    });
+    </script>";
+    $edit_name = '&nbsp;&nbsp;<a id="adjust_max_participants_'.$activity->id.'"   href="#"><i class="icon-cog"></i></a>&nbsp;&nbsp;';
+    $row->cells[1]->text .= '<tr><td>'.'# max participants'.'</td>';
+    $row->cells[1]->text .= '<td>'.$max_participants.$edit_name.'</td></tr>';
+    $row->cells[1]->text .= $dialog;
+    $row->cells[1]->text .= $script;
+
+    $max_supervisors = $DB->get_field('course_ssis_metadata', 'value', array('field'=>'activitysupervisor', 'courseid'=>$activity->id));
+
+    $dialog = '<div id="dialog_adjust_max_supervisors_'.$activity->id.'" title="Edit Max Supervisors" style="display:none"> Enter the maximum number of supervisors:
+    <form id="dialog_adjust_max_supervisors_'.$activity->id.'" action="'.derive_plugin_path_from('activity_mods.php').'">
+    <input name="activity_id" type="hidden" value="'.$activity->id.'" />
+    <input id="dialog_adjust_max_supervisors_input_'.$activity->id.'" style="width:100%;margin-top:5px;" name="new_name" autofocus="autofocus" size="100" onclick="this.select()" type="text" value="'.$max_supervisors.'" />
+    </form>
+    .</div>';
+    $script = "<script>
+
+    $('#dialog_adjust_max_supervisors_".$activity->id."').on(\"submit\", function (e) {
+        e.preventDefault();
+        var formURL = \"".derive_plugin_path_from('activity_mods.php') . "\";
+        var formData = {
+            \"activity_id\": \"".$activity->id."\",
+            \"max_supervisors\": $('#dialog_adjust_max_supervisors_input_".$activity->id."').val()
+        };
+        $.ajax(
+        {
+            url : formURL,
+            data: formData,
+            async: true,
+            type: \"GET\",
+            success: function(data, textStatus, jqXHR)
+            {
+                $('#dialog_max_supervisors_".$activity->id."').dialog('close');
+                window.location.reload();
+            },
+            error: function(jqXHR, textStatus, errorThrown)
+            {
+                alert('Could not change the name for some reason... you will have to do it manually (boo!)');
+            }
+        });
+    });
+
+    $('#adjust_max_supervisors_".$activity->id."').on(\"click\", function(e) {
+        e.preventDefault();
+        $(\"#dialog_adjust_max_supervisors_".$activity->id."\").dialog({
+            minWidth: 450,
+            draggable: false,
+            modal: true,
+            show: { effect: \"drop\", duration: 400 },
+            buttons: [
+                {
+                    id: 'ok_button_".$activity->id."',
+                    text: \"OK\",
+                    click: function() {
+                        $('#dialog_adjust_max_supervisors_".$activity->id."').submit();
+                    }
+                },
+            ],
+            open: function () {
+                $('#ok_button_".$activity->id."').focus();
+        }
+
+        });
+
+    });
+    </script>";
+    $edit_name = '&nbsp;&nbsp;<a id="adjust_max_supervisors_'.$activity->id.'"   href="#"><i class="icon-cog"></i></a>&nbsp;&nbsp;';
+
+    $row->cells[1]->text .= '<tr><td>'.'# max supervisors'.'</td>';
+
+    if ($max_supervisors) {
+        $value = $max_supervisors;
+    } else {
+        $value = 'undefined';
+    }
+
+    $row->cells[1]->text .= '<td>'.$value.$edit_name.'</td></tr>';
+    $row->cells[1]->text .= $dialog;
+    $row->cells[1]->text .= $script;
 
     $row->cells[1]->text .= '</table>';
 

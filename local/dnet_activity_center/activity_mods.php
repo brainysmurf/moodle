@@ -9,6 +9,8 @@ $new_name = optional_param('new_name', '', PARAM_RAW);
 $enrol = optional_param('enrol', '', PARAM_RAW);
 $toggle_visibility = optional_param('toggle_visibility', '', PARAM_RAW);
 $toggle_enrollments = optional_param('toggle_enrollments', '', PARAM_RAW);
+$max_participants = optional_param('max_participants', '', PARAM_INT);
+$max_supervisors = optional_param('max_supervisors', '', PARAM_INT);
 
 if ($enrol == "BULKENROL") {
     $selfenrolment_plugin = enrol_get_plugin('self');
@@ -74,4 +76,22 @@ if (!empty($toggle_enrollments)) {
                 ));
         }
     }
+}
+
+if (!empty($max_supervisors)) {
+    $exists = $DB->get_field('course_ssis_metadata', 'value', array('field'=>'activitysupervisor', 'courseid'=>$activity_id));
+    if ($exists) {
+        $DB->set_field('course_ssis_metadata', 'value', $max_supervisors, array('field'=>'activitysupervisor', 'courseid'=>$activity_id));
+    } else {
+        $data = new stdClass();
+        $data->field = 'activitysupervisor';
+        $data->courseid = $activity_id;
+        $data->value = $max_supervisors;
+        print_object($data);
+        $DB->insert_record('course_ssis_metadata', $data, $returnid=false);
+    }
+}
+
+if (!empty($max_participants)) {
+    $DB->set_field('enrol', 'customint3', $max_participants, array('courseid'=>$activity_id, 'enrol'=>'self'));
 }

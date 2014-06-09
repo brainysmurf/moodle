@@ -332,7 +332,7 @@ class Display
 
 				echo '<td>';
 				$variable = $item['var'];
-				echo $goal_data->$variable;
+				echo '<label style="font-size:14px;font-weight:normal;">'.$goal_data->$variable.'</label>';
 				echo '</td>';
 
 				echo $endrow;
@@ -361,11 +361,11 @@ class Display
 		echo $startrow;
 		echo '<td><b>Activities</b></td>';
 		foreach ($info_by_seasons as $items) {
-			echo '<td>';
+			echo '<td><label style="font-size:14px;font-weight:normal;">';
 			foreach ($items as $item) {
 				echo $item.'<br />';
 			}
-			echo '</td>';
+			echo '</label></td>';
 		}
 		echo $endrow;
 
@@ -375,11 +375,13 @@ class Display
 			echo '<td>';
 
 			if ($pd_data->season == $season) {
+				echo '<label style="font-size:14px;font-weight:normal;">';
 				if ($conflict) {
 					echo '<strong class="red">'.$pd_data->strand.'</strong>';
 				} else {
 					echo $pd_data->strand;
 				}
+				echo '</label>';
 			}
 			echo '</td>';
 		}
