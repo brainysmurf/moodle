@@ -712,7 +712,7 @@ class awesomebar
 			#if ($category['id'] == 1) {
 			if ($categoryPath[0] == 1) {
 				//Match specific text in parentheses
-				if (preg_match_all('/\((S1|S2|S3|ALL|FULL)\)/i', $course['fullname'], $matches)) {
+				if (preg_match_all('/\((([S1|S2|S3|ALL|FULL],?)+)\)/i', $course['fullname'], $matches)) {
 					foreach ($matches[0] as $i => $matchedText) {
 						$icon = '<i class="pull-right icon-text">' . $matches[1][$i] . '</i>';
 						$course['fullname'] = str_replace($matchedText, $icon, $course['fullname']);
