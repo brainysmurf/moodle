@@ -215,10 +215,10 @@ class Block
 		return $this->extractGroupIDsFromTimetable($classes);
 	}
 
-	public function extractGroupIDsFromTimetable($timetableData)
+	public function extractGroupIDsFromTimetable($classes)
 	{
 		$groups = array();
-		foreach ($classes as $class) {
+		foreach ($classes as $classID => $class) {
 			$groups += $class['groups'];
 		}
 		return array_keys($groups);
@@ -310,7 +310,12 @@ class Block
 			$sql .= ' private = 1 AND userID = ?';
 			$params[] = $this->userID();
 
-		} elseif (is_array($groupIDs) && count($groupIDs) > 0) {
+		} elseif (is_array($groupIDs)) {
+
+			if (count($groupIDs) < 1) {
+				return array();
+			}
+
 			// Group IDs
 			$sql .= ($where ? ' AND' : ' WHERE');
 			$where = true;
@@ -324,7 +329,12 @@ class Block
 		}
 
 		// Course IDs
-		if (is_array($courseIDs) && count($courseIDs) > 0) {
+		if (is_array($courseIDs)) {
+
+			if (count($courseIDs) < 1) {
+				return array();
+			}
+
 			$sql .= ($where ? ' AND' : ' WHERE');
 			$where = true;
 

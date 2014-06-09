@@ -622,7 +622,7 @@ class Display
 
 		foreach ($dates as $date => $hw) {
 			++$i;
-			$past = $date < $today;
+			$past = $date < $this->hwblock->today;
 			$r .= '<li class="col-md-2 ' . ($past ? 'past' : '') . '">
 				<span class="day row">
 

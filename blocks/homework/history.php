@@ -17,7 +17,7 @@ switch ($hwblock->mode()) {
 		echo $hwblock->display->sign('th-list', 'View History', 'All Homework, Sorted By Due Date (Latest At The Top)');
 
 		// Get the user's group (class) IDs
-		$groupIDs = $hwblock->getUsersGroupIDs($USER->id);
+		$groupIDs = $hwblock->getUsersGroupIDs($hwblock->userID());
 
 		$approvedStatus = true; // Only show approved homework
 		$past = null; // Include future and past
