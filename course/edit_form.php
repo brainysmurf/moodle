@@ -308,6 +308,12 @@ class course_edit_form extends moodleform {
 	$mform->addElement('text', 'ssismetadata[grade2]', 'Grade 2', 'maxlength="100" size="20"');
 	$mform->setType('ssismetadata[grade2]', PARAM_INT);
 
+	$mform->addElement('text', 'ssismetadata[activityseason]', 'Activities: Season', 'maxlength="100" size="20"');
+	$mform->setType('ssismetadata[activityseason]', PARAM_TEXT);
+
+	$mform->addElement('text', 'ssismetadata[activitysupervisors]', 'Activities: Supervisors Required', 'maxlength="100" size="20"');
+	$mform->setType('ssismetadata[activitysupervisors]', PARAM_INT);
+
 //--------------------------------------------------------------------------------
 //End SSIS Metadata
 
