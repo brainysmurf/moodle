@@ -50,7 +50,7 @@ switch ($action) {
 		require_once $CFG->libdir . '/ssismetadata.php';
 		$metadata = new \ssismetadata();
 
-		$metadata->setCourseField($course->id, 'activitysupervisors', $supervisors);
+		$metadata->setCourseField($course->id, 'activitysupervisor', $supervisors);
 		$metadata->setCourseField($course->id, 'activityseason', implode(',', $season));
 
 		// Add the required enrolment methods...

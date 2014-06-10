@@ -10,17 +10,17 @@ class Display
 {
 	private $activityCenter;
 	public $tabs = array( // Array of which tabs are shown in differnet modes
-		'admin' => array(
-			'activities' => array('session_mod.php?submode=activities&value=YES', '<i class="icon-rocket"></i> Modify Activities'),
-			'individuals' => array('session_modephp?submode=individuals&value=YES', '<i class="icon-user"></i> Manage Individuals'),
-			'newactivity' => array('view.php?view=admin/newactivity', '<i class="icon-plus-sign"></i> Create New Activity')
-		),
 		'teacher' => array(
 			'overview' => array('teacher/index.php', '<i class="icon-ok-sign"></i> Overview'),
 			'goals' => array('teacher/goals.php', '<i class="icon-pencil"></i> Enter Your Goals'),
 			'pdframework' => array('teacher/pd-framework.php', '<i class="icon-star"></i> Choose PD Strand'),
 			'all-sec' => array('teacher/all-sec.php', '<i class="icon-rocket"></i> Pick Secondary Activities'),
 			'all-elem' => array('teacher/all-elem.php', '<i class="icon-rocket"></i> Pick Elementary Activities'),
+		),
+		'admin' => array(
+			'activities' => array('session_mod.php?submode=activities&value=YES', '<i class="icon-rocket"></i> Modify Activities'),
+			'individuals' => array('session_modephp?submode=individuals&value=YES', '<i class="icon-user"></i> Manage Individuals'),
+			'newactivity' => array('view.php?view=admin/newactivity', '<i class="icon-plus-sign"></i> Create New Activity')
 		),
 	);
 
@@ -74,9 +74,9 @@ class Display
 		}
 
 		$modeLabels = array(
-			'admin' => '<i class="icon-wrench"></i> Activity Admin Mode',
 			'teacher' => '<i class="icon-magic"></i> Teacher Mode',
 			'student' => '<i class="icon-user"></i> Student Mode',
+			'admin' => '<i class="icon-wrench"></i> Activity Admin Mode',
 		);
 
 		$t = '<div class="tabs noborder">';
@@ -502,7 +502,7 @@ class Display
 				$r .= '<span>' . $supervisorCount . '/' . $supervisorsNeeded . ' supervisors</span>';
 
 				if ($iamasupervisor) {
-					$r .= '<span>You are a supervisor! <i class="icon-heart"></i></span>';
+					$r .= '<span><i class="icon-heart"></i> You are a supervisor! <i class="icon-heart"></i></span>';
 				}
 
 				$r .= '<span class="desc" style="display:none;">' . htmlentities($course->summary) . '</span>';

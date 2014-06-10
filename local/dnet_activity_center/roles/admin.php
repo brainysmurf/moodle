@@ -7,6 +7,7 @@ if (empty($mode)) {
     $mode = SELECT;
 }
 
+
 if (isset($SESSION->dnet_activity_center_submode)) {
     $sub_mode = $SESSION->dnet_activity_center_submode;
 } else {

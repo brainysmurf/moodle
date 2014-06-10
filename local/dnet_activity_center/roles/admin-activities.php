@@ -14,10 +14,6 @@ function add_activity_to_sesssion($activity_id) {
 }
 
 switch ($mode) {
-    case BROWSE:
-        echo 'look up their enrollments';
-        break;
-
     case CLEAR:
         unset($SESSION->dnet_activity_center_activities);
         sign("thumbs-up", "List cleared.", "Go to ".SELECT." to start building a new list.");
