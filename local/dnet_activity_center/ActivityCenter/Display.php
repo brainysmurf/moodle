@@ -465,7 +465,9 @@ class Display
 
 			$supervisorCount = count($supervisors);
 			$supervisorsNeeded = $courseMetatdata->getCourseField($course->id, 'activitysupervisors');
-			if (!$supervisorsNeeded) {
+
+			var_dump($supervisorsNeeded);
+			if ($supervisorsNeeded == NULL) {
 				continue;
 			}
 

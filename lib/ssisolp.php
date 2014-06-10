@@ -73,75 +73,82 @@ class OLPManager {
 				$this->fixOLPCourseName($user, $olp);
 			}
 
-			/**
-			 * Ensure user is an editor in their OLP
-			 */
-			if ($this->isUserEditorInOLP($user, $olp)) {
-				$this->output($user, 'User is enroled as editor in OLP', 'DEBUG');
-			} else {
-				$this->output($user, 'User was not enroled in OLP', 'NOTICE');
-
-				// Enrol if not already
-				if ($this->enrolStudentInOLP($user, $olp)) {
-					$this->output($user, "Enroled in OLP", 'DEBUG');
-				}
-			}
+			$this->handleEnrollments($user, $olp);
 
 
-			/**
-			 * Ensure teachers are enroled as students (viewers) in the OLP
-			 */
-			if ($this->checkCohortEnrolmentExists($olp->id, self::STUDENT_ROLE_ID, self::TEACHER_COHORT_ID)) {
-
-				//Enrolment already exists
-				$this->output($user, 'Teacher cohort -> Student role enrolment exists in OLP', 'DEBUG');
-
-			} else {
-
-				$this->output($user, 'No Teacher cohort -> Student role enrolment in OLP', 'NOTICE');
-
-				// Create enrolment
-				if ($teacherStudentEnrolmentID = $this->createCohortEnrolment(
-					$olp,
-					self::STUDENT_ROLE_ID,
-					self::TEACHER_COHORT_ID,
-					'Cohort sync (All teachers as viewers)', //Name of enrolment method to create
-					true //Disabled?
-				)) {
-					$this->output($user, "Created enrolment method {$teacherStudentEnrolmentID}", 'DEBUG');
-				}
-
-			}
-
-			/**
-			 * Ensure teachers are enroled as teachers (editors) in the OLP
-			 */
-			if ($this->checkCohortEnrolmentExists($olp->id, self::TEACHER_ROLE_ID, self::TEACHER_COHORT_ID)) {
-
-				//Enrolment already exists
-				$this->output($user, 'Teacher cohort -> Teacher role enrolment exists in OLP', 'DEBUG');
-
-			} else {
-
-				$this->output($user, 'No Teacher cohort -> Teacher role enrolment in OLP', 'NOTICE');
-
-				// Create enrolment
-				if ($teacherTeacherEnrolmentID = $this->createCohortEnrolment(
-					$olp,
-					self::TEACHER_ROLE_ID,
-					self::TEACHER_COHORT_ID,
-					'Cohort sync (All teachers as editors)', //Name of enrolment method to create
-					false //Disabled?
-				)) {
-					$this->output($user, "Created enrolment method {$teacherTeacherEnrolmentID}", 'DEBUG');
-				}
-
-			}
 
 		} // end foreach user
 
 	}
 
+
+	public function handleEnrollments($user, $olp)
+	{
+		/**
+		 * Ensure user is an editor in their OLP
+		 */
+		if ($this->isUserEditorInOLP($user, $olp)) {
+			$this->output($user, 'User is enroled as editor in OLP', 'DEBUG');
+		} else {
+			$this->output($user, 'User was not enroled in OLP', 'NOTICE');
+
+			// Enrol if not already
+			if ($this->enrolStudentInOLP($user, $olp)) {
+				$this->output($user, "Enroled in OLP", 'DEBUG');
+			}
+		}
+
+
+		/**
+		 * Ensure teachers are enroled as students (viewers) in the OLP
+		 */
+		if ($this->checkCohortEnrolmentExists($olp->id, self::STUDENT_ROLE_ID, self::TEACHER_COHORT_ID)) {
+
+			//Enrolment already exists
+			$this->output($user, 'Teacher cohort -> Student role enrolment exists in OLP', 'DEBUG');
+
+		} else {
+
+			$this->output($user, 'No Teacher cohort -> Student role enrolment in OLP', 'NOTICE');
+
+			// Create enrolment
+			if ($teacherStudentEnrolmentID = $this->createCohortEnrolment(
+				$olp,
+				self::STUDENT_ROLE_ID,
+				self::TEACHER_COHORT_ID,
+				'Cohort sync (All teachers as viewers)', //Name of enrolment method to create
+				true //Disabled?
+			)) {
+				$this->output($user, "Created enrolment method {$teacherStudentEnrolmentID}", 'DEBUG');
+			}
+
+		}
+
+		/**
+		 * Ensure teachers are enroled as teachers (editors) in the OLP
+		 */
+		if ($this->checkCohortEnrolmentExists($olp->id, self::TEACHER_ROLE_ID, self::TEACHER_COHORT_ID)) {
+
+			//Enrolment already exists
+			$this->output($user, 'Teacher cohort -> Teacher role enrolment exists in OLP', 'DEBUG');
+
+		} else {
+
+			$this->output($user, 'No Teacher cohort -> Teacher role enrolment in OLP', 'NOTICE');
+
+			// Create enrolment
+			if ($teacherTeacherEnrolmentID = $this->createCohortEnrolment(
+				$olp,
+				self::TEACHER_ROLE_ID,
+				self::TEACHER_COHORT_ID,
+				'Cohort sync (All teachers as editors)', //Name of enrolment method to create
+				false //Disabled?
+			)) {
+				$this->output($user, "Created enrolment method {$teacherTeacherEnrolmentID}", 'DEBUG');
+			}
+
+		}
+	}
 
 
 	/**
@@ -190,8 +197,8 @@ class OLPManager {
 	{
 		if (!$user->idnumber) {
 			return false;
-		}
 
+		}
 		return 'OLP:' . $user->idnumber;
 	}
 
@@ -381,32 +388,34 @@ class OLPManager {
 	 */
 	private function output($user, $string, $type = 'INFO')
 	{
-		$line = str_pad("[{$user->username}]", 30);
-		$line .= $string;
+		// $line = str_pad("[{$user->username}]", 30);
+		// $line .= $string;
 
-		switch ($type) {
+		// switch ($type) {
 
-			case 'ERROR':
-				$foreground = 'red';
-				break;
+		// 	case 'ERROR':
+		// 		$foreground = 'red';
+		// 		break;
 
-			case 'WARNING':
-				$foreground = 'light_purple';
-				break;
+		// 	case 'WARNING':
+		// 		$foreground = 'light_purple';
+		// 		break;
 
-			case 'NOTICE':
-				$foreground = 'cyan';
-				break;
+		// 	case 'NOTICE':
+		// 		$foreground = 'cyan';
+		// 		break;
 
-			case 'DEBUG':
-				$foreground = 'green';
-				break;
+		// 	case 'DEBUG':
+		// 		$foreground = 'green';
+		// 		break;
 
-			case 'INFO':
-			default:
-				$foreground = 'white';
-		}
+		// 	case 'INFO':
+		// 	default:
+		// 		$foreground = 'white';
+		// }
 
-		echo $this->colors->getColoredString($line, $foreground, null) . "\n";
+		// echo $this->colors->getColoredString($line, $foreground, null) . "\n";
 	}
+
+
 }
