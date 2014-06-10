@@ -441,7 +441,7 @@ class Display
 		global $PAGE, $CFG;
 
 		require_once $CFG->libdir . '/ssismetadata.php';
-		$courseMetatdata = new \ssismetadata();
+		$courseMetaData = new \ssismetadata();
 
 		$r  = '<div class="courseList ' . $listClasses . '">';
 		$r .= '<input type="text" class="filter" placeholder="Type here to filter by name..." />';
@@ -464,9 +464,8 @@ class Display
 			}
 
 			$supervisorCount = count($supervisors);
-			$supervisorsNeeded = $courseMetatdata->getCourseField($course->id, 'activitysupervisors');
-
-			if ($supervisorsNeeded == NULL) {
+			$supervisorsNeeded = $courseMetaData->getCourseField($course->id, 'activitysupervisor');
+			if ($supervisorsNeeded == null) {
 				continue;
 			}
 
@@ -499,7 +498,7 @@ class Display
 
 				$r .= $course->fullname;
 
-				$r .= '<span>' . $supervisorCount . '/' . $supervisorsNeeded . ' supervisors (full)</span>';
+				$r .= '<span>' . $supervisorCount . '/' . $supervisorsNeeded . ' supervisors</span>';
 
 				if ($iamasupervisor) {
 					$r .= '<span>You are a supervisor! <i class="icon-heart"></i></span>';
