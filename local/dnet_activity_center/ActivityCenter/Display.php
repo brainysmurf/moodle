@@ -320,19 +320,22 @@ class Display
 			);
 		$pattern = '/^\((.*?)\)/';  # start of string has a parens
 		foreach ($courses as $course) {
-			$season = preg_match($pattern, $course->fullname, $matches);
-			if (!$season) {
+			$seasons = preg_match($pattern, $course->fullname, $matches);
+			if (!$seasons) {
 				continue;
 			}
-			$season = $matches[1];
+			$seasons = $matches[1];
+
 			$name = preg_split($pattern, $course->fullname);
 			$name = trim($name[1]);
-			if ($season == 'ALL') {
+			if ($seasons == 'ALL') {
 				foreach (array("S1", "S2", "S3") as $this_season) {
 					$info_by_seasons[$this_season][] = $name;
 				}
 			} else {
-				$info_by_seasons[$season][] = $name;
+				foreach (explode(",", $seasons) as $season) {
+					$info_by_seasons[$season][] = $name;
+				}
 			}
 		}
 		$pd_data = json_decode($pd->data);
@@ -362,7 +365,7 @@ class Display
 		$goal_data = json_decode($goal->data);
 
 		if (!$goal_data) {
-			echo $this->output->sign("plus-sign", 'No Goal Entered', 'Click "Enter Your Goal" tab to enter it.');
+			echo $this->output->sign("plus-sign", 'No Goal Entered', 'Click "Enter Your Goal" tab to enter it.', 'redAlert alert-danger');
 		} else {
 			echo $starttable;
 			foreach ($goal_array as $item) {
@@ -391,7 +394,6 @@ class Display
 			echo $endtable;
 		}
 
-
 		echo $starttable;
 		echo $startrow;
 		echo '<td style="color:#eee;background-color:#eee;"></td>';
@@ -415,8 +417,7 @@ class Display
 		echo '<td><b>PD</b></td>';
 		foreach ($seasons as $season=>$data) {
 			echo '<td>';
-
-			if (substr($pd_data->season, $season)) {
+			if ($pd_data->season == $season) {
 				echo '<label style="font-size:14px;font-weight:normal;">';
 				if ($conflict) {
 					echo '<strong class="red">'.$pd_data->strand.'</strong>';
