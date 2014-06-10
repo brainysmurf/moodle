@@ -44,8 +44,22 @@ $(document).on('click', '.becomeActivityManagerList a', function(e)
 			'View Activity Page': function() {
 				window.open('/course/view.php?id=' + courseID);
 				return false;
-			}
+			},
 
+			'Unenrol': function() {
+				var ths = this;
+				$(this).children('.ui-dialog-content').html('<i class="icon-spinner icon-spin"></i> Saving...');
+				$(this).parent().find('.ui-dialog-buttonpane').hide();
+
+				$.post('ajax/deenrol.php', {action:'deenrol', courseid:courseID}, function(res){
+					if (res.success) {
+						alert('You are now a manager of the activity.');
+					} else {
+						alert('Something went wrong. Please try again.');
+					}
+					$(ths).dialog('close');
+				});
+			}
 
 		}
 	});

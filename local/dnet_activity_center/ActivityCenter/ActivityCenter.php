@@ -142,4 +142,30 @@ class ActivityCenter
 		// ^ that doesn't return anything, so we have to assume it worked...
 		return true;
 	}
+
+	/**
+	 * De-enrol a user as a manager to a course using the manual enrolment method
+	 */
+	public function removeManager($courseID, $userID)
+	{
+		// Get the instance
+		$instances = enrol_get_instances($courseID, 1);
+		foreach ($instances as $possibleInstance) {
+			if ($possibleInstance->enrol == 'manual') {
+				// This is the one we want
+				$instance = $possibleInstance;
+				break;
+			}
+		}
+
+		if (!isset($instance)) {
+			throw new Exception("Unable to find a manual enrolment method for course {$courseID}");
+		}
+
+		$manualEnrolmentPlugin = enrol_get_plugin('manual');
+
+		$manualEnrolmentPlugin->unenrol_user($instance, $userID, Data::MANAGER_ROLE_ID);
+		// ^ that doesn't return anything, so we have to assume it worked...
+		return true;
+	}
 }

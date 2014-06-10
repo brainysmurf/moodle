@@ -416,7 +416,7 @@ class Display
 		foreach ($seasons as $season=>$data) {
 			echo '<td>';
 
-			if ($pd_data->season == $season) {
+			if (substr($pd_data->season, $season)) {
 				echo '<label style="font-size:14px;font-weight:normal;">';
 				if ($conflict) {
 					echo '<strong class="red">'.$pd_data->strand.'</strong>';
@@ -447,17 +447,27 @@ class Display
 		$r .= '<input type="text" class="filter" placeholder="Type here to filter by name..." />';
 		$r .= '<div class="row courses">';
 
+		global $USER;
+
 		foreach ($courses as $course) {
 
 			// Find the activity manager
 			$supervisors = $this->activityCenter->data->getActivitiesManaged($course->id);
 			$supervisorNames = array();
+
+			$iamasupervisor = false;
 			foreach ($supervisors as $supervisor) {
 				$supervisorNames[] = $supervisor->firstname . ' ' . $supervisor->lastname;
+				if ($supervisor->userid == $USER->id) {
+					$iamasupervisor = true;
+				}
 			}
 
 			$supervisorCount = count($supervisors);
 			$supervisorsNeeded = $courseMetatdata->getCourseField($course->id, 'activitysupervisors');
+			// if (!$supervisorsNeeded) {
+			// 	continue;
+			// }
 
 			$icon = course_get_icon($course->id);
 
@@ -488,10 +498,10 @@ class Display
 
 				$r .= $course->fullname;
 
-				if ($supervisorsNeeded) {
-					$r .= '<span>' . $supervisorCount . '/' . $supervisorsNeeded . ' supervisors (full)</span>';
-				} else {
-					$r .= '<span>No supervisors needed</span>';
+				$r .= '<span>' . $supervisorCount . '/' . $supervisorsNeeded . ' supervisors (full)</span>';
+
+				if ($iamasupervisor) {
+					$r .= '<span>You are a supervisor! <i class="icon-heart"></i></span>';
 				}
 
 				$r .= '<span class="desc" style="display:none;">' . htmlentities($course->summary) . '</span>';
