@@ -11,11 +11,11 @@ require '../ActivityCenter/ActivityCenter.php';
 $activityCenter = new \SSIS\ActivityCenter\ActivityCenter();
 
 switch ($action) {
-	case 'enrol':
+    case 'enrol':
 
-		$success = $activityCenter->data->addManager($courseID, $activityCenter->getUserID());
+        $success = $activityCenter->data->addManager($courseID, $activityCenter->getUserID());
 
-		break;
+        break;
 }
 
 header('Cache-Control: no-cache, must-revalidate');

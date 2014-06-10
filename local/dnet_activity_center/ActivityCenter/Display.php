@@ -106,19 +106,19 @@ class Display
 		$ret .= '</textarea>';
 
 		$ret .= '<br/><p><b>B. Individual Goal(s):</b>';
-		$ret .= ' (Enter one or two goals based on the Approaches to Teaching, see Goal Setting Guidance.)</p>';
+		$ret .= ' (Enter one or two goals based on the Approaches to Teaching, see <a href="https://dragonnet.ssis-suzhou.net/pluginfile.php/74998/mod_resource/content/0/Goal%20Setting%20Guidance%202014-15.pdf" target="_new">Goal Setting Guidance</a>.)</p>';
 		$ret .= '<textarea id="individual_goal" class="filter" rows="3" style="font-size:18px;" />';
 		$ret .= $info->individual;
 		$ret .= '</textarea>';
 
 		$ret .= '<br/><p><b>C. Pastoral or Leadership Goal(s)</b>' ;
-		$ret .= ' (Enter only one goal. Write. PoRs enter a SMART goal relevant to your leaders role.  Non-PoRs enter a goal relevant to your role of supporting student well-being.)</p>';
+		$ret .= '(Enter only one goal. PoRs enter a SMART goal relevant to your leadership role.  Non-PoRs enter a goal relevant to your role of supporting student well-being.)</p>';
 		$ret .= '<textarea id="pastleadership_goal" class="filter" rows="3" style="font-size:18px;" />';
 		$ret .= $info->pastleadership;
 		$ret .= '</textarea>';
 
 		$ret .= '<br/><p><b>D. Additional Individual Goal(s):</b>';
-		$ret .= ' (<b>Optional</b>. Additional goals that do not fit in the above headings e.g. some initiative, see guidance.)</p>';
+		$ret .= ' (<b>Optional</b>. Additional goals that do not fit in the above headings e.g. some initiative, see <a href="https://dragonnet.ssis-suzhou.net/pluginfile.php/74998/mod_resource/content/0/Goal%20Setting%20Guidance%202014-15.pdf" target="_new">Goal Setting Guidance</a>.)</p>';
 		$ret .= '<textarea id="additional_goal" class="filter" rows="3" style="font-size:18px;" />';
 		$ret .= $info->additional;
 		$ret .= '</textarea>';
@@ -465,9 +465,9 @@ class Display
 
 			$supervisorCount = count($supervisors);
 			$supervisorsNeeded = $courseMetatdata->getCourseField($course->id, 'activitysupervisors');
-			// if (!$supervisorsNeeded) {
-			// 	continue;
-			// }
+			if (!$supervisorsNeeded) {
+				continue;
+			}
 
 			$icon = course_get_icon($course->id);
 

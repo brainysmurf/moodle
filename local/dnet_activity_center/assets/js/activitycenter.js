@@ -34,11 +34,24 @@ $(document).on('click', '.becomeActivityManagerList a', function(e)
 						alert('Something went wrong. Please try again.');
 					}
 					$(ths).dialog('close');
+					window.location.reload();
 				});
 			},
 
-			'No': function() {
-				$(this).dialog("close");
+			'Remove me as supervisor': function() {
+				var ths = this;
+				$(this).children('.ui-dialog-content').html('<i class="icon-spinner icon-spin"></i> Saving...');
+				$(this).parent().find('.ui-dialog-buttonpane').hide();
+
+				$.post('../ajax/remove.php?action=remove&courseid=' + courseID, {action:'remove', courseid:courseID}, function(res){
+					if (res.success) {
+						alert('You have been removed as a supervisor for this activity.');
+					} else {
+						alert('Something went wrong. Please try again.');
+					}
+					$(ths).dialog('close');
+					window.location.reload();
+				});
 			},
 
 			'View Activity Page': function() {
@@ -46,20 +59,10 @@ $(document).on('click', '.becomeActivityManagerList a', function(e)
 				return false;
 			},
 
-			'Unenrol': function() {
-				var ths = this;
-				$(this).children('.ui-dialog-content').html('<i class="icon-spinner icon-spin"></i> Saving...');
-				$(this).parent().find('.ui-dialog-buttonpane').hide();
-
-				$.post('ajax/deenrol.php', {action:'deenrol', courseid:courseID}, function(res){
-					if (res.success) {
-						alert('You are now a manager of the activity.');
-					} else {
-						alert('Something went wrong. Please try again.');
-					}
-					$(ths).dialog('close');
-				});
+			'Cancel': function() {
+				$(this).dialog("close");
 			}
+
 
 		}
 	});

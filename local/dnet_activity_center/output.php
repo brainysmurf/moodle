@@ -523,6 +523,7 @@ function output_submode_choice($kind, $tabs, $mode_name="mode") {
                 break;
             case "becometeacher":
                 $icon = "magic";
+                $url = '../teacher';
                 break;
         }
 

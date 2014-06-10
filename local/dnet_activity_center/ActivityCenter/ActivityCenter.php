@@ -115,8 +115,6 @@ class ActivityCenter
 	}
 
 
-
-
 	/**
 	 * Enrol a user as a manager to a course using the manual enrolment method
 	 */
