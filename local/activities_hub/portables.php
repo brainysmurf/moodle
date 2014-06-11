@@ -2,7 +2,7 @@
 
 function derive_plugin_path_from($stem) {
     // Moodle really really should be providing a standard way to do this
-    return "/local/dnet_activity_center/{$stem}";
+    return "/local/activities_hub/{$stem}";
 }
 
 function setup_page() {
@@ -11,8 +11,8 @@ function setup_page() {
 
     $PAGE->set_context(context_system::instance());
     $PAGE->set_url(derive_plugin_path_from('index.php'));
-    $PAGE->set_title("Activities Center");
-    $PAGE->set_heading("Activities Center");
+    $PAGE->set_title("Activities Hub");
+    $PAGE->set_heading("Activities Hub");
 
     echo $OUTPUT->header();
 }

@@ -6,7 +6,7 @@ class ActivityCenter
 {
 	public $data;
 	public $display;
-	const PATH = '/local/dnet_activity_center/';
+	const PATH = '/local/activities_hub/';
 	public $activityCourseCategory = 1;
 
 	function __construct()
