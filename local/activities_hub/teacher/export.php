@@ -17,10 +17,10 @@ $activityCenter = new \SSIS\ActivityCenter\ActivityCenter();
 
 $data = $activityCenter->data->getAllUsersGoals();
 
-header('Content-type: text/csv');
-header('Content-Disposition: attachment; filename=pdgoals.csv');
-header('Pragma: no-cache');
-header('Expires: 0');
+// header('Content-type: text/csv');
+// header('Content-Disposition: attachment; filename=pdgoals.csv');
+// header('Pragma: no-cache');
+// header('Expires: 0');
 
 $headers = array();
 
@@ -65,6 +65,7 @@ fputcsv($output, $headers);
 
 foreach ($data as $row) {
 	fputcsv($output, get_object_vars($row));
+	echo '<br />';
 }
 
 fclose($output);
