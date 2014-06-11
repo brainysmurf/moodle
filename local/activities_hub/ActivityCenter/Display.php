@@ -299,7 +299,6 @@ class Display
 		return $ret;
 	}
 
-
 	public function overview($goal, $courses, $pd)
 	{
 		?>
@@ -478,6 +477,10 @@ class Display
 				$color = 'success';
 			} else {
 				$color = '';
+			}
+
+			if ($iamasupervisor) {
+				$color = 'mine';
 			}
 
 			$r .= '<div class="col-sm-3"><a href="' . ($url ?  $url . $course->id : '#') . '" class="btn ' . ($color ? 'btn-' . $color : '') . '" data-courseid="'. $course->id . '" data-fullname="' . $course->fullname . '">';

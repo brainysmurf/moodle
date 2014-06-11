@@ -4,6 +4,8 @@
  * Display all activities so a teacher can pick which ones they want to manage
  */
 
+require_login();
+
 include '../roles/common_top.php';
 
 $activityCenter->setCurrentMode('teacher');

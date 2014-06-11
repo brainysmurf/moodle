@@ -54,10 +54,10 @@ $(document).on('click', '.becomeActivityManagerList a', function(e)
 				});
 			},
 
-			'View Activity Page': function() {
-				window.open('/course/view.php?id=' + courseID);
-				return false;
-			},
+			// 'View Activity Page': function() {
+			// 	window.open('/course/view.php?id=' + courseID);
+			// 	return false;
+			// },
 
 			'Cancel': function() {
 				$(this).dialog("close");
