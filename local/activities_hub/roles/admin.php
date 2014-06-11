@@ -14,12 +14,12 @@ if (isset($SESSION->dnet_activity_center_submode)) {
     $sub_mode = '';
 }
 
-if ($sub_mode == strtolower(SUBMODE_INDIVIDUALS)) {
+if ($sub_mode == str_replace(" ", "", strtolower(SUBMODE_INDIVIDUALS))) {
 
     output_tabs($mode, array(SELECT, ENROL, DEENROL, START_AGAIN));
     include 'admin-individuals.php';
 
-} else if ($sub_mode == strtolower(SUBMODE_ACTIVITIES)) {
+} else if ($sub_mode == str_replace(" ", "", strtolower(SUBMODE_ACTIVITIES))) {
 
     output_tabs($mode, array(SELECT, TOGGLEVISIBILITY, TOGGLEENROLLMENTS, UNENROLLALL, START_AGAIN));
     include 'admin-activities.php';

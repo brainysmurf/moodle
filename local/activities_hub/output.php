@@ -508,6 +508,7 @@ function output_submode_choice($kind, $tabs, $mode_name="mode") {
     $li = '';
     $size =  count($tabs);
     for ($i = 0; $i < $size; ++$i) {
+        $url = null;
         $label = $tabs[$i];
         $label_lower = str_replace(" ", "", strtolower($label));
         switch ($label_lower) {
