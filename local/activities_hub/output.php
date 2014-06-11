@@ -511,15 +511,19 @@ function output_submode_choice($kind, $tabs, $mode_name="mode") {
         $label = $tabs[$i];
         $label_lower = str_replace(" ", "", strtolower($label));
         switch ($label_lower) {
-            case "activities":
+            case "manageactivities":
                 $icon = "rocket";
                 break;
-            case "individuals":
+            case "manageindividuals":
                 $icon = "user";
                 break;
             case 'createnewactivity':
                 $icon = "plus-sign";
                 $url = '../view.php?view=newactivity';
+                break;
+            case 'exportpdchoices':
+                $icon = "download";
+                $url = '../teacher/export.php';
                 break;
             case "becometeacher":
                 $icon = "magic";

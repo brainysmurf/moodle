@@ -1,7 +1,7 @@
 <?php
 
-define('SUBMODE_INDIVIDUALS', "Individuals");
-define('SUBMODE_ACTIVITIES', "Activities");
+define('SUBMODE_INDIVIDUALS', "Manage Individuals");
+define('SUBMODE_ACTIVITIES', "Manage Activities");
 
 define('BROWSE', "Browse");
 define('SELECT', "Select");
@@ -15,6 +15,8 @@ define('DEENROL', "Bulk Unenrol");
 define('DEENROL_ICON', "minus-sign");
 define('BECOME_TEACHER', "Become Teacher");
 define('NEW_ACTIVITY', 'Create New Activity');
+define('EXPORT', 'Export PD Choices');
+define('EXPORT_ICON', 'download');
 define('START_AGAIN', "Switch mode");
 define('START_AGAIN_ICON', "repeat");
 define('PLACEHOLDER', "Type first or last name of a student. Spaces don't matter");
