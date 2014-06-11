@@ -21,7 +21,7 @@ if ($sub_mode == str_replace(" ", "", strtolower(SUBMODE_INDIVIDUALS))) {
 
 } else if ($sub_mode == str_replace(" ", "", strtolower(SUBMODE_ACTIVITIES))) {
 
-    output_tabs($mode, array(SELECT, TOGGLEVISIBILITY, TOGGLEENROLLMENTS, UNENROLLALL, START_AGAIN));
+    output_tabs($mode, array(SELECT, TOGGLEVISIBILITY, TOGGLEENROLLMENTS, UNENROLLALL, UNENROLLMAN, START_AGAIN));
     include 'admin-activities.php';
 
 } else {

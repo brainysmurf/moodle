@@ -31,6 +31,10 @@ switch ($mode) {
         include 'admin-activities-unenrollall.php';
         break;
 
+    case UNENROLLMAN:
+        include 'admin-activities-unenrollman.php';
+        break;
+
     case SELECT:
         include 'admin-activities-select.php';
         break;
