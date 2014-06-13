@@ -48,6 +48,47 @@ class Data
 		return $info;
 	}
 
+	/*
+	Returns list of stuff
+	*/
+	public function getUsersSummary($cohort_name) {
+		$choiceField = $this->getPDChoiceField();
+		$goalField = $this->getPDGoalField();
+
+		global $DB;
+		$cohort = $DB->get_record('cohort', array('idnumber'=>$cohort_name));
+		$sql = '
+select
+    usr.id,
+	usr.username,
+	usr.firstname,
+	usr.lastname,
+	(select infodata.data from {user_info_data} infodata where infodata.userid = usr.id and infodata.fieldid = ' . $goalField->id . ') as goals,
+	(select infodata.data from {user_info_data} infodata where infodata.userid = usr.id and infodata.fieldid = ' . $choiceField->id . ') as pd,
+	string_agg(crs.fullname, \'|\') as activities
+from
+	{user_enrolments} ue
+join {user} usr on usr.id = ue.userid
+join {enrol} enrol on enrol.id = ue.enrolid
+join {course} crs on crs.id = enrol.courseid
+join {context} ctx on (ctx.instanceid = enrol.courseid and ctx.contextlevel = 50) --contextlevel 50 = a course
+join {role_assignments} ra on ra.contextid = ctx.id and ra.userid = usr.id
+join {cohort_members} chrt_mmbrs on usr.id = chrt_mmbrs.userid
+where
+	chrt_mmbrs.cohortid = '.$cohort->id.'
+	and
+	ctx.path like \'/1/3/%\' --contextid of activities category
+	and
+	ra.roleid = ' . self::MANAGER_ROLE_ID . ' --manager roleid
+	and
+	enrol.enrol = \'manual\' --exclude cohort sync managers
+group by usr.id
+';
+
+		$rows = $DB->get_records_sql($sql, array($cohort->id));
+		return $rows;
+	}
+
 	/**
 	 * Returns the goals entered by every user
 	 */
@@ -174,6 +215,7 @@ order by goals desc';
 
 		return $DB->get_records_sql($sql, $params);
 	}
+
 
 	public function getManualEnrolmentMethodForActivity($courseID)
 	{

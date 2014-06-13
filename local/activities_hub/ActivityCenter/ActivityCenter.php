@@ -1,5 +1,7 @@
 <?php
 
+// require_once('../../cohort/lib.php');
+
 namespace SSIS\ActivityCenter;
 
 class ActivityCenter
@@ -85,7 +87,7 @@ class ActivityCenter
 
 		require_once dirname(dirname(__DIR__)) . '/dnet_common/sharedlib.php';
 
-		if (is_admin()) {
+		if (is_admin() or is_activities_head()) {
 			return array('teacher', 'admin');
 		} elseif (is_teacher()) {
 			return array('teacher');

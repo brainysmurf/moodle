@@ -78,7 +78,6 @@ if (!empty($toggle_enrollments)) {
     }
 }
 
-
 if (!empty($max_supervisors) or $max_supervisors==0) {
     $exists = $DB->get_field('course_ssis_metadata', 'value', array('field'=>'activitysupervisor', 'courseid'=>$activity_id));
     if ($exists or $exists == 0) {

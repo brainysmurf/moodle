@@ -17,6 +17,13 @@ define('BECOME_TEACHER', "Become Teacher");
 define('NEW_ACTIVITY', 'Create New Activity');
 define('EXPORT', 'Export PD Choices');
 define('EXPORT_ICON', 'download');
+
+define('SUMMARY_SEC', 'Sec Summary Report');
+define('SUMMARY_SEC_ICON', 'download');
+
+define('SUMMARY_ELEM', 'Elem Summary Report');
+define('SUMMARY_ELEM_ICON', 'download');
+
 define('START_AGAIN', "Switch mode");
 define('START_AGAIN_ICON', "repeat");
 define('PLACEHOLDER', "Type first or last name of a student. Spaces don't matter");

@@ -526,6 +526,14 @@ function output_submode_choice($kind, $tabs, $mode_name="mode") {
                 $icon = "download";
                 $url = '../teacher/export.php';
                 break;
+            case 'secsummaryreport':
+                $icon = "download";
+                $url = '../teacher/summary-sec.php';
+                break;
+            case 'elemsummaryreport':
+                $icon = "download";
+                $url = '../teacher/summary-elem.php';
+                break;
             case "becometeacher":
                 $icon = "magic";
                 $url = '../teacher';
