@@ -65,7 +65,7 @@ select
 	usr.lastname,
 	(select infodata.data from {user_info_data} infodata where infodata.userid = usr.id and infodata.fieldid = ' . $goalField->id . ') as goals,
 	(select infodata.data from {user_info_data} infodata where infodata.userid = usr.id and infodata.fieldid = ' . $choiceField->id . ') as pd,
-	string_agg(crs.fullname, \'|\') as activities
+	string_agg(distinct(crs.fullname), \'|\') as activities
 from
 	{user_enrolments} ue
 join {user} usr on usr.id = ue.userid

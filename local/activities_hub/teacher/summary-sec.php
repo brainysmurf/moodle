@@ -6,11 +6,11 @@
 
 include '../roles/common_top.php';
 
-$activityCenter->setCurrentMode('teacher');
+$activityCenter->setCurrentMode('admin');
 
-echo $activityCenter->display->showTabs('teacher', 'summary-sec');
+echo $activityCenter->display->showTabs('admin', 'summary-sec');
 
-echo $OUTPUT->sign('rocket', 'Secondary reports', 'This page shows all the activities currently available for selection. Click on an Activity you would like to supervise. <br /><strong class="red">Red</strong> means that activity already has enough supervisors, <strong class="green">green</strong> means there are spaces available. <strong class="blue">White/Blue</strong> means that you are listed as supervising it.');
+echo $OUTPUT->sign('rocket', 'Secondary reports', '');
 
 $info = $activityCenter->data->getUsersSummary('teachersSEC');
 echo $activityCenter->display->summaryList($info);
