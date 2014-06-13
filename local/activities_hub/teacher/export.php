@@ -5,10 +5,11 @@
  */
 
 require '../../../config.php';
+require_once '../../../local/dnet_common/sharedlib.php';
 
 require_login();
 
-if (!is_admin() or !is_activities_head()) {
+if (!(is_admin() or is_activities_head())) {
 	die("Only admins may do that.");
 }
 
