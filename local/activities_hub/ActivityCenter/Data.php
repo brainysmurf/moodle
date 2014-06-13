@@ -83,6 +83,7 @@ where
 	and
 	enrol.enrol = \'manual\' --exclude cohort sync managers
 group by usr.id
+ordery by usr.firstname
 ';
 
 		$rows = $DB->get_records_sql($sql, array($cohort->id));

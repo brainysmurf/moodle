@@ -345,6 +345,9 @@ class Display
                 );
 
             $pd = json_decode($row->pd);
+            if (empty($pd->strand)) {
+                $pd->strand = 'Not chosen';
+            }
             $info_by_seasons[$pd->season][] = '<strong>PD: '.$pd->strand.'</strong>';
 
             foreach (explode('|', $row->activities) as $activity) {
