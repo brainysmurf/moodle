@@ -21,6 +21,7 @@ class SSIS
 		$session->userIsStudent = cohort_is_member_by_idnumber('studentsALL', $user->id);
 		$session->userIsSecStudent = cohort_is_member_by_idnumber('studentsSEC', $user->id);
 		$session->userIsSecretary = cohort_is_member_by_idnumber('secretariesALL', $user->id);
+		$session->userIsActivitiesHead = cohort_is_member_by_idnumber('activitiesHEAD', $user->id);
 
 		/**
 		 * Decide which frontpage the user should be redirected to when they visit /index.php
