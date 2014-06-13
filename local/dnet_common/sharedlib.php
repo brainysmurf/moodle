@@ -14,6 +14,11 @@ function is_admin() {
     }
 }
 
+function is_activities_head() {
+    global $SESSION;
+    return $SESSION->userIsActivitiesHead;
+}
+
 function is_secretary() {
     if (is_admin()) {
         return true;
