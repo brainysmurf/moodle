@@ -15,7 +15,8 @@ function add_activity_to_sesssion($activity_id) {
 
 switch ($mode) {
     case START_AGAIN:
-        echo 'here';
+        $SESSION->dnet_activity_center_submode = '';
+        redirect(derive_plugin_path_from('index.php'));
         break;
 
     case CLEAR:
