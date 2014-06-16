@@ -23,7 +23,7 @@ function output_tabs($kind, $tabs, $mode_name="mode") {
             $pre = "<span class=\"selected\">";
             $post = "</span>";
         } else {
-            if ($label==START_AGAIN && is_admin()) {
+            if ($label==START_AGAIN && (is_admin() or is_activities_head())) {
                 $pre = '<a href="'.derive_plugin_path_from("session_mod.php?submode=&value=NO").'">';
                 $post = "</a>";
             } else {
