@@ -470,7 +470,7 @@ $.datepicker._gotoToday = function(id) {
 };
 
 // Add 'tomorrow' button to datepicker
-
+try {
 	$.datepicker._generateHTML_old = $.datepicker._generateHTML;
 	$.datepicker._generateHTML = function (inst) {
 		var html = this._generateHTML_old(inst);
@@ -481,11 +481,7 @@ $.datepicker._gotoToday = function(id) {
 		// Gonna put our button before this ...
 		var doneButton = "<button type='button' class='ui-datepicker-close";
 
-		console.log(html);
-
 		var position = html.indexOf(doneButton);
-
-		console.log(position);
 
 		if (position !== -1) {
 			// Add the button into the html
@@ -494,7 +490,9 @@ $.datepicker._gotoToday = function(id) {
 
 		return html;
 	};
+} catch(e) {
 
+}
 
 $(document).on('click', '.ui-datepicker-tomorrow', function(e){
 	e.preventDefault();
