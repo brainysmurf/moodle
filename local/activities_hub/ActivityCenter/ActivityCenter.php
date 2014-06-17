@@ -103,6 +103,9 @@ class ActivityCenter
 	 */
 	public function defaultViewForMode($mode)
 	{
+		if (!$mode) {
+			$mode = $this->getCurrentMode();
+		}
 		$tabs = $this->display->tabs[$mode];
 		reset($tabs);
 		return key($tabs);

@@ -17,7 +17,7 @@ if (!$activityCenter->isValidView($view)) {
 
 if (!$view) {
 	$view = $view ? $view : $activityCenter->defaultViewForMode($mode);
-	redirect("view.php?view={$view}");
+	#redirect("view.php?view={$view}");
 	exit();
 }
 
