@@ -329,6 +329,7 @@ $(document).on('submit', '.addHomeworkForm', function(e){
 	$(this).find('.has-error').removeClass('has-error');
 	$(this).find('.help-block.error').remove();
 	var errors = false;
+	var assigneddates;
 
 	if (!ensureFieldHasValue($(this).find('select[name=groupid]'), 'Please select a course.')) {
 		errors = true;
@@ -350,8 +351,13 @@ $(document).on('submit', '.addHomeworkForm', function(e){
 		errors = true;
 	}
 
-	if (!ensureFieldHasValue($(this).find('input[name=assigneddates]'), 'Please pick which days this homework is assigned for.')) {
-		errors = true;
+	var assigneddates = $(this).find('input[name=assigneddates]');
+	if (!ensureFieldHasValue(assigneddates), 'Please pick which days this homework is assigned for.') {
+		if (assigneddates.is(':hidden')) {
+			errors = false;
+		} else {
+			errors = true;
+		}
 	}
 
 	if (errors) {
@@ -481,11 +487,7 @@ $.datepicker._gotoToday = function(id) {
 		// Gonna put our button before this ...
 		var doneButton = "<button type='button' class='ui-datepicker-close";
 
-		console.log(html);
-
 		var position = html.indexOf(doneButton);
-
-		console.log(position);
 
 		if (position !== -1) {
 			// Add the button into the html
