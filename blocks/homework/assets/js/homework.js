@@ -329,7 +329,6 @@ $(document).on('submit', '.addHomeworkForm', function(e){
 	$(this).find('.has-error').removeClass('has-error');
 	$(this).find('.help-block.error').remove();
 	var errors = false;
-	var assigneddates;
 
 	if (!ensureFieldHasValue($(this).find('select[name=groupid]'), 'Please select a course.')) {
 		errors = true;
@@ -476,7 +475,6 @@ $.datepicker._gotoToday = function(id) {
 };
 
 // Add 'tomorrow' button to datepicker
-try {
 	$.datepicker._generateHTML_old = $.datepicker._generateHTML;
 	$.datepicker._generateHTML = function (inst) {
 		var html = this._generateHTML_old(inst);
@@ -496,9 +494,6 @@ try {
 
 		return html;
 	};
-} catch(e) {
-
-}
 
 $(document).on('click', '.ui-datepicker-tomorrow', function(e){
 	e.preventDefault();
