@@ -82,7 +82,9 @@ function activity_box($activity, $remove=false) {
     $dialog = '<div id="dialog_'.$activity->id.'" title="Rename" style="display:none"> Enter the new name for this activity:
     <form id="dialog_rename_'.$activity->id.'" action="'.derive_plugin_path_from('activity_mods.php').'">
     <input name="activity_id" type="hidden" value="'.$activity->id.'" />
-    <input id="dialog_rename_input_'.$activity->id.'" style="width:100%;margin-top:5px;" name="new_name" autofocus="autofocus" size="100" onclick="this.select()" type="text" value="'.$activity->fullname.'" />
+    <input id="dialog_rename_input_'.$activity->id.'" style="width:100%;margin-top:5px;" name="new_name" autofocus="autofocus" size="100" type="text" value="'.$activity->fullname.'" />
+    <br /><br />Enter the description for this activity (<b>including html</b>):
+    <textarea id="dialog_summary_input_'.$activity->id.'" style="width:100%;margin-top:5px;" rows=10 name="new_name" autofocus="autofocus" size="100" type="text" />'.$activity->summary.'</textarea>
     </form>
     .</div>';
     $script = "<script>
@@ -92,7 +94,8 @@ function activity_box($activity, $remove=false) {
         var formURL = \"".derive_plugin_path_from('activity_mods.php') . "\";
         var formData = {
             \"activity_id\": \"".$activity->id."\",
-            \"new_name\": $('#dialog_rename_input_".$activity->id."').val()
+            \"new_name\": $('#dialog_rename_input_".$activity->id."').val(),
+            \"new_summary\": $('#dialog_summary_input_".$activity->id."').val()
         };
         $.ajax(
         {
