@@ -6,6 +6,7 @@ require_login();
 
 $activity_id = required_param('activity_id', PARAM_RAW);
 $new_name = optional_param('new_name', '', PARAM_RAW);
+$new_summary = optional_param('new_summary', '', PARAM_RAW);
 $enrol = optional_param('enrol', '', PARAM_RAW);
 $toggle_visibility = optional_param('toggle_visibility', '', PARAM_RAW);
 $toggle_enrollments = optional_param('toggle_enrollments', '', PARAM_RAW);
@@ -56,6 +57,15 @@ if (!empty($new_name)) {
         ));
 }
 
+var_dump($new_summary);
+
+if (!empty($new_summary)) {
+    $DB->update_record('course', array(
+        "id"=>$activity_id,
+        "summary"=>$new_summary
+        ));
+}
+
 if (!empty($toggle_visibility)) {
     $course = $DB->get_record('course', array('id'=>$activity_id));
     $value = $course->visible == 1 ? 0 : 1;
@@ -78,9 +88,9 @@ if (!empty($toggle_enrollments)) {
     }
 }
 
-if (!empty($max_supervisors) or $max_supervisors==0) {
+if (!empty($max_supervisors) or $max_supervisors===0) {
     $exists = $DB->get_field('course_ssis_metadata', 'value', array('field'=>'activitysupervisor', 'courseid'=>$activity_id));
-    if ($exists or $exists == 0) {
+    if ($exists) {
         $DB->set_field('course_ssis_metadata', 'value', $max_supervisors, array('field'=>'activitysupervisor', 'courseid'=>$activity_id));
     } else {
         $data = new stdClass();
@@ -88,6 +98,7 @@ if (!empty($max_supervisors) or $max_supervisors==0) {
         $data->courseid = $activity_id;
         $data->value = $max_supervisors;
         $DB->insert_record('course_ssis_metadata', $data, $returnid=false);
+        echo 'done';
     }
 }
 

@@ -5,10 +5,11 @@
  */
 
 require '../../../config.php';
+require_once '../../../local/dnet_common/sharedlib.php';
 
 require_login();
 
-if (!has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM)) && empty($SESSION->userIsSecretary)) {
+if (!(is_admin() or is_activities_head())) {
 	die("Only admins may do that.");
 }
 

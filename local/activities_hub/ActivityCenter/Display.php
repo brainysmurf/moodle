@@ -19,7 +19,9 @@ class Display
         ),
         'admin' => array(
             'activities' => array('session_mod.php?submode=activities&value=YES', '<i class="icon-rocket"></i> Modify Activities'),
-            'individuals' => array('session_modephp?submode=individuals&value=YES', '<i class="icon-user"></i> Manage Individuals'),
+            'individuals' => array('session_mod.php?submode=individuals&value=YES', '<i class="icon-user"></i> Manage Individuals'),
+            'summary-sec' => array('session_mod.php?submode=individuals&value=YES', '<i class="icon-user"></i> Seconday Summary'),
+
             'newactivity' => array('view.php?view=admin/newactivity', '<i class="icon-plus-sign"></i> Create New Activity')
         ),
     );
@@ -304,10 +306,10 @@ class Display
         ?>
 
         <style type="text/css">
-        .tftable {font-size:18px;color:#333333;width:100%;border-width: 1px;border-color: #729ea5;border-collapse: collapse;}
-        .tftable th {font-size:18px;color:#eee;background-color:#1662A3;border-width: 1px;padding: 8px;border-style: solid;border-color: #000;text-align:left;}
+        .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #729ea5;border-collapse: collapse;}
+        .tftable th {font-size:14px;color:#eee;background-color:#1662A3;border-width: 1px;padding: 8px;border-style: solid;border-color: #000;text-align:left;}
         .tftable tr {background-color:#d4e3e5;}
-        .tftable td {font-size:18px;border-width: 1px;padding: 8px;border-style: solid;border-color: #729ea5;}
+        .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #729ea5;}
         </style>
 
         <?php
@@ -316,22 +318,64 @@ class Display
         $startrow = '<tr>';
         $endrow = '</tr>';
         $endtable = '</table>';
-        $seasons = array(
-            "S1"=>"Season 1",
-            "S2"=>"Season 2",
-            "S3"=>"Season 3"
-            );
 
         $r = $starttable;
+        $pattern = '/^\((.*?)\)/';  # start of string has a parens
+
+        $r .= $startrow;
+        $r .= '<td></td>';
+        foreach (array("S1", "S2", "S3") as $season) {
+            $r .= '<th>';
+            $r .= $season;
+            $r .= '</th>';
+        }
+        $r .= $endrow;
+
         foreach ($rows as $row) {
             $r .= $startrow;
 
             $r .= '<th>';
             $r .= $row->firstname. ' ' . $row->lastname;
             $r .= '</th>';
+
+            $info_by_seasons = array(
+                "S1" => array(),
+                "S2" => array(),
+                "S3" => array()
+                );
+
+            $pd = json_decode($row->pd);
+            if (empty($pd->strand)) {
+                $pd->strand = 'Not chosen';
+            }
+            $info_by_seasons[$pd->season][] = '<strong>PD: '.$pd->strand.'</strong>';
+
             foreach (explode('|', $row->activities) as $activity) {
+                $seasons = preg_match($pattern, $activity, $matches);
+                if (!$seasons) {
+                    continue;
+                }
+                $seasons = $matches[1];
+
+                $name = preg_split($pattern, $activity);
+                $name = trim($name[1]);
+                if ($seasons == 'ALL') {
+                    foreach (array("S1", "S2", "S3") as $this_season) {
+                        $info_by_seasons[$this_season][] = $name;
+                    }
+                } else {
+                    foreach (explode(",", $seasons) as $season) {
+                        $info_by_seasons[$season][] = $name;
+                    }
+                }
+
+            }
+
+            foreach ($info_by_seasons as $season=>$activities) {
                 $r .= '<td>';
-                $r .= $activity;
+                foreach ($activities as $activity) {
+                    $r .= $activity.'<br/>';
+                }
                 $r .= '</td>';
             }
 
