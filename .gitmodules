@@ -15,7 +15,7 @@
 	url = https://github.com/piersharding/moodle-tool_uploadcourse.git
 [submodule "blocks/mrbs"]
 	path = blocks/mrbs
-	url = https://github.com/arborrow/moodle-block_mrbs.git
+	url = https://github.com/antriver/moodle-block_mrbs
 [submodule "font-awesome"]
 	path = font-awesome
 	url = https://github.com/FortAwesome/Font-Awesome.git
