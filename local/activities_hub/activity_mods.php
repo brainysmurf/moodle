@@ -97,6 +97,7 @@ if (!empty($max_supervisors) or $max_supervisors===0) {
         $data->value = $max_supervisors;
         $DB->insert_record('course_ssis_metadata', $data, $returnid=false);
     }
+    cache_helper::purge_by_event('changesincourse');
 }
 
 if (!empty($max_participants)) {
