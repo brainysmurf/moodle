@@ -57,8 +57,6 @@ if (!empty($new_name)) {
         ));
 }
 
-var_dump($new_summary);
-
 if (!empty($new_summary)) {
     $DB->update_record('course', array(
         "id"=>$activity_id,
@@ -89,7 +87,7 @@ if (!empty($toggle_enrollments)) {
 }
 
 if (!empty($max_supervisors) or $max_supervisors===0) {
-    $exists = $DB->get_field('course_ssis_metadata', 'value', array('field'=>'activitysupervisor', 'courseid'=>$activity_id));
+    $exists = $DB->get_record('course_ssis_metadata', array('field'=>'activitysupervisor', 'courseid'=>$activity_id));
     if ($exists) {
         $DB->set_field('course_ssis_metadata', 'value', $max_supervisors, array('field'=>'activitysupervisor', 'courseid'=>$activity_id));
     } else {
@@ -98,7 +96,6 @@ if (!empty($max_supervisors) or $max_supervisors===0) {
         $data->courseid = $activity_id;
         $data->value = $max_supervisors;
         $DB->insert_record('course_ssis_metadata', $data, $returnid=false);
-        echo 'done';
     }
 }
 
