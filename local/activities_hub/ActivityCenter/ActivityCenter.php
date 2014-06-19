@@ -88,7 +88,7 @@ class ActivityCenter
 		require_once dirname(dirname(__DIR__)) . '/dnet_common/sharedlib.php';
 
 		if (is_admin() or is_activities_head()) {
-			return array('teacher', 'admin');
+			return array('admin', 'teacher');
 		} elseif (is_teacher()) {
 			return array('teacher');
 		} elseif (is_student()) {
