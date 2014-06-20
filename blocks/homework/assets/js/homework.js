@@ -351,12 +351,8 @@ $(document).on('submit', '.addHomeworkForm', function(e){
 	}
 
 	var assigneddates = $(this).find('input[name=assigneddates]');
-	if (!ensureFieldHasValue(assigneddates), 'Please pick which days this homework is assigned for.') {
-		if (assigneddates.is(':hidden')) {
-			errors = false;
-		} else {
-			errors = true;
-		}
+	if (!assigneddates.is(':hidden') && !ensureFieldHasValue(assigneddates), 'Please pick which days this homework is assigned for.') {
+		errors = true;
 	}
 
 	if (errors) {
