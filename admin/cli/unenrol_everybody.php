@@ -54,7 +54,7 @@ $manualEnrolment = enrol_get_plugin('manual');
 $cohortID = cohort_get_id('studentsALL');
 $cohortMembers = $DB->get_records('cohort_members', array('cohortid' => $cohortID));
 foreach ($cohortMembers as $student) {
-
+break;
 	// Is this student a grade 11?
 	// Look this up from the homeroom (department) user profile field
 	$homeroom = $DB->get_field('user', 'department', array('id' => $student->userid));
@@ -66,7 +66,7 @@ foreach ($cohortMembers as $student) {
 
 	// What courses is this student enrolled in?
 	$enrolledCourses = enrol_get_all_users_courses($student->userid);
-	
+
 	foreach ($enrolledCourses as $enrolledCourse) {
 		// Is it a T&L course?
 		if (in_array($enrolledCourse->id, $courseIDs)) {
@@ -84,9 +84,9 @@ foreach ($cohortMembers as $student) {
 
 echo "\n\n";
 
-// 3 = teacher 
-// 4 = non-editing teacher 
-// 
+// 3 = teacher
+// 4 = non-editing teacher
+//
 // context level 50 = a course
 
 // Get all teachersALL teachers
@@ -96,16 +96,17 @@ foreach ($cohortMembers as $teacher) {
 
 	// What courses is this teacher enrolled in?
 	$enrolledCourses = enrol_get_all_users_courses($teacher->userid);
-	
+
 	foreach ($enrolledCourses as $enrolledCourse) {
 		// Is it a T&L course?
 		if (in_array($enrolledCourse->id, $courseIDs)) {
 
-			$contextID = $courseContexts[$courseID]->id;
+			$contextID = $courseContexts[$enrolledCourse->id]->id;
 
 			// Check if the user is a non-editing teacher
 			if ($DB->get_records('role_assignments', array('userid' => $teacher->userid, 'contextid' => $contextID, 'roleid' => 4))) {
-				echo "\nTeacher {$teacher->userid} is a non-editing teacher in {$enrolledCourse->id}  {$enrolledCourse->fullname}, skipping course";
+				echo "\nTeacher {$teacher->userid} is a non-editing teacher in {$enrolledCourse->id}  {$enrolledCourse->fullname}, removing Teacher role";
+				role_unassign(3, $teacher->userid, $contextID);
 			} else {
 				// Unenrol user
 				echo "\nRemoving teacher {$teacher->userid} from course {$enrolledCourse->id} {$enrolledCourse->fullname}";
