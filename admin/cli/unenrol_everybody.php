@@ -54,7 +54,6 @@ $manualEnrolment = enrol_get_plugin('manual');
 $cohortID = cohort_get_id('studentsALL');
 $cohortMembers = $DB->get_records('cohort_members', array('cohortid' => $cohortID));
 foreach ($cohortMembers as $student) {
-break;
 	// Is this student a grade 11?
 	// Look this up from the homeroom (department) user profile field
 	$homeroom = $DB->get_field('user', 'department', array('id' => $student->userid));
