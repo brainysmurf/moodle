@@ -59,7 +59,7 @@ foreach ($cohortMembers as $student) {
 	$homeroom = $DB->get_field('user', 'department', array('id' => $student->userid));
 	$grade = intval($homeroom);
 	// Skip grade 11s
-	if ($grade == 11) {
+	if ( ($grade == 11) or ($grade == 12)) {    # leave all IB students alone, since 11s haven't changed classes and 12s info might be needed
 		continue;
 	}
 
