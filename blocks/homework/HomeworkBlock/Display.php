@@ -450,7 +450,8 @@ class Display
 		$r .= '<h4><a href="class.php?groupid=' . $hw->groupid . '">' . ($icon ? '<i class="icon-' . $icon . '"></i> ' : '') . $hw->coursename . '</a></h4>';
 
 		// Class (group) name
-		if ($showClassName) {
+		global $SESSION;
+		if ($SESSION->userIsTeacher || $showClassName) {
 			$r .= '<h4>' . $hw->getGroupName() . '</h4>';
 		}
 

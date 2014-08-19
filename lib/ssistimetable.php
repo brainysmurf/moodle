@@ -19,6 +19,18 @@ class Timetable
 		'D' => 'Thu',
 		'E' => 'Fri',
 	);
+	static $twoWeekDays = array(
+		'A' => 'Mon A',
+		'B' => 'Tue A',
+		'C' => 'Wed A',
+		'D' => 'Thu A',
+		'E' => 'Fri A',
+		'F' => 'Mon B',
+		'G' => 'Tue B',
+		'H' => 'Wed B',
+		'I' => 'Thu B',
+		'J' => 'Fri B',
+	);
 
 	public function __construct($userid = false)
 	{
@@ -141,6 +153,11 @@ class Timetable
 
 		$name .= ' (' . implode(', ', $classDays) . ')';
 
+		global $SESSION;
+		if ($SESSION->userIsTeacher) {
+			$name .= ' (' . $class->name . ')';
+		}
+
 		return $name;
 	}
 
@@ -152,7 +169,7 @@ class Timetable
 
 		foreach (explode(' ', $periods) as $day) {
 
-			$res = preg_match('/([0-9,?]+)\(([A-E,?]+)\)/', $day, $matches);
+			$res = preg_match('/([0-9,?]+)\(([A-J,?]+)\)/', $day, $matches);
 
 			foreach (explode(',', $matches[2]) as $dayOfWeek) {
 
