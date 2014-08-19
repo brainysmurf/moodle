@@ -152,7 +152,7 @@ class Timetable
 		$days = array_keys($periods);
 		sort($days);
 
-		if ($class->grade >= 6 && $class->grade <= 8) {
+		if ($class->grade == 6 || $class->grade == 7 || $class->grade == 8) {
 			// Two week timetable
 			$classDays = array_map(function($day) {
 				return  \SSIS\Timetable::$twoWeekDays[$day];
