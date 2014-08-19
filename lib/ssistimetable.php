@@ -148,7 +148,7 @@ class Timetable
 		sort($days);
 
 		$classDays = array_map(function($day) {
-			return  \SSIS\Timetable::$days[$day];
+			return  \SSIS\Timetable::$twoWeekDays[$day];
 		}, $days);
 
 		$name .= ' (' . implode(', ', $classDays) . ')';
