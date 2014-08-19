@@ -18,6 +18,11 @@ class Timetable
 		'C' => 'Wed',
 		'D' => 'Thu',
 		'E' => 'Fri',
+		'F' => 'Mon',
+		'G' => 'Tue',
+		'H' => 'Wed',
+		'I' => 'Thu',
+		'J' => 'Fri',
 	);
 	static $twoWeekDays = array(
 		'A' => 'Mon A',
@@ -147,9 +152,18 @@ class Timetable
 		$days = array_keys($periods);
 		sort($days);
 
-		$classDays = array_map(function($day) {
-			return  \SSIS\Timetable::$twoWeekDays[$day];
-		}, $days);
+		if ($class->grade >= 6 && $class->grade <= 8) {
+			// Two week timetable
+			$classDays = array_map(function($day) {
+				return  \SSIS\Timetable::$twoWeekDays[$day];
+			}, $days);
+		} else {
+			// One week timetable
+			$classDays = array_map(function($day) {
+				return  \SSIS\Timetable::$days[$day];
+			}, $days);
+			$classDays = array_unique($classDays);
+		}
 
 		$name .= ' (' . implode(', ', $classDays) . ')';
 
