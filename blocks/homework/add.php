@@ -201,7 +201,7 @@ if (defined('FORMACTION')) {
 
 	} else if (FORMACTION === 'add' && $mode == 'teacher') {
 
-		echo $hwblock->display->sign('play-sign', 'Add Homework', 'You may directly add homework for every student in a class. It does not need to approved separately.');
+		echo $hwblock->display->sign('play-sign', 'Add Homework', 'Here you may add homework for every student in a class to see. It does not need to be approved separately, it will become visible instantly.');
 
 	}
 
