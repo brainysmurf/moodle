@@ -291,24 +291,24 @@ class Block
 
 		$where = false;
 
-		$sql .= ' (';
+		$sql .= ' WHERE (';
 
 		// Course IDs
 		if (is_array($courseIDs)) {
-			$sql .= ($where ? ' AND' : ' WHERE');
+			$sql .= ($where ? ' AND' : ' ');
 			$where = true;
 			$sql .= ' hw.courseid IN (' . implode(',', $courseIDs) . ')';
 		}
 
 		// Show homework for the given group IDs
 		if (is_array($groupIDs) && count($groupIDs) > 0) {
-			$sql .= ($where ? ' AND' : ' WHERE');
+			$sql .= ($where ? ' AND' : ' ');
 			$where = true;
 			$sql .= ' (private = 0 AND hw.groupid IN (' . implode(',', $groupIDs) . ') )';
 		}
 
 		if ($includePrivate) {
-			$sql .= ($where ? ' OR' : ' WHERE');
+			$sql .= ($where ? ' OR' : ' ');
 			$where = true;
 			$sql .= ' (private = 1 AND userID = ?)';
 			$params[] = $this->userID();
