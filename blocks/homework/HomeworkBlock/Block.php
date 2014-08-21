@@ -291,32 +291,60 @@ class Block
 
 		$where = false;
 
-		$sql .= ' WHERE (';
+		if ($includePrivate && is_array($groupIDs) && count($groupIDs) > 0) {
+
+			$sql .= ' WHERE (';
+			$where = true;
+
+			$sql .= ' (private = 1 AND userID = ?)';
+			$params[] = $this->userID();
+
+			$sql .= ' OR (private = 0 AND hw.groupid IN (' . implode(',', $groupIDs) . ') )';
+
+			$sql .= ')';
+
+		} elseif ($includePrivate) {
+
+			$sql .= ($where ? ' AND' : ' WHERE');
+			$where = true;
+			$sql .= ' private = 1 AND userID = ?';
+			$params[] = $this->userID();
+
+		} elseif (is_array($groupIDs)) {
+
+			if (count($groupIDs) < 1) {
+				return array();
+			}
+
+			// Group IDs
+			$sql .= ($where ? ' AND' : ' WHERE');
+			$where = true;
+
+			if (count($groupIDs) == 1) {
+				$sql .= ' hw.groupid = ?';
+				$params[] = $groupIDs[0];
+			} elseif (count($groupIDs)) {
+				$sql .= ' hw.groupid IN (' . implode(',', $groupIDs) . ')';
+			}
+		}
 
 		// Course IDs
 		if (is_array($courseIDs)) {
-			$sql .= ($where ? ' AND' : ' ');
+
+			if (count($courseIDs) < 1) {
+				return array();
+			}
+
+			$sql .= ($where ? ' AND' : ' WHERE');
 			$where = true;
-			$sql .= ' hw.courseid IN (' . implode(',', $courseIDs) . ')';
+
+			if (count($courseIDs) == 1) {
+				$sql .= ' hw.courseid = ?';
+				$params[] = $courseIDs[0];
+			} elseif (count($courseIDs)) {
+				$sql .= ' hw.courseid IN (' . implode(',', $courseIDs) . ')';
+			}
 		}
-
-		// Show homework for the given group IDs
-		if (is_array($groupIDs) && count($groupIDs) > 0) {
-			$sql .= ($where ? ' AND' : ' ');
-			$where = true;
-			$sql .= ' (private = 0 AND hw.groupid IN (' . implode(',', $groupIDs) . ') )';
-		}
-
-		if ($includePrivate) {
-			$sql .= ($where ? ' OR' : ' ');
-			$where = true;
-			$sql .= ' (private = 1 AND userID = ?)';
-			$params[] = $this->userID();
-		}
-
-		$sql .= ') ';
-
-		// End selecting portion, now filtering...
 
 		// Show only stuff that has a start date (visible date) of today or earlier
 		if ($this->mode() != 'teacher' && $this->mode() != 'pastroal') {
@@ -350,7 +378,7 @@ class Block
 			if ($approved) {
 				$sql .= ' (approved = 1 OR private = 1)';
 			} else {
-				$sql .= ' (approved = 0 OR private = 1)';
+				$sql .= ' approved = 0';
 			}
 		}
 
