@@ -291,6 +291,7 @@ class Block
 
 		$where = false;
 
+		// Show the user's private homework, and homework for their classes (groups)
 		if ($includePrivate && is_array($groupIDs) && count($groupIDs) > 0) {
 
 			$sql .= ' WHERE (';
@@ -303,13 +304,15 @@ class Block
 
 			$sql .= ')';
 
+		// Show the user's private homework only
 		} elseif ($includePrivate) {
 
 			$sql .= ($where ? ' AND' : ' WHERE');
 			$where = true;
-			$sql .= ' private = 1 AND userID = ?';
+			$sql .= ' (private = 1 AND userID = ?)';
 			$params[] = $this->userID();
 
+		// Show the user's classes homework only (no private)
 		} elseif (is_array($groupIDs)) {
 
 			if (count($groupIDs) < 1) {
@@ -326,6 +329,8 @@ class Block
 			} elseif (count($groupIDs)) {
 				$sql .= ' hw.groupid IN (' . implode(',', $groupIDs) . ')';
 			}
+
+			$sql .= ' AND private = 0';
 		}
 
 		// Course IDs

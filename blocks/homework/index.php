@@ -68,7 +68,12 @@ switch ($hwblock->mode()) {
 		// Get the homework for those groups
 		$approved = false;
 		$distinct = true;
-		$homework = $hwblock->getHomework($groupIDs, false, false, $approved, $distinct);
+		$homework = $hwblock->getHomework(
+			$groupIDs,
+			false,
+			false,
+			$approved,
+			$distinct);
 
 		// Show the list
 		echo $hwblock->display->homeworkList($homework);
