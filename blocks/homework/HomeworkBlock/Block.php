@@ -291,47 +291,7 @@ class Block
 
 		$where = false;
 
-		// Show the user's private homework, and homework for their classes (groups)
-		if ($includePrivate && is_array($groupIDs) && count($groupIDs) > 0) {
-
-			$sql .= ' WHERE (';
-			$where = true;
-
-			$sql .= ' (private = 1 AND userID = ?)';
-			$params[] = $this->userID();
-
-			$sql .= ' OR (private = 0 AND hw.groupid IN (' . implode(',', $groupIDs) . ') )';
-
-			$sql .= ')';
-
-		// Show the user's private homework only
-		} elseif ($includePrivate) {
-
-			$sql .= ($where ? ' AND' : ' WHERE');
-			$where = true;
-			$sql .= ' (private = 1 AND userID = ?)';
-			$params[] = $this->userID();
-
-		// Show the user's classes homework only (no private)
-		} elseif (is_array($groupIDs)) {
-
-			if (count($groupIDs) < 1) {
-				return array();
-			}
-
-			// Group IDs
-			$sql .= ($where ? ' AND' : ' WHERE');
-			$where = true;
-
-			if (count($groupIDs) == 1) {
-				$sql .= ' hw.groupid = ?';
-				$params[] = $groupIDs[0];
-			} elseif (count($groupIDs)) {
-				$sql .= ' hw.groupid IN (' . implode(',', $groupIDs) . ')';
-			}
-
-			$sql .= ' AND private = 0';
-		}
+		$sql .= ' (';
 
 		// Course IDs
 		if (is_array($courseIDs)) {
@@ -350,6 +310,38 @@ class Block
 				$sql .= ' hw.courseid IN (' . implode(',', $courseIDs) . ')';
 			}
 		}
+
+		// Show homework for the given group IDs
+		if (is_array($groupIDs) && count($groupIDs) > 0) {
+
+			if (count($groupIDs) < 1) {
+				return array();
+			}
+
+			// Group IDs
+			$sql .= ($where ? ' AND' : ' WHERE');
+			$where = true;
+
+			if (count($groupIDs) == 1) {
+				$sql .= ' hw.groupid = ?';
+				$params[] = $groupIDs[0];
+			} elseif (count($groupIDs)) {
+				$sql .= ' hw.groupid IN (' . implode(',', $groupIDs) . ')';
+			}
+
+			$sql .= ' (private = 0 AND hw.groupid IN (' . implode(',', $groupIDs) . ') )';
+		}
+
+		if ($includePrivate) {
+			$sql .= ($where ? ' OR' : ' WHERE');
+			$where = true;
+			$sql .= ' (private = 1 AND userID = ?)';
+			$params[] = $this->userID();
+		}
+
+		$sql .= ') ';
+
+		// End selecting portion, now filtering...
 
 		// Show only stuff that has a start date (visible date) of today or earlier
 		if ($this->mode() != 'teacher' && $this->mode() != 'pastroal') {
@@ -383,7 +375,7 @@ class Block
 			if ($approved) {
 				$sql .= ' (approved = 1 OR private = 1)';
 			} else {
-				$sql .= ' approved = 0';
+				$sql .= ' (approved = 0 OR private = 1)';
 			}
 		}
 
