@@ -407,6 +407,10 @@ class Display
 
 		$r  = '<li class="homework ' . ($hw->approved ? 'approved' : 'unapproved') . ($canEdit ? ' canedit' : '') . ($past ? ' past' : '') . ($future ? ' future' : '') . ($hw->private ? ' private' : '') . '" data-id="' . $hw->id . '" data-duedate="'. $hw->duedate . '">';
 
+		if ($hw->private) {
+			$r .= '<h5><i class="icon-eye-close"></i> Only ' . $this->getUsername($hw->userid) . ' can see this.</h5>';
+		}
+
 		// Button for teachers to approve pending homework
 		if (!$hw->approved && !$hw->private) {
 			// Only teachers should be seeing this
@@ -753,6 +757,12 @@ class Display
 	{
 		$ext = strtolower(substr($url, strrpos($url, '.')));
 		return $ext == '.jpg' || $ext == '.png' || $ext == '.gif' || $ext == '.bmp';
+	}
+
+	private function getUsername($userid)
+	{
+		global $DB;
+		return $DB->get_field('user', 'username', array('id' => $userid));
 	}
 
 }
