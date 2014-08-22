@@ -26,7 +26,7 @@ if (isloggedin()) {
 }
 
 if ( empty($powerschoolID) )  {
-    output_forms(null, $placeholder="Start typing your child's name");
+    output_forms(null, $placeholder="Start typing your child's name, at least two characters is needed.");
 } else {
 
     if ($email == "YES") {
