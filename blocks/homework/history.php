@@ -23,7 +23,16 @@ switch ($hwblock->mode()) {
 		$past = null; // Include future and past
 		$order = 'hw.duedate DESC'; // Latest due date at the top
 
-		$homework = $hwblock->getHomework($groupIDs, false, false, $approvedStatus, true,  $past, false, $order);
+		$homework = $hwblock->getHomework(
+			$groupIDs,
+			false,
+			false,
+			$approvedStatus,
+			true,
+			$past,
+			false,
+			$order
+		);
 
 		echo $hwblock->display->homeworkList($homework);
 

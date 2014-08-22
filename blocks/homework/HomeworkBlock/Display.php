@@ -8,27 +8,27 @@ class Display
 	private $possibleTabs = array( // Array of which tabs are shown in differnet modes
 		'student' => array(
 			'index' => array('index.php', '<i class="icon-calendar"></i> To Do'),
+			'history' => array('history.php', '<i class="icon-th-list"></i> Full List / History'),
 			'classes' => array('classes.php', '<i class="icon-group"></i> View by Class'),
-			'history' => array('history.php', '<i class="icon-th-list"></i> View History'),
 			'add' => array('add.php', '<i class="icon-plus-sign"></i> Add Homework'),
 			'icalfeed' => array('icalfeed.php', '<i class="icon-rss"></i> iCal'),
 		),
 		'pastoral-student' => array( // When a pastoral user clicks on a student (same as parent mode)
 			'index' => array('index.php', '<i class="icon-calendar"></i> To Do'),
+			'history' => array('history.php', '<i class="icon-th-list"></i> Full List / History'),
 			'classes' => array('classes.php', '<i class="icon-group"></i> View by Class'),
-			'history' => array('history.php', '<i class="icon-th-list"></i> View History'),
 			'icalfeed' => array('icalfeed.php', '<i class="icon-rss"></i> iCal'),
 		),
 		'teacher' => array(
 			'index' => array('index.php', '<i class="icon-check"></i> Manage Submissions'),
+			'history' => array('history.php', '<i class="icon-th-list"></i> Full List / History'),
 			'classes' => array('classes.php', '<i class="icon-group"></i> View by Class'),
-			'history' => array('history.php', '<i class="icon-th-list"></i> View History'),
 			'add' => array('add.php', '<i class="icon-plus-sign"></i> Add Homework'),
 		),
 		'parent' => array(
 			'index' => array('index.php', '<i class="icon-calendar"></i> To Do'),
+			'history' => array('history.php', '<i class="icon-th-list"></i> Full List / History'),
 			'classes' => array('classes.php', '<i class="icon-group"></i> View by Class'),
-			'history' => array('history.php', '<i class="icon-th-list"></i> View History'),
 			'icalfeed' => array('icalfeed.php', '<i class="icon-rss"></i> iCal'),
 		),
 		'pastoral' => array(
@@ -406,6 +406,14 @@ class Display
 		$past = $hw->duedate < $this->hwblock->today;
 
 		$r  = '<li class="homework ' . ($hw->approved ? 'approved' : 'unapproved') . ($canEdit ? ' canedit' : '') . ($past ? ' past' : '') . ($future ? ' future' : '') . ($hw->private ? ' private' : '') . '" data-id="' . $hw->id . '" data-duedate="'. $hw->duedate . '">';
+
+		if (!$hw->private && !$hw->approved) {
+			$r .= '<h5><i class="icon-pause"></i> This must be approved by a teacher before it is visible to the whole class.</h5>';
+		}
+
+		if ($past) {
+			$r .= '<h5><i class="icon-time"></i> The due date for this has passed.</h5>';
+		}
 
 		if ($hw->private) {
 			$r .= '<h5><i class="icon-eye-close"></i> Only ' . $this->getUsername($hw->userid) . ' can see this.</h5>';

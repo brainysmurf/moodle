@@ -267,7 +267,7 @@ class Block
 		$order = null,
 		$assignedRangeStart = null,
 		$assignedRangeEnd = null,
-		$includePrivate = false
+		$includePrivate = true
 	) {
 		global $DB;
 		$params = array();
@@ -289,36 +289,33 @@ class Block
 		JOIN {block_homework_assign_dates} days ON days.homeworkid = hw.id
 		LEFT JOIN {user} usr ON usr.id = hw.userid';
 
-		$where = false;
+		$sql .= ' WHERE (';
+		$where = true;
 
-		if ($includePrivate && is_array($groupIDs) && count($groupIDs) > 0) {
+		// Begin selecting portion...
+		$selectWhere = false;
 
-			$sql .= ' WHERE (';
-			$where = true;
+		$privateSelector = "(private = 1 AND userID = " . intval($this->userID()) . ')';
 
-			$sql .= ' (private = 1 AND userID = ?)';
-			$params[] = $this->userID();
+		// Include private homework for the current logged in user
+		if ($includePrivate) {
 
-			$sql .= ' OR (private = 0 AND hw.groupid IN (' . implode(',', $groupIDs) . ') )';
+			$selectWhere = true;
+			$sql .= ' ' . $privateSelector;
 
-			$sql .= ')';
+		} else {
+			$sql .= ' private = 0';
+		}
 
-		} elseif ($includePrivate) {
-
-			$sql .= ($where ? ' AND' : ' WHERE');
-			$where = true;
-			$sql .= ' private = 1 AND userID = ?';
-			$params[] = $this->userID();
-
-		} elseif (is_array($groupIDs)) {
+		if (is_array($groupIDs)) {
 
 			if (count($groupIDs) < 1) {
 				return array();
 			}
 
 			// Group IDs
-			$sql .= ($where ? ' AND' : ' WHERE');
-			$where = true;
+			$sql .= ($selectWhere ? ' OR' : ' ');
+			$selectWhere = true;
 
 			if (count($groupIDs) == 1) {
 				$sql .= ' hw.groupid = ?';
@@ -335,8 +332,8 @@ class Block
 				return array();
 			}
 
-			$sql .= ($where ? ' AND' : ' WHERE');
-			$where = true;
+			$sql .= ($selectWhere ? ' OR' : ' ');
+			$selectWhere = true;
 
 			if (count($courseIDs) == 1) {
 				$sql .= ' hw.courseid = ?';
@@ -346,12 +343,17 @@ class Block
 			}
 		}
 
+		$sql .= ')';
+		// End selecting portion...
+
+		// Begin filtering portion...
+
 		// Show only stuff that has a start date (visible date) of today or earlier
 		if ($this->mode() != 'teacher' && $this->mode() != 'pastroal') {
 			$sql .= ($where ? ' AND' : ' WHERE');
 			$where = true;
 
-			$sql .= ' hw.startdate <= ?';
+			$sql .= ' (hw.startdate <= ? OR ' . $privateSelector . ')';
 			$params[] = $this->today;
 		}
 
@@ -375,10 +377,11 @@ class Block
 			$sql .= ($where ? ' AND' : ' WHERE');
 			$where = true;
 
+			// The IS NULL part is so private homework remains included
 			if ($approved) {
-				$sql .= ' (approved = 1 OR private = 1)';
+				$sql .= ' (approved = 1 OR ' . $privateSelector . ')';
 			} else {
-				$sql .= ' approved = 0';
+				$sql .= ' (approved = 0 OR ' . $privateSelector . ')';
 			}
 		}
 
@@ -426,6 +429,9 @@ class Block
 		if ($order) {
 			$sql .= ' ORDER BY ' . $order;
 		}
+
+		#print_object($sql);
+		#print_object($params);
 
 		$records = $DB->get_records_sql($sql, $params);
 		$return = array();
