@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/HomeworkBlock/Block.php';
 $hwblock = new \SSIS\HomeworkBlock\Block;
 
 $PAGE->requires->css('/blocks/homework/assets/bootstrap/css/bootstrap.css');
-$PAGE->requires->css('/blocks/homework/assets/css/homework.css?v=3');
+$PAGE->requires->css('/blocks/homework/assets/css/homework.css?v=5');
 
 $PAGE->requires->jquery();
 $PAGE->requires->js('/blocks/homework/assets/js/jquery.scrollTo.min.js');

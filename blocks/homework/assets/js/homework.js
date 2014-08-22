@@ -294,8 +294,8 @@ $(document).on('click', '.deleteHomeworkButton', function(e){
 */
 $(document).on('click', '.addHomeworkPrivateToggle a', function(e) {
 	e.preventDefault();
-	$(this).closest('.addHomeworkPrivateToggle').find('a').removeClass('active btn-primary');
-	$(this).addClass('active btn-primary');
+	$(this).closest('.addHomeworkPrivateToggle').find('a').removeClass('active');
+	$(this).addClass('active');
 	var value = $(this).attr('data-value');
 	$(this).closest('form').find('input[name=private]').val(value);
 

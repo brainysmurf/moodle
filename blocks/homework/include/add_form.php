@@ -36,10 +36,10 @@
 		<div class="col-md-9">
 			<div class="row addHomeworkPrivateToggle">
 				<div class="col-md-6">
-					<a class="btn btn-block <?=(!$private ? 'btn-primary active' : '')?>" data-value="0" href="#"><i class="icon-group"></i><br/><b>Everybody in the Class</b><br/>(Everyone can see after teacher approves)</a>
+					<a class="btn btn-block <?=(!$private ? 'active' : '')?> publicHomeworkButton" data-value="0" href="#"><i class="icon-group"></i><br/><b>Everybody in the Class</b><br/>(Everyone can see after teacher approves)</a>
 				</div>
 				<div class="col-md-6">
-					<a class="btn btn-block  <?=($private ? 'btn-primary active' : '')?>" data-value="1" href="#"><i class="icon-user"></i><br/><b>Just Me</b><br/>(Only you see it, no teacher approval needed)</a>
+					<a class="btn btn-block  <?=($private ? 'active' : '')?> privateHomeworkButton" data-value="1" href="#"><i class="icon-user"></i><br/><b>Just Me</b><br/>(Only you see it, no teacher approval needed)</a>
 				</div>
 			</div>
 		</div>

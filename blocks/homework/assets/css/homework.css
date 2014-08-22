@@ -278,12 +278,13 @@ h3 {
 		display:block;
 		padding:15px;
 		margin-bottom:15px;
-		background:rgba(22,98,163,.08);
-		border-color: #bce8f1;
 		-webkit-border-radius:3px;
 		-moz-border-radius:3px;
 		border-radius:3px;
+		background:rgba(22,98,163,.08);
+		border-color: #bce8f1;
 	}
+
 		.homework:last-child {
 			margin-bottom:0;
 		}
@@ -301,7 +302,7 @@ h3 {
 			border-color: #EBCCD1;
 		}
 
-		.homework.private {
+		.homework.private{
 			background:#D3BFF0;
 			border-color:#D3BFF0;
 		}
@@ -424,3 +425,56 @@ h3 {
 }
 
 
+.publicHomeworkButton {
+	color: #000000;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+	background-color: #D7DEE5;
+	*background-color: #D7DEE5;
+	background-image: -moz-linear-gradient(top, #E6EAEE, #D7DEE5);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#E6EAEE), to(#D7DEE5));
+	background-image: -webkit-linear-gradient(top, #E6EAEE, #D7DEE5);
+	background-image: -o-linear-gradient(top, #E6EAEE, #D7DEE5);
+	background-image: linear-gradient(to bottom, #E6EAEE, #D7DEE5);
+	background-repeat: repeat-x;
+	border-color: #D7DEE5;
+	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#E6EAEE', endColorstr='#D7DEE5', GradientType=0);
+	filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+}
+a.btn.publicHomeworkButton:hover,
+a.btn.publicHomeworkButton:focus,
+a.btn.publicHomeworkButton:active,
+a.btn.publicHomeworkButton.active,
+.publicHomeworkButton.disabled,
+.publicHomeworkButton[disabled] {
+	color: #000000;
+	background-color: #D7DEE5;
+	*background-color: #003bb3;
+}
+
+.privateHomeworkButton {
+	color: #000000;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+	background-color: #D3BFF0;
+	*background-color: #D3BFF0;
+	background-image: -moz-linear-gradient(top, #E4D8F5, #D3BFF0);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#E4D8F5), to(#D3BFF0));
+	background-image: -webkit-linear-gradient(top, #E4D8F5, #D3BFF0);
+	background-image: -o-linear-gradient(top, #E4D8F5, #D3BFF0);
+	background-image: linear-gradient(to bottom, #E4D8F5, #D3BFF0);
+	background-repeat: repeat-x;
+	border-color: #D3BFF0;
+	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#E4D8F5', endColorstr='#D3BFF0', GradientType=0);
+	filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+}
+a.btn.privateHomeworkButton:hover,
+a.btn.privateHomeworkButton:focus,
+a.btn.privateHomeworkButton:active,
+a.btn.privateHomeworkButton.active,
+.privateHomeworkButton.disabled,
+.privateHomeworkButton[disabled] {
+	color: #000;
+	background-color: #D3BFF0;
+	*background-color: #003bb3;
+}
