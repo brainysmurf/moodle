@@ -411,6 +411,10 @@ class Display
 			$r .= '<h5><i class="icon-pause"></i> This must be approved by a teacher before it is visible to the whole class.</h5>';
 		}
 
+		if (!$hw->private && $hw->approved && $this->hwblock->mode() == 'teacher') {
+			$r .= '<h5><i class="icon-ok"></i> Approved and visible to the whole class.</h5>';
+		}
+
 		if ($past) {
 			$r .= '<h5><i class="icon-time"></i> The due date for this has passed.</h5>';
 		}
