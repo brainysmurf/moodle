@@ -94,4 +94,14 @@ switch ($hwblock->mode()) {
 		break;
 }
 
+echo '<br/>';
+echo '<br/>';
+
+$timetableList = '';
+for ($i = 6; $i <= 10; $i++) {
+	$timetableList .= '<a target="_blank" style="display:block; padding: 4px 2px; font-size: 14px; margin:2px 0;" class="btn" href="timetables/Grade%20'. $i . '%20Homework%20Timetable%202014-15.pdf">Grade '. $i . ' Homework Timetable</a>';
+}
+
+echo $hwblock->display->sign('list-alt', 'Homework Timetables', '<div class="clear"></div>' . $timetableList);
+
 echo $OUTPUT->footer();
