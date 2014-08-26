@@ -551,7 +551,7 @@ class Display
             }
 
             $supervisorCount = count($supervisors);
-            $supervisorsNeeded = $courseMetaData->getCourseField($course->id, 'activitysupervisor');
+            $supervisorsNeeded = $courseMetaData->getCourseField($course->id, 'activitysupervisors');
             if ($supervisorsNeeded == null or $supervisorsNeeded == 0) {
                 continue;
             }
