@@ -65,7 +65,16 @@ require_once('../../enrol/locallib.php');
 	echo "\nCategory: ".$category->name;
 	
 	//Get all courses in category and subcategory
-	$courses = $category->get_courses(array('recursive'=>true));
+	// This way would not include hidden courses
+	#$courses = $category->get_courses(array('recursive'=>true));
+	
+	// doing it this way includes hidden courses
+	$context = context_coursecat::instance($categoryID);
+	$contextID = $context->id;
+	$sql = 'select crs.id, crs.fullname from {course} crs
+	join {context} ctx on ctx.instanceid = crs.id and ctx.contextlevel = 50
+	where ctx.path like \'/1/' . $contextID .'/%\'';
+	$courses = $DB->get_records_sql($sql);
 	
 	echo "\nCourses...";
 	
