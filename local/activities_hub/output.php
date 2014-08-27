@@ -347,7 +347,7 @@ function activity_box($activity, $remove=false) {
     $row->cells[1]->text .= $dialog;
     $row->cells[1]->text .= $script;
 
-    $max_supervisors = $DB->get_field('course_ssis_metadata', 'value', array('field'=>'activitysupervisor', 'courseid'=>$activity->id));
+    $max_supervisors = $DB->get_field('course_ssis_metadata', 'value', array('field'=>'activitysupervisors', 'courseid'=>$activity->id));
 
     $dialog = '<div id="dialog_adjust_max_supervisors_'.$activity->id.'" title="Edit Max Supervisors" style="display:none"> Enter the maximum number of supervisors:
     <form id="dialog_adjust_max_supervisors_'.$activity->id.'" action="'.derive_plugin_path_from('activity_mods.php').'">
