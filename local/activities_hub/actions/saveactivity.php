@@ -29,6 +29,10 @@ switch ($action) {
 
 		$seasonString = 'S' . implode(',S', $season);
 
+		 if ($seasonString === 'S1,S2,S3') {
+                $seasonString = 'ALL';
+            }
+
 		$shortname = strtoupper($name);
 		$shortname = str_replace(' ', '', $shortname);
 
