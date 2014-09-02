@@ -24,6 +24,8 @@ switch ($action) {
 		$summary = required_param('summary', PARAM_RAW);
 		$season = required_param('season', PARAM_RAW);
 		$supervisors = optional_param('supervisors', 0, PARAM_INT);
+		$maxEnrolledUsers = optional_param('maxEnrolledUsers', 0, PARAM_INT);
+		$parentsCanEnrol = optional_param('parentsCanEnrol', 1, PARAM_INT);
 
 		// Create the new course
 
@@ -58,7 +60,7 @@ switch ($action) {
 		$metadata->setCourseField($course->id, 'activityseason', implode(',', $season));
 
 		// Add the required enrolment methods...
-		$activityCenter->data->addSelfEnrolmentToActivityCourse($course);
+		$activityCenter->data->addSelfEnrolmentToActivityCourse($course, $maxEnrolledUsers, $parentsCanEnrol);
 
 		redirect($activityCenter->getPath() . 'view.php?refreshawesomebar&view=activitycreated&id=' . $course->id);
 

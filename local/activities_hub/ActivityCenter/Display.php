@@ -23,7 +23,7 @@ class Display
             'summary-sec' => array('session_mod.php?submode=individuals&value=YES', '<i class="icon-user"></i> Seconday Summary'),
             'summary-elem' => array('session_mod.php?submode=individuals&value=YES', '<i class="icon-user"></i> Elementary Summary'),
 
-            'newactivity' => array('view.php?view=admin/newactivity', '<i class="icon-plus-sign"></i> Create New Activity')
+            'newactivity' => array('view.php?view=newactivity', '<i class="icon-plus-sign"></i> Create New Activity')
         ),
     );
 

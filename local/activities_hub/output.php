@@ -229,10 +229,10 @@ function activity_box($activity, $remove=false) {
     $row->cells[1]->text .= '<tr>
         <td>Convenient Links:</td>
         <td>
-        <a target="_new" href="'.$CFG->wwwroot.'/course/view.php?id='.$activity->id.'"><i class="icon-rocket"></i></a>&nbsp;&nbsp;&nbsp;
-        <a target="_new" href="'.$CFG->wwwroot.'/course/edit.php?id='.$activity->id.'"><i class="icon-cogs"></i></a>&nbsp;&nbsp;&nbsp;
-        <a target="_new" href="'.$CFG->wwwroot.'/enrol/self/edit.php?courseid='.$activity->id.'&id='.$instance->id.'"><i class="icon-dashboard"></i></a>&nbsp;&nbsp;&nbsp;
-        <a target="_new" href="'.$CFG->wwwroot.'/enrol/users.php?id='.$activity->id.'"><i class="icon-user"></i></a>&nbsp;&nbsp;&nbsp;
+        <a target="_blank" href="'.$CFG->wwwroot.'/course/view.php?id='.$activity->id.'"><i class="icon-rocket"></i> Activity Page</a>&nbsp;&nbsp;&nbsp;
+        <a target="_blank" href="'.$CFG->wwwroot.'/course/edit.php?id='.$activity->id.'"><i class="icon-cogs"></i> Course Settings</a>&nbsp;&nbsp;&nbsp;
+        <a target="_blank" href="'.$CFG->wwwroot.'/enrol/self/edit.php?courseid='.$activity->id.'&id='.$instance->id.'"><i class="icon-dashboard"></i> Enrolment Settings</a>&nbsp;&nbsp;&nbsp;
+        <a target="_blank" href="'.$CFG->wwwroot.'/enrol/users.php?id='.$activity->id.'"><i class="icon-user"></i> Enrolled Users</a>&nbsp;&nbsp;&nbsp;
         </td>
     </tr>';
 

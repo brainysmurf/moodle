@@ -9,7 +9,7 @@ namespace SSIS\ActivityCenter;
 class Data
 {
 	const MANAGER_ROLE_ID = 1;
-	const STUDENT_ROLE_ID = 3;
+	const STUDENT_ROLE_ID = 5;
 	private $activityCenter;
 
 	public function __construct(ActivityCenter $activityCenter)
@@ -306,7 +306,7 @@ order by goals desc';
 		print_object($users);
 	}
 
-	public function addSelfEnrolmentToActivityCourse($course)
+	public function addSelfEnrolmentToActivityCourse($course, $maxEnrolledUsers = 0, $parentsCanEnrol = 1)
 	{
 		//Load the cohort sync enrolment plugin
 		$plugin = enrol_get_plugin('self');
@@ -317,9 +317,20 @@ order by goals desc';
 			array(
 				'name' => 'Self Enrolment (Student)',
 				'roleid' => self::STUDENT_ROLE_ID,
-				'status' => ENROL_INSTANCE_ENABLED
+				'status' => ENROL_INSTANCE_ENABLED,
+				'password' => '',
+				'customint1' => 1,
+				'customint2' => 0,
+				'customint3' => $maxEnrolledUsers,
+				'customint4' => 0,
+				'customtext1' => '',
+				'customint5' => 0,
+				'customint6' => 1,
+				'customint7' => 0,
+				'customint8' => $parentsCanEnrol
 			)
 		);
 	}
 
 }
+
