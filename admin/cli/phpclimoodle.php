@@ -263,7 +263,7 @@ class moodlephp
       $group_name = $args[1];
 
       if ( !$group = $this->get_group_from_name($group_name) ) {
-        return "-1 Cannot get group, may because course does not exist?... ".$course_idnumber;
+        return "-1 Cannot get group ".$group_name.", maybe because course ".$course_idnumber." does not exist?... ";
       }
 
       if (groups_delete_group($group)) {
