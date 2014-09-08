@@ -148,7 +148,7 @@ function activity_box($activity, $remove=false) {
 
     if ($remove) {
         $row->cells[1]->text .= '<tr>
-            <td>Remove from list:</td>
+            <td style="width:220px;">Remove from list:</td>
             <td><a href="?mode='.SELECT.'&courseid='.$activity->id.'&remove=YES"><i class="icon-remove"></i></a></td>
         </tr>';
 
@@ -242,11 +242,10 @@ function activity_box($activity, $remove=false) {
     $editor_role = TEACHER_ROLE_ID;
     $participant_role = STUDENT_ROLE_ID;
 
-
     $role_info = array(
         array( "id"=>$manager_role, "name"=>"Supervisors:" ),
         array( "id"=>$editor_role, "name"=>"Editors:" ),
-        array( "id"=>$participant_role, "name"=>"# Participants (<u>excl.</u> parents):")
+        array( "id"=>$participant_role, "name"=>"# Participants (students only):")
         );
 
     $context = get_context_instance(CONTEXT_COURSE, $activity->id, true);
