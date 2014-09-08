@@ -246,7 +246,7 @@ function activity_box($activity, $remove=false) {
     $role_info = array(
         array( "id"=>$manager_role, "name"=>"Supervisors:" ),
         array( "id"=>$editor_role, "name"=>"Editors:" ),
-        array( "id"=>$participant_role, "name"=>"# Participants (incl parents):")
+        array( "id"=>$participant_role, "name"=>"# Participants (<u>excl.</u> parents):")
         );
 
     $context = get_context_instance(CONTEXT_COURSE, $activity->id, true);
@@ -342,7 +342,7 @@ function activity_box($activity, $remove=false) {
     });
     </script>";
     $edit_name = '&nbsp;&nbsp;<a id="adjust_max_participants_'.$activity->id.'"   href="#"><i class="icon-cog"></i></a>&nbsp;&nbsp;';
-    $row->cells[1]->text .= '<tr><td>'.'# max participants'.'</td>';
+    $row->cells[1]->text .= '<tr><td>'.'# Max participants'.'</td>';
     $row->cells[1]->text .= '<td>'.$max_participants.$edit_name.'</td></tr>';
     $row->cells[1]->text .= $dialog;
     $row->cells[1]->text .= $script;
@@ -408,7 +408,7 @@ function activity_box($activity, $remove=false) {
     </script>";
     $edit_name = '&nbsp;&nbsp;<a id="adjust_max_supervisors_'.$activity->id.'"   href="#"><i class="icon-cog"></i></a>&nbsp;&nbsp;';
 
-    $row->cells[1]->text .= '<tr><td>'.'# max supervisors'.'</td>';
+    $row->cells[1]->text .= '<tr><td>'.'# Max supervisors'.'</td>';
 
     if ($max_supervisors) {
         $value = $max_supervisors;
@@ -566,7 +566,7 @@ function output_act_form($placeholder="Type something, dude", $kind="activities"
 
     ?>
 <form id="activity_user_entry" action="" method="get">
-<input name="" size="100" onclick="this.select()"
+<input name="" style="box-sizing:border-box; width:100%;" onclick="this.select()"
     type="text" autofocus="autofocus" id="activity" placeholder="<?= $placeholder ?>"/><br />
 <input name="courseid" type="hidden" id="courseid" value=""/>
 <input name="mode" type="hidden" id="select" value="<?= $mode ?>"/>
@@ -601,7 +601,7 @@ function output_act_cat_form($placeholder="Type something, dude", $kind="student
 
     ?>
 <form id="cat_user_entry" action="" method="get">
-<input name="" size="100" onclick="this.select()"
+<input name="" style="box-sizing:border-box; width:100%;" onclick="this.select()"
     type="text" id="activity_cat" placeholder="<?= $placeholder ?>"/><br />
 <input name="catid" type="hidden" id="catid" value=""/>
 <input name="mode" type="hidden" id="select" value="<?= $mode ?>"/>

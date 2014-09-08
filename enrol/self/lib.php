@@ -254,10 +254,23 @@ class enrol_self_plugin extends enrol_plugin {
 
 		//Max enrol limit specified.
 		if ($instance->customint3 > 0) {
-			$count = $DB->count_records('user_enrolments', array('enrolid'=>$instance->id));
+			// This old way just returns the total number of people enrolled via this enrolment method
+			#$count = $DB->count_records('user_enrolments', array('enrolid'=>$instance->id));
+
+			// The new way counts the number of people enroled as student/participant
+			$q = 'select count(*) from {user_enrolments} ue
+			join {enrol} enrl on enrl.id = ue.enrolid
+			join {context} ctx on ctx.instanceid = enrl.courseid and ctx.contextlevel = 50
+			join {role_assignments} ra on ra.userid = ue.userid and ra.contextid = ctx.id
+			where ue.enrolid = ? and ra.roleid = 5'; // 5 = student role id
+			$count = $DB->get_field_sql($q, array($instance->id));
+
 			if ($count >= $instance->customint3) {
 				//Too many people enrolled already
-				return $OUTPUT->errorbox("Sorry, this activity already has the maximum number of participants.");
+				// This is the only check that is done to limit number of participants!
+				// Making it easy to tweak, but easy for somebody to work around if they know
+				// what they're doing...
+				return $OUTPUT->errorbox("Sorry, this activity already has the maximum number of participants ({$count}).");
 			}
 		}
 
