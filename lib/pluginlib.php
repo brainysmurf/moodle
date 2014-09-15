@@ -1100,8 +1100,6 @@ class available_update_checker {
             return array();
         }
 
-        echo 'get_update_info';
-
         if (!isset($options['minmaturity'])) {
             $options['minmaturity'] = 0;
         }
