@@ -349,7 +349,7 @@ class Block
 		// Begin filtering portion...
 
 		// Show only stuff that has a start date (visible date) of today or earlier
-		if ($this->mode() != 'teacher' && $this->mode() != 'pastroal') {
+		if ($this->mode() != 'teacher' && $this->mode() != 'pastoral') {
 			$sql .= ($where ? ' AND' : ' WHERE');
 			$where = true;
 
