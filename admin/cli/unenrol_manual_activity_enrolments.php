@@ -21,7 +21,6 @@ require_once $CFG->dirroot . '/cohort/lib.php';
 #$category = coursecat::get(1);
 #$courses = $category->get_courses(array('recursive'=>true));
 
-// This way does
 // doing it this way includes hidden courses
 $categoryID = 1;
 $context = context_coursecat::instance($categoryID);
@@ -37,24 +36,25 @@ $cohortID = cohort_get_id('activitiesHEAD');
 $cohortMembers = $DB->get_records('cohort_members', array('cohortid' => $cohortID));
 print_r($cohortMembers);
 
+$plugin = enrol_get_plugin('manual');
+
 foreach ($courses as $course) {
 
 	echo "\n{$course->fullname}";
 
 	// Get manual enrolment method for the course
-	$manual = $DB->get_record('enrol', array(
-		'courseid' => $course->id,
-		'enrol' => 'manual'
-	));
+	$instance = $DB->get_record('enrol', array('enrol' => 'manual', 'courseid' => $course->id), '*', IGNORE_MISSING);
 
-	echo "\tManual method: {$manual->id}";
+	if (!$instance) {
+		echo "\tNo manual instance";
+		continue;
+	} else {
+		echo "\tManual method: {$instance->id}";
+	}
 
-	// Now see if the cohort members are enroled by the manual method
-
+	// Unenrol these users from the manual enrolment method (they'll remain enroled from the cohort sync)
 	foreach ($cohortMembers as $cohortMember) {
-		if ($DB->count_records('user_enrolments', array('enrolid' => $manual->id, 'userid' => $cohortMember->userid))) {
-			echo "\n\t{$cohortMember->userid} is enroled";
-		}
+		echo "\t" . $plugin->unenrol_user($instance, $cohortMember->userid);
 	}
 
 }
