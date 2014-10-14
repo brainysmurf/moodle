@@ -351,7 +351,7 @@ order by goals desc';
 		return $plugin->add_instance(
 			$course,
 			array(
-				'name' => 'Activity Heads (Manager)',
+				'name' => 'Cohort Sync (Activity Heads -> Manager)',
 				'roleid' => self::MANAGER_ROLE_ID,
 				'status' => ENROL_INSTANCE_ENABLED,
 				'password' => '',
