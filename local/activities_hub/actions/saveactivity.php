@@ -62,6 +62,9 @@ switch ($action) {
 		// Add the required enrolment methods...
 		$activityCenter->data->addSelfEnrolmentToActivityCourse($course, $maxEnrolledUsers, $parentsCanEnrol);
 
+		// Add manager cohort sync
+		$activityCenter->data->addActivitiesHeadCohortSync($course);
+
 		redirect($activityCenter->getPath() . 'view.php?refreshawesomebar&view=activitycreated&id=' . $course->id);
 
 		break;
