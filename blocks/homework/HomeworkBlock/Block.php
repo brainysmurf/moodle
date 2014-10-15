@@ -293,18 +293,18 @@ class Block
 		$where = true;
 
 		// Begin selecting portion...
-		$selectWhere = false;
+		$and = false;
 
 		$privateSelector = "(private = 1 AND userID = " . intval($this->userID()) . ')';
 
-		// Include private homework for the current logged in user
 		if ($includePrivate) {
-
-			$selectWhere = true;
+			// Include private homework for the current logged in user
 			$sql .= ' ' . $privateSelector;
-
+			$and = true;
 		} else {
+			// Exclude all private homework
 			$sql .= ' private = 0';
+			$and = true;
 		}
 
 		if (is_array($groupIDs)) {
@@ -314,8 +314,8 @@ class Block
 			}
 
 			// Group IDs
-			$sql .= ($selectWhere ? ' OR' : ' ');
-			$selectWhere = true;
+			$sql .= ($and ? ' OR' : ' ');
+			$and = true;
 
 			if (count($groupIDs) == 1) {
 				$sql .= ' hw.groupid = ?';
@@ -332,8 +332,8 @@ class Block
 				return array();
 			}
 
-			$sql .= ($selectWhere ? ' OR' : ' ');
-			$selectWhere = true;
+			$sql .= ($and ? ' OR' : ' ');
+			$and = true;
 
 			if (count($courseIDs) == 1) {
 				$sql .= ' hw.courseid = ?';
