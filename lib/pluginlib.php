@@ -1093,6 +1093,13 @@ class available_update_checker {
      */
     public function get_update_info($component, array $options = array()) {
 
+        // Moodle likes to check for updates even if update notifications are turned off.
+        // This make it really not check for updates
+        global $CFG;
+        if (!empty($CFG->fakeupdatecheck)) {
+            return array();
+        }
+
         if (!isset($options['minmaturity'])) {
             $options['minmaturity'] = 0;
         }

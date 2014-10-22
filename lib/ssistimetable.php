@@ -169,7 +169,7 @@ class Timetable
 		$name .= ' (' . implode(', ', $classDays) . ')';
 
 		global $SESSION;
-		if ($SESSION->userIsTeacher) {
+		if (!empty($SESSION->userIsTeacher)) {
 			$name .= ' (' . $class->name . ')';
 		}
 

@@ -178,6 +178,11 @@ function cohort_remove_member($cohortid, $userid) {
     events_trigger('cohort_member_removed', (object)array('cohortid'=>$cohortid, 'userid'=>$userid));
 }
 
+function cohort_count_members($cohortid) {
+    return $DB->count_records('cohort_members', array('cohortid'=>$cohortid));
+}
+
+
 /**
  * Is this user a cohort member?
  * @param int $cohortid

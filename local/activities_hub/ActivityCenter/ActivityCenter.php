@@ -1,7 +1,5 @@
 <?php
 
-// require_once('../../cohort/lib.php');
-
 namespace SSIS\ActivityCenter;
 
 class ActivityCenter
@@ -37,8 +35,6 @@ class ActivityCenter
 
 		return $USER->id;
 	}
-
-
 
 	/**
 	 * Modes

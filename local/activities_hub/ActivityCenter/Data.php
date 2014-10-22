@@ -9,10 +9,10 @@ namespace SSIS\ActivityCenter;
 class Data
 {
 	const MANAGER_ROLE_ID = 1;
-	const STUDENT_ROLE_ID = 3;
+	const STUDENT_ROLE_ID = 5;
 	private $activityCenter;
 
-	public function __construct(ActivityCenter $activityCenter)
+	public function __construct(ActivityCenter $activityCenter = null)
 	{
 		$this->activityCenter = $activityCenter;
 	}
@@ -306,20 +306,79 @@ order by goals desc';
 		print_object($users);
 	}
 
-	public function addSelfEnrolmentToActivityCourse($course)
+	/**
+	 * @param course Object of course data
+	 */
+	public function addSelfEnrolmentToActivityCourse($course, $maxEnrolledUsers = 0, $parentsCanEnrol = 1)
 	{
 		//Load the cohort sync enrolment plugin
 		$plugin = enrol_get_plugin('self');
 
-		//Enrol teachers as students (disabled by default)
+		//Enrol teachers as students (enabled by default)
 		return $plugin->add_instance(
 			$course,
 			array(
 				'name' => 'Self Enrolment (Student)',
 				'roleid' => self::STUDENT_ROLE_ID,
-				'status' => ENROL_INSTANCE_ENABLED
+				'status' => ENROL_INSTANCE_ENABLED,
+				'password' => '',
+				'customint1' => 1,
+				'customint2' => 0,
+				'customint3' => $maxEnrolledUsers,
+				'customint4' => 0,
+				'customtext1' => '',
+				'customint5' => 0,
+				'customint6' => 1,
+				'customint7' => 0,
+				'customint8' => $parentsCanEnrol
 			)
 		);
 	}
 
+
+	public function getActivitiesHeadCohortID()
+	{
+		global $CFG;
+		require_once $CFG->dirroot . '/cohort/lib.php';
+		return cohort_get_id('activitiesHEAD');
+	}
+
+	public function addActivitiesHeadCohortSync($course)
+	{
+		//Load the cohort sync enrolment plugin
+		$plugin = enrol_get_plugin('cohort');
+
+		return $plugin->add_instance(
+			$course,
+			array(
+				'name' => 'Cohort Sync (Activity Heads -> Manager)',
+				'roleid' => self::MANAGER_ROLE_ID,
+				'status' => ENROL_INSTANCE_ENABLED,
+				'password' => '',
+				'customint1' => $this->getActivitiesHeadCohortID(), //Cohort ID
+				'customint2' => 0,
+				'customint3' => '',
+				'customint4' => '',
+				'customtext1' => '',
+				'customint5' => '',
+				'customint6' => '',
+				'customint7' => '',
+				'customint8' => ''
+			)
+		);
+	}
+
+	/**
+	 * Checks if a course already has the activitiesHEAD cohort sync enrolment method
+	 */
+	public function doesCourseHaveActivitesHeadSync($course)
+	{
+		global $DB;
+		$count = $DB->count_records('enrol', array(
+			'enrol' => 'cohort',
+			'courseid' => $course->id,
+			'customint1' => $this->getActivitiesHeadCohortID()
+		));
+		return $count > 0;
+	}
 }

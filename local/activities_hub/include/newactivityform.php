@@ -68,6 +68,33 @@ function displayCategories($categories)
 	</div>
 
 	<?php
+	if (FORMACTION == 'add') {
+		?>
+		<div class="form-group">
+			<label for="maxEnrolledUsers" class="col-md-3 control-label">How many students can join the activity? (0 = unlimited)</label>
+			<div class="col-md-9">
+
+				<p><input type="text" class="form-control" name="maxEnrolledUsers" value="0" /></p>
+
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="parentsCanEnrol" class="col-md-3 control-label">Can parents enrol their children?</label>
+			<div class="col-md-9">
+
+				<label><input type="radio" name="parentsCanEnrol" value="1" checked="checked" /> Yes</label>
+				&nbsp;&nbsp;&nbsp;
+				<label><input type="radio" name="parentsCanEnrol" value="0" /> No</label>
+
+			</div>
+		</div>
+
+		<?
+	}
+	?>
+
+	<?php
 	if (FORMACTION == 'edit') {
 		$label = 'Save Changes';
 	} else {

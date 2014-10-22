@@ -77,7 +77,8 @@ class HomeworkStats
 			null, //dueDate
 			null, //order
 			$assignedRangeStart,
-			$assignedRangeEnd
+			$assignedRangeEnd,
+			false //exclude private
 		);
 		return $homework;
 	}

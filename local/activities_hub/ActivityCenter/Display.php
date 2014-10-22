@@ -23,7 +23,7 @@ class Display
             'summary-sec' => array('session_mod.php?submode=individuals&value=YES', '<i class="icon-user"></i> Seconday Summary'),
             'summary-elem' => array('session_mod.php?submode=individuals&value=YES', '<i class="icon-user"></i> Elementary Summary'),
 
-            'newactivity' => array('view.php?view=admin/newactivity', '<i class="icon-plus-sign"></i> Create New Activity')
+            'newactivity' => array('view.php?view=newactivity', '<i class="icon-plus-sign"></i> Create New Activity')
         ),
     );
 
@@ -576,8 +576,12 @@ class Display
 
                     foreach ($matches[0] as $i => $matchedText) {
 
-                        if ($matches[1][$i] === 'ALL') {
-                            $matches[1][$i] = 'S1,S2,S3';
+                        #if ($matches[1][$i] === 'ALL') {
+                        #    $matches[1][$i] = 'S1,S2,S3';
+                        #}
+
+                        if ($matches[1][$i] === 'S1,S2,S3') {
+                            $matches[1][$i] = 'ALL';
                         }
 
                         $icon = '<i class="pull-right icon-text">' . $matches[1][$i] . '</i>';
