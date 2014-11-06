@@ -225,6 +225,9 @@ M.format_grid.icon_change_shown = function() {
     this.selected_section = this.ourYUI.one("#section-" + this.selected_section_no);
 
     this.selected_section.removeClass('hide_section');
+    setTimeout(function(){
+        $('#gridshadebox_content_inner').scrollTop(0);
+    }, 200);
 };
 
 /**
