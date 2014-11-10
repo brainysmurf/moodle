@@ -11,6 +11,7 @@ echo $hwblock->display->tabs('classes');
 
 switch ($hwblock->mode()) {
 
+	case 'pastoral-student':
 	case 'student':
 	case 'parent':
 	case 'teacher':
