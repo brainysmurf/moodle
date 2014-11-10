@@ -236,7 +236,8 @@ order by goals desc';
 		$sql = "SELECT
 			crs.fullname,
 			crs.id,
-			crs.summary
+			crs.summary,
+			crs.visible
 		FROM
 			{course} crs
 		JOIN
