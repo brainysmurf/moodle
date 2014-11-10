@@ -92,17 +92,17 @@ class Timetable
 		return $this->formatTimetableData($rows);
 	}
 
-	public function getTeacherClasses($activeOnly = false)
+	public function getTeacherClasses($activeOnly = true)
 	{
 		return $this->query($activeOnly, array('teacheruserid' => $this->userid));
 	}
 
-	public function getStudentClasses($activeOnly = false)
+	public function getStudentClasses($activeOnly = true)
 	{
 		return $this->query($activeOnly, array('studentuserid' => $this->userid));
 	}
 
-	public function getAllClasses($activeOnly = false, $grade = null)
+	public function getAllClasses($activeOnly = true, $grade = null)
 	{
 		return $this->query($activeOnly, array(), $grade);
 	}
