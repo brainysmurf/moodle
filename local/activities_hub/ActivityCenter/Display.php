@@ -539,7 +539,7 @@ class Display
         foreach ($courses as $course) {
 
             // Skip hidden courses
-            if (!$course->visible) {
+            if (empty($course->visible)) {
                 continue;
             }
 
