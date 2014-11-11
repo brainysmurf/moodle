@@ -538,6 +538,11 @@ class Display
 
         foreach ($courses as $course) {
 
+            // Skip hidden courses
+            if (empty($course->visible)) {
+                continue;
+            }
+
             // Find the activity manager
             $supervisors = $this->activityCenter->data->getActivitiesManaged($course->id);
             $supervisorNames = array();

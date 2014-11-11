@@ -2603,7 +2603,8 @@ class assignment_grading_form extends moodleform {
         }
     }
 
-    function add_action_buttons($cancel = true, $submitlabel = NULL) {
+    function add_action_buttons($cancel = true, $submitlabel = NULL, $closeHeaderBefore=true) {
+        var_dump(error_reporting());
         $mform =& $this->_form;
         //if there are more to be graded.
         if ($this->_customdata->nextid>0) {

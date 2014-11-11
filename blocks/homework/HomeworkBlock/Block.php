@@ -193,7 +193,7 @@ class Block
 	/**
 	 * Get all classes (groups) a user is in
 	 */
-	public function getUsersGroups($userid, $activeOnly = false)
+	public function getUsersGroups($userid, $activeOnly = true)
 	{
 		$timetable = new \SSIS\Timetable($userid);
 
@@ -209,9 +209,9 @@ class Block
 	/**
 	 * Get only an array of class group IDs a user is in
 	 */
-	public function getUsersGroupIDs($userid)
+	public function getUsersGroupIDs($userid, $activeOnly = true)
 	{
-		$classes = $this->getUsersGroups($userid);
+		$classes = $this->getUsersGroups($userid, $activeOnly);
 		return $this->extractGroupIDsFromTimetable($classes);
 	}
 

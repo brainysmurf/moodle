@@ -143,7 +143,8 @@ order by goals desc';
 			usr.firstname,
 			usr.lastname,
 			crs.id as id,
-			crs.fullname
+			crs.fullname,
+			crs.visible
 		from {user_enrolments} ue
 		join {user} usr on usr.id = ue.userid
 		join {enrol} enrol on enrol.id = ue.enrolid
@@ -187,7 +188,8 @@ order by goals desc';
 			usr.firstname,
 			usr.lastname,
 			crs.id as id,
-			crs.fullname
+			crs.fullname,
+			crs.visible
 		from {user_enrolments} ue
 		join {user} usr on usr.id = ue.userid
 		join {enrol} enrol on enrol.id = ue.enrolid
@@ -236,7 +238,8 @@ order by goals desc';
 		$sql = "SELECT
 			crs.fullname,
 			crs.id,
-			crs.summary
+			crs.summary,
+			crs.visible
 		FROM
 			{course} crs
 		JOIN
@@ -270,7 +273,8 @@ order by goals desc';
 		$sql = "SELECT
 			crs.fullname,
 			crs.id,
-			crs.summary
+			crs.summary,
+			crs.visible
 		FROM
 			{course} crs
 		JOIN
