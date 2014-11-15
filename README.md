@@ -1,0 +1,42 @@
+DragonNet
+====
+
+### Setting up a DragonNet development/testing environment
+
+#### Required Software
+* [git](http://git-scm.com/)
+* [Virtualbox](https://www.virtualbox.org/wiki/Downloads)
+* [Vagrant](https://www.vagrantup.com/)
+* Vagrant hostsupdater plugin. (Install by running `vagrant plugin install vagrant-hostsupdater`)
+
+#### Setup
+
+##### 1. Clone this repository
+```bash
+
+git clone https://github.com/brainysmurf/moodle.git
+cd moodle
+```
+
+##### 2. Grab a copy of the database
+```bash
+scp -C lcssisadmin@wiki.ssis-suzhou.net:~/latest.sql dragonnet.sql
+```
+Call it dragonnet.sql and put it in the moodle directory.
+
+##### 3. Start the Vagrant server
+```bash
+vagrant up
+```
+The first time you start the server it will provision itself (install all the required software) and import the database. This may take a long time.
+If asked for a password, enter your local sudo password. This is so it can update your hosts file to make dragonnet.vagrant point to the virtual server.
+
+#### 4. Try it
+Go to https://dragonnet.vagrant in your browser.
+If you see a warning about SSL certificates, ignore it and choose to proceed. This is because dragonnet.vagrant uses a self-signed certificate.
+![](http://img.ctrlv.in/img/14/11/15/5466b71a45838.png)
+If everything went right, you should see DragonNet. The green header reminds you that this is the test version not the live version.
+![](http://img.ctrlv.in/img/14/11/15/5466b70d32d77.png)
+
+
+

@@ -36,3 +36,4 @@ composer.lock
 /phpmemcacheadmin
 /local/codechecker/
 filter/variables
+dragonnet.sql
