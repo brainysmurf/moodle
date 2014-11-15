@@ -16,6 +16,8 @@ DragonNet
 
 git clone https://github.com/brainysmurf/moodle.git
 cd moodle
+git submodule init
+git submodule update
 ```
 
 ##### 2. Grab a copy of the database
@@ -31,7 +33,7 @@ vagrant up
 The first time you start the server it will provision itself (install all the required software) and import the database. This may take a long time.
 If asked for a password, enter your local sudo password. This is so it can update your hosts file to make dragonnet.vagrant point to the virtual server.
 
-#### 4. Try it
+##### 4. Use it
 Go to https://dragonnet.vagrant in your browser.
 If you see a warning about SSL certificates, ignore it and choose to proceed. This is because dragonnet.vagrant uses a self-signed certificate.
 ![](http://img.ctrlv.in/img/14/11/15/5466b71a45838.png)
