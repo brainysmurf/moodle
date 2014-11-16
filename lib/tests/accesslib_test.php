@@ -74,7 +74,7 @@ class accesslib_testcase extends advanced_testcase {
         $this->assertNotEmpty($ACCESSLIB_PRIVATE->rolepermissions);
         $this->assertNotEmpty($ACCESSLIB_PRIVATE->rolepermissions);
         $this->assertNotEmpty($ACCESSLIB_PRIVATE->accessdatabyuser);
-        accesslib_clear_all_caches(true);
+        accesslib_clear_all_caches_for_unit_testing();
         $this->assertEmpty($ACCESSLIB_PRIVATE->rolepermissions);
         $this->assertEmpty($ACCESSLIB_PRIVATE->rolepermissions);
         $this->assertEmpty($ACCESSLIB_PRIVATE->dirtycontexts);
@@ -888,7 +888,7 @@ class accesslib_testcase extends advanced_testcase {
         $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'), '*', MUST_EXIST);
         $teacher = $this->getDataGenerator()->create_user();
         role_assign($teacherrole->id, $teacher->id, $coursecontext);
-        $teacherename = (object)array('roleid'=>$teacher->id, 'name'=>'Učitel', 'contextid'=>$coursecontext->id);
+        $teacherename = (object)array('roleid'=>$teacherrole->id, 'name'=>'Učitel', 'contextid'=>$coursecontext->id);
         $DB->insert_record('role_names', $teacherename);
 
         $studentrole = $DB->get_record('role', array('shortname'=>'student'), '*', MUST_EXIST);
@@ -996,7 +996,7 @@ class accesslib_testcase extends advanced_testcase {
         $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'), '*', MUST_EXIST);
         $teacher = $this->getDataGenerator()->create_user();
         role_assign($teacherrole->id, $teacher->id, $coursecontext);
-        $teacherename = (object)array('roleid'=>$teacher->id, 'name'=>'Učitel', 'contextid'=>$coursecontext->id);
+        $teacherename = (object)array('roleid'=>$teacherrole->id, 'name'=>'Učitel', 'contextid'=>$coursecontext->id);
         $DB->insert_record('role_names', $teacherename);
 
         $contexts = $DB->get_records('context');
@@ -1055,10 +1055,10 @@ class accesslib_testcase extends advanced_testcase {
         $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'), '*', MUST_EXIST);
         $teacher = $this->getDataGenerator()->create_user();
         role_assign($teacherrole->id, $teacher->id, $coursecontext);
-        $teacherename = (object)array('roleid'=>$teacher->id, 'name'=>'Učitel', 'contextid'=>$coursecontext->id);
+        $teacherename = (object)array('roleid'=>$teacherrole->id, 'name'=>'Učitel', 'contextid'=>$coursecontext->id);
         $DB->insert_record('role_names', $teacherename);
         $this->assertTrue($DB->record_exists('capabilities', array('name'=>'moodle/backup:backupcourse'))); // any capability is ok
-        assign_capability('moodle/backup:backupcourse', CAP_PROHIBIT, $teacher->id, $coursecontext->id);
+        assign_capability('moodle/backup:backupcourse', CAP_PROHIBIT, $teacherrole->id, $coursecontext->id);
 
         $studentrole = $DB->get_record('role', array('shortname'=>'student'), '*', MUST_EXIST);
         $student = $this->getDataGenerator()->create_user();
@@ -1714,12 +1714,12 @@ class accesslib_testcase extends advanced_testcase {
         $this->assertSame($systemcontext->get_parent_contexts(), array());
         $this->assertSame($systemcontext->get_parent_contexts(true), array($systemcontext->id=>$systemcontext));
         $this->assertSame($systemcontext->get_parent_context_ids(), array());
-        $this->assertSame($systemcontext->get_parent_context_ids(true), array($systemcontext->id));
+        $this->assertEquals($systemcontext->get_parent_context_ids(true), array($systemcontext->id));
 
         $this->assertSame($frontpagecontext->get_parent_context(), $systemcontext);
         $this->assertSame($frontpagecontext->get_parent_contexts(), array($systemcontext->id=>$systemcontext));
         $this->assertSame($frontpagecontext->get_parent_contexts(true), array($frontpagecontext->id=>$frontpagecontext, $systemcontext->id=>$systemcontext));
-        $this->assertSame($frontpagecontext->get_parent_context_ids(), array($systemcontext->id));
+        $this->assertEquals($frontpagecontext->get_parent_context_ids(), array($systemcontext->id));
         $this->assertEquals($frontpagecontext->get_parent_context_ids(true), array($frontpagecontext->id, $systemcontext->id));
 
         $this->assertSame($systemcontext->get_parent_context(), false);
@@ -1837,7 +1837,7 @@ class accesslib_testcase extends advanced_testcase {
         unassign_capability('moodle/site:accessallgroups', $allroles['teacher'], $frontpagecontext->id, true);
         unset($rc);
 
-        accesslib_clear_all_caches(false); // must be done after assign_capability()
+        accesslib_clear_all_caches_for_unit_testing(); // Must be done after assign_capability().
 
 
         // ======= role_assign(), role_unassign(), role_unassign_all() ==============
@@ -1854,7 +1854,7 @@ class accesslib_testcase extends advanced_testcase {
         $this->assertEquals($DB->count_records('role_assignments', array('contextid'=>$context->id)), 0);
         unset($context);
 
-        accesslib_clear_all_caches(false); // just in case
+        accesslib_clear_all_caches_for_unit_testing(); // Just in case.
 
 
         // ====== has_capability(), get_users_by_capability(), role_switch(), reload_all_capabilities() and friends ========================
@@ -1915,7 +1915,7 @@ class accesslib_testcase extends advanced_testcase {
 
         assign_capability('mod/page:view', CAP_PREVENT, $allroles['guest'], $systemcontext, true);
 
-        accesslib_clear_all_caches(false); // must be done after assign_capability()
+        accesslib_clear_all_caches_for_unit_testing(); /// Must be done after assign_capability().
 
         // Extra tests for guests and not-logged-in users because they can not be verified by cross checking
         // with get_users_by_capability() where they are ignored
@@ -2038,7 +2038,7 @@ class accesslib_testcase extends advanced_testcase {
         unset($permissions);
         unset($roles);
 
-        accesslib_clear_all_caches(false); // must be done after assign_capability()
+        accesslib_clear_all_caches_for_unit_testing(); // must be done after assign_capability().
 
         // Test time - let's set up some real user, just in case the logic for USER affects the others...
         $USER = $DB->get_record('user', array('id'=>$testusers[3]));

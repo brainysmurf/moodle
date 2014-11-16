@@ -85,7 +85,7 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool always true
  */
 function xmldb_main_upgrade($oldversion) {
-    global $CFG, $USER, $DB, $OUTPUT, $SITE;
+    global $CFG, $USER, $DB, $OUTPUT, $SITE, $COURSE;
 
     require_once($CFG->libdir.'/db/upgradelib.php'); // Core Upgrade-related functions
 
@@ -316,6 +316,10 @@ function xmldb_main_upgrade($oldversion) {
             $dbman->drop_field($table, $field);
         }
 
+        // Since structure of 'course' table has changed we need to re-read $SITE from DB.
+        $SITE = $DB->get_record('course', array('id' => $SITE->id));
+        $COURSE = clone($SITE);
+
         upgrade_main_savepoint(true, 2012031500.02);
     }
 
@@ -447,6 +451,10 @@ function xmldb_main_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
+        // Since structure of 'course' table has changed we need to re-read $SITE from DB.
+        $SITE = $DB->get_record('course', array('id' => $SITE->id));
+        $COURSE = clone($SITE);
+
         // Main savepoint reached
         upgrade_main_savepoint(true, 2012050300.03);
     }
@@ -562,6 +570,10 @@ function xmldb_main_upgrade($oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+
+        // Since structure of 'course' table has changed we need to re-read $SITE from DB.
+        $SITE = $DB->get_record('course', array('id' => $SITE->id));
+        $COURSE = clone($SITE);
 
         // Add course_sections_availability to add completion & grade availability conditions
         $table = new xmldb_table('course_sections_availability');
@@ -1336,6 +1348,10 @@ function xmldb_main_upgrade($oldversion) {
         // Launch change of type for field format
         $dbman->change_field_type($table, $field);
 
+        // Since structure of 'course' table has changed we need to re-read $SITE from DB.
+        $SITE = $DB->get_record('course', array('id' => $SITE->id));
+        $COURSE = clone($SITE);
+
         // Main savepoint reached
         upgrade_main_savepoint(true, 2012110200.00);
     }
@@ -1387,6 +1403,10 @@ function xmldb_main_upgrade($oldversion) {
                 $dbman->drop_field($table, $field);
             }
         }
+
+        // Since structure of 'course' table has changed we need to re-read $SITE from DB.
+        $SITE = $DB->get_record('course', array('id' => $SITE->id));
+        $COURSE = clone($SITE);
 
         // Main savepoint reached
         upgrade_main_savepoint(true, 2012110201.00);
@@ -1504,6 +1524,7 @@ function xmldb_main_upgrade($oldversion) {
         if ($SITE->format !== 'site') {
             $DB->set_field('course', 'format', 'site', array('id' => $SITE->id));
             $SITE->format = 'site';
+            $COURSE->format = 'site';
         }
 
         // Main savepoint reached
@@ -1993,6 +2014,10 @@ function xmldb_main_upgrade($oldversion) {
             $dbman->drop_field($table, $field);
         }
 
+        // Since structure of 'course' table has changed we need to re-read $SITE from DB.
+        $SITE = $DB->get_record('course', array('id' => $SITE->id));
+        $COURSE = clone($SITE);
+
         // Main savepoint reached.
         upgrade_main_savepoint(true, 2013040300.01);
     }
@@ -2216,30 +2241,7 @@ function xmldb_main_upgrade($oldversion) {
     if ($oldversion < 2013051402.10) {
         // Find all fileareas that have missing root folder entry and add the root folder entry.
         if (empty($CFG->filesrootrecordsfixed)) {
-            $sql = "SELECT distinct f1.contextid, f1.component, f1.filearea, f1.itemid
-                FROM {files} f1 left JOIN {files} f2
-                    ON f1.contextid = f2.contextid
-                    AND f1.component = f2.component
-                    AND f1.filearea = f2.filearea
-                    AND f1.itemid = f2.itemid
-                    AND f2.filename = '.'
-                    AND f2.filepath = '/'
-                WHERE (f1.component <> 'user' or f1.filearea <> 'draft')
-                and f2.id is null";
-            $rs = $DB->get_recordset_sql($sql);
-            $defaults = array('filepath' => '/',
-                            'filename' => '.',
-                            'userid' => $USER->id,
-                            'filesize' => 0,
-                            'timecreated' => time(),
-                            'timemodified' => time(),
-                            'contenthash' => sha1(''));
-            foreach ($rs as $r) {
-                $pathhash = sha1("/$r->contextid/$r->component/$r->filearea/$r->itemid".'/.');
-                $DB->insert_record('files', (array)$r + $defaults +
-                        array('pathnamehash' => $pathhash));
-            }
-            $rs->close();
+            upgrade_fix_missing_root_folders();
             // To skip running the same script on the upgrade to the next major release.
             set_config('filesrootrecordsfixed', 1);
         }
@@ -2327,6 +2329,65 @@ function xmldb_main_upgrade($oldversion) {
 
         // Main savepoint reached.
         upgrade_main_savepoint(true, 2013051404.02);
+    }
+
+    if ($oldversion < 2013051404.04) {
+        // Remove deleted users home pages.
+        $sql = "DELETE FROM {my_pages}
+                WHERE EXISTS (SELECT {user}.id
+                                  FROM {user}
+                                  WHERE {user}.id = {my_pages}.userid
+                                  AND {user}.deleted = 1)
+                AND {my_pages}.private = 1";
+        $DB->execute($sql);
+
+        // Reached main savepoint.
+        upgrade_main_savepoint(true, 2013051404.04);
+    }
+
+    if ($oldversion < 2013051405.10) {
+        // Fixing possible wrong MIME type for DigiDoc files.
+        $extensions = array('%.bdoc', '%.cdoc', '%.ddoc');
+        $select = $DB->sql_like('filename', '?', false);
+        foreach ($extensions as $extension) {
+            $DB->set_field_select(
+                'files',
+                'mimetype',
+                'application/x-digidoc',
+                $select,
+                array($extension)
+            );
+        }
+        upgrade_main_savepoint(true, 2013051405.10);
+    }
+
+    // MDL-32543 Make sure that the log table has correct length for action and url fields.
+    if ($oldversion < 2013051406.01) {
+
+        $table = new xmldb_table('log');
+
+        $columns = $DB->get_columns('log');
+        if ($columns['action']->max_length < 40) {
+            $index1 = new xmldb_index('course-module-action', XMLDB_INDEX_NOTUNIQUE, array('course', 'module', 'action'));
+            if ($dbman->index_exists($table, $index1)) {
+                $dbman->drop_index($table, $index1);
+            }
+            $index2 = new xmldb_index('action', XMLDB_INDEX_NOTUNIQUE, array('action'));
+            if ($dbman->index_exists($table, $index2)) {
+                $dbman->drop_index($table, $index2);
+            }
+            $field = new xmldb_field('action', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, null, 'cmid');
+            $dbman->change_field_precision($table, $field);
+            $dbman->add_index($table, $index1);
+            $dbman->add_index($table, $index2);
+        }
+
+        if ($columns['url']->max_length < 100) {
+            $field = new xmldb_field('url', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null, 'action');
+            $dbman->change_field_precision($table, $field);
+        }
+
+        upgrade_main_savepoint(true, 2013051406.01);
     }
 
     return true;

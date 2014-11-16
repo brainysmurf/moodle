@@ -55,6 +55,9 @@ if (!$wiki = wiki_get_wiki($subwiki->wikiid)) {
 
 require_login($course, true, $cm);
 
+if (!wiki_user_can_view($subwiki, $wiki)) {
+    print_error('cannotviewpage', 'wiki');
+}
 
 $context = context_module::instance($cm->id);
 require_capability('mod/wiki:managewiki', $context);
@@ -63,6 +66,13 @@ add_to_log($course->id, "wiki", "admin", "admin.php?pageid=".$page->id, $page->i
 
 //Delete page if a page ID to delete was supplied
 if (!empty($delete) && confirm_sesskey()) {
+    if ($pageid != $delete) {
+        // Validate that we are deleting from the same subwiki.
+        $deletepage = wiki_get_page($delete);
+        if (!$deletepage || $deletepage->subwikiid != $page->subwikiid) {
+            print_error('incorrectsubwikiid', 'wiki');
+        }
+    }
     wiki_delete_pages($context, $delete, $page->subwikiid);
     //when current wiki page is deleted, then redirect user to create that page, as
     //current pageid is invalid after deletion.

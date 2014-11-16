@@ -29,11 +29,7 @@
     width:100%;
 }
 
-.fluid-span (@columns) {
-    width: (@fluidGridColumnWidth * @columns) + (@fluidGridGutterWidth * (@columns - 1));
-    *width: (@fluidGridColumnWidth * @columns) + (@fluidGridGutterWidth * (@columns - 1)) - (.5 / @gridRowWidth * 100 * 1%);
-}
-
+// grid.less implied.
 .empty-region-side-post.used-region-side-pre #region-main.span8 {
     /** increase the span size by 1 **/
     .fluid-span(9);
@@ -2044,4 +2040,9 @@ a.disabled {
     cursor: default;
     font-style: italic;
     color: #808080;
+}
+.dir-rtl {
+    ul, ol {
+        margin-right: 25px;
+    }
 }

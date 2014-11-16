@@ -3183,8 +3183,8 @@ function require_logout() {
  */
 function require_course_login($courseorid, $autologinguest = true, $cm = NULL, $setwantsurltome = true, $preventredirect = false) {
     global $CFG, $PAGE, $SITE;
-    $issite = (is_object($courseorid) and $courseorid->id == SITEID)
-          or (!is_object($courseorid) and $courseorid == SITEID);
+    $issite = ((is_object($courseorid) and $courseorid->id == SITEID)
+          or (!is_object($courseorid) and $courseorid == SITEID));
     if ($issite && !empty($cm) && !($cm instanceof cm_info)) {
         // note: nearly all pages call get_fast_modinfo anyway and it does not make any
         // db queries so this is not really a performance concern, however it is obviously
@@ -4072,6 +4072,9 @@ function delete_user(stdClass $user) {
 
     // Remove users private keys.
     $DB->delete_records('user_private_key', array('userid' => $user->id));
+
+    // Remove users customised pages.
+    $DB->delete_records('my_pages', array('userid' => $user->id, 'private' => 1));
 
     // force logout - may fail if file based sessions used, sorry
     session_kill_user($user->id);
@@ -9352,9 +9355,20 @@ function moodle_setlocale($locale='') {
     if ($CFG->ostype != 'WINDOWS') {
         $messages= setlocale (LC_MESSAGES, 0);
     }
-/// Set locale to all
-    setlocale (LC_ALL, $currentlocale);
-/// Set old values
+    // Set locale to all.
+    $result = setlocale (LC_ALL, $currentlocale);
+    // If setting of locale fails try the other utf8 or utf-8 variant,
+    // some operating systems support both (Debian), others just one (OSX).
+    if ($result === false) {
+        if (stripos($currentlocale, '.UTF-8') !== false) {
+            $newlocale = str_ireplace('.UTF-8', '.UTF8', $currentlocale);
+            setlocale (LC_ALL, $newlocale);
+        } else if (stripos($currentlocale, '.UTF8') !== false) {
+            $newlocale = str_ireplace('.UTF8', '.UTF-8', $currentlocale);
+            setlocale (LC_ALL, $newlocale);
+        }
+    }
+    // Set old values.
     setlocale (LC_MONETARY, $monetary);
     setlocale (LC_NUMERIC, $numeric);
     if ($CFG->ostype != 'WINDOWS') {
@@ -10507,43 +10521,7 @@ function message_popup_window() {
     //if we have new messages to notify the user about
     if (!empty($message_users)) {
 
-        $strmessages = '';
-        if (count($message_users)>1) {
-            $strmessages = get_string('unreadnewmessages', 'message', count($message_users));
-        } else {
-            $message_users = reset($message_users);
-
-            //show who the message is from if its not a notification
-            if (!$message_users->notification) {
-                $strmessages = get_string('unreadnewmessage', 'message', fullname($message_users) );
-            }
-
-            //try to display the small version of the message
-            $smallmessage = null;
-            if (!empty($message_users->smallmessage)) {
-                //display the first 200 chars of the message in the popup
-                $smallmessage = null;
-                if (textlib::strlen($message_users->smallmessage) > 200) {
-                    $smallmessage = textlib::substr($message_users->smallmessage,0,200).'...';
-                } else {
-                    $smallmessage = $message_users->smallmessage;
-                }
-
-                //prevent html symbols being displayed
-                if ($message_users->fullmessageformat == FORMAT_HTML) {
-                    $smallmessage = html_to_text($smallmessage);
-                } else {
-                    $smallmessage = s($smallmessage);
-                }
-            } else if ($message_users->notification) {
-                //its a notification with no smallmessage so just say they have a notification
-                $smallmessage = get_string('unreadnewnotification', 'message');
-            }
-            if (!empty($smallmessage)) {
-                $strmessages .= '<div id="usermessage">'.s($smallmessage).'</div>';
-            }
-        }
-
+        $strmessages = get_string('unreadnewmessages', 'message', count($message_users));
         $strgomessage = get_string('gotomessages', 'message');
         $strstaymessage = get_string('ignore','admin');
 
@@ -10717,6 +10695,10 @@ function get_performance_info() {
     $info['dbqueries'] = $DB->perf_get_reads().'/'.($DB->perf_get_writes() - $PERF->logwrites);
     $info['html'] .= '<span class="dbqueries">DB reads/writes: '.$info['dbqueries'].'</span> ';
     $info['txt'] .= 'db reads/writes: '.$info['dbqueries'].' ';
+
+    $info['dbtime'] = round($DB->perf_get_queries_time(), 5);
+    $info['html'] .= '<span class="dbtime">DB queries time: '.$info['dbtime'].' secs</span> ';
+    $info['txt'] .= 'db queries time: ' . $info['dbtime'] . 's ';
 
     if (function_exists('posix_times')) {
         $ptimes = posix_times();
