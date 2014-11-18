@@ -61,3 +61,6 @@
 [submodule "blocks/search"]
         path = blocks/search
         url = https://github.com/antriver/moodle-block_search.git
+[submodule "blocks/configurable_reports"]
+	path = blocks/configurable_reports
+	url = https://github.com/ssis-suzhou/moodle-block_configurablereports.git
