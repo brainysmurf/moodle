@@ -52,12 +52,6 @@
 [submodule "mod/scheduler"]
 	path = mod/scheduler
 	url = https://github.com/bostelm/moodle-mod_scheduler.git
-[submodule "testrepo"]
-	path = testrepo
-	url = https://github.com/brainysmurf/testrepo.git
-[submodule "forked_config_reports"]
-	path = blocks/configurable_reports
-	url = https://github.com/brainysmurf/moodle-block_configurablereports.git
 [submodule "mod/lightboxgallery"]
 	path = mod/lightboxgallery
 	url = https://github.com/netspotau/moodle-mod_lightboxgallery.git
