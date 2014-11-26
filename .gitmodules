@@ -61,3 +61,6 @@
 [submodule "blocks/configurable_reports"]
 	path = blocks/configurable_reports
 	url = https://github.com/ssis-suzhou/moodle-block_configurablereports.git
+[submodule "mod/brainpop"]
+	path = mod/brainpop
+	url = https://github.com/antriver/moodle-mod_brainpop.git
