@@ -63,9 +63,9 @@ require_once('../../enrol/locallib.php');
 	
 	echo "\n\nAll users in to cohort ".$cohort->name." (".$cohort->idnumber.") \n and their parents will be enrolled into their Online Portfolio (if it exists) as a ".$teacher_role->name."\n";
 	
-	$response = cli_input("Enter Y to continue. (Any other key to cancel)");
+	//$response = cli_input("Enter Y to continue. (Any other key to cancel)");
 	
-	if ( trim(strtoupper($response)) !== 'Y' ) { die(); }
+	//if ( trim(strtoupper($response)) !== 'Y' ) { die(); }
 	
 	
 	//Go time
@@ -114,23 +114,38 @@ require_once('../../enrol/locallib.php');
 	  	$instances = $manager->get_enrolment_instances();
 		$instance = $instances[$enrolMethodID];
 
+                $today = time();
+                $timestart = make_timestamp(date('Y', $today), date('m', $today), date('d', $today), 0, 0, 0);
+                $timeend = 0;
+
 		if ( is_enrolled($context, $userid) )
 			{
 				//This would break if the user is already enrolled but with the wrong role
-				echo "\nUser $userid is already enrolled in course $courseid";			
+				echo "\nUser $userid is already enrolled in course $courseid";
+			}
+		else
+			{
+				echo "\nEnrolling user $student->firstname $student->lastname in course $course->fullname";
+				$plugin->enrol_user($instance, $userid, $teacher_role->id, $timestart, $timeend);
+			}
+
+		if ( !$parentid )
+			{
+				echo "\nNo parent for this user!";
 				continue;
 			}
 
-		echo "\nEnrolling user $student->firstname $student->lastname in course $course->fullname";
-
-		$today = time();
-		$timestart = make_timestamp(date('Y', $today), date('m', $today), date('d', $today), 0, 0, 0);
-		$timeend = 0;
-
-		$plugin->enrol_user($instance, $userid, $teacher_role->id, $timestart, $timeend);
-		$plugin->enrol_user($instance, $parentid, $student_role->id, $timestart, $timeend);
+		if ( is_enrolled($context, $parentid) )
+			{
+				echo "\n Parent of user $userid is already enrolled in course $courseid";
+			}
+		else
+			{
+				echo "\nEnrolling parent of $student->firstname $student->lastname in course $course->fullname";
+				$plugin->enrol_user($instance, $parentid, $student_role->id, $timestart, $timeend);
+			}
 		}
-	
+
 	echo "\n";
 
 ?>
