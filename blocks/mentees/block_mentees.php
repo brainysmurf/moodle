@@ -28,8 +28,10 @@ class block_mentees extends block_base {
         $this->content = new stdClass();
 
         // get all the mentees, i.e. users you have a direct assignment to
-        // Nov 25th '13: Uses the new cached $SESSION->usersChildren
-        if (!empty($SESSION->usersChildren) && $usercontexts = $SESSION->usersChildren) { //$usercontexts = get_users_children($USER->id)) {
+
+        $usercontexts = get_users_children($USER->id);
+
+        if (!empty($usercontexts)) {
             $this->content->text = '<ul>';
             foreach ($usercontexts as $usercontext) {
                 $this->content->text .= '<li><a href="'.$CFG->wwwroot.'/user/view.php?id='.$usercontext->instanceid.'&amp;course='.SITEID.'">'.fullname($usercontext).'</a></li>';

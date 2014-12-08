@@ -1935,7 +1935,7 @@ class assignment_base {
         $context = context_module::instance($this->cm->id);
 
         // Get ids of users enrolled in the given course.
-        list($enroledsql, $params) = get_enrolled_sql($context, 'mod/assignment:view', $groupid);
+        list($enroledsql, $params) = get_enrolled_sql($context, 'mod/assignment:submit', $groupid);
         $params['assignmentid'] = $this->cm->instance;
 
         // Get ids of users enrolled in the given course.
@@ -2603,7 +2603,7 @@ class assignment_grading_form extends moodleform {
         }
     }
 
-    function add_action_buttons($cancel = true, $submitlabel = NULL) {
+    function add_action_buttons($cancel = true, $submitlabel = NULL, $closeHeaderBefore=true) {
         $mform =& $this->_form;
         //if there are more to be graded.
         if ($this->_customdata->nextid>0) {

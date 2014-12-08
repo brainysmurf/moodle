@@ -54,9 +54,13 @@ if (session_is_loggedinas() and $USER->loginascontext->contextlevel == CONTEXT_C
 $enrols = enrol_get_plugins(true);
 $enrolinstances = enrol_get_instances($course->id, true);
 $forms = array();
+$self_enrollment = false;
 foreach($enrolinstances as $instance) {
     if (!isset($enrols[$instance->enrol])) {
         continue;
+    }
+    if ($instance->enrol == 'self') {
+        $self_enrollment = true;
     }
     $form = $enrols[$instance->enrol]->enrol_page_hook($instance);
     if ($form) {
@@ -83,7 +87,9 @@ echo $OUTPUT->header();
 
 //echo $OUTPUT->errorbox(get_string('enrolmentoptions','enrol'));
 //echo $OUTPUT->heading(get_string('enrolmentoptions','enrol'));
-echo '<h2 class="noAccess"><i class="icon-info-sign"></i> '.get_string('enrolmentoptions','enrol').'</div>';
+# TODO: Due to confusion, I have disabled this 'not enrolled yet' message
+# Figure out how to word it
+#echo '<h2 class="noAccess"><i class="icon-info-sign"></i> '.get_string('enrolmentoptions','enrol').'</div>';
 
 $courserenderer = $PAGE->get_renderer('core', 'course');
 echo $courserenderer->course_info_box($course);

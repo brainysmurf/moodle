@@ -1279,7 +1279,12 @@ class core_renderer extends renderer_base {
      */
     public function block_move_target($target, $zones, $previous) {
         if ($previous == null) {
-            $position = get_string('moveblockbefore', 'block', $zones[0]);
+            if (empty($zones)) {
+                // There are no zones, probably because there are no blocks.
+                $position = get_string('moveblockhere', 'block');
+            } else {
+                $position = get_string('moveblockbefore', 'block', $zones[0]);
+            }
         } else {
             $position = get_string('moveblockafter', 'block', $previous);
         }
@@ -2508,7 +2513,7 @@ EOD;
         $pagingbar->prepare($this, $this->page, $this->target);
 
         if ($pagingbar->totalcount > $pagingbar->perpage) {
-            
+
             $output .= html_writer::tag('span', get_string('page').':' );
 
             if (!empty($pagingbar->previouslink)) {
@@ -2573,12 +2578,12 @@ EOD;
     public function box($contents, $classes = 'generalbox', $id = null) {
         return $this->box_start($classes, $id) . $contents . $this->box_end();
     }
-    
+
     public function errorbox($contents, $extraclasses = '', $id = null)
     {
     	return $this->box($contents, 'generalbox errorbox ' . $extraclasses, $id);
     }
-    
+
     public function successbox($contents, $extraclasses = '', $id = null)
     {
     	return $this->box($contents, 'generalbox successbox ' . $extraclasses, $id);
@@ -3210,6 +3215,13 @@ EOD;
     public function favicon() {
         return $this->pix_url('favicon', 'theme');
     }
+
+    /**
+    * Added by ssis
+    */
+    public function refresh_awesomebar() {
+        // do nothing!
+    }
 }
 
 /**
@@ -3370,16 +3382,16 @@ class core_renderer_ajax extends core_renderer {
      */
     public function header() {
         // MDL-39810: IE doesn't support JSON MIME type if version < 8 or when it runs in Compatibility View.
-        $supports_json_contenttype = !check_browser_version('MSIE') ||
+        $supportsjsoncontenttype = !check_browser_version('MSIE') ||
                 (check_browser_version('MSIE', 8) &&
                     !(preg_match("/MSIE 7.0/", $_SERVER['HTTP_USER_AGENT']) && preg_match("/Trident\/([0-9\.]+)/", $_SERVER['HTTP_USER_AGENT'])));
         // unfortunately YUI iframe upload does not support application/json
         if (!empty($_FILES)) {
             @header('Content-type: text/plain; charset=utf-8');
-            if (!$supports_json_contenttype) {
+            if (!$supportsjsoncontenttype) {
                 @header('X-Content-Type-Options: nosniff');
             }
-        } else if (!$supports_json_contenttype) {
+        } else if (!$supportsjsoncontenttype) {
             @header('Content-type: text/plain; charset=utf-8');
             @header('X-Content-Type-Options: nosniff');
         } else {

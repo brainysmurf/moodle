@@ -33,3 +33,9 @@ composer.lock
 /behat.yml
 */yui/build/*/*-coverage.js
 /lib/yuilib/*/build/*/*-coverage.js
+/phpmemcacheadmin
+/local/codechecker/
+filter/variables
+dragonnet.sql
+ssis-html-resources/
+ssis-uploads/

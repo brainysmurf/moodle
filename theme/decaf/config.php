@@ -182,7 +182,9 @@ $THEME->csspostprocess = 'decaf_process_css';
 // media player for the filters
 ////////////////////////////////////////////////////
 
-//  $THEME->javascripts
+$THEME->javascripts = array(
+	'jquery.mousewheel.min'
+);
 
 ////////////////////////////////////////////////////
 // An array containing the names of JavaScript files

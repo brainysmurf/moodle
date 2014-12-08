@@ -115,6 +115,9 @@ M.format_grid.init = function(Y, the_editing_on, the_update_capability, the_num_
         document.getElementById("gridshadebox_left").style.display = "";
         document.getElementById("gridshadebox_right").style.display = "";
 
+        //Hide all sections by default
+        Y.all(".grid_section").addClass('hide_section');
+
         M.format_grid.shadebox.initialize_shadebox();
         M.format_grid.shadebox.update_shadebox();
         window.onresize = function() {
@@ -222,6 +225,9 @@ M.format_grid.icon_change_shown = function() {
     this.selected_section = this.ourYUI.one("#section-" + this.selected_section_no);
 
     this.selected_section.removeClass('hide_section');
+    setTimeout(function(){
+        $('#gridshadebox_content_inner').scrollTop(0);
+    }, 200);
 };
 
 /**
@@ -326,6 +332,22 @@ M.format_grid.shadebox.initialize_shadebox = function() {
     this.shadebox_overlay = document.getElementById('gridshadebox_overlay');
     this.shadebox_overlay.style.display="";
     this.grid_shadebox = document.getElementById('gridshadebox');
+
+    $('#gridshadebox').hide();
+
+	//When you scroll to the bottom of the shadebox, don't start scrolling the background
+	$('#gridshadebox_content_inner').bind('mousewheel', function(e, d)
+    {
+	    if (d > 0 && $(this).scrollTop() == 0) {
+	        e.preventDefault();
+	        return false;
+		} else if (d < 0 &&  $(this).scrollTop() >= ($(this).get(0).scrollHeight - $(this).innerHeight() - 1)) {
+			e.preventDefault();
+			return false;
+		}
+    });
+
+
     document.body.appendChild(this.grid_shadebox); // Adds the shade box to the document.
 
     this.hide_shadebox();
@@ -350,7 +372,7 @@ M.format_grid.shadebox.toggle_shadebox = function() {
         this.hide_shadebox();
         this.shadebox_open = false;
     } else {
-        window.scrollTo(0, 0);
+        //window.scrollTo(0, 0);
         this.show_shadebox();
         this.shadebox_open = true;
     }
@@ -362,7 +384,8 @@ M.format_grid.shadebox.toggle_shadebox = function() {
 M.format_grid.shadebox.show_shadebox = function() {
     "use strict";
     this.update_shadebox();
-    this.grid_shadebox.style.display = "";
+    //this.grid_shadebox.style.display = "";
+	$('#gridshadebox').stop().fadeIn(); //jQuery!!!
 };
 
 /**
@@ -370,7 +393,8 @@ M.format_grid.shadebox.show_shadebox = function() {
  */
 M.format_grid.shadebox.hide_shadebox = function() {
     "use strict";
-    this.grid_shadebox.style.display = "none";
+    //this.grid_shadebox.style.display = "none";
+	$('#gridshadebox').stop().fadeOut(); //jQuery!!!
 };
 
 /**

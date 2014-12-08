@@ -88,9 +88,12 @@ class auth_plugin_email extends auth_plugin_base {
         global $CFG, $DB;
         require_once($CFG->dirroot.'/user/profile/lib.php');
 
+		$plainPassword = $user->password;
         $user->password = hash_internal_user_password($user->password);
 
         $user->id = $DB->insert_record('user', $user);
+
+        SSIS::update_user_password2($user->id, $plainPassword);
 
         /// Save any custom profile field information
         profile_save_data($user);

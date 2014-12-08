@@ -26,6 +26,14 @@ a:hover,a:active {color: #1662A3;}
 	text-align:right;
 }
 
+.icon-red {
+	color:#A00;
+}
+
+.clear {
+	clear:both;
+}
+
 /* Header
 ------------------------- */
 #page-header{
@@ -41,25 +49,47 @@ a:hover,a:active {color: #1662A3;}
 
 #page-header-wrapper{
 	margin:0;
-	padding: 49px 30px 53px 48px; /* Vertically center the page title */	
 	position: relative;
+	padding: 49px 30px 53px 48px; /* Vertically center the page title */
 	z-index: 2;
 }
 
-	#page-header-gradient {
-		position: absolute;
-		top:0;
-		bottom:0;
-		right:0;
-		width:800px;
-		background: -moz-linear-gradient(left,  rgba(22,98,163,1) 0%, rgba(22,98,163,0.7) 10%, rgba(22,98,163,0) 33%, rgba(22,98,163,0) 100%);
-		background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(22,98,163,1)), color-stop(10%,rgba(22,98,163,0.7)), color-stop(33%,rgba(22,98,163,0)), color-stop(100%,rgba(22,98,163,0)));
-		background: -webkit-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
-		background: -o-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
-		background: -ms-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
-		background: linear-gradient(to right,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
-		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', endColorstr='#001662a3',GradientType=1 );
-	}
+#page-header-gradient {
+	position: absolute;
+	top:0;
+	bottom:0;
+	right:0;
+	width:800px;
+	background: -moz-linear-gradient(left,  rgba(22,98,163,1) 0%, rgba(22,98,163,0.7) 10%, rgba(22,98,163,0) 33%, rgba(22,98,163,0) 100%);
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(22,98,163,1)), color-stop(10%,rgba(22,98,163,0.7)), color-stop(33%,rgba(22,98,163,0)), color-stop(100%,rgba(22,98,163,0)));
+	background: -webkit-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+	background: -o-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+	background: -ms-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+	background: linear-gradient(to right,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', endColorstr='#001662a3',GradientType=1 );
+}
+
+/*
+	Make dragonnet.local and dragonnet.vagrant have a green header
+	Moodle automatically adds the dragonnet-local class to the body (or dragonnet-ssis-suzhou-net, from the hostname)
+*/
+body.dragonnet-vagrant #page-header,
+body.dragonnet-local #page-header,
+body.dragonnet-dev #page-header {
+	background-color: #27ae60;
+}
+body.dragonnet-vagrant #page-header-gradient,
+body.dragonnet-local #page-header-gradient,
+body.dragonnet-dev #page-header-gradient {
+	background: -moz-linear-gradient(left,  rgba(39, 174, 96,1) 0%, rgba(39, 174, 96,0.7) 10%, rgba(39, 174, 96,0) 33%, rgba(39, 174, 96,0) 100%);
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(39, 174, 96,1)), color-stop(10%,rgba(39, 174, 96,0.7)), color-stop(33%,rgba(39, 174, 96,0)), color-stop(100%,rgba(39, 174, 96,0)));
+	background: -webkit-linear-gradient(left,  rgba(39, 174, 96,1) 0%,rgba(39, 174, 96,0.7) 10%,rgba(39, 174, 96,0) 33%,rgba(39, 174, 96,0) 100%);
+	background: -o-linear-gradient(left,  rgba(39, 174, 96,1) 0%,rgba(39, 174, 96,0.7) 10%,rgba(39, 174, 96,0) 33%,rgba(39, 174, 96,0) 100%);
+	background: -ms-linear-gradient(left,  rgba(39, 174, 96,1) 0%,rgba(39, 174, 96,0.7) 10%,rgba(39, 174, 96,0) 33%,rgba(39, 174, 96,0) 100%);
+	background: linear-gradient(to right,  rgba(39, 174, 96,1) 0%,rgba(39, 174, 96,0.7) 10%,rgba(39, 174, 96,0) 33%,rgba(39, 174, 96,0) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#27ae60', endColorstr='#27ae60',GradientType=1 );
+}
+
 
 #page-header .sitelogo {float:left;margin:0.75em 0;}
 #page-header .headermain{
@@ -75,15 +105,18 @@ a:hover,a:active {color: #1662A3;}
 #page-header .headermenu {width:235px;}
 #page-header .headermenu a:hover{color:#C30;}
 
-	/* On frontpage, grow the blue header to be the height of the header + breadcrumbs on normal pages */
-	#page-site-index #page-header {
-		min-height:176px;
-	}
-		#page-site-index #page-header-wrapper {
-			padding: 61px 30px 64px 48px;  /* Vertically center the page title */
-		}
-			#page-site-index #page-header-wrapper .headermain{ font-size: 3em; }
-			
+/* On frontpage, grow the blue header to be the height of the header + breadcrumbs on normal pages */
+
+#page-site-index #page-header {
+	min-height:176px;
+}
+
+#page-site-index #page-header-wrapper {
+	padding: 61px 30px 64px 48px;  /* Vertically center the page title */
+}
+
+#page-site-index #page-header-wrapper .headermain{ font-size: 3em; }
+
 /* Header Profile
 -------------------------- */
 #header-profileoptions ul{margin-right:4px;}
@@ -150,13 +183,32 @@ a:hover,a:active {color: #1662A3;}
 	height: 14px;
 }
 
+#navsearchbox {
+	width: 150px;
+	margin-top: 25px;
+	margin-left: 110px;
+	padding: 2px 2px;
+}
+
 .sep{background:url([[pix:theme|breadcrumb_arrow]]) no-repeat scroll 100% 50%;margin-right:5px;padding:0.98em 7px;}
 /* Calendar
 --------------------------- */
 .minicalendar td,.minicalendar th{border-color:#EEE;border-width:0;}
 .calendartab th,.calendartable td{border-width:0;}
 
+hr {
+	border: none;
+	border-top: 1px #CBCBCB solid;
+	border-bottom: 1px #FAFAFA solid;
+	margin: 30px 0;
+}
+
 /* Tabs
+CSS for cleaner tab markup than the Moodle default
+<ul class="tabs">
+	<li><a href="#">tab</a></li>
+	<li><a href="#">tab</a></li>
+</ul>
 --------------------------- */
 
 .tabs {
@@ -164,6 +216,11 @@ a:hover,a:active {color: #1662A3;}
 	border-bottom: 1px solid #DDD;
 	margin-bottom:12px !important;
 }
+	.tabs.noborder {
+		border:none;
+		margin:0;
+		padding:0;
+	}
 
 .tabs ul {
 	list-style:none;
@@ -171,136 +228,149 @@ a:hover,a:active {color: #1662A3;}
 	padding:0;
 	margin:0;
 }
-	.tabs ul li {
-		padding-left: 1px;
-		padding-right: 1px;
-		margin-right: 2px;
-		margin-bottom: 2px;
-		display:inline-block;
-	}
-		.tabs ul li:last-child {
-			margin-right:0;
-		}
-		.tabs ul li > a,
-		.tabs ul li > span {
-			background: #F7F7F7;
-			margin:0;
-			display:inline-block;
-			line-height: 16px;
-			padding: 7px 20px;
-			border: 1px solid #D4D4D4 !important;
-			-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-			-moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-			box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-			border-radius: 3px;
-			-webkit-border-radius: 3px;
-			-moz-border-radius: 3px;
-			font-size:13px;
-			white-space: nowrap;
-			text-align:center;
-		}
-			
-			.tabs ul li > a:hover {
-				background: rgb(244,244,244);
-				background: -moz-linear-gradient(top,  rgba(244,244,244,1) 0%, rgba(230,230,230,1) 100%);
-				background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(244,244,244,1)), color-stop(100%,rgba(230,230,230,1)));
-				background: -webkit-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
-				background: -o-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
-				background: -ms-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
-				background: linear-gradient(to bottom,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
-				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f4f4f4', endColorstr='#d8d8d8',GradientType=0 );
-			}
-			
-			.tabs ul li > span.selected {
-				font-weight:normal;
-				background:#1662A3;
-				font-size:13px;
-				color: #FFF;
-				border-color: #1662A3 !important;
-			}
-			
-		/* Delete section button */
-		.tabs ul li span.selected a.btn {
-			display:inline-block;
-			font-weight:normal;
-			margin: 0 -4px -9px 4px;
-			font-size: 11px;
-			position: relative;
-			top: -6px;
-			right:-4px;
-			height: 16px;
-			line-height: 15px;
-			cursor: pointer;
-		}
-			.tabs .delete_section.hide {
-				display: none !important;
-			}
-		
-		
-		/* Subtabs */
-	
-		.tabs ul.additional-tabs {
-			margin-top:10px;
-		}
-	
-		.tabs ul.additional-tabs li a,
-		.tabs ul.additional-tabs li span {
-			font-size:10px;
-			padding:5px 6px;
-		}
-			.tabs ul.additonal-tabs li > span.selected {
-				font-size:11px;
-			}
-		
-		/* Moving tabs */
-		.tabs ul.ui-sortable a,
-		.tabs ul.ui-sortable span {
-			-webkit-touch-callout: none;
-			-webkit-user-select: none;
-			-khtml-user-select: none;
-			-moz-user-select: none;
-			-ms-user-select: none;
-			user-select: none;
-			cursor: move;
-		}
-		.tabs ul li.sortable-placeholder {
-			border:1px #333 dashed;
-			background: #fff;
-			visibility: visible !important;
-			height:29px !important;
-			border-radius: 3px;
-			-webkit-border-radius: 3px;
-			-moz-border-radius: 3px;
-			margin: 0 3px -10px 2px;
-			-webkit-box-sizing: border-box;
-			-moz-box-sizing: border-box;
-			box-sizing: border-box;
-		}
-		
-		#reorderSectionsButton {
-			margin-right:5px;
-			font-size:11px;
-		}
-		
-		#reorderSectionsAlert .icon-move {
-			font-size: 35px;
-		}
-			#reorderSectionsAlert .small {
-				font-size:12px;
-			}
-		
-		a.editsectionbutton {
-			font-size:11px;
-			color:#999;
-			line-height:28px;
-		}
-			a.editsectionbutton img {
-				vertical-align: middle;
-				margin: 0;
-				position: relative;
-				top: -2px;
-			}
-			
+
+.tabs ul li {
+	padding-left: 1px;
+	padding-right: 1px;
+	margin-right: 2px;
+	margin-bottom: 2px;
+	display:inline-block;
+}
+
+.tabs ul li:last-child {
+	margin-right:0;
+}
+
+.tabs ul li > a,
+.tabs ul li > span {
+	background: #F7F7F7;
+	margin:0;
+	display:inline-block;
+	line-height: 16px;
+	padding: 7px 20px;
+	border: 1px solid #D4D4D4 !important;
+	-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+	-moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+	border-radius: 3px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	font-size:13px;
+	white-space: nowrap;
+	text-align:center;
+}
+
+.tabs ul li > a:hover {
+	background: rgb(244,244,244);
+	background: -moz-linear-gradient(top,  rgba(244,244,244,1) 0%, rgba(230,230,230,1) 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(244,244,244,1)), color-stop(100%,rgba(230,230,230,1)));
+	background: -webkit-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+	background: -o-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+	background: -ms-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+	background: linear-gradient(to bottom,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f4f4f4', endColorstr='#d8d8d8',GradientType=0 );
+}
+
+.tabs ul li > span.selected,
+.tabs ul li > a.selected {
+	font-weight:normal;
+	background:#1662A3;
+	font-size:13px;
+	color: #FFF;
+	border-color: #1662A3 !important;
+}
+
+/* onetopic delete section buttons */
+
+/* Delete section button */
+.tabs a.delete_section {
+	display:inline-block;
+	font-weight:normal;
+	margin: 0 -4px -9px 4px;
+	font-size: 11px;
+	position: relative;
+	top: -6px;
+	right:-4px;
+	height: 16px;
+	line-height: 15px;
+	cursor: pointer;
+}
+
+.tabs a.delete_section.hide {
+	display: none !important;
+}
+
+.tabs a.delete_section.disabled {
+	cursor:not-allowed;
+}
+
+/* Subtabs */
+
+.tabs ul.additional-tabs {
+	margin-top:10px;
+}
+
+.tabs ul.additional-tabs li a,
+.tabs ul.additional-tabs li span {
+	font-size:10px;
+	padding:5px 6px;
+}
+
+.tabs ul.additonal-tabs li > span.selected {
+	font-size:11px;
+}
+
+/* Moving tabs */
+.tabs ul.ui-sortable .movey a,
+.tabs ul.ui-sortable .movey span {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	cursor: move;
+}
+.tabs ul li.sortable-placeholder {
+	border:1px #333 dashed;
+	background: #fff;
+	visibility: visible !important;
+	height:29px !important;
+	border-radius: 3px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	margin: 0 3px -10px 2px;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+#reorderSectionsButton {
+	margin-right:5px;
+	font-size:11px;
+}
+
+#reorderSectionsAlert .icon-move {
+	font-size: 35px;
+}
+
+#reorderSectionsAlert .small {
+	font-size:12px;
+}
+
+a.editsectionbutton {
+	font-size:11px;
+	color:#999;
+	line-height:28px;
+}
+
+a.editsectionbutton img {
+	vertical-align: middle;
+	margin: 0;
+	position: relative;
+	top: -2px;
+}
+
 
 /* User
 --------------------------- */
@@ -322,10 +392,12 @@ a:hover,a:active {color: #1662A3;}
 	float:left;
 	/*background:rgba(255,0,0,.2);*/
 }
-	#centerCol.fullWidth {
-		width:auto;
-		float:none;
-	}
+
+#centerCol.fullWidth {
+	width:auto;
+	float:none;
+}
+
 #side-post {
 	width:25%;
 	padding-left:12px;
@@ -333,9 +405,9 @@ a:hover,a:active {color: #1662A3;}
 	/*background:rgba(0,255,0,.2);*/
 }
 
-	.course-content .single-section {
-		margin:0;
-	}
+.course-content .single-section {
+	margin:0;
+}
 
 #page {top:31px;} /*Space for awesomebar at top */
 #page-content-wrapper { margin:25px 50px; }
@@ -377,8 +449,8 @@ body.editing ul.section>li {border-bottom: 1px dashed #808080; position:relative
 	display:inline-block;
 }
 	.addresourcemodchooser i { margin-right:4px; }
-	
-	
+
+
 /* Make 2.3 activity chooser sit on top of modules in sections */
 div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 
@@ -419,7 +491,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 .block .block_action {margin-right:4px;}
 .block .header .block_action{ margin: 6px 6px 0 0; }
 .block_with_controls .header .title {position:relative;}
-.block .commands { 
+.block .commands {
 	clear:both;
 	height:auto;
 	padding:0;
@@ -428,6 +500,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 }
 .block .content{ padding:0; margin:12px; }
 	.block.block_html .content .no-overflow { padding:0; }
+	.block .no-overflow { overflow:hidden; }
 .block .content .buttons{margin-top:2px;}
 .block_login label{font-size:0.85em;display:block;}
 .block_login .fld input{width:95%;margin:1px 0 5px;padding:2px;}
@@ -544,7 +617,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 .form-input {text-align:left;}
 
 	/* Login Form */
-	
+
 	.loginpanel {
 		width:75%;
 		max-width:500px;
@@ -556,30 +629,30 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 			line-height: 22px;
 			padding: 15px;
 			background-color:#fff;
-			border-top: 2px solid #1662A3; 
+			border-top: 2px solid #1662A3;
 			border-bottom: 2px solid #1662A3;
 		}
 			.login-reminder icon { margin-top: -4px; }
-	
+
 	.loginerrors {
 		text-align: center;
 		padding: 10px 0 0 0;
 		color: #A00;
 	}
-		
+
 	.loginform-input-row {
 		padding: 0 0 0 25px;
 		position: relative;
 		margin:15px 0;
 	}
-	
+
 		/* form icons */
 		.loginform-input-row icon {
 			position: absolute;
 			top: 14px;
 			left: 2px;
 		}
-	
+
 		/* Username & Password */
 		.loginform input[type=text],
 		.loginform input[type=password],
@@ -593,23 +666,23 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 			font-size:16px;
 			line-height:1.5em;
 			padding:10px;
-			width:100%;			
+			width:100%;
 			/* to have 100% width with padding */
 			-moz-box-sizing:border-box;
 			-webkit-box-sizing:border-box;
 			box-sizing:border-box;
 		}
-		
+
 		.loginform input[type=submit],
 		.loginform button {
 			cursor:pointer;
 		}
-		
+
 	.loginform-remember-row {
 		margin:15px 0;
 		text-align:center;
 	}
-	
+
 	.loginform #login-guest,
 	.loginform #login-forgotten {
 		margin-top:30px;
@@ -620,13 +693,13 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 		-webkit-box-sizing:border-box;
 		box-sizing:border-box;
 	}
-	
+
 		.loginform h4 {
 			font-size:12px;
 			font-weight:bold;
 			min-height:30px;
 		}
-	
+
 	.loginform #login-guest {
 		float:left;
 		padding-right:10px;
@@ -635,17 +708,26 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 			margin:5px 0 0 0;
 			font-size:12px;
 		}
-	
+
 	.loginform #login-forgotten {
 		float:right;
 		padding-left:10px;
 	}
-	
 
+	#cantLoginBox .content {
+		text-align:center;
+	}
+
+	#cantLoginBox .btn {
+		font-size: 12px;
+		padding: 4px 8px;
+		display: block;
+		margin: 0;
+	}
 
 /* Footer
 -------------------------- */
-#page-footer { 
+#page-footer {
 	padding:15px;
 	margin:15px 0 0 0;
 	font-size:12px;
@@ -662,7 +744,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 		margin: 0 0 7px 0;
 	}
 		#page-footer p:last-child { margin-bottom:0; }
-		
+
 #page-footer .logininfo{margin:1em 0;}
 
 #back-to-top {
@@ -717,7 +799,7 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 		.course-content ul.weeks li.section .right {
 			margin: 10px 0 0 0;
 		}
-		
+
 		.course-content ul.topics li.section .right a,
 		.course-content ul.weeks li.section .right a {
 			margin:0 5px;
@@ -809,16 +891,59 @@ body.pagelayout-report #page-content #region-main .region-content {
 table#categoryquestions .iconcol {width:21px;}
 body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questioncategories .commands > img.iconsmall {display:none;}
 
+
+/* Blue Alerts (from bootstrap's alert-info)*/
+.blueAlert {
+	padding: 15px;
+	margin-bottom: 20px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	background-color: #d9edf7;
+	border-color: #bce8f1;
+	color: #31708f;
+}
+	.blueAlert .icon-4x,
+	.local-alert .icon-4x,
+	.global-alert .icon-4x {
+		position: relative;
+		top: -6px;
+	}
+	.blueAlert h4 {
+		font-size:18px;
+		margin:0;
+	}
+	.blueAlert p {
+		margin-top:1px;
+	}
+
+/* Red Alert (like bootstrap alert-danger)
+include the .blueAlert class on .redAlerts too! this just changes the colour */
+.redAlert {
+	background-color: #F2DEDE;
+	border-color: #EBCCD1;
+	color: #A94442;
+}
+
+/* Original dragonnet alerts */
 .local-alert,
 .global-alert,
 .dnet-row {
-    margin-left:100px;
+
+	padding: 15px;
+	margin-bottom: 20px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	background-color: #d9edf7;
+	border-color: #bce8f1;
+	color: #31708f;
+
+    /*margin-left:100px;
     margin-right:100px;
     margin-bottom:10px;
     padding: 15px 20px;
     background-color: #fff;
-    border-top: 2px solid #1662A3; 
-    border-bottom: 2px solid #1662A3;
+    border-top: 2px solid #1662A3;
+    border-bottom: 2px solid #1662A3;*/
 }
 	.section .local-alert {
 		margin-top:10px;
@@ -960,16 +1085,16 @@ table.styledtable tr:hover td {
 			.htmltable_removecol_button button {
 				margin-bottom:5px;
 			}
-		
-		#htmltable_edittable td:first-child button {		
+
+		#htmltable_edittable td:first-child button {
 			position: absolute;
 			top: 6px;
 			left: 5px;
 		}
-			#htmltable_edittable tr:last-child {		
+			#htmltable_edittable tr:last-child {
 				padding-left:3px;
 			}
-			#htmltable_edittable tr:last-child td:first-child button {		
+			#htmltable_edittable tr:last-child td:first-child button {
 				position: static;
 			}
 		#htmltable_edittable td:first-child input[type=text] {
@@ -999,7 +1124,7 @@ h2.noAccess {
 }
 .coursebox>.info>.name {
 	width:auto;
-	float:none;	
+	float:none;
 }
 .coursebox .content .summary {
 	width:auto;
@@ -1026,7 +1151,7 @@ h2.noAccess {
 	}
 		.errorbox a {
 			color: #A00;
-			font-weight:bold;	
+			font-weight:bold;
 		}
 		/* Add fontawesome alert icon to errorboxes*/
 		.errorbox:before {
@@ -1034,7 +1159,7 @@ h2.noAccess {
 			content: "\f071";
 			margin-right:5px;
 		}
-		
+
 	.successbox {
 		text-align:center;
 		color:#048804;
@@ -1046,7 +1171,7 @@ h2.noAccess {
 			content: "\f058";
 			margin-right:5px;
 		}
-		
+
 	.generalbox .errorbox,
 	.mform > fieldset .errorbox,
 	.generalbox .successbox,
@@ -1056,7 +1181,7 @@ h2.noAccess {
 		-webkit-box-shadow:none;
 		box-shadow:none;
 	}
-		
+
 	.helptext {
 		font-size:12px;
 		text-align:center;
@@ -1081,7 +1206,7 @@ h2.noAccess {
 	#intro.generalbox {
 		padding: 10px;
 	}
-	
+
 	.generalbox.inset {
 		-webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.2) inset;
 		-moz-box-shadow: 0 0 8px rgba(0, 0, 0, 0.2) inset;
@@ -1092,17 +1217,17 @@ h2.noAccess {
 	.mform > fieldset .ftoggler {
 		background: #fff;
 	}
-	.generalbox > :last-child { 
+	.generalbox > :last-child {
 		margin-bottom:0;
 	}
-	
+
 	.sitetopic {
 		background:none;
 		-webkit-box-shadow:none;
 		-moz-box-shadow:none;
 		box-shadow:none;
 	}
-	
+
 	/* Icons page */
 	ul.iconList {
 		list-style:none;
@@ -1129,18 +1254,18 @@ h2.noAccess {
 			vertical-align: middle;
 			margin-right:5px;
 		}
-		
+
 
 	.boxwidthwide {
 		width:auto;
 	}
-	
+
 	.template_heading {
 		margin-bottom: 10px;
 		font-weight: bold;
 		font-size: 12px;
 	}
-	
+
 	/* Pagination */
 	.paging {
 		text-align:center;
@@ -1152,7 +1277,7 @@ h2.noAccess {
 			top: 1px;
 			margin-right: 5px;
 		}
-		.paging .btn { 
+		.paging .btn {
 			font-weight:normal;
 			margin:0 1px;
 			font-size:13px;
@@ -1164,16 +1289,16 @@ h2.noAccess {
 		}
 
 	/* Grid course format tweaks */
-	
+
 	#gridiconcontainer {
 		padding:0;
 	}
-	
+
 	/* Button list */
 	ul.gridformatbuttons.buttons {
 		max-width:none;
 	}
-		
+
 		/* Button list items */
 		ul.gridformatbuttons.buttons li {
 			margin:0 !important;
@@ -1182,7 +1307,7 @@ h2.noAccess {
 			background:none !important;
 			opacity:1 !important;
 		}
-			
+
 			/* Button links (the actual buttons) */
 			ul.gridformatbuttons.buttons a.btn {
 				position: relative;
@@ -1206,12 +1331,12 @@ h2.noAccess {
 					ul.gridformatbuttons.buttons .btn:hover span {
 						opacity:1;
 					}
-			
+
 				/* Buttons with images */
 				ul.gridformatbuttons a.btn.hasIcon {
 					background-size:cover !important;
 				}
-				
+
 					/* Labels gradient */
 					ul.gridformatbuttons .btn.hasIcon span {
 						color:#fff;
@@ -1223,7 +1348,7 @@ h2.noAccess {
 						background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
 						filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#cc000000',GradientType=0 );
 					}
-					
+
 					ul.gridformatbuttons .btn.noIcon span {
 						color:#fff;
 						background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.4) 100%);
@@ -1234,7 +1359,7 @@ h2.noAccess {
 						background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 30%,rgba(0,0,0,0.4) 100%);
 						filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#cc000000',GradientType=0 );
 					}
-					
+
 				ul.gridformatbuttons .editbuttons,
 				ul.gridformatbuttons .editbuttons a {
 					text-align:center;
@@ -1244,9 +1369,26 @@ h2.noAccess {
 					ul.gridformatbuttons .editbuttons a:hover {
 						color:#888;
 					}
-			
-	.icon-red {
-		color:#A00;
+
+	#gridshadebox_content .activity {
+		border-bottom-width:0;
+	}
+		body.editing #gridshadebox_content .activity {
+			border-bottom-width:1px;
+		}
+		#gridshadebox_content .activity .activityinstance img.activityicon {
+			margin-top:2px;
+		}
+
+	/* Grid format popup */
+	#gridshadebox_content {
+		position:fixed !important;
+		top:40px !important;
+		bottom:40px;
+		left:40px !important;
+		right:40px;
+		width:auto !important;
+		border-color:#1662A3;
 	}
 	
 /* Christmas */
@@ -1308,4 +1450,3 @@ ul.buttons a.btn
 
 /** Custom CSS **/
 [[setting:customcss]]
-

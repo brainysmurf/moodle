@@ -41,6 +41,45 @@ class theme_decaf_core_renderer extends core_renderer {
 			}); </script>';
 	}
 
+	public function rarrow() {
+		return '&raquo;';
+		//return '<i class="icon-caret-right"></i> ';
+	}
+
+	public function larrow() {
+		return '&laquo;';
+		//return '<i class="icon-caret-left"></i> ';
+	}
+
+	private function get_accesshide($text, $elem='span', $class='', $attrs='') {
+	    return "<$elem class=\"accesshide $class\" $attrs>$text</$elem>";
+	}
+
+	private function my_get_separator($text='/', $url='', $accesshide=true, $addclass='sep') {
+	    $arrowclass = 'arrow ';
+	    if (! $url) {
+	        $arrowclass .= $addclass;
+	    }
+	    $arrow = '<span class="'.$arrowclass.'"></span>';
+	    $htmltext = '';
+	    if ($text) {
+	        $htmltext = '<span class="arrow_text">'.$text.'</span>&nbsp;';
+	        if ($accesshide) {
+	            $htmltext = $this->get_accesshide($htmltext);
+	        }
+        }
+
+	    if ($url) {
+	        $class = 'arrow_link';
+	        if ($addclass) {
+	            $class .= ' '.$addclass;
+	        }
+	        return '<a class="'.$class.'" href="'.$url.'" title="'.preg_replace('/<.*?>/','',$text).'">'.$htmltext.$arrow.'</a>';
+	    }
+        return ' '.$arrow.$htmltext.' ';
+	}
+
+
 	/*
 		Breadcrumbs
 		SSIS modifies this to only include coures name followed by whatever activity after that
@@ -49,7 +88,7 @@ class theme_decaf_core_renderer extends core_renderer {
 	{
 		global $CFG;
 
-		$separator = get_separator();
+		$separator = $this->my_get_separator();
 
 		//Array of our items on the bar (<li> tags)
 		$listitems = array();
@@ -60,6 +99,7 @@ class theme_decaf_core_renderer extends core_renderer {
 
 		// Iterate the navarray and display each node
 		$items = $this->page->navbar->get_items();
+
 		foreach ( $items as $item )
 		{
 			if (!$item->parent) { continue; }
@@ -219,8 +259,8 @@ class theme_decaf_core_renderer extends core_renderer {
 		$awesomebar = new awesomebar($this->page);
 		return $awesomebar->create();
 	}
-	
-	
+
+
 	/**
 	* Updates the cached awesomebar HTML for the current session, but doesn't display it
 	*/
@@ -391,6 +431,15 @@ class theme_decaf_core_renderer extends core_renderer {
 		return $ul;
 	}
 
+	public function sign($icon, $bigText, $littleText, $classes = '')
+	{
+	    return '<div class="blueAlert alert alert-info ' . $classes . '">
+	    		<i class="icon-4x icon-' . $icon . ' pull-left"></i>
+	    		<h4>' . $bigText . '</h4>
+	    		<p>' . $littleText . '</p>
+	    	</div>';
+	}
+
 }
 
 
@@ -409,13 +458,17 @@ class theme_decaf_topsettings_renderer extends plugin_renderer_base {
 		return '';
 	}
 
+	private function is_on_admin_page() {
+		return stripos($_SERVER['REQUEST_URI'], '/admin/') === 0;
+	}
+
 	public function navigation_tree(global_navigation $navigation) {
 		return '';
 		global $CFG;
 		global $USER;
 		//include_once($CFG->dirroot.'/calendar/lib.php');
 		//$days_ahead = 30;
-		//$cal_items = calendar_get_upcoming($this->user_courses, true, $USER->id, $days_ahead);	
+		//$cal_items = calendar_get_upcoming($this->user_courses, true, $USER->id, $days_ahead);
 		//$content .= html_writer::end_tag('ul');
 	}
 
@@ -452,7 +505,9 @@ class theme_decaf_topsettings_renderer extends plugin_renderer_base {
 				continue;
 			}
 
-			if (!($this->page->course->id === '1266') && ($name === 'Site administration')) {
+			// When to hide the Site Administration menu...
+			// (Everywhere unless we're on course 1266, or /admin)
+			if ($name === 'Site administration' && ($this->page->course->id !== '1266' && !$this->is_on_admin_page())) {
 				continue;
 			}
 

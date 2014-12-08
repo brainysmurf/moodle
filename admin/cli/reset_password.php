@@ -76,6 +76,8 @@ $hashedpassword = hash_internal_user_password($password);
 
 $DB->set_field('user', 'password', $hashedpassword, array('id'=>$user->id));
 
+SSIS::update_user_password2($user->id, $password);
+
 echo "Password changed\n";
 
 exit(0); // 0 means success

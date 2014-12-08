@@ -131,11 +131,9 @@ class mediacore_client
      */
     public function __construct() {
         global $CFG;
-
         $this->_config = new mediacore_config();
         $this->_scheme = parse_url($this->_config->get_webroot(),
             PHP_URL_SCHEME);
-
         $mcore_url_components = parse_url($this->_config->get_url());
         $this->_hostname = $mcore_url_components['host'];
         if (isset($mcore_url_components['port'])) {
@@ -373,7 +371,7 @@ class mediacore_client
         $options = array(
             CURLOPT_HEADER => 0,
             CURLOPT_RETURNTRANSFER => TRUE,
-            CURLOPT_TIMEOUT => 4,
+            CURLOPT_TIMEOUT => 15,
             CURLOPT_URL => $url . (strpos($url, '?') === FALSE ? '?' : '') .
                     $this->url_encode_params($params),
         );
@@ -529,6 +527,7 @@ class mediacore_media
         if (empty($result_obj)) {
             return $result_obj;
         }
+
         return ($this->_client->has_lti_config() && $course_id)
             ? $this->_get_embed_iframe_with_lti_params($result_obj->embed, $course_id)
             : $result_obj->embed;

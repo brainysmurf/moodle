@@ -337,14 +337,6 @@
                 	$buttons[] = html_writer::link(new moodle_url($securewwwroot.'/admin/user/reset_password.php', array('id'=>$user->id,'ref'=>$_SERVER['REQUEST_URI'])), html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/locked'), 'alt'=>'Reset User\'s Password', 'class'=>'iconsmall')), array('title'=>'Reset User\'s Password'));
                 }
             }
-            
-            // reset email password button
-            if ( has_capability('moodle/user:update', $sitecontext) && substr($user->email,-23) == 'student.ssis-suzhou.net' ) {
-	            // prevent editing of admins by non-admins
-                if (is_siteadmin($USER) or !is_siteadmin($user)) {
-               		$buttons[] = html_writer::link(new moodle_url($securewwwroot.'/admin/user/reset_email_password.php', array('id'=>$user->id,'ref'=>$_SERVER['REQUEST_URI'])), html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/emailno'), 'alt'=>'Reset Email Password', 'class'=>'iconsmall')), array('title'=>'Reset Email Password'));
-                }
-            }
 
             // the last column - confirm or mnet info
             if (is_mnet_remote_user($user)) {

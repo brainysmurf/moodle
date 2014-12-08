@@ -65,8 +65,10 @@ $string['groupkey_help'] = 'In addition to restricting access to the course to o
 Note: An enrolment key for the course must be specified in the self enrolment settings as well as group enrolment keys in the group settings.';
 $string['longtimenosee'] = 'Unenrol inactive after';
 $string['longtimenosee_help'] = 'If users haven\'t accessed a course for a long time, then they are automatically unenrolled. This parameter specifies that time limit.';
-$string['maxenrolled'] = 'Max enrolled users';
-$string['maxenrolled_help'] = 'Specifies the maximum number of users that can self enrol. 0 means no limit.';
+#$string['maxenrolled'] = 'Max enrolled users';
+#$string['maxenrolled_help'] = 'Specifies the maximum number of users that can self enrol. 0 means no limit.';
+$string['maxenrolled'] = 'Max enrolled students/participants';
+$string['maxenrolled_help'] = 'Specifies the maximum number of STUDENTS that can self enrol (total users enroled may be higher because Parents are not counted against this limit). 0 means no limit.';
 $string['maxenrolledreached'] = 'Sorry, this course already has the maximum number of users enrolled. You cannot join this course.';
 $string['maxenrolledreached_activity'] = 'Sorry, this activity already has the maximum number of users enrolled. You cannot join this activity.';
 $string['messageprovider:expiry_notification'] = 'Self enrolment expiry notifications';

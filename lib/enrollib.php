@@ -1342,10 +1342,14 @@ abstract class enrol_plugin {
                 remove_temp_course_roles($context);
             }
         }
-        
-        //Refresh the awesomebar
-        global $OUTPUT;
-        $OUTPUT->refresh_awesomebar();
+
+        if ( (!defined('CLI_SCRIPT') && ($USER->id == $userid))) {
+	        //Refresh the awesomebar
+    	    global $OUTPUT;
+    	    if (!empty($OUTPUT)) {
+	        	$OUTPUT->refresh_awesomebar();
+	        }
+        }
     }
 
     /**
@@ -1480,11 +1484,12 @@ abstract class enrol_plugin {
                 remove_temp_course_roles($context);
             }
         }
-        
-        //Refresh the awesomebar
-        global $OUTPUT;
-        $OUTPUT->refresh_awesomebar();
-        
+
+        if (!defined('CLI_SCRIPT') && $USER->id == $userid) {
+            //Refresh the awesomebar
+            global $OUTPUT;
+            $OUTPUT->refresh_awesomebar();
+        }
     }
 
     /**

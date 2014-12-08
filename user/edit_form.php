@@ -45,8 +45,10 @@ class user_edit_form extends moodleform {
         useredit_shared_definition($mform, $editoroptions, $filemanageroptions);
 
         /// extra settigs
-        //disable user images is on OR user isn't a parent -> remove the image uploader
-        if ( !empty($CFG->disableuserimages) || !$SESSION->userIsParent ) {
+        
+        //If user image uploads are disabled OR the current user is a student, don't allow them to upload a photo
+        //if (!empty($CFG->disableuserimages) || !empty($SESSION->userIsStudent) ) {
+        if (!empty($SESSION->userIsStudent) ) {
             $mform->removeElement('deletepicture');
             $mform->removeElement('imagefile');
             $mform->removeElement('imagealt');
@@ -102,11 +104,15 @@ class user_edit_form extends moodleform {
             $fields = get_user_fieldnames();
             $authplugin = get_auth_plugin($user->auth);
             
-            //If the user is a parent, allow editing firstname and lastname
-			if ( $SESSION->userIsParent )
-			{      
+            //Allow anybody who isn't a student to edit their firstname and lastname
+			if (empty($SESSION->userIsStudent)) {
 				unset($authplugin->config->field_lock_firstname);
 				unset($authplugin->config->field_lock_lastname);
+			}
+			
+			//Allow admins to change idnumber
+			if (!empty($SESSION->userIsSiteAdmin)) {
+				unset($authplugin->config->field_lock_idnumber);
 			}
             
             foreach ($fields as $field) {

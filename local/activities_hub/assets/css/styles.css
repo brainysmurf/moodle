@@ -1,0 +1,16 @@
+a.btn-mine,
+a.btn-mine:hover,
+a.btn-mine:active,
+a.btn-mine.active,
+a.btn-mine.disabled,
+a.btn-mine[disabled] {
+  text-shadow:none;
+  color: #FFFFFF;
+  background: #1662A3;
+}
+
+a.btn-mine:active,
+a.btn-mine.active {
+  background-color: #942a25 \9;
+}
+

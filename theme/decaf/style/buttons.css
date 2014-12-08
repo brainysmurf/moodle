@@ -4,7 +4,7 @@ button,
 a.btn,
 .tabtree .tabrow0 li a.btn,
 .section-navigation a,
-.addresourcemodchooser a { 
+.addresourcemodchooser a {
 text-transform:capitalize;
 padding: 2px 8px;
 text-align: center;
@@ -111,7 +111,8 @@ ul.buttons {
 	list-style: none;
 	margin:auto;
 	padding:0;
-	max-width:1000px;
+	/*max-width:1000px;*/
+	overflow:hidden; /* this fixes the scrollbars appearing when buttons are in a .no-overflow (on any course page) */
 }
 	ul.buttons:after { /* clearfix */
 		content: ".";
@@ -121,8 +122,9 @@ ul.buttons {
 		line-height: 0;
 		height: 0;
 	}
+
 	ul.buttons li {
-		width:33%;
+		width:25%;
 		-webkit-box-sizing:border-box;
 		-moz-box-sizing:border-box;
 		box-sizing:border-box;
@@ -130,50 +132,87 @@ ul.buttons {
 		text-align:center;
 		float:left;
 	}
-	
-		/*
-			This stuff sets the left/right padding depending on which 'column' the li is in to make everything line up perfectly.
-			It also makes it so if there's one and only button, it's 100% wide. if there's only 2 buttons each is 50% wide
-			And normally, in the 3 column layout the middle column is made 34% wide
-		*/
-	
-		/* Remove left padding on buttons on left */
-		ul.buttons li:nth-child(3n+1) /* item #1then every 3rd item from that */
-		{ 
+
+		/**
+		 * 4 columns - default
+		 * 25% wide
+		 * (There are 4 or more buttons)
+		 */
+
+		 ul.buttons li {
+		 	width:25%;
+		 }
+
+		/* Remove left padding for buttons in the 1st column (4 col layout) */
+		ul.buttons li:nth-child(4n+1) {
 			padding-left:0;
 		}
-		
-		/* Remove right padding on buttons on the right */
-		ul.buttons li:last-child:nth-child(1), /*last item, but it's also the first item*/
-		ul.buttons li:last-child:nth-child(2), /*last item, but it's also the second item*/
-		ul.buttons li:nth-child(3n+3) /* item #3 then every 3rd item from that*/
-		{
+
+		/* Remove right padding for buttons in the 4th column (4 col layout) */
+		ul.buttons li:nth-child(4n+4) {
 			padding-right:0;
 		}
-		
-		/* Middle button is 34% wide to make it an even 100% */
-		ul.buttons li:nth-child(3n+2) {
-			width:34%;
+
+
+		/**
+		 * 3 columns
+		 * 33.3333% wide
+		 * (There are only 2 buttons)
+		 */
+
+		 /* 3 buttons (1/3) */
+		ul.buttons li:first-child:nth-last-child(3) {
+			padding:5px 5px 5px 0;
+			width: 33.33333333%;
 		}
-		
+
+		/* 3 buttons (2/3) */
+		ul.buttons li:nth-child(2):nth-last-child(2) {
+			padding:5px;
+			width: 33.33333333%;
+		}
+
+		/* 3 buttons (3/3) */
+		ul.buttons li:nth-child(3):last-child {
+			padding:5px 0 5px 5px;
+			width: 33.33333333%;
+		}
+
+
+		/**
+		 * 2 columns
+		 * 50% wide
+		 * (There are only 2 buttons)
+		 */
+
+		/* 2 buttons (1/3) */
+		ul.buttons li:first-child:nth-last-child(2) {
+			padding:5px 5px 5px 0;
+			width:50%;
+		}
+
+		/* 2 buttons (2/2) */
+		ul.buttons li:nth-child(2):last-child {
+			padding:5px 0 5px 5px;
+			width:50%;
+		}
+
+
+		/**
+		 * 1 column
+		 * 100% wide
+		 * (There's only 1 button)
+		 */
+
 		/* First and only button - make it 100% wide */
 		ul.buttons li:first-child:last-child {
 			width:100%;
+			padding:5px 0;
 		}
-		
-		/* Two buttons (1/2) - make it 50% wide */
-		ul.buttons li:first-child:nth-last-child(2) {
-			width:50%;
-		}
-		
-		/* Two buttons (2/2) - make it 50% wide */
-		ul.buttons li:nth-child(2):last-child {
-			width:50%;
-		}
-		
-		/* k done */
-		
-	
+
+
+		/* Finished with the column stuff */
+
 		ul.buttons a.btn,
 		ul.buttons span.btn {
 			margin:0;
@@ -182,14 +221,14 @@ ul.buttons {
 			-khtml-border-radius:10px;
 			border-radius:10px;
 			border-color:#ddd #fff #fff #ddd;
-			background-color:#eee;	
-			font-size:1.5em;
+			background-color:#eee;
+			font-size:17px;
 			line-height:2em;
 			width:100%;
 			-webkit-box-sizing:border-box;
 			-moz-box-sizing:border-box;
 			box-sizing:border-box;
-			padding:10px;
+			padding:5px 10px;
 			display: block;
 		}
 			ul.buttons a.btn {
@@ -211,4 +250,4 @@ ul.buttons {
 	user-select: none;
 }
 	#tinymce ul.buttons * { pointer-events:none; } /*disable hover effect in the editor */
-	 
+

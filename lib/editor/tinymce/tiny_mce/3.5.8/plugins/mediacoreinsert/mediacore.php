@@ -12,7 +12,7 @@
  */
 
 $mediacore_url = 'http://dragontv.ssis-suzhou.net'; // no slash at the end, please.
-$max_per_page = 10;
+$max_per_page = 6;
 
 require 'mediacore.inc.php';
 $here = $_SERVER['SCRIPT_NAME'];
@@ -77,7 +77,7 @@ $here = $_SERVER['SCRIPT_NAME'];
 	<div class="mcore-message">
 		<img src="images/zero-state.png" alt="zero state">
 		<h2>No media found</h2>
-		<p>DragonTV returned no results.</p>
+		<p>Either you have no media in your MediaCore library, or your search returned no results.</p>
 	</div>
 	<?php endif; ?>
 	<?php foreach ($videos as $video): ?>
