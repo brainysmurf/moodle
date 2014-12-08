@@ -1,0 +1,58 @@
+#page-header,
+body.dragonnet-vagrant #page-header, body.dragonnet-local #page-header, body.dragonnet-dev #page-header {
+    background-color:#8f111f;
+}
+
+#page-header-gradient,
+body.dragonnet-vagrant #page-header-gradient, body.dragonnet-local #page-header-gradient, body.dragonnet-dev #page-header-gradient
+{
+    position: absolute;
+    top:0;
+    bottom:0;
+    right:0;
+    width:800px;
+    background: -moz-linear-gradient(top,  rgba(143,17,31,1) 0%, rgba(143,17,31,0) 33%, rgba(143,17,31,0) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(143,17,31,1)), color-stop(33%,rgba(143,17,31,0)), color-stop(100%,rgba(143,17,31,0))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(143,17,31,1) 0%,rgba(143,17,31,0) 33%,rgba(143,17,31,0) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(143,17,31,1) 0%,rgba(143,17,31,0) 33%,rgba(143,17,31,0) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(143,17,31,1) 0%,rgba(143,17,31,0) 33%,rgba(143,17,31,0) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(143,17,31,1) 0%,rgba(143,17,31,0) 33%,rgba(143,17,31,0) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#8f111f', endColorstr='#008f111f',GradientType=0 ); /* IE6-9 */
+}
+
+#awesomebar {
+    /* So snow doesn't go on top */
+    z-index:9999999;
+}
+
+a:link,
+a:visited,
+a:hover,
+a:active
+{
+    color:#8f111f;
+}
+
+ul.buttons a.btn
+{
+    color:#8f111f !important;
+}
+
+.login-reminder,
+.local-alert {
+    border-top-color: #8f111f;
+    border-bottom-color: #8f111f;
+}
+
+.tabs ul li > span.selected {
+    font-weight:normal;
+    background:#8f111f;
+    font-size:13px;
+    color: #FFF;
+    border-color: #8f111f !important;
+}
+
+.paging .btn.selected {
+    background:#8f111f;
+    color: #fff;
+}

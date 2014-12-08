@@ -8,99 +8,99 @@ select,input,button,textarea{font-size:0.9em;}
 a img {border: none;}
 a:active {outline: none;}
 .singleselect option {text-align:left;}
-	.singleselect select {
-		-webkit-box-sizing: border-box;
-		-moz-box-sizing: border-box;
-		box-sizing: border-box;
-	}
+    .singleselect select {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
 a:link,a:visited {color: #1662A3;}
 a:hover,a:active {color: #1662A3;}
 
 .align-center {
-	text-align:center;
+    text-align:center;
 }
 .align-left {
-	text-align:left;
+    text-align:left;
 }
 .align-right {
-	text-align:right;
+    text-align:right;
 }
 
 .icon-red {
-	color:#A00;
+    color:#A00;
 }
 
 .clear {
-	clear:both;
+    clear:both;
 }
 
 /* Header
 ------------------------- */
 #page-header{
-	float:none;
-	background:#1662A3;
-	background-position:center right;
-	background-repeat: no-repeat;
-	border-bottom:1px solid #cbcbcb;
-	margin-right:0;
-	position:relative;
-	min-height:144px;
+    float:none;
+    background:#1662A3;
+    background-position:center right;
+    background-repeat: no-repeat;
+    border-bottom:1px solid #cbcbcb;
+    margin-right:0;
+    position:relative;
+    min-height:144px;
 }
 
 #page-header-wrapper{
-	margin:0;
-	position: relative;
-	padding: 49px 30px 53px 48px; /* Vertically center the page title */
-	z-index: 2;
+    margin:0;
+    position: relative;
+    padding: 49px 30px 53px 48px; /* Vertically center the page title */
+    z-index: 2;
 }
 
 #page-header-gradient {
-	position: absolute;
-	top:0;
-	bottom:0;
-	right:0;
-	width:800px;
-	background: -moz-linear-gradient(left,  rgba(22,98,163,1) 0%, rgba(22,98,163,0.7) 10%, rgba(22,98,163,0) 33%, rgba(22,98,163,0) 100%);
-	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(22,98,163,1)), color-stop(10%,rgba(22,98,163,0.7)), color-stop(33%,rgba(22,98,163,0)), color-stop(100%,rgba(22,98,163,0)));
-	background: -webkit-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
-	background: -o-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
-	background: -ms-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
-	background: linear-gradient(to right,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', endColorstr='#001662a3',GradientType=1 );
+    position: absolute;
+    top:0;
+    bottom:0;
+    right:0;
+    width:800px;
+    background: -moz-linear-gradient(left,  rgba(22,98,163,1) 0%, rgba(22,98,163,0.7) 10%, rgba(22,98,163,0) 33%, rgba(22,98,163,0) 100%);
+    background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(22,98,163,1)), color-stop(10%,rgba(22,98,163,0.7)), color-stop(33%,rgba(22,98,163,0)), color-stop(100%,rgba(22,98,163,0)));
+    background: -webkit-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+    background: -o-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+    background: -ms-linear-gradient(left,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+    background: linear-gradient(to right,  rgba(22,98,163,1) 0%,rgba(22,98,163,0.7) 10%,rgba(22,98,163,0) 33%,rgba(22,98,163,0) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', endColorstr='#001662a3',GradientType=1 );
 }
 
 /*
-	Make dragonnet.local and dragonnet.vagrant have a green header
-	Moodle automatically adds the dragonnet-local class to the body (or dragonnet-ssis-suzhou-net, from the hostname)
+    Make dragonnet.local and dragonnet.vagrant have a green header
+    Moodle automatically adds the dragonnet-local class to the body (or dragonnet-ssis-suzhou-net, from the hostname)
 */
 body.dragonnet-vagrant #page-header,
 body.dragonnet-local #page-header,
 body.dragonnet-dev #page-header {
-	background-color: #27ae60;
+    background-color: #27ae60;
 }
 body.dragonnet-vagrant #page-header-gradient,
 body.dragonnet-local #page-header-gradient,
 body.dragonnet-dev #page-header-gradient {
-	background: -moz-linear-gradient(left,  rgba(39, 174, 96,1) 0%, rgba(39, 174, 96,0.7) 10%, rgba(39, 174, 96,0) 33%, rgba(39, 174, 96,0) 100%);
-	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(39, 174, 96,1)), color-stop(10%,rgba(39, 174, 96,0.7)), color-stop(33%,rgba(39, 174, 96,0)), color-stop(100%,rgba(39, 174, 96,0)));
-	background: -webkit-linear-gradient(left,  rgba(39, 174, 96,1) 0%,rgba(39, 174, 96,0.7) 10%,rgba(39, 174, 96,0) 33%,rgba(39, 174, 96,0) 100%);
-	background: -o-linear-gradient(left,  rgba(39, 174, 96,1) 0%,rgba(39, 174, 96,0.7) 10%,rgba(39, 174, 96,0) 33%,rgba(39, 174, 96,0) 100%);
-	background: -ms-linear-gradient(left,  rgba(39, 174, 96,1) 0%,rgba(39, 174, 96,0.7) 10%,rgba(39, 174, 96,0) 33%,rgba(39, 174, 96,0) 100%);
-	background: linear-gradient(to right,  rgba(39, 174, 96,1) 0%,rgba(39, 174, 96,0.7) 10%,rgba(39, 174, 96,0) 33%,rgba(39, 174, 96,0) 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#27ae60', endColorstr='#27ae60',GradientType=1 );
+    background: -moz-linear-gradient(left,  rgba(39, 174, 96,1) 0%, rgba(39, 174, 96,0.7) 10%, rgba(39, 174, 96,0) 33%, rgba(39, 174, 96,0) 100%);
+    background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(39, 174, 96,1)), color-stop(10%,rgba(39, 174, 96,0.7)), color-stop(33%,rgba(39, 174, 96,0)), color-stop(100%,rgba(39, 174, 96,0)));
+    background: -webkit-linear-gradient(left,  rgba(39, 174, 96,1) 0%,rgba(39, 174, 96,0.7) 10%,rgba(39, 174, 96,0) 33%,rgba(39, 174, 96,0) 100%);
+    background: -o-linear-gradient(left,  rgba(39, 174, 96,1) 0%,rgba(39, 174, 96,0.7) 10%,rgba(39, 174, 96,0) 33%,rgba(39, 174, 96,0) 100%);
+    background: -ms-linear-gradient(left,  rgba(39, 174, 96,1) 0%,rgba(39, 174, 96,0.7) 10%,rgba(39, 174, 96,0) 33%,rgba(39, 174, 96,0) 100%);
+    background: linear-gradient(to right,  rgba(39, 174, 96,1) 0%,rgba(39, 174, 96,0.7) 10%,rgba(39, 174, 96,0) 33%,rgba(39, 174, 96,0) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#27ae60', endColorstr='#27ae60',GradientType=1 );
 }
 
 
 #page-header .sitelogo {float:left;margin:0.75em 0;}
 #page-header .headermain{
-	float:none;
-	margin: 0;
-	padding: 0;
-	color:#EEE;
-	font-size:2.5em;
-	font-weight:700;
-	letter-spacing:-1px;
-	line-height:normal;
+    float:none;
+    margin: 0;
+    padding: 0;
+    color:#EEE;
+    font-size:2.5em;
+    font-weight:700;
+    letter-spacing:-1px;
+    line-height:normal;
 }
 #page-header .headermenu {width:235px;}
 #page-header .headermenu a:hover{color:#C30;}
@@ -108,11 +108,11 @@ body.dragonnet-dev #page-header-gradient {
 /* On frontpage, grow the blue header to be the height of the header + breadcrumbs on normal pages */
 
 #page-site-index #page-header {
-	min-height:176px;
+    min-height:176px;
 }
 
 #page-site-index #page-header-wrapper {
-	padding: 61px 30px 64px 48px;  /* Vertically center the page title */
+    padding: 61px 30px 64px 48px;  /* Vertically center the page title */
 }
 
 #page-site-index #page-header-wrapper .headermain{ font-size: 3em; }
@@ -164,30 +164,30 @@ body.dragonnet-dev #page-header-gradient {
 /* Breadcrumb
 --------------------------- */
 .navbar{
-	font-size:.9em;
-	background-color:#F0F0F0;
-	border-bottom:1px solid #DDD;
-	margin:0;
-	padding:0 10px 0 0;
+    font-size:.9em;
+    background-color:#F0F0F0;
+    border-bottom:1px solid #DDD;
+    margin:0;
+    padding:0 10px 0 0;
 }
 .navbar .breadcrumb{font-size:1em;padding:6px 10px;}
 
 #coursesearchnavbar label {
-	position: relative;
-	top: 2px;
+    position: relative;
+    top: 2px;
 }
 #coursesearchnavbar #navsearchbox {
-	margin-right: 4px;
-	position: relative;
-	top: 1px;
-	height: 14px;
+    margin-right: 4px;
+    position: relative;
+    top: 1px;
+    height: 14px;
 }
 
 #navsearchbox {
-	width: 150px;
-	margin-top: 25px;
-	margin-left: 110px;
-	padding: 2px 2px;
+    width: 150px;
+    margin-top: 25px;
+    margin-left: 110px;
+    padding: 2px 2px;
 }
 
 .sep{background:url([[pix:theme|breadcrumb_arrow]]) no-repeat scroll 100% 50%;margin-right:5px;padding:0.98em 7px;}
@@ -197,178 +197,178 @@ body.dragonnet-dev #page-header-gradient {
 .calendartab th,.calendartable td{border-width:0;}
 
 hr {
-	border: none;
-	border-top: 1px #CBCBCB solid;
-	border-bottom: 1px #FAFAFA solid;
-	margin: 30px 0;
+    border: none;
+    border-top: 1px #CBCBCB solid;
+    border-bottom: 1px #FAFAFA solid;
+    margin: 30px 0;
 }
 
 /* Tabs
 CSS for cleaner tab markup than the Moodle default
 <ul class="tabs">
-	<li><a href="#">tab</a></li>
-	<li><a href="#">tab</a></li>
+    <li><a href="#">tab</a></li>
+    <li><a href="#">tab</a></li>
 </ul>
 --------------------------- */
 
 .tabs {
-	padding-bottom:9px;
-	border-bottom: 1px solid #DDD;
-	margin-bottom:12px !important;
+    padding-bottom:9px;
+    border-bottom: 1px solid #DDD;
+    margin-bottom:12px !important;
 }
-	.tabs.noborder {
-		border:none;
-		margin:0;
-		padding:0;
-	}
+    .tabs.noborder {
+        border:none;
+        margin:0;
+        padding:0;
+    }
 
 .tabs ul {
-	list-style:none;
-	text-align: center;
-	padding:0;
-	margin:0;
+    list-style:none;
+    text-align: center;
+    padding:0;
+    margin:0;
 }
 
 .tabs ul li {
-	padding-left: 1px;
-	padding-right: 1px;
-	margin-right: 2px;
-	margin-bottom: 2px;
-	display:inline-block;
+    padding-left: 1px;
+    padding-right: 1px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    display:inline-block;
 }
 
 .tabs ul li:last-child {
-	margin-right:0;
+    margin-right:0;
 }
 
 .tabs ul li > a,
 .tabs ul li > span {
-	background: #F7F7F7;
-	margin:0;
-	display:inline-block;
-	line-height: 16px;
-	padding: 7px 20px;
-	border: 1px solid #D4D4D4 !important;
-	-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-	-moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-	border-radius: 3px;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	font-size:13px;
-	white-space: nowrap;
-	text-align:center;
+    background: #F7F7F7;
+    margin:0;
+    display:inline-block;
+    line-height: 16px;
+    padding: 7px 20px;
+    border: 1px solid #D4D4D4 !important;
+    -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+    -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    font-size:13px;
+    white-space: nowrap;
+    text-align:center;
 }
 
 .tabs ul li > a:hover {
-	background: rgb(244,244,244);
-	background: -moz-linear-gradient(top,  rgba(244,244,244,1) 0%, rgba(230,230,230,1) 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(244,244,244,1)), color-stop(100%,rgba(230,230,230,1)));
-	background: -webkit-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
-	background: -o-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
-	background: -ms-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
-	background: linear-gradient(to bottom,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f4f4f4', endColorstr='#d8d8d8',GradientType=0 );
+    background: rgb(244,244,244);
+    background: -moz-linear-gradient(top,  rgba(244,244,244,1) 0%, rgba(230,230,230,1) 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(244,244,244,1)), color-stop(100%,rgba(230,230,230,1)));
+    background: -webkit-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+    background: -o-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+    background: -ms-linear-gradient(top,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+    background: linear-gradient(to bottom,  rgba(244,244,244,1) 0%,rgba(230,230,230,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f4f4f4', endColorstr='#d8d8d8',GradientType=0 );
 }
 
 .tabs ul li > span.selected,
 .tabs ul li > a.selected {
-	font-weight:normal;
-	background:#1662A3;
-	font-size:13px;
-	color: #FFF;
-	border-color: #1662A3 !important;
+    font-weight:normal;
+    background:#1662A3;
+    font-size:13px;
+    color: #FFF;
+    border-color: #1662A3 !important;
 }
 
 /* onetopic delete section buttons */
 
 /* Delete section button */
 .tabs a.delete_section {
-	display:inline-block;
-	font-weight:normal;
-	margin: 0 -4px -9px 4px;
-	font-size: 11px;
-	position: relative;
-	top: -6px;
-	right:-4px;
-	height: 16px;
-	line-height: 15px;
-	cursor: pointer;
+    display:inline-block;
+    font-weight:normal;
+    margin: 0 -4px -9px 4px;
+    font-size: 11px;
+    position: relative;
+    top: -6px;
+    right:-4px;
+    height: 16px;
+    line-height: 15px;
+    cursor: pointer;
 }
 
 .tabs a.delete_section.hide {
-	display: none !important;
+    display: none !important;
 }
 
 .tabs a.delete_section.disabled {
-	cursor:not-allowed;
+    cursor:not-allowed;
 }
 
 /* Subtabs */
 
 .tabs ul.additional-tabs {
-	margin-top:10px;
+    margin-top:10px;
 }
 
 .tabs ul.additional-tabs li a,
 .tabs ul.additional-tabs li span {
-	font-size:10px;
-	padding:5px 6px;
+    font-size:10px;
+    padding:5px 6px;
 }
 
 .tabs ul.additonal-tabs li > span.selected {
-	font-size:11px;
+    font-size:11px;
 }
 
 /* Moving tabs */
 .tabs ul.ui-sortable .movey a,
 .tabs ul.ui-sortable .movey span {
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-	cursor: move;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: move;
 }
 .tabs ul li.sortable-placeholder {
-	border:1px #333 dashed;
-	background: #fff;
-	visibility: visible !important;
-	height:29px !important;
-	border-radius: 3px;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	margin: 0 3px -10px 2px;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
+    border:1px #333 dashed;
+    background: #fff;
+    visibility: visible !important;
+    height:29px !important;
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    margin: 0 3px -10px 2px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 #reorderSectionsButton {
-	margin-right:5px;
-	font-size:11px;
+    margin-right:5px;
+    font-size:11px;
 }
 
 #reorderSectionsAlert .icon-move {
-	font-size: 35px;
+    font-size: 35px;
 }
 
 #reorderSectionsAlert .small {
-	font-size:12px;
+    font-size:12px;
 }
 
 a.editsectionbutton {
-	font-size:11px;
-	color:#999;
-	line-height:28px;
+    font-size:11px;
+    color:#999;
+    line-height:28px;
 }
 
 a.editsectionbutton img {
-	vertical-align: middle;
-	margin: 0;
-	position: relative;
-	top: -2px;
+    vertical-align: middle;
+    margin: 0;
+    position: relative;
+    top: -2px;
 }
 
 
@@ -381,35 +381,35 @@ a.editsectionbutton img {
 
 #centerCol,
 #side-post {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 #centerCol {
-	width:75%;
-	padding-right:13px;
-	float:left;
-	/*background:rgba(255,0,0,.2);*/
+    width:75%;
+    padding-right:13px;
+    float:left;
+    /*background:rgba(255,0,0,.2);*/
 }
 
 #centerCol.fullWidth {
-	width:auto;
-	float:none;
+    width:auto;
+    float:none;
 }
 
 #side-post {
-	width:25%;
-	padding-left:12px;
-	float:left;
-	/*background:rgba(0,255,0,.2);*/
+    width:25%;
+    padding-left:12px;
+    float:left;
+    /*background:rgba(0,255,0,.2);*/
 }
 
 .course-content .single-section {
-	margin:0;
+    margin:0;
 }
 
-#page {top:31px;} /*Space for awesomebar at top */
+#page {top:25px;} /*Space for awesomebar at top */
 #page-content-wrapper { margin:25px 50px; }
 #page-content .region-content { padding:0; }
 
@@ -436,19 +436,19 @@ ul.section .activity .contentafterlink p {margin:0 0 1em;}
 body.editing ul.section>li {border-bottom: 1px dashed #808080; position:relative;}
 
 .addresourcemodchooser {
-	margin: 0 0 10px 0;
+    margin: 0 0 10px 0;
 }
 .bottomaddresourcemodchooser .addresourcemodchooser {
-	margin:10px 0 0 0;
+    margin:10px 0 0 0;
 }
 
 .addresourcemodchooser a {
-	opacity:.9 !important;
-	font-size: 13px;
-	padding: 4px 7px;
-	display:inline-block;
+    opacity:.9 !important;
+    font-size: 13px;
+    padding: 4px 7px;
+    display:inline-block;
 }
-	.addresourcemodchooser i { margin-right:4px; }
+    .addresourcemodchooser i { margin-right:4px; }
 
 
 /* Make 2.3 activity chooser sit on top of modules in sections */
@@ -459,13 +459,13 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 .block {border-style:none;}
 
 #side-post .block {
-	background: #FFF;
-	padding: 0;
-	margin: 0 0 15px 0;
-	border: 1px solid #D4D4D4;
-	-webkit-border-radius: 3px;
-	-moz-webkit-border-radius: 3px;
-	border-radius: 3px;
+    background: #FFF;
+    padding: 0;
+    margin: 0 0 15px 0;
+    border: 1px solid #D4D4D4;
+    -webkit-border-radius: 3px;
+    -moz-webkit-border-radius: 3px;
+    border-radius: 3px;
   -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
   -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
@@ -476,31 +476,31 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 .block .calendar-controls .next {background:transparent url([[pix:theme|next]]) no-repeat right top;}
 .block .header{border-color:#EEE;border-width:0 1px;}
 .block .header h2 {
-	background:#EEE url([[pix:theme|bg-header]]) repeat-x scroll bottom center;
-	color:#555;
-	font-family:"Tahoma",sans-serif;
-	font-size:14px;
-	letter-spacing:-0.5px;
-	line-height:18px;
-	text-shadow:0 1px 0 #DDD;
-	padding:7px 12px;
-	margin:0;
-	text-transform:capitalize;
+    background:#EEE url([[pix:theme|bg-header]]) repeat-x scroll bottom center;
+    color:#555;
+    font-family:"Tahoma",sans-serif;
+    font-size:14px;
+    letter-spacing:-0.5px;
+    line-height:18px;
+    text-shadow:0 1px 0 #DDD;
+    padding:7px 12px;
+    margin:0;
+    text-transform:capitalize;
 }
 
 .block .block_action {margin-right:4px;}
 .block .header .block_action{ margin: 6px 6px 0 0; }
 .block_with_controls .header .title {position:relative;}
 .block .commands {
-	clear:both;
-	height:auto;
-	padding:0;
-	top:auto;
-	bottom:0px;
+    clear:both;
+    height:auto;
+    padding:0;
+    top:auto;
+    bottom:0px;
 }
 .block .content{ padding:0; margin:12px; }
-	.block.block_html .content .no-overflow { padding:0; }
-	.block .no-overflow { overflow:hidden; }
+    .block.block_html .content .no-overflow { padding:0; }
+    .block .no-overflow { overflow:hidden; }
 .block .content .buttons{margin-top:2px;}
 .block_login label{font-size:0.85em;display:block;}
 .block_login .fld input{width:95%;margin:1px 0 5px;padding:2px;}
@@ -559,13 +559,13 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 .decaf_with_edit_buttons.jsenabled .block_with_controls .commands a span {padding-top:3px;}
 
 .block .header .commands {
-	text-align: center;
-	clear: both;
-	float: none;
-	position: static;
-	margin-top: 2px;
-	max-height:17px;
-	height:auto;
+    text-align: center;
+    clear: both;
+    float: none;
+    position: static;
+    margin-top: 2px;
+    max-height:17px;
+    height:auto;
 }
 .decaf_with_edit_buttons.jsenabled .block .header .commands .icon img {margin-left:0px; margin-right:4px;}
 
@@ -611,162 +611,162 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 .mform .fitem .fitemtitle{width:30%;}
 
 .mform .felement.fsubmit {
-	margin:0 auto !important;
+    margin:0 auto !important;
 }
 
 .form-input {text-align:left;}
 
-	/* Login Form */
+    /* Login Form */
 
-	.loginpanel {
-		width:75%;
-		max-width:500px;
-		margin:auto;
-	}
-		.login-reminder {
-			margin:0 auto 0;
-			min-height:50px;
-			line-height: 22px;
-			padding: 15px;
-			background-color:#fff;
-			border-top: 2px solid #1662A3;
-			border-bottom: 2px solid #1662A3;
-		}
-			.login-reminder icon { margin-top: -4px; }
+    .loginpanel {
+        width:75%;
+        max-width:500px;
+        margin:auto;
+    }
+        .login-reminder {
+            margin:0 auto 0;
+            min-height:50px;
+            line-height: 22px;
+            padding: 15px;
+            background-color:#fff;
+            border-top: 2px solid #1662A3;
+            border-bottom: 2px solid #1662A3;
+        }
+            .login-reminder icon { margin-top: -4px; }
 
-	.loginerrors {
-		text-align: center;
-		padding: 10px 0 0 0;
-		color: #A00;
-	}
+    .loginerrors {
+        text-align: center;
+        padding: 10px 0 0 0;
+        color: #A00;
+    }
 
-	.loginform-input-row {
-		padding: 0 0 0 25px;
-		position: relative;
-		margin:15px 0;
-	}
+    .loginform-input-row {
+        padding: 0 0 0 25px;
+        position: relative;
+        margin:15px 0;
+    }
 
-		/* form icons */
-		.loginform-input-row icon {
-			position: absolute;
-			top: 14px;
-			left: 2px;
-		}
+        /* form icons */
+        .loginform-input-row icon {
+            position: absolute;
+            top: 14px;
+            left: 2px;
+        }
 
-		/* Username & Password */
-		.loginform input[type=text],
-		.loginform input[type=password],
-		.loginform input[type=submit],
-		.loginform button {
-			display:block;
-			-webkit-border-radius:2px;
-			-moz-border-radius:2px;
-			border-radius:2px;
-			border:1px #666 solid;
-			font-size:16px;
-			line-height:1.5em;
-			padding:10px;
-			width:100%;
-			/* to have 100% width with padding */
-			-moz-box-sizing:border-box;
-			-webkit-box-sizing:border-box;
-			box-sizing:border-box;
-		}
+        /* Username & Password */
+        .loginform input[type=text],
+        .loginform input[type=password],
+        .loginform input[type=submit],
+        .loginform button {
+            display:block;
+            -webkit-border-radius:2px;
+            -moz-border-radius:2px;
+            border-radius:2px;
+            border:1px #666 solid;
+            font-size:16px;
+            line-height:1.5em;
+            padding:10px;
+            width:100%;
+            /* to have 100% width with padding */
+            -moz-box-sizing:border-box;
+            -webkit-box-sizing:border-box;
+            box-sizing:border-box;
+        }
 
-		.loginform input[type=submit],
-		.loginform button {
-			cursor:pointer;
-		}
+        .loginform input[type=submit],
+        .loginform button {
+            cursor:pointer;
+        }
 
-	.loginform-remember-row {
-		margin:15px 0;
-		text-align:center;
-	}
+    .loginform-remember-row {
+        margin:15px 0;
+        text-align:center;
+    }
 
-	.loginform #login-guest,
-	.loginform #login-forgotten {
-		margin-top:30px;
-		text-align:center;
-		width:50%;
-		/* to have % width with padding */
-		-moz-box-sizing:border-box;
-		-webkit-box-sizing:border-box;
-		box-sizing:border-box;
-	}
+    .loginform #login-guest,
+    .loginform #login-forgotten {
+        margin-top:30px;
+        text-align:center;
+        width:50%;
+        /* to have % width with padding */
+        -moz-box-sizing:border-box;
+        -webkit-box-sizing:border-box;
+        box-sizing:border-box;
+    }
 
-		.loginform h4 {
-			font-size:12px;
-			font-weight:bold;
-			min-height:30px;
-		}
+        .loginform h4 {
+            font-size:12px;
+            font-weight:bold;
+            min-height:30px;
+        }
 
-	.loginform #login-guest {
-		float:left;
-		padding-right:10px;
-	}
-		.loginform #login-guest p {
-			margin:5px 0 0 0;
-			font-size:12px;
-		}
+    .loginform #login-guest {
+        float:left;
+        padding-right:10px;
+    }
+        .loginform #login-guest p {
+            margin:5px 0 0 0;
+            font-size:12px;
+        }
 
-	.loginform #login-forgotten {
-		float:right;
-		padding-left:10px;
-	}
+    .loginform #login-forgotten {
+        float:right;
+        padding-left:10px;
+    }
 
-	#cantLoginBox .content {
-		text-align:center;
-	}
+    #cantLoginBox .content {
+        text-align:center;
+    }
 
-	#cantLoginBox .btn {
-		font-size: 12px;
-		padding: 4px 8px;
-		display: block;
-		margin: 0;
-	}
+    #cantLoginBox .btn {
+        font-size: 12px;
+        padding: 4px 8px;
+        display: block;
+        margin: 0;
+    }
 
 /* Footer
 -------------------------- */
 #page-footer {
-	padding:15px;
-	margin:15px 0 0 0;
-	font-size:12px;
-	color:#BDBDBD;
-	background-color: #EEE;
-	float:none;
-	width:auto;
+    padding:15px;
+    margin:15px 0 0 0;
+    font-size:12px;
+    color:#BDBDBD;
+    background-color: #EEE;
+    float:none;
+    width:auto;
 }
-	#page-footer a {
-		color:#BDBDBD;
-	}
-	#page-footer p {
-		text-shadow:none;
-		margin: 0 0 7px 0;
-	}
-		#page-footer p:last-child { margin-bottom:0; }
+    #page-footer a {
+        color:#BDBDBD;
+    }
+    #page-footer p {
+        text-shadow:none;
+        margin: 0 0 7px 0;
+    }
+        #page-footer p:last-child { margin-bottom:0; }
 
 #page-footer .logininfo{margin:1em 0;}
 
 #back-to-top {
-	position: fixed;
-	bottom: 14px;
-	right: 25px;
-	text-align: center;
-	cursor: pointer;
-	opacity: .5;
-	filter:alpha(opacity=50);
-	display:none;
+    position: fixed;
+    bottom: 14px;
+    right: 25px;
+    text-align: center;
+    cursor: pointer;
+    opacity: .5;
+    filter:alpha(opacity=50);
+    display:none;
 }
 #back-to-top a.arrow {
-	padding: 5px 10px;
-	font-size: 36px;
-	color: #1662A3;
-	background: #EEE;
-	border: 1px solid #CCC;
-	border-bottom: 1px solid #AAA;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 36px;
+    color: #1662A3;
+    background: #EEE;
+    border: 1px solid #CCC;
+    border-bottom: 1px solid #AAA;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
 }
 #back-to-top a.text {display: block;background: white;visibility: hidden;position: relative;top: 10px;}
 #back-to-top a {text-decoration: none;border: 0;outline: none;}
@@ -790,24 +790,24 @@ div.moodle-dialogue-base {position:absolute;top:0;left:0;right:0;z-index:150;}
 .course-content ul.topics li.section{background:transparent url([[pix:theme|topic-bg-bottom]]) repeat-x scroll bottom center;margin:0 0 30px;padding:0 0 30px; clear:both;}
 .course-content ul.weeks li.section{background:transparent url([[pix:theme|topic-bg-bottom]]) repeat-x scroll bottom center;margin:0;padding:0 0 30px;}
 
-	.course-content ul.topics li.section .right,
-	.course-content ul.weeks li.section .right {
-		width:auto;
-		margin:0;
-		padding:0;
-	}
-		.course-content ul.weeks li.section .right {
-			margin: 10px 0 0 0;
-		}
+    .course-content ul.topics li.section .right,
+    .course-content ul.weeks li.section .right {
+        width:auto;
+        margin:0;
+        padding:0;
+    }
+        .course-content ul.weeks li.section .right {
+            margin: 10px 0 0 0;
+        }
 
-		.course-content ul.topics li.section .right a,
-		.course-content ul.weeks li.section .right a {
-			margin:0 5px;
-		}
+        .course-content ul.topics li.section .right a,
+        .course-content ul.weeks li.section .right a {
+            margin:0 5px;
+        }
 
-	.course-content ul.topics li.section .content {
-		clear:both;
-	}
+    .course-content ul.topics li.section .content {
+        clear:both;
+    }
 .section-navigation.headingblock span.mdl-left, .section-navigation.headingblock span.mdl-right {font-size:0.7em;margin-top:0.3em;}
 
 .dir-ltr .section-navigation span.mdl-left a:before { content: '\00AB';
@@ -822,23 +822,23 @@ top: -1px;
 margin-left: 2px; }
 
 .section-navigation {
-	height: 25px;
-	padding:0 !important;
-	overflow: visible;
-	margin-bottom:0 !important;
+    height: 25px;
+    padding:0 !important;
+    overflow: visible;
+    margin-bottom:0 !important;
 }
 .section-navigation a {
-	font-size:13px;
-	padding: 4px 12px;
+    font-size:13px;
+    padding: 4px 12px;
 }
 
 
 .course-content .section li.activity {
-	padding-left:0;
+    padding-left:0;
 }
 
 .course-content .section .activity img.activityicon {
-	margin-left:0;
+    margin-left:0;
 }
 
 #intro, #pageintro { background:#f7f7f7; }
@@ -869,16 +869,16 @@ div.eventlist table.event div.commands {position:relative; float:right; top:auto
 /* Glossaries
 --------------------------*/
 table.glossarypost {
-	border-bottom: 1px solid #DDD;
+    border-bottom: 1px solid #DDD;
 }
 
 /* Reports
 --------------------------*/
 body.pagelayout-report #page-content {
-	overflow:hidden;
+    overflow:hidden;
 }
 body.pagelayout-report #page-content #region-main .region-content {
-	overflow-x:auto;
+    overflow-x:auto;
 }
 
 /* Quiz ordering/paging tool
@@ -894,34 +894,34 @@ body#page-question-category.decaf_with_edit_buttons.jsenabled div.box.questionca
 
 /* Blue Alerts (from bootstrap's alert-info)*/
 .blueAlert {
-	padding: 15px;
-	margin-bottom: 20px;
-	border: 1px solid transparent;
-	border-radius: 4px;
-	background-color: #d9edf7;
-	border-color: #bce8f1;
-	color: #31708f;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+    color: #31708f;
 }
-	.blueAlert .icon-4x,
-	.local-alert .icon-4x,
-	.global-alert .icon-4x {
-		position: relative;
-		top: -6px;
-	}
-	.blueAlert h4 {
-		font-size:18px;
-		margin:0;
-	}
-	.blueAlert p {
-		margin-top:1px;
-	}
+    .blueAlert .icon-4x,
+    .local-alert .icon-4x,
+    .global-alert .icon-4x {
+        position: relative;
+        top: -6px;
+    }
+    .blueAlert h4 {
+        font-size:18px;
+        margin:0;
+    }
+    .blueAlert p {
+        margin-top:1px;
+    }
 
 /* Red Alert (like bootstrap alert-danger)
 include the .blueAlert class on .redAlerts too! this just changes the colour */
 .redAlert {
-	background-color: #F2DEDE;
-	border-color: #EBCCD1;
-	color: #A94442;
+    background-color: #F2DEDE;
+    border-color: #EBCCD1;
+    color: #A94442;
 }
 
 /* Original dragonnet alerts */
@@ -929,13 +929,13 @@ include the .blueAlert class on .redAlerts too! this just changes the colour */
 .global-alert,
 .dnet-row {
 
-	padding: 15px;
-	margin-bottom: 20px;
-	border: 1px solid transparent;
-	border-radius: 4px;
-	background-color: #d9edf7;
-	border-color: #bce8f1;
-	color: #31708f;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+    color: #31708f;
 
     /*margin-left:100px;
     margin-right:100px;
@@ -945,33 +945,33 @@ include the .blueAlert class on .redAlerts too! this just changes the colour */
     border-top: 2px solid #1662A3;
     border-bottom: 2px solid #1662A3;*/
 }
-	.section .local-alert {
-		margin-top:10px;
-	}
+    .section .local-alert {
+        margin-top:10px;
+    }
 
-	.global-alert.clipboard {
-		margin:0 100px 25px;
-	}
+    .global-alert.clipboard {
+        margin:0 100px 25px;
+    }
 
-	.dnet-row-left {font-weight:bold;}
+    .dnet-row-left {font-weight:bold;}
 
 h4.advice {
-	font-size:12px;
-	margin:5px;
-	font-weight:normal;
+    font-size:12px;
+    margin:5px;
+    font-weight:normal;
 }
 
-	/* User Directory */
+    /* User Directory */
 
 .userinfobox {
-	background: #F6F6F6;
-	border: 1px solid #D4D4D4;
-	-webkit-border-radius: 3px;
-	-moz-webkit-border-radius: 3px;
-	border-radius: 3px;
-	-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-	-moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+    background: #F6F6F6;
+    border: 1px solid #D4D4D4;
+    -webkit-border-radius: 3px;
+    -moz-webkit-border-radius: 3px;
+    border-radius: 3px;
+    -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+    -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
 }
 
 .userinfobox .username {
@@ -995,11 +995,11 @@ table.styledtable td {
 
 table.userinfotable tr.r0 td,
 table.styledtable tr.r0 td {
-	background:rgba(50,50,50,.02);
+    background:rgba(50,50,50,.02);
 }
 table.userinfotable tr.r1 td,
 table.styledtable tr.r1 td {
-	background:rgba(50,50,50,.04);
+    background:rgba(50,50,50,.04);
 }
 
 table.userinfotable td:first-child,
@@ -1012,7 +1012,7 @@ table.styledtable td:first-child {
 
 table.userinfotable tr:hover td,
 table.styledtable tr:hover td {
-	background:rgba(50,50,50,.06);
+    background:rgba(50,50,50,.06);
 }
 
 
@@ -1027,79 +1027,79 @@ table.styledtable tr:hover td {
     text-align: center;
 }
 
-	.directorysearchform {
-		text-align:center;
-	}
-		.directorysearchform input,
-		.directorysearchform select {
-			margin:0 5px;
-		}
-			.directorysearchform input[type=text] {
-				padding: 1px 2px;
-				position: relative;
-				top: 1px;
-			}
+    .directorysearchform {
+        text-align:center;
+    }
+        .directorysearchform input,
+        .directorysearchform select {
+            margin:0 5px;
+        }
+            .directorysearchform input[type=text] {
+                padding: 1px 2px;
+                position: relative;
+                top: 1px;
+            }
 
 
 /* htmltable module */
 .userinfotable.htmltable p {
-	margin:0 !important;
+    margin:0 !important;
 }
 
 #htmltable_edittable_buttons {
-	text-align:center;
-	margin:10px;
+    text-align:center;
+    margin:10px;
 }
-	#htmltable_edittable_buttons:first-child {
-		margin-top:0;
-	}
-	#htmltable_edittable_buttons:last-child {
-		margin-bottom:0;
-	}
+    #htmltable_edittable_buttons:first-child {
+        margin-top:0;
+    }
+    #htmltable_edittable_buttons:last-child {
+        margin-bottom:0;
+    }
 
 
-	#htmltable_edittable th {
-		vertical-align: bottom;
-	}
+    #htmltable_edittable th {
+        vertical-align: bottom;
+    }
 
-	#htmltable_edittable input[type=text],
-	#htmltable_edittable textarea {
-		-webkit-box-sizing:border-box;
-		-moz-box-sizing:border-box;
-		box-sizing:border-box;
-		width:100%;
-		padding:3px;
-		text-align:left;
-	}
-		#htmltable_edittable th input[type=text] {
-			font-weight:bold;
-			text-align:center;
-		}
+    #htmltable_edittable input[type=text],
+    #htmltable_edittable textarea {
+        -webkit-box-sizing:border-box;
+        -moz-box-sizing:border-box;
+        box-sizing:border-box;
+        width:100%;
+        padding:3px;
+        text-align:left;
+    }
+        #htmltable_edittable th input[type=text] {
+            font-weight:bold;
+            text-align:center;
+        }
 
 
-		/*Make space for minus button */
-		#htmltable_edittable td:first-child {
-			padding-left:40px;
-			position: relative;
-		}
-			.htmltable_removecol_button button {
-				margin-bottom:5px;
-			}
+        /*Make space for minus button */
+        #htmltable_edittable td:first-child {
+            padding-left:40px;
+            position: relative;
+        }
+            .htmltable_removecol_button button {
+                margin-bottom:5px;
+            }
 
-		#htmltable_edittable td:first-child button {
-			position: absolute;
-			top: 6px;
-			left: 5px;
-		}
-			#htmltable_edittable tr:last-child {
-				padding-left:3px;
-			}
-			#htmltable_edittable tr:last-child td:first-child button {
-				position: static;
-			}
-		#htmltable_edittable td:first-child input[type=text] {
-			text-align:right;
-		}
+        #htmltable_edittable td:first-child button {
+            position: absolute;
+            top: 6px;
+            left: 5px;
+        }
+            #htmltable_edittable tr:last-child {
+                padding-left:3px;
+            }
+            #htmltable_edittable tr:last-child td:first-child button {
+                position: static;
+            }
+        #htmltable_edittable td:first-child input[type=text] {
+            text-align:right;
+        }
 
 /* end htmltable module */
 
@@ -1108,345 +1108,337 @@ color: #333;
 }
 
 h2.noAccess {
-	text-align:center;
-	font-size:18px;
-	margin:20px 0 30px;
-	font-weight:bold;
-	color: #A00;
+    text-align:center;
+    font-size:18px;
+    margin:20px 0 30px;
+    font-weight:bold;
+    color: #A00;
 }
-	h2.noAccess a {
-		color: #A00;
-		text-decoration: underline;
-	}
+    h2.noAccess a {
+        color: #A00;
+        text-decoration: underline;
+    }
 
 .coursebox:last-child {
-	border-bottom:0;
+    border-bottom:0;
 }
 .coursebox>.info>.name {
-	width:auto;
-	float:none;
+    width:auto;
+    float:none;
 }
 .coursebox .content .summary {
-	width:auto;
-	float:none;
+    width:auto;
+    float:none;
 }
 
 .generalbox,
 .mform > fieldset {
-	background: rgba(255, 255, 255, 0.8);
-	border-radius: 3px;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	padding:10px;
-	-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-	-moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-	margin-top:15px
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    padding:10px;
+    -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+    -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+    margin-top:15px
 }
 
-	.errorbox {
-		text-align:center;
-		color: #A00;
-		border-color:#A00;
-	}
-		.errorbox a {
-			color: #A00;
-			font-weight:bold;
-		}
-		/* Add fontawesome alert icon to errorboxes*/
-		.errorbox:before {
-			font-family: FontAwesome;
-			content: "\f071";
-			margin-right:5px;
-		}
+    .errorbox {
+        text-align:center;
+        color: #A00;
+        border-color:#A00;
+    }
+        .errorbox a {
+            color: #A00;
+            font-weight:bold;
+        }
+        /* Add fontawesome alert icon to errorboxes*/
+        .errorbox:before {
+            font-family: FontAwesome;
+            content: "\f071";
+            margin-right:5px;
+        }
 
-	.successbox {
-		text-align:center;
-		color:#048804;
-		border-color:#048804;
-	}
-		/* Add fontawesome alert icon to errorboxes*/
-		.successbox:before {
-			font-family: FontAwesome;
-			content: "\f058";
-			margin-right:5px;
-		}
+    .successbox {
+        text-align:center;
+        color:#048804;
+        border-color:#048804;
+    }
+        /* Add fontawesome alert icon to errorboxes*/
+        .successbox:before {
+            font-family: FontAwesome;
+            content: "\f058";
+            margin-right:5px;
+        }
 
-	.generalbox .errorbox,
-	.mform > fieldset .errorbox,
-	.generalbox .successbox,
-	.mform > fieldset .successbox {
-		border:none;
-		-moz-box-shadow:none;
-		-webkit-box-shadow:none;
-		box-shadow:none;
-	}
+    .generalbox .errorbox,
+    .mform > fieldset .errorbox,
+    .generalbox .successbox,
+    .mform > fieldset .successbox {
+        border:none;
+        -moz-box-shadow:none;
+        -webkit-box-shadow:none;
+        box-shadow:none;
+    }
 
-	.helptext {
-		font-size:12px;
-		text-align:center;
-		margin:10px !important;
-		color:#888;
-	}
-		.helptext:before {
-			font-family: FontAwesome;
-			content: "\f129";
-			margin-right:5px;
-		}
+    .helptext {
+        font-size:12px;
+        text-align:center;
+        margin:10px !important;
+        color:#888;
+    }
+        .helptext:before {
+            font-family: FontAwesome;
+            content: "\f129";
+            margin-right:5px;
+        }
 
-	span.grey,
-	span.red,
-	span.green {
-		font-size:12px;
-	}
-		span.grey { color:#888; }
-		span.red { color:#A00; }
-		span.green { color:#048804; }
+    span.grey,
+    span.red,
+    span.green {
+        font-size:12px;
+    }
+        span.grey { color:#888; }
+        span.red { color:#A00; }
+        span.green { color:#048804; }
 
-	#intro.generalbox {
-		padding: 10px;
-	}
+    #intro.generalbox {
+        padding: 10px;
+    }
 
-	.generalbox.inset {
-		-webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.2) inset;
-		-moz-box-shadow: 0 0 8px rgba(0, 0, 0, 0.2) inset;
-		box-shadow: 0 0 8px rgba(0, 0, 0, 0.2) inset;
-		background: #e9ecf3;
-	}
+    .generalbox.inset {
+        -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.2) inset;
+        -moz-box-shadow: 0 0 8px rgba(0, 0, 0, 0.2) inset;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.2) inset;
+        background: #e9ecf3;
+    }
 
-	.mform > fieldset .ftoggler {
-		background: #fff;
-	}
-	.generalbox > :last-child {
-		margin-bottom:0;
-	}
+    .mform > fieldset .ftoggler {
+        background: #fff;
+    }
+    .generalbox > :last-child {
+        margin-bottom:0;
+    }
 
-	.sitetopic {
-		background:none;
-		-webkit-box-shadow:none;
-		-moz-box-shadow:none;
-		box-shadow:none;
-	}
+    .sitetopic {
+        background:none;
+        -webkit-box-shadow:none;
+        -moz-box-shadow:none;
+        box-shadow:none;
+    }
 
-	/* Icons page */
-	ul.iconList {
-		list-style:none;
-		margin:0;
-		padding:0;
-	}
-		ul.iconList li {
-			float:left;
-			width:32%;
-			-moz-box-sizing: border-box;
-			-webkit-box-sizing: border-box;
-			box-sizing: border-box;
-			margin-right:1%;
-			margin-bottom:3px;
-			display:block;
-			font-size:15px;
-			background:rgba(255,255,255,0.5);
-			padding:5px 10px;
-		}
-			ul.iconList li:nth-child(even) {
-				background:rgba(255,255,255,0.75);
-			}
-		ul.iconList li i {
-			vertical-align: middle;
-			margin-right:5px;
-		}
+    /* Icons page */
+    ul.iconList {
+        list-style:none;
+        margin:0;
+        padding:0;
+    }
+        ul.iconList li {
+            float:left;
+            width:32%;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            margin-right:1%;
+            margin-bottom:3px;
+            display:block;
+            font-size:15px;
+            background:rgba(255,255,255,0.5);
+            padding:5px 10px;
+        }
+            ul.iconList li:nth-child(even) {
+                background:rgba(255,255,255,0.75);
+            }
+        ul.iconList li i {
+            vertical-align: middle;
+            margin-right:5px;
+        }
 
 
-	.boxwidthwide {
-		width:auto;
-	}
+    .boxwidthwide {
+        width:auto;
+    }
 
-	.template_heading {
-		margin-bottom: 10px;
-		font-weight: bold;
-		font-size: 12px;
-	}
+    .template_heading {
+        margin-bottom: 10px;
+        font-weight: bold;
+        font-size: 12px;
+    }
 
-	/* Pagination */
-	.paging {
-		text-align:center;
-		font-weight:bold;
-		margin:0 0 15px 0;
-	}
-		.paging > span {
-			position: relative;
-			top: 1px;
-			margin-right: 5px;
-		}
-		.paging .btn {
-			font-weight:normal;
-			margin:0 1px;
-			font-size:13px;
-			border: 0px;
-		}
-		.paging .btn.selected {
-			background:#1662A3;
-			color: #fff;
-		}
+    /* Pagination */
+    .paging {
+        text-align:center;
+        font-weight:bold;
+        margin:0 0 15px 0;
+    }
+        .paging > span {
+            position: relative;
+            top: 1px;
+            margin-right: 5px;
+        }
+        .paging .btn {
+            font-weight:normal;
+            margin:0 1px;
+            font-size:13px;
+            border: 0px;
+        }
+        .paging .btn.selected {
+            background:#1662A3;
+            color: #fff;
+        }
 
-	/* Grid course format tweaks */
+    /* Grid course format tweaks */
 
-	#gridiconcontainer {
-		padding:0;
-	}
+    #gridiconcontainer {
+        padding:0;
+    }
 
-	/* Button list */
-	ul.gridformatbuttons.buttons {
-		max-width:none;
-	}
+    /* Button list */
+    ul.gridformatbuttons.buttons {
+        max-width:none;
+    }
 
-		/* Button list items */
-		ul.gridformatbuttons.buttons li {
-			margin:0 !important;
-			width:25% !important;
-			padding:5px !important;
-			background:none !important;
-			opacity:1 !important;
-		}
+        /* Button list items */
+        ul.gridformatbuttons.buttons li {
+            margin:0 !important;
+            width:25% !important;
+            padding:5px !important;
+            background:none !important;
+            opacity:1 !important;
+        }
 
-			/* Button links (the actual buttons) */
-			ul.gridformatbuttons.buttons a.btn {
-				position: relative;
-				height:142px;
-				white-space: normal;
-				padding:0;
-			}
-				/* Button label */
-				ul.gridformatbuttons.buttons a.btn span {
-					white-space: normal !important;
-					position: absolute;
-					bottom:0;
-					left:0;
-					right:0;
-					opacity:.9;
-					display:block;
-					padding: 23px 10px 10px;
-					font-size:14px;
-					line-height: 22px;
-				}
-					ul.gridformatbuttons.buttons .btn:hover span {
-						opacity:1;
-					}
+            /* Button links (the actual buttons) */
+            ul.gridformatbuttons.buttons a.btn {
+                position: relative;
+                height:142px;
+                white-space: normal;
+                padding:0;
+            }
+                /* Button label */
+                ul.gridformatbuttons.buttons a.btn span {
+                    white-space: normal !important;
+                    position: absolute;
+                    bottom:0;
+                    left:0;
+                    right:0;
+                    opacity:.9;
+                    display:block;
+                    padding: 23px 10px 10px;
+                    font-size:14px;
+                    line-height: 22px;
+                }
+                    ul.gridformatbuttons.buttons .btn:hover span {
+                        opacity:1;
+                    }
 
-				/* Buttons with images */
-				ul.gridformatbuttons a.btn.hasIcon {
-					background-size:cover !important;
-				}
+                /* Buttons with images */
+                ul.gridformatbuttons a.btn.hasIcon {
+                    background-size:cover !important;
+                }
 
-					/* Labels gradient */
-					ul.gridformatbuttons .btn.hasIcon span {
-						color:#fff;
-						background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0.8) 100%);
-						background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0)), color-stop(30%,rgba(0,0,0,0.8)), color-stop(100%,rgba(0,0,0,0.8)));
-						background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
-						background: -o-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
-						background: -ms-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
-						background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
-						filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#cc000000',GradientType=0 );
-					}
+                    /* Labels gradient */
+                    ul.gridformatbuttons .btn.hasIcon span {
+                        color:#fff;
+                        background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0.8) 100%);
+                        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0)), color-stop(30%,rgba(0,0,0,0.8)), color-stop(100%,rgba(0,0,0,0.8)));
+                        background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
+                        background: -o-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
+                        background: -ms-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
+                        background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 30%,rgba(0,0,0,0.8) 100%);
+                        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#cc000000',GradientType=0 );
+                    }
 
-					ul.gridformatbuttons .btn.noIcon span {
-						color:#fff;
-						background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.4) 100%);
-						background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0)), color-stop(30%,rgba(0,0,0,0.4)), color-stop(100%,rgba(0,0,0,0.4)));
-						background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 30%,rgba(0,0,0,0.4) 100%);
-						background: -o-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 30%,rgba(0,0,0,0.4) 100%);
-						background: -ms-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 30%,rgba(0,0,0,0.4) 100%);
-						background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 30%,rgba(0,0,0,0.4) 100%);
-						filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#cc000000',GradientType=0 );
-					}
+                    ul.gridformatbuttons .btn.noIcon span {
+                        color:#fff;
+                        background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.4) 100%);
+                        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0)), color-stop(30%,rgba(0,0,0,0.4)), color-stop(100%,rgba(0,0,0,0.4)));
+                        background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 30%,rgba(0,0,0,0.4) 100%);
+                        background: -o-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 30%,rgba(0,0,0,0.4) 100%);
+                        background: -ms-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 30%,rgba(0,0,0,0.4) 100%);
+                        background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 30%,rgba(0,0,0,0.4) 100%);
+                        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#cc000000',GradientType=0 );
+                    }
 
-				ul.gridformatbuttons .editbuttons,
-				ul.gridformatbuttons .editbuttons a {
-					text-align:center;
-					font-size: 11px;
-					color:#999;
-				}
-					ul.gridformatbuttons .editbuttons a:hover {
-						color:#888;
-					}
+                ul.gridformatbuttons .editbuttons,
+                ul.gridformatbuttons .editbuttons a {
+                    text-align:center;
+                    font-size: 11px;
+                    color:#999;
+                }
+                    ul.gridformatbuttons .editbuttons a:hover {
+                        color:#888;
+                    }
 
-	#gridshadebox_content .activity {
-		border-bottom-width:0;
-	}
-		body.editing #gridshadebox_content .activity {
-			border-bottom-width:1px;
-		}
-		#gridshadebox_content .activity .activityinstance img.activityicon {
-			margin-top:2px;
-		}
+    #gridshadebox_content .activity {
+        border-bottom-width:0;
+    }
+        body.editing #gridshadebox_content .activity {
+            border-bottom-width:1px;
+        }
+        #gridshadebox_content .activity .activityinstance img.activityicon {
+            margin-top:2px;
+        }
 
-	/* Grid format popup */
-	#gridshadebox_content {
-		position:fixed !important;
-		top:40px !important;
-		bottom:40px;
-		left:40px !important;
-		right:40px;
-		width:auto !important;
-		border-color:#1662A3;
-	}
-	
-/* Christmas */
-#awesomebar {
-	z-index:99999999 !important;
+    /* Grid format popup */
+    #gridshadebox_content {
+        position:fixed !important;
+        top:40px !important;
+        bottom:40px;
+        left:40px !important;
+        right:40px;
+        width:auto !important;
+        border-color:#1662A3;
+    }
+        body.editing #gridshadebox_content {
+            position: static !important;
+        }
+
+        #gridshadebox_content_inner {
+            height:100%;
+            overflow: auto;
+            padding:20px;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+            #gridshadebox_content ul.gtopics {
+                margin:0;
+            }
+                #gridshadebox_content ul.gtopics .section {
+                    padding:0;
+                }
+
+
+/* Search form in header */
+#headerSearchForm {
+    position: absolute;
+    bottom:10px;
+    right:10px;
+    width:290px;
 }
 
-a:link,
-a:visited,
-a:hover,
-a:active
-{
-	color:#23811F;
+#headerSearchForm input,
+#headerSearchForm button {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
-ul.buttons a.btn
-{
-	color:#23811F !important;
+#headerSearchForm input[type=text] {
+    width:220px;
+    margin-right:10px;
+    font-size:13px;
+    padding:3px;
 }
 
-#page-header
-{
-	background-color:#23811F;
+#headerSearchForm button {
+    width:60px;
+    font-size:13px;
+    margin-top: -3px;
+    padding: 4px;
 }
 
-#page-header-gradient {
-	position: absolute;
-	top:0;
-	bottom:0;
-	right:0;
-	width:800px;
-	background: -moz-linear-gradient(left,  rgba(35,129,31,1) 0%, rgba(35,129,31,0.7) 10%, rgba(35,129,31,0) 33%, rgba(35,129,31,0) 100%);
-	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(35,129,31,1)), color-stop(10%,rgba(35,129,31,0.7)), color-stop(33%,rgba(35,129,31,0)), color-stop(100%,rgba(35,129,31,0)));
-	background: -webkit-linear-gradient(left,  rgba(35,129,31,1) 0%,rgba(35,129,31,0.7) 10%,rgba(35,129,31,0) 33%,rgba(35,129,31,0) 100%);
-	background: -o-linear-gradient(left,  rgba(35,129,31,1) 0%,rgba(35,129,31,0.7) 10%,rgba(35,129,31,0) 33%,rgba(35,129,31,0) 100%);
-	background: -ms-linear-gradient(left,  rgba(35,129,31,1) 0%,rgba(35,129,31,0.7) 10%,rgba(35,129,31,0) 33%,rgba(35,129,31,0) 100%);
-	background: linear-gradient(to right,  rgba(35,129,31,1) 0%,rgba(35,129,31,0.7) 10%,rgba(35,129,31,0) 33%,rgba(35,129,31,0) 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1662a3', endColorstr='#001662a3',GradientType=1 );
-}
-
-.login-reminder,
-.local-alert {
-	border-top-color: #23811F;
-	border-bottom-color: #23811F;
-}
-
-.tabs ul li > span.selected {
-	font-weight:normal;
-	background:#23811F;
-	font-size:13px;
-	color: #FFF;
-	border-color: #23811F !important;
-}
-
-.paging .btn.selected {
-	background:#23811F;
-	color: #fff;
-}
 
 /** Custom CSS **/
 [[setting:customcss]]

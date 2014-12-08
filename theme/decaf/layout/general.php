@@ -75,7 +75,9 @@ echo $OUTPUT->doctype() ?>
     <title><?php echo ltrim($PAGE->title,': ') ?></title>
     <link rel="shortcut icon" href="<?php echo $OUTPUT->pix_url('favicon', 'theme')?>" />
     <?php echo $OUTPUT->standard_head_html() ?>
-    
+
+
+    <link rel="stylesheet" href="/theme/decaf/style/christmas.css?v=2"></link>
     <?php if (empty($_COOKIE['nosnow'])) { ?>
     <!-- Snow -->
    	<link rel="stylesheet" href="/jquery-snowfall/styles.css"></link>
@@ -88,7 +90,7 @@ echo $OUTPUT->doctype() ?>
     </script>
     <!-- end snow -->
     <? } ?>
-    
+
 </head>
 
 <body id="<?php p($PAGE->bodyid) ?>" class="<?php p($PAGE->bodyclasses.' '.join(' ', $bodyclasses)) ?>">
@@ -126,7 +128,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 <?php if ($hasheading || $hasnavbar) { ?>
 
    <?php
-	   	$headerPhotos = array(
+	   	/*$headerPhotos = array(
 	   		'header-0.jpg',
 	   		'header-1.jpg',
 	   		'header-2.jpg',
@@ -137,15 +139,15 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 	   	if ( isset($_GET['header']) ) { $headerPhoto = $_GET['header']; }
 	   	else if ( isset($SESSION) && isset($SESSION->headerPhoto) ) { $headerPhoto = $SESSION->headerPhoto; }
 	   	else { $headerPhoto = rand(0,4); }
-		$headerBg = '/theme/decaf/pix/'.$headerPhotos[$headerPhoto];
-		
-		$headerBg = '/theme/decaf/pix/header-xmas.jpg';
-   ?>   
+		$headerBg = '/theme/decaf/pix/'.$headerPhotos[$headerPhoto]; */
+
+		$headerBg = '/theme/decaf/pix/redchristmasheader.jpg';
+   ?>
 
     <div id="page-header" style="background-image:url(<?php echo $headerBg; ?>);">
     	<div id="page-header-gradient"></div>
 		<div id="page-header-wrapper">
-	        
+
 	        <?php if ($hasheading) { ?>
 		    	<h1 class="headermain"><?php echo str_replace('DragonNet','<img src="/theme/decaf/pix/dragonnet-hat.png" alt="DragonNet" style="height:40px; vertical-align:middle; margin-top:-5px;" />', $PAGE->heading); ?></h1>
     		    <div class="headermenu">
@@ -166,15 +168,15 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 	        	echo $PAGE->headingmenu;
         			?>
 	        	</div>
-	        <?php } ?>        
-        	
+	        <?php } ?>
+
 	    </div>
     </div>
-    
+
     <?php if ($hascustommenu && empty($PAGE->theme->settings->custommenuinawesomebar)) { ?>
       <div id="custommenu" class="decaf-awesome-bar"><?php echo $custommenu; ?></div>
  	<?php } ?>
-    
+
     <?php if (!empty($courseheader)) { ?>
         <div id="course-header"><?php echo $courseheader; ?></div>
     <?php } ?>
