@@ -34,9 +34,6 @@
 [submodule "question/format/stack"]
 	path = question/format/stack
 	url = git://github.com/maths/moodle-qformat_stack.git
-[submodule "mod/brainpop"]
-	path = mod/brainpop
-	url = https://github.com/brainysmurf/brainpopmoodle.git
 [submodule "question/type/ddmarker"]
 	path = question/type/ddmarker
 	url = https://github.com/moodleou/moodle-qtype_ddmarker.git
@@ -64,3 +61,6 @@
 [submodule "blocks/configurable_reports"]
 	path = blocks/configurable_reports
 	url = https://github.com/ssis-suzhou/moodle-block_configurablereports.git
+[submodule "mod/brainpop"]
+	path = mod/brainpop
+	url = https://github.com/antriver/moodle-mod_brainpop.git
