@@ -24,7 +24,6 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
-
 require_once("$CFG->libdir/filestorage/stored_file.php");
 
 /**

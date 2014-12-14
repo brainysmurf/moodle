@@ -595,10 +595,13 @@ class awesomebar
 			}
 		}
 
-		//See if an icon for this category is set in the SSIS metadata
-		$category_icon = course_get_category_icon($category['id']);
+		// SSIS:
+		$category_icon = false;
+		if (function_exists('\course_get_category_icon')) {
+			$category_icon = course_get_category_icon($category['id']);
+		}
 
-		//Backward compatibility: If no icon was set in the metadata, use the ones defined in this class
+		//SSIS: Backward compatibility: If no icon was set in the metadata, use the ones defined in this class
 		//This can be removed when all category icons have been set in the metadata
 		if (!$category_icon) {
 			$category_icon = $this->get_category_icon($category['name']);

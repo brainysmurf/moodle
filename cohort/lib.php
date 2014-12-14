@@ -170,12 +170,10 @@ function cohort_add_member($cohortid, $userid) {
     $record->timeadded = time();
     $DB->insert_record('cohort_members', $record);
 
-<<<<<<< HEAD
+
 	#cohort_clear_cache(); //Clear everything
 	$COHORT_CACHE->delete("cohort_is_member,$cohortid,$userid"); //Just clear cohort_is_member
 
-    events_trigger('cohort_member_added', (object)array('cohortid'=>$cohortid, 'userid'=>$userid));
-=======
     $cohort = $DB->get_record('cohort', array('id' => $cohortid), '*', MUST_EXIST);
 
     $event = \core\event\cohort_member_added::create(array(
@@ -185,7 +183,6 @@ function cohort_add_member($cohortid, $userid) {
     ));
     $event->add_record_snapshot('cohort', $cohort);
     $event->trigger();
->>>>>>> moodle/MOODLE_27_STABLE
 }
 
 /**
@@ -198,12 +195,9 @@ function cohort_remove_member($cohortid, $userid) {
     global $DB, $COHORT_CACHE;
     $DB->delete_records('cohort_members', array('cohortid'=>$cohortid, 'userid'=>$userid));
 
-<<<<<<< HEAD
 	#cohort_clear_cache(); //Clear everything
 	$COHORT_CACHE->delete("cohort_is_member,$cohortid,$userid"); //Just clear cohort_is_member
 
-    events_trigger('cohort_member_removed', (object)array('cohortid'=>$cohortid, 'userid'=>$userid));
-=======
     $cohort = $DB->get_record('cohort', array('id' => $cohortid), '*', MUST_EXIST);
 
     $event = \core\event\cohort_member_removed::create(array(
@@ -213,7 +207,6 @@ function cohort_remove_member($cohortid, $userid) {
     ));
     $event->add_record_snapshot('cohort', $cohort);
     $event->trigger();
->>>>>>> moodle/MOODLE_27_STABLE
 }
 
 function cohort_count_members($cohortid) {

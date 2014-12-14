@@ -7606,7 +7606,7 @@ function moodle_needs_upgrading() {
     }
 
     $hash = core_component::get_all_versions_hash();
-
+    
     return ($hash !== $CFG->allversionshash);
 }
 

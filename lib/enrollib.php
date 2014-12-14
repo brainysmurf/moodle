@@ -1073,8 +1073,6 @@ function enrol_accessing_via_instance(stdClass $instance) {
     return $DB->record_exists('user_enrolments', array('userid'=>$USER->id, 'enrolid'=>$instance->id));
 }
 
->>>>>>> moodle/MOODLE_27_STABLE
-
 /**
  * All enrol plugins should be based on this class,
  * this is also the main source of documentation.

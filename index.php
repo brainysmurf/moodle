@@ -21,7 +21,7 @@
  * @package    core
  * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+ */ 
 
     if (!file_exists('./config.php')) {
         header('Location: install.php');
@@ -181,7 +181,6 @@
     } else {
         $frontpagelayout = $CFG->frontpage;
     }
-
     foreach (explode(',',$frontpagelayout) as $v) {
         switch ($v) {     /// Display the main part of the front page.
             case FRONTPAGENEWS:
