@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -19,8 +18,8 @@
  * This file contains classes used to manage the navigation structures in Moodle
  * and was introduced as part of the changes occuring in Moodle 2.0
  *
- * @since 2.0
- * @package blocks
+ * @since Moodle 2.0
+ * @package block_settings
  * @copyright 2009 Sam Hemelryk
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +29,7 @@
  *
  * Used to produce the settings navigation block new to Moodle 2.0
  *
- * @package blocks
+ * @package block_settings
  * @copyright 2009 Sam Hemelryk
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -91,10 +90,13 @@ class block_settings extends block_base {
     }
 
     function get_required_javascript() {
-        global $CFG;
-        $arguments = array('id' => $this->instance->id, 'instance' => $this->instance->id, 'candock' => $this->instance_can_be_docked());
-        $this->page->requires->yui_module(array('core_dock', 'moodle-block_navigation-navigation'), 'M.block_navigation.init_add_tree', array($arguments));
-        user_preference_allow_ajax_update('docked_block_instance_'.$this->instance->id, PARAM_INT);
+        parent::get_required_javascript();
+        $arguments = array(
+            'id' => $this->instance->id,
+            'instance' => $this->instance->id,
+            'candock' => $this->instance_can_be_docked()
+        );
+        $this->page->requires->yui_module('moodle-block_navigation-navigation', 'M.block_navigation.init_add_tree', array($arguments));
     }
 
     /**

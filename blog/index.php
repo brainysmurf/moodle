@@ -34,10 +34,6 @@ foreach ($url_params as $var => $val) {
 }
 $PAGE->set_url('/blog/index.php', $url_params);
 
-if (empty($CFG->enableblogs)) {
-    print_error('blogdisable', 'blog');
-}
-
 //correct tagid if a text tag is provided as a param
 if (!empty($tag)) {
     if ($tagrec = $DB->get_record('tag', array('name' => $tag))) {
@@ -45,15 +41,6 @@ if (!empty($tag)) {
     } else {
         unset($tagid);
     }
-}
-
-// add courseid if modid or groupid is specified: This is used for navigation and title
-if (!empty($modid) && empty($courseid)) {
-    $courseid = $DB->get_field('course_modules', 'course', array('id'=>$modid));
-}
-
-if (!empty($groupid) && empty($courseid)) {
-    $courseid = $DB->get_field('groups', 'courseid', array('id'=>$groupid));
 }
 
 $sitecontext = context_system::instance();
@@ -82,6 +69,19 @@ if ($CFG->bloglevel == BLOG_GLOBAL_LEVEL) {
 } else {
     // weird!
     print_error('blogdisable', 'blog');
+}
+
+if (empty($CFG->enableblogs)) {
+    print_error('blogdisable', 'blog');
+}
+
+// Add courseid if modid or groupid is specified: This is used for navigation and title.
+if (!empty($modid) && empty($courseid)) {
+    $courseid = $DB->get_field('course_modules', 'course', array('id' => $modid));
+}
+
+if (!empty($groupid) && empty($courseid)) {
+    $courseid = $DB->get_field('groups', 'courseid', array('id' => $groupid));
 }
 
 
@@ -223,5 +223,13 @@ $bloglisting = new blog_listing($blogheaders['filters']);
 $bloglisting->print_entries();
 
 echo $OUTPUT->footer();
-
-add_to_log($courseid, 'blog', 'view', 'index.php?entryid='.$entryid.'&amp;tagid='.@$tagid.'&amp;tag='.$tag, 'view blog entry');
+$eventparams = array(
+    'other' => array('entryid' => $entryid, 'tagid' => $tagid, 'userid' => $userid, 'modid' => $modid, 'groupid' => $groupid,
+                     'search' => $search, 'fromstart' => $start)
+);
+if (!empty($userid)) {
+    $eventparams['relateduserid'] = $userid;
+}
+$eventparams['other']['courseid'] = ($courseid === SITEID) ? 0 : $courseid;
+$event = \core\event\blog_entries_viewed::create($eventparams);
+$event->trigger();

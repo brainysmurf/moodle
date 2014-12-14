@@ -35,8 +35,7 @@
 /**
  * This file contains all necessary code to view a lti activity instance
  *
- * @package    mod
- * @subpackage lti
+ * @package mod_lti
  * @copyright  2009 Marc Alier, Jordi Piguillem, Nikolas Galanis
  *  marc.alier@upc.edu
  * @copyright  2009 Universitat Politecnica de Catalunya http://www.upc.edu
@@ -96,7 +95,15 @@ require_login($course);
 $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 
-add_to_log($course->id, "lti", "view", "view.php?id=$cm->id", "$lti->id");
+$params = array(
+    'context' => $context,
+    'objectid' => $lti->id
+);
+$event = \mod_lti\event\course_module_viewed::create($params);
+$event->add_record_snapshot('course_modules', $cm);
+$event->add_record_snapshot('course', $course);
+$event->add_record_snapshot('lti', $lti);
+$event->trigger();
 
 $pagetitle = strip_tags($course->shortname.': '.format_string($lti->name));
 $PAGE->set_title($pagetitle);
@@ -107,11 +114,11 @@ echo $OUTPUT->header();
 
 if ($lti->showtitlelaunch) {
     // Print the main part of the page
-    echo $OUTPUT->heading(format_string($lti->name));
+    echo $OUTPUT->heading(format_string($lti->name, true, array('context' => $context)));
 }
 
 if ($lti->showdescriptionlaunch && $lti->intro) {
-    echo $OUTPUT->box($lti->intro, 'generalbox description', 'intro');
+    echo $OUTPUT->box(format_module_intro('lti', $lti, $cm->id), 'generalbox description', 'intro');
 }
 
 if ( $launchcontainer == LTI_LAUNCH_CONTAINER_WINDOW ) {
@@ -121,10 +128,10 @@ if ( $launchcontainer == LTI_LAUNCH_CONTAINER_WINDOW ) {
     echo "</script>\n";
     echo "<p>".get_string("basiclti_in_new_window", "lti")."</p>\n";
 } else {
-    // Request the launch content with an object tag
-    echo '<object id="contentframe" height="600px" width="100%" type="text/html" data="launch.php?id='.$cm->id.'"></object>';
+    // Request the launch content with an iframe tag.
+    echo '<iframe id="contentframe" height="600px" width="100%" src="launch.php?id='.$cm->id.'"></iframe>';
 
-    //Output script to make the object tag be as large as possible
+    // Output script to make the iframe be as large as possible.
     $resize = '
         <script type="text/javascript">
         //<![CDATA[

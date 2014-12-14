@@ -6,6 +6,7 @@ Feature: We can enter in grades and view reports from the gradebook
   I need to enable grade weightings and check that they are displayed correctly.
 
   Background:
+<<<<<<< HEAD
     Given the following "courses" exists:
       | fullname | shortname | format |
       | Course 1 | C1 | topics |
@@ -14,6 +15,16 @@ Feature: We can enter in grades and view reports from the gradebook
       | teacher1 | Teacher | 1 | teacher1@asd.com |
       | student1 | Student | 1 | student1@asd.com |
     And the following "course enrolments" exists:
+=======
+    Given the following "courses" exist:
+      | fullname | shortname | format |
+      | Course 1 | C1 | topics |
+    And the following "users" exist:
+      | username | firstname | lastname | email |
+      | teacher1 | Teacher | 1 | teacher1@asd.com |
+      | student1 | Student | 1 | student1@asd.com |
+    And the following "course enrolments" exist:
+>>>>>>> moodle/MOODLE_27_STABLE
       | user | course | role |
       | teacher1 | C1 | editingteacher |
       | student1 | C1 | student |
@@ -21,16 +32,38 @@ Feature: We can enter in grades and view reports from the gradebook
     And I follow "Course 1"
     And I turn editing mode on
     And I add a "Assignment" to section "1" and I fill the form with:
+<<<<<<< HEAD
       | Assignment name | Test assignment name |
+=======
+      | Assignment name | Test assignment name 1 |
+      | Description | Submit your online text |
+      | assignsubmission_onlinetext_enabled | 1 |
+    And I add a "Assignment" to section "1" and I fill the form with:
+      | Assignment name | Test assignment name 2 |
+>>>>>>> moodle/MOODLE_27_STABLE
       | Description | Submit your online text |
       | assignsubmission_onlinetext_enabled | 1 |
     And I log out
     And I log in as "student1"
     And I follow "Course 1"
+<<<<<<< HEAD
     And I follow "Test assignment name"
     When I press "Add submission"
     And I fill the moodle form with:
       | Online text | This is a submission |
+=======
+    And I follow "Test assignment name 1"
+    When I press "Add submission"
+    And I set the following fields to these values:
+      | Online text | This is a submission for assignment 1 |
+    And I press "Save changes"
+    Then I should see "Submitted for grading"
+    And I follow "Course 1"
+    And I follow "Test assignment name 2"
+    When I press "Add submission"
+    And I set the following fields to these values:
+      | Online text | This is a submission for assignment 2 |
+>>>>>>> moodle/MOODLE_27_STABLE
     And I press "Save changes"
     Then I should see "Submitted for grading"
     And I log out
@@ -38,12 +71,21 @@ Feature: We can enter in grades and view reports from the gradebook
     And I follow "Course 1"
     And I follow "Grades"
     And I turn editing mode on
+<<<<<<< HEAD
     And I give the grade "80.00" to the user "Student 1" for the grade item "Test assignment name"
+=======
+    And I give the grade "80.00" to the user "Student 1" for the grade item "Test assignment name 1"
+    And I give the grade "90.00" to the user "Student 1" for the grade item "Test assignment name 2"
+>>>>>>> moodle/MOODLE_27_STABLE
     And I press "Update"
 
   @javascript
   Scenario: Grade a grade item and ensure the results display correctly in the gradebook
+<<<<<<< HEAD
     When I select "User report" from "Grade report"
+=======
+    When I set the field "Grade report" to "User report"
+>>>>>>> moodle/MOODLE_27_STABLE
     And the "Grade report" select box should contain "Grader report"
     And the "Grade report" select box should contain "Outcomes report"
     And the "Grade report" select box should contain "User report"
@@ -52,6 +94,7 @@ Feature: We can enter in grades and view reports from the gradebook
     And I log in as "student1"
     And I follow "Course 1"
     And I follow "Grades"
+<<<<<<< HEAD
     And I should see "80.00" in the "Test assignment name" "table_row"
     And I select "Overview report" from "Grade report"
     And I should see "80.00" in the "overview-grade" "table"
@@ -66,11 +109,48 @@ Feature: We can enter in grades and view reports from the gradebook
     And I select "User report" from "Grade report"
     And I follow "Course grade settings"
     And I fill the moodle form with:
+=======
+    Then the following should exist in the "user-grade" table:
+      | Grade item | Grade | Range | Percentage |
+      | Test assignment name 1 | 80.00 | 0–100 | 80.00 % |
+      | Test assignment name 2 | 90.00 | 0–100 | 90.00 % |
+      | Course total | 85.00 | 0–100 | 85.00 % |
+    And the following should not exist in the "user-grade" table:
+      | Grade item | Grade | Range | Percentage |
+      | Course total | 90.00 | 0–110 | 90.00 % |
+    And I set the field "Grade report" to "Overview report"
+    And "C1" row "Grade" column of "overview-grade" table should contain "85.00"
+    And "C1" row "Grade" column of "overview-grade" table should not contain "90.00"
+
+  @javascript
+  Scenario: We can add a weighting to a grade item and it is displayed properly in the user report
+    When I set the field "Grade report" to "Full view"
+    And I set the field "Aggregation" to "Weighted mean of grades"
+    And I set the following fields to these values:
+      | Extra credit value for Test assignment name | 0.72 |
+    And I press "Save changes"
+    And I set the field "Grade report" to "User report"
+    And I follow "Course grade settings"
+    And I set the following fields to these values:
+>>>>>>> moodle/MOODLE_27_STABLE
       | Show weightings | Show |
     And I press "Save changes"
     And I log out
     And I log in as "student1"
     And I follow "Course 1"
     And I follow "Grades"
+<<<<<<< HEAD
     Then I should see "0.72" in the "Test assignment name" "table_row"
     And I should not see "0.72%" in the "Test assignment name" "table_row"
+=======
+    Then the following should exist in the "user-grade" table:
+      | Grade item | Weight | Grade | Range | Percentage |
+      | Test assignment name 1 | 0.72 | 80.00 | 0–100 | 80.00 % |
+      | Test assignment name 2 | 1.00 | 90.00 | 0–100 | 90.00 % |
+      | Course total | - | 85.81 | 0–100 | 85.81 % |
+    And the following should not exist in the "user-grade" table:
+      | Grade item | Weight | Percentage |
+      | Test assignment name 1 | 0.72% | 0.72% |
+      | Test assignment name 2 | 1.00% | 1.00% |
+      | Course total | 1.00% | 1.00% |
+>>>>>>> moodle/MOODLE_27_STABLE

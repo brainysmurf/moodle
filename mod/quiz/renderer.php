@@ -17,10 +17,9 @@
 /**
  * Defines the renderer for the quiz module.
  *
- * @package    mod
- * @subpackage quiz
- * @copyright  2011 The Open University
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_quiz
+ * @copyright 2011 The Open University
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 
@@ -99,6 +98,8 @@ class mod_quiz_renderer extends plugin_renderer_base {
     public function review_question_not_allowed($message) {
         $output = '';
         $output .= $this->header();
+        $output .= $this->heading(format_string($attemptobj->get_quiz_name(), true,
+                                  array("context" => $attemptobj->get_quizobj()->get_context())));
         $output .= $this->notification($message);
         $output .= $this->close_window_button();
         $output .= $this->footer();
@@ -393,6 +394,8 @@ class mod_quiz_renderer extends plugin_renderer_base {
     public function start_attempt_page(quiz $quizobj, mod_quiz_preflight_check_form $mform) {
         $output = '';
         $output .= $this->header();
+        $output .= $this->heading(format_string($quizobj->get_quiz_name(), true,
+                                  array("context" => $quizobj->get_context())));
         $output .= $this->quiz_intro($quizobj->get_quiz(), $quizobj->get_cm());
         ob_start();
         $mform->display();
@@ -706,6 +709,7 @@ class mod_quiz_renderer extends plugin_renderer_base {
      * @return string HTML to output.
      */
     public function view_page_buttons(mod_quiz_view_object $viewobj) {
+        global $CFG;
         $output = '';
 
         if (!$viewobj->quizhasquestions) {
@@ -719,8 +723,9 @@ class mod_quiz_renderer extends plugin_renderer_base {
                     $viewobj->startattempturl, $viewobj->startattemptwarning,
                     $viewobj->popuprequired, $viewobj->popupoptions);
 
-        } else if ($viewobj->buttontext === '') {
-            // We should show a 'back to the course' button.
+        }
+
+        if ($viewobj->showbacktocourse) {
             $output .= $this->single_button($viewobj->backtocourseurl,
                     get_string('backtocourse', 'quiz'), 'get',
                     array('class' => 'continuebutton'));
@@ -880,7 +885,7 @@ class mod_quiz_renderer extends plugin_renderer_base {
      * Generates the table heading.
      */
     public function view_table_heading() {
-        return $this->heading(get_string('summaryofattempts', 'quiz'));
+        return $this->heading(get_string('summaryofattempts', 'quiz'), 3);
     }
 
     /**
@@ -967,6 +972,7 @@ class mod_quiz_renderer extends plugin_renderer_base {
                     // Highlight the highest grade if appropriate.
                     if ($viewobj->overallstats && !$attemptobj->is_preview()
                             && $viewobj->numattempts > 1 && !is_null($viewobj->mygrade)
+                            && $attemptobj->get_state() == quiz_attempt::FINISHED
                             && $attemptgrade == $viewobj->mygrade
                             && $quiz->grademethod == QUIZ_GRADEHIGHEST) {
                         $table->rowclasses[$attemptobj->get_attempt_number()] = 'bestrow';
@@ -1033,13 +1039,6 @@ class mod_quiz_renderer extends plugin_renderer_base {
     }
 
     /**
-     * @deprecated Do not use any more. Removed in Moodle 2.6.
-     */
-    public function view_best_score($viewobj) {
-        return '';
-    }
-
-    /**
      * Generates data pertaining to quiz results
      *
      * @param array $quiz Array containing quiz data
@@ -1060,14 +1059,13 @@ class mod_quiz_renderer extends plugin_renderer_base {
                 $a->method = quiz_get_grading_option_name($quiz->grademethod);
                 $a->mygrade = quiz_format_grade($quiz, $viewobj->mygrade);
                 $a->quizgrade = quiz_format_grade($quiz, $quiz->grade);
-                $resultinfo .= $this->heading(get_string('gradesofar', 'quiz', $a), 2, 'main');
+                $resultinfo .= $this->heading(get_string('gradesofar', 'quiz', $a), 3);
             } else {
                 $a = new stdClass();
                 $a->grade = quiz_format_grade($quiz, $viewobj->mygrade);
                 $a->maxgrade = quiz_format_grade($quiz, $quiz->grade);
                 $a = get_string('outofshort', 'quiz', $a);
-                $resultinfo .= $this->heading(get_string('yourfinalgradeis', 'quiz', $a), 2,
-                        'main');
+                $resultinfo .= $this->heading(get_string('yourfinalgradeis', 'quiz', $a), 3);
             }
         }
 
@@ -1077,11 +1075,11 @@ class mod_quiz_renderer extends plugin_renderer_base {
                     array('class' => 'overriddennotice'))."\n";
         }
         if ($viewobj->gradebookfeedback) {
-            $resultinfo .= $this->heading(get_string('comment', 'quiz'), 3, 'main');
+            $resultinfo .= $this->heading(get_string('comment', 'quiz'), 3);
             $resultinfo .= html_writer::div($viewobj->gradebookfeedback, 'quizteacherfeedback') . "\n";
         }
         if ($viewobj->feedbackcolumn) {
-            $resultinfo .= $this->heading(get_string('overallfeedback', 'quiz'), 3, 'main');
+            $resultinfo .= $this->heading(get_string('overallfeedback', 'quiz'), 3);
             $resultinfo .= html_writer::div(
                     quiz_feedback_for_grade($viewobj->mygrade, $quiz, $context),
                     'quizgradefeedback') . "\n";
@@ -1165,7 +1163,7 @@ class mod_quiz_renderer extends plugin_renderer_base {
 
         $graph = html_writer::empty_tag('img', array('src' => $url, 'alt' => $title));
 
-        return $this->heading($title) . html_writer::tag('div', $graph, array('class' => 'graph'));
+        return $this->heading($title, 3) . html_writer::tag('div', $graph, array('class' => 'graph'));
     }
 
     /**
@@ -1242,6 +1240,8 @@ class mod_quiz_view_object {
     public $startattempturl;
     /** @var moodle_url $startattempturl URL for any Back to the course button. */
     public $backtocourseurl;
+    /** @var bool $showbacktocourse should we show a back to the course button? */
+    public $showbacktocourse;
     /** @var bool whether the attempt must take place in a popup window. */
     public $popuprequired;
     /** @var array options to use for the popup window, if required. */

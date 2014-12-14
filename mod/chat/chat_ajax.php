@@ -22,7 +22,7 @@ require_once(dirname(__FILE__) . '/lib.php');
 $action       = optional_param('action', '', PARAM_ALPHANUM);
 $beep_id      = optional_param('beep', '', PARAM_RAW);
 $chat_sid     = required_param('chat_sid', PARAM_ALPHANUM);
-$theme        = required_param('theme', PARAM_ALPHANUM);
+$theme        = required_param('theme', PARAM_ALPHANUMEXT);
 $chat_message = optional_param('chat_message', '', PARAM_RAW);
 $chat_lasttime = optional_param('chat_lasttime', 0, PARAM_INT);
 $chat_lastrow  = optional_param('chat_lastrow', 1, PARAM_INT);
@@ -52,6 +52,11 @@ if (!isloggedin()) {
 $PAGE->set_cm($cm, $course, $chat);
 $PAGE->set_url('/mod/chat/chat_ajax.php', array('chat_sid'=>$chat_sid));
 
+require_login($course, false, $cm);
+
+$context = context_module::instance($cm->id);
+require_capability('mod/chat:chat', $context);
+
 ob_start();
 header('Expires: Sun, 28 Dec 1997 09:32:45 GMT');
 header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
@@ -68,7 +73,7 @@ case 'init':
     break;
 
 case 'chat':
-    session_get_instance()->write_close();
+    \core\session\manager::write_close();
     chat_delete_old_users();
     $chat_message = clean_text($chat_message, FORMAT_MOODLE);
 
@@ -77,22 +82,14 @@ case 'chat':
     }
 
     if (!empty($chat_message)) {
-        $message = new stdClass();
-        $message->chatid    = $chatuser->chatid;
-        $message->userid    = $chatuser->userid;
-        $message->groupid   = $chatuser->groupid;
-        $message->message   = $chat_message;
-        $message->timestamp = time();
+
+        chat_send_chatmessage($chatuser, $chat_message, 0, $cm);
 
         $chatuser->lastmessageping = time() - 2;
         $DB->update_record('chat_users', $chatuser);
 
-        $DB->insert_record('chat_messages', $message);
-        $DB->insert_record('chat_messages_current', $message);
-        // response ok message
+        // Response OK message.
         echo json_encode(true);
-        add_to_log($course->id, 'chat', 'talk', "view.php?id=$cm->id", $chat->id, $cm->id);
-
         ob_end_flush();
     }
     break;
@@ -133,7 +130,6 @@ case 'update':
             // when somebody enter room, user list will be updated
             if (!empty($message->system)){
                 $send_user_list = true;
-                $users = chat_format_userlist(chat_get_users($chatuser->chatid, $chatuser->groupid, $cm->groupingid), $course);
             }
             if ($html = chat_format_message_theme($message, $chatuser, $USER, $cm->groupingid, $theme)) {
                 $message->mymessage = ($USER->id == $message->userid);
@@ -147,8 +143,9 @@ case 'update':
         }
     }
 
-    if(!empty($users) && $send_user_list){
+    if($send_user_list){
         // return users when system message coming
+        $users = chat_format_userlist(chat_get_users($chatuser->chatid, $chatuser->groupid, $cm->groupingid), $course);
         $response['users'] = $users;
     }
 

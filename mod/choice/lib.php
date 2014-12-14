@@ -16,7 +16,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package   mod-choice
+ * @package   mod_choice
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -207,7 +207,7 @@ function choice_prepare_options($choice, $user, $coursemodule, $allresponses) {
             $option = new stdClass;
             $option->attributes = new stdClass;
             $option->attributes->value = $optionid;
-            $option->text = $text;
+            $option->text = format_string($text);
             $option->maxanswers = $choice->maxanswers[$optionid];
             $option->displaylayout = $choice->display;
 
@@ -293,21 +293,49 @@ WHERE
             $newanswer->optionid = $formanswer;
             $newanswer->timemodified = time();
             $DB->update_record("choice_answers", $newanswer);
-            add_to_log($course->id, "choice", "choose again", "view.php?id=$cm->id", $choice->id, $cm->id);
+
+            $eventdata = array();
+            $eventdata['context'] = $context;
+            $eventdata['objectid'] = $newanswer->id;
+            $eventdata['userid'] = $userid;
+            $eventdata['courseid'] = $course->id;
+            $eventdata['other'] = array();
+            $eventdata['other']['choiceid'] = $choice->id;
+            $eventdata['other']['optionid'] = $formanswer;
+
+            $event = \mod_choice\event\answer_updated::create($eventdata);
+            $event->add_record_snapshot('choice_answers', $newanswer);
+            $event->add_record_snapshot('course', $course);
+            $event->add_record_snapshot('course_modules', $cm);
+            $event->trigger();
         } else {
             $newanswer = new stdClass();
             $newanswer->choiceid = $choice->id;
             $newanswer->userid = $userid;
             $newanswer->optionid = $formanswer;
             $newanswer->timemodified = time();
-            $DB->insert_record("choice_answers", $newanswer);
+            $newanswer->id = $DB->insert_record("choice_answers", $newanswer);
 
             // Update completion state
             $completion = new completion_info($course);
             if ($completion->is_enabled($cm) && $choice->completionsubmit) {
                 $completion->update_state($cm, COMPLETION_COMPLETE);
             }
-            add_to_log($course->id, "choice", "choose", "view.php?id=$cm->id", $choice->id, $cm->id);
+
+            $eventdata = array();
+            $eventdata['context'] = $context;
+            $eventdata['objectid'] = $newanswer->id;
+            $eventdata['userid'] = $userid;
+            $eventdata['courseid'] = $course->id;
+            $eventdata['other'] = array();
+            $eventdata['other']['choiceid'] = $choice->id;
+            $eventdata['other']['optionid'] = $formanswer;
+
+            $event = \mod_choice\event\answer_submitted::create($eventdata);
+            $event->add_record_snapshot('choice_answers', $newanswer);
+            $event->add_record_snapshot('course', $course);
+            $event->add_record_snapshot('course_modules', $cm);
+            $event->trigger();
         }
     } else {
         if (!($current->optionid==$formanswer)) { //check to see if current choice already selected - if not display error
@@ -374,7 +402,7 @@ function prepare_choice_show_results($choice, $course, $cm, $allresponses, $forc
     $display->fullnamecapability = has_capability('moodle/site:viewfullnames', $context);
 
     if (empty($allresponses)) {
-        echo $OUTPUT->heading(get_string("nousersyet"));
+        echo $OUTPUT->heading(get_string("nousersyet"), 3, null);
         return false;
     }
 
@@ -629,6 +657,13 @@ function choice_get_choice($choiceid) {
 }
 
 /**
+ * List the actions that correspond to a view of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = 'r' and edulevel = LEVEL_PARTICIPATING will
+ *       be considered as view action.
+ *
  * @return array
  */
 function choice_get_view_actions() {
@@ -636,6 +671,13 @@ function choice_get_view_actions() {
 }
 
 /**
+ * List the actions that correspond to a post of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = ('c' || 'u' || 'd') and edulevel = LEVEL_PARTICIPATING
+ *       will be considered as post action.
+ *
  * @return array
  */
 function choice_get_post_actions() {

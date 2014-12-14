@@ -91,11 +91,15 @@ class mod_assign_renderer extends plugin_renderer_base {
      */
     public function render_assign_gradingmessage(assign_gradingmessage $result) {
         $urlparams = array('id' => $result->coursemoduleid, 'action'=>'grading');
+        if (!empty($result->page)) {
+            $urlparams['page'] = $result->page;
+        }
         $url = new moodle_url('/mod/assign/view.php', $urlparams);
+        $classes = $result->gradingerror ? 'notifyproblem' : 'notifysuccess';
 
         $o = '';
         $o .= $this->output->heading($result->heading, 4);
-        $o .= $this->output->notification($result->message);
+        $o .= $this->output->notification($result->message, $classes);
         $o .= $this->output->continue_button($url);
         return $o;
     }
@@ -124,14 +128,23 @@ class mod_assign_renderer extends plugin_renderer_base {
      */
     public function render_assign_user_summary(assign_user_summary $summary) {
         $o = '';
+        $supendedclass = '';
+        $suspendedicon = '';
 
         if (!$summary->user) {
             return;
         }
+
+        if ($summary->suspendeduser) {
+            $supendedclass = ' usersuspended';
+            $suspendedstring = get_string('userenrolmentsuspended', 'grades');
+            $suspendedicon = ' ' . html_writer::empty_tag('img', array('src' => $this->pix_url('i/enrolmentsuspended'),
+                'title' => $suspendedstring, 'alt' => $suspendedstring, 'class' => 'usersuspendedicon'));
+        }
         $o .= $this->output->container_start('usersummary');
-        $o .= $this->output->box_start('boxaligncenter usersummarysection');
+        $o .= $this->output->box_start('boxaligncenter usersummarysection'.$supendedclass);
         if ($summary->blindmarking) {
-            $o .= get_string('hiddenuser', 'assign') . $summary->uniqueidforuser;
+            $o .= get_string('hiddenuser', 'assign') . $summary->uniqueidforuser.$suspendedicon;
         } else {
             $o .= $this->output->user_picture($summary->user);
             $o .= $this->output->spacer(array('width'=>30));
@@ -145,6 +158,7 @@ class mod_assign_renderer extends plugin_renderer_base {
             if (count($extrainfo)) {
                 $fullname .= ' (' . implode(', ', $extrainfo) . ')';
             }
+            $fullname .= $suspendedicon;
             $o .= $this->output->action_link($url, $fullname);
         }
         $o .= $this->output->box_end();
@@ -211,14 +225,14 @@ class mod_assign_renderer extends plugin_renderer_base {
         }
 
         $this->page->set_title(get_string('pluginname', 'assign'));
-        $this->page->set_heading($header->assign->name);
+        $this->page->set_heading($this->page->course->fullname);
 
         $o .= $this->output->header();
+        $heading = format_string($header->assign->name, false, array('context' => $header->context));
+        $o .= $this->output->heading($heading);
         if ($header->preface) {
             $o .= $header->preface;
         }
-        $heading = format_string($header->assign->name, false, array('context' => $header->context));
-        $o .= $this->output->heading($heading);
 
         if ($header->showintro) {
             $o .= $this->output->box_start('generalbox boxaligncenter', 'intro');
@@ -226,6 +240,17 @@ class mod_assign_renderer extends plugin_renderer_base {
             $o .= $this->output->box_end();
         }
 
+        return $o;
+    }
+
+    /**
+     * Render the header for an individual plugin.
+     *
+     * @param assign_plugin_header $header
+     * @return string
+     */
+    public function render_assign_plugin_header(assign_plugin_header $header) {
+        $o = $header->plugin->view_header();
         return $o;
     }
 
@@ -537,6 +562,7 @@ class mod_assign_renderer extends plugin_renderer_base {
         $row->cells = array($cell1, $cell2);
         $t->data[] = $row;
 
+        $submission = $status->teamsubmission ? $status->teamsubmission : $status->submission;
         $duedate = $status->duedate;
         if ($duedate > 0) {
             // Due date.
@@ -571,8 +597,8 @@ class mod_assign_renderer extends plugin_renderer_base {
             $row = new html_table_row();
             $cell1 = new html_table_cell(get_string('timeremaining', 'assign'));
             if ($duedate - $time <= 0) {
-                if (!$status->submission ||
-                        $status->submission->status != ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
+                if (!$submission ||
+                        $submission->status != ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
                     if ($status->submissionsenabled) {
                         $overduestr = get_string('overdue', 'assign', format_time($time - $duedate));
                         $cell2 = new html_table_cell($overduestr);
@@ -581,16 +607,16 @@ class mod_assign_renderer extends plugin_renderer_base {
                         $cell2 = new html_table_cell(get_string('duedatereached', 'assign'));
                     }
                 } else {
-                    if ($status->submission->timemodified > $duedate) {
+                    if ($submission->timemodified > $duedate) {
                         $latestr = get_string('submittedlate',
                                               'assign',
-                                              format_time($status->submission->timemodified - $duedate));
+                                              format_time($submission->timemodified - $duedate));
                         $cell2 = new html_table_cell($latestr);
                         $cell2->attributes = array('class'=>'latesubmission');
                     } else {
                         $earlystr = get_string('submittedearly',
                                                'assign',
-                                               format_time($status->submission->timemodified - $duedate));
+                                               format_time($submission->timemodified - $duedate));
                         $cell2 = new html_table_cell($earlystr);
                         $cell2->attributes = array('class'=>'earlysubmission');
                     }
@@ -627,7 +653,6 @@ class mod_assign_renderer extends plugin_renderer_base {
         }
 
         // Last modified.
-        $submission = $status->teamsubmission ? $status->teamsubmission : $status->submission;
         if ($submission) {
             $row = new html_table_row();
             $cell1 = new html_table_cell(get_string('timemodified', 'assign'));
@@ -675,7 +700,9 @@ class mod_assign_renderer extends plugin_renderer_base {
                     $o .= $this->output->box_end();
                 } else if ($submission->status == ASSIGN_SUBMISSION_STATUS_REOPENED) {
                     $o .= $this->output->box_start('generalbox submissionaction');
-                    $urlparams = array('id' => $status->coursemoduleid, 'action' => 'editprevioussubmission');
+                    $urlparams = array('id' => $status->coursemoduleid,
+                                       'action' => 'editprevioussubmission',
+                                       'sesskey'=>sesskey());
                     $o .= $this->output->single_button(new moodle_url('/mod/assign/view.php', $urlparams),
                                                        get_string('addnewattemptfromprevious', 'assign'), 'get');
                     $o .= $this->output->box_start('boxaligncenter submithelp');
@@ -957,6 +984,8 @@ class mod_assign_renderer extends plugin_renderer_base {
         $this->page->requires->string_for_js('batchoperationconfirmreverttodraft', 'assign');
         $this->page->requires->string_for_js('batchoperationconfirmunlock', 'assign');
         $this->page->requires->string_for_js('batchoperationconfirmaddattempt', 'assign');
+        $this->page->requires->string_for_js('batchoperationconfirmsetmarkingworkflowstate', 'assign');
+        $this->page->requires->string_for_js('batchoperationconfirmsetmarkingallocation', 'assign');
         $this->page->requires->string_for_js('editaction', 'assign');
         foreach ($table->plugingradingbatchoperations as $plugin => $operations) {
             foreach ($operations as $operation => $description) {

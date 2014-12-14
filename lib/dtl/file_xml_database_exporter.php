@@ -60,14 +60,16 @@ class file_xml_database_exporter extends xml_database_exporter {
      * Specific implementation for file exporting the database: it opens output stream, calls
      * superclass @see database_exporter::export_database() and closes output stream.
      *
-     * @exception dbtransfer_exception if any checking (e.g. database schema) fails
+     * @throws dbtransfer_exception if any checking (e.g. database schema) fails
      *
      * @param string $description a user description of the data.
      */
     public function export_database($description=null) {
+        global $CFG;
         // TODO: add exception if file creation fails
         $this->file = fopen($this->filepath, 'wb');
         parent::export_database($description);
         fclose($this->file);
+        @chmod($this->filepath, $CFG->filepermissions);
     }
 }

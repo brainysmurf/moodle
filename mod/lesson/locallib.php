@@ -19,8 +19,7 @@
  * Local library file for Lesson.  These are non-standard functions that are used
  * only by Lesson.
  *
- * @package    mod
- * @subpackage lesson
+ * @package mod_lesson
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or late
  **/
@@ -489,14 +488,15 @@ function lesson_clock_block_contents($cmid, $lesson, $timer, $page) {
         return null;
     }
 
-    $content = '<div class="jshidewhenenabled">';
+    $content = '<div id="lesson-timer">';
     $content .=  $lesson->time_remaining($timer->starttime);
     $content .= '</div>';
 
     $clocksettings = array('starttime'=>$timer->starttime, 'servertime'=>time(),'testlength'=>($lesson->maxtime * 60));
-    $page->requires->data_for_js('clocksettings', $clocksettings);
+    $page->requires->data_for_js('clocksettings', $clocksettings, true);
+    $page->requires->strings_for_js(array('timeisup'), 'lesson');
     $page->requires->js('/mod/lesson/timer.js');
-    $page->requires->js_function_call('show_clock');
+    $page->requires->js_init_call('show_clock');
 
     $bc = new block_contents();
     $bc->title = get_string('timeremaining', 'lesson');
@@ -770,6 +770,12 @@ abstract class lesson_add_page_form_base extends moodleform {
         $this->_form->setType($name, PARAM_INT);
         if ($value !== null) {
             $this->_form->setDefault($name, $value);
+        }
+        $this->_form->addHelpButton($name, 'score', 'lesson');
+
+        // Score is only used for custom scoring. Disable the element when not in use to stop some confusion.
+        if (!$this->_customdata['lesson']->custom) {
+            $this->_form->freeze($name);
         }
     }
 
@@ -1198,6 +1204,18 @@ class lesson extends lesson_base {
      */
     public function start_timer() {
         global $USER, $DB;
+
+        $cm = get_coursemodule_from_instance('lesson', $this->properties()->id, $this->properties()->course,
+            false, MUST_EXIST);
+
+        // Trigger lesson started event.
+        $event = \mod_lesson\event\lesson_started::create(array(
+            'objectid' => $this->properties()->id,
+            'context' => context_module::instance($cm->id),
+            'courseid' => $this->properties()->course
+        ));
+        $event->trigger();
+
         $USER->startlesson[$this->properties->id] = true;
         $startlesson = new stdClass;
         $startlesson->lessonid = $this->properties->id;
@@ -1250,6 +1268,18 @@ class lesson extends lesson_base {
     public function stop_timer() {
         global $USER, $DB;
         unset($USER->startlesson[$this->properties->id]);
+
+        $cm = get_coursemodule_from_instance('lesson', $this->properties()->id, $this->properties()->course,
+            false, MUST_EXIST);
+
+        // Trigger lesson ended event.
+        $event = \mod_lesson\event\lesson_ended::create(array(
+            'objectid' => $this->properties()->id,
+            'context' => context_module::instance($cm->id),
+            'courseid' => $this->properties()->course
+        ));
+        $event->trigger();
+
         return $this->update_timer(false, false);
     }
 
@@ -1960,12 +1990,17 @@ abstract class lesson_page extends lesson_base {
 
                 $attempt->timeseen = time();
                 // if allow modattempts, then update the old attempt record, otherwise, insert new answer record
+                $userisreviewing = false;
                 if (isset($USER->modattempts[$this->lesson->id])) {
                     $attempt->retry = $nretakes - 1; // they are going through on review, $nretakes will be too high
+                    $userisreviewing = true;
                 }
 
-                if ($this->lesson->retake || (!$this->lesson->retake && $nretakes == 0)) {
-                    $DB->insert_record("lesson_attempts", $attempt);
+                // Only insert a record if we are not reviewing the lesson.
+                if (!$userisreviewing) {
+                    if ($this->lesson->retake || (!$this->lesson->retake && $nretakes == 0)) {
+                        $DB->insert_record("lesson_attempts", $attempt);
+                    }
                 }
                 // "number of attempts remaining" message if $this->lesson->maxattempts > 1
                 // displaying of message(s) is at the end of page for more ergonomic display
@@ -2742,7 +2777,7 @@ class lesson_page_type_manager {
     public function load_all_pages(lesson $lesson) {
         global $DB;
         if (!($pages =$DB->get_records('lesson_pages', array('lessonid'=>$lesson->id)))) {
-            print_error('cannotfindpages', 'lesson');
+            return array(); // Records returned empty.
         }
         foreach ($pages as $key=>$page) {
             $pagetype = get_class($this->types[$page->qtype]);

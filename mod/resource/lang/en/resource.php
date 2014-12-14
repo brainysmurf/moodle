@@ -18,8 +18,7 @@
 /**
  * Strings for component 'resource', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package    mod
- * @subpackage resource
+ * @package    mod_resource
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -68,7 +67,6 @@ $string['modulename'] = 'File';
 $string['modulename_help'] = 'A _File_ is where you can put a file. You can also use drag\'n\'drop on the course directly. When putting files in courses, consider using a _Folder_ to organize them into collections.';
 $string['modulename_link'] = 'mod/resource/view';
 $string['modulenameplural'] = 'Files';
-$string['neverseen'] = 'Never seen';
 $string['notmigrated'] = 'This legacy resource type ({$a}) was not yet migrated, sorry.';
 $string['optionsheader'] = 'Display options';
 $string['page-mod-resource-x'] = 'Any file module page';
@@ -80,8 +78,6 @@ $string['popupresource'] = 'This resource should appear in a popup window.';
 $string['popupresourcelink'] = 'If it didn\'t, click here: {$a}';
 $string['popupwidth'] = 'Pop-up width (in pixels)';
 $string['popupwidthexplain'] = 'Specifies default width of popup windows.';
-$string['printheading'] = 'Display resource name';
-$string['printheadingexplain'] = 'Display resource name above content? Some display types may not display resource name even if enabled.';
 $string['printintro'] = 'Display resource description';
 $string['printintroexplain'] = 'Display resource description below content? Some display types may not display description even if enabled.';
 $string['resource:addinstance'] = 'Add a new resource';

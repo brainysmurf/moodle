@@ -24,8 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+<<<<<<< HEAD
 require_once(__DIR__ . '/backend.php');
 
+=======
+>>>>>>> moodle/MOODLE_27_STABLE
 /**
  * Backend code for the 'make large course' tool.
  *
@@ -39,6 +42,13 @@ class tool_generator_course_backend extends tool_generator_backend {
      */
     private static $paramsections = array(1, 10, 100, 500, 1000, 2000);
     /**
+<<<<<<< HEAD
+=======
+     * @var array Number of assignments in course
+     */
+    private static $paramassignments = array(1, 10, 100, 500, 1000, 2000);
+    /**
+>>>>>>> moodle/MOODLE_27_STABLE
      * @var array Number of Page activities in course
      */
     private static $parampages = array(1, 50, 200, 1000, 5000, 10000);
@@ -181,6 +191,10 @@ class tool_generator_course_backend extends tool_generator_backend {
         // Make course.
         $this->course = $this->create_course();
         $this->create_users();
+<<<<<<< HEAD
+=======
+        $this->create_assignments();
+>>>>>>> moodle/MOODLE_27_STABLE
         $this->create_pages();
         $this->create_small_files();
         $this->create_big_files();
@@ -321,6 +335,29 @@ class tool_generator_course_backend extends tool_generator_backend {
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * Creates a number of Assignment activities.
+     */
+    private function create_assignments() {
+        // Set up generator.
+        $assigngenerator = $this->generator->get_plugin_generator('mod_assign');
+
+        // Create assignments.
+        $number = self::$paramassignments[$this->size];
+        $this->log('createassignments', $number, true);
+        for ($i = 0; $i < $number; $i++) {
+            $record = array('course' => $this->course);
+            $options = array('section' => $this->get_target_section());
+            $assigngenerator->create_instance($record, $options);
+            $this->dot($i, $number);
+        }
+
+        $this->end_log();
+    }
+
+    /**
+>>>>>>> moodle/MOODLE_27_STABLE
      * Creates a number of Page activities.
      */
     private function create_pages() {
@@ -331,7 +368,11 @@ class tool_generator_course_backend extends tool_generator_backend {
         $number = self::$parampages[$this->size];
         $this->log('createpages', $number, true);
         for ($i = 0; $i < $number; $i++) {
+<<<<<<< HEAD
             $record = array('course' => $this->course->id);
+=======
+            $record = array('course' => $this->course);
+>>>>>>> moodle/MOODLE_27_STABLE
             $options = array('section' => $this->get_target_section());
             $pagegenerator->create_instance($record, $options);
             $this->dot($i, $number);
@@ -349,7 +390,11 @@ class tool_generator_course_backend extends tool_generator_backend {
 
         // Create resource with default textfile only.
         $resourcegenerator = $this->generator->get_plugin_generator('mod_resource');
+<<<<<<< HEAD
         $record = array('course' => $this->course->id,
+=======
+        $record = array('course' => $this->course,
+>>>>>>> moodle/MOODLE_27_STABLE
                 'name' => get_string('smallfiles', 'tool_generator'));
         $options = array('section' => 0);
         $resource = $resourcegenerator->create_instance($record, $options);
@@ -417,7 +462,11 @@ class tool_generator_course_backend extends tool_generator_backend {
         $resourcegenerator = $this->generator->get_plugin_generator('mod_resource');
         for ($i = 0; $i < $count; $i++) {
             // Create resource.
+<<<<<<< HEAD
             $record = array('course' => $this->course->id,
+=======
+            $record = array('course' => $this->course,
+>>>>>>> moodle/MOODLE_27_STABLE
                     'name' => get_string('bigfile', 'tool_generator', $i));
             $options = array('section' => $this->get_target_section());
             $resource = $resourcegenerator->create_instance($record, $options);
@@ -460,7 +509,11 @@ class tool_generator_course_backend extends tool_generator_backend {
 
         // Create empty forum.
         $forumgenerator = $this->generator->get_plugin_generator('mod_forum');
+<<<<<<< HEAD
         $record = array('course' => $this->course->id,
+=======
+        $record = array('course' => $this->course,
+>>>>>>> moodle/MOODLE_27_STABLE
                 'name' => get_string('pluginname', 'forum'));
         $options = array('section' => 0);
         $forum = $forumgenerator->create_instance($record, $options);

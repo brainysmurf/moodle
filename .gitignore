@@ -39,3 +39,5 @@ filter/variables
 dragonnet.sql
 ssis-html-resources/
 ssis-uploads/
+# lib/yuilib/version/module/module-coverage.js
+/lib/yuilib/*/*/*-coverage.js

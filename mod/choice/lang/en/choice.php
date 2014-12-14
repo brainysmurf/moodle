@@ -18,7 +18,7 @@
 /**
  * Strings for component 'choice', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package   choice
+ * @package   mod_choice
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,6 +30,9 @@ $string['completionsubmit'] = 'Show as complete when user makes a choice';
 $string['displayhorizontal'] = 'Display horizontally';
 $string['displaymode'] = 'Display mode for the options';
 $string['displayvertical'] = 'Display vertically';
+$string['eventanswercreated'] = 'Choice made';
+$string['eventanswerupdated'] = 'Choice updated';
+$string['eventreportviewed'] = 'Choice report viewed';
 $string['expired'] = 'Sorry, this activity closed on {$a} and is no longer available';
 $string['atleastoneoption'] = 'You need to provide at least one possible answer.';
 $string['full'] = '(Full)';
@@ -54,6 +57,7 @@ $string['choice:readresponses'] = 'Read responses';
 $string['choicesaved'] = 'Your choice has been saved';
 $string['choicetext'] = 'Choice text';
 $string['chooseaction'] = 'Choose an action ...';
+$string['description'] = 'Description';
 $string['limit'] = 'Limit';
 $string['limitno'] = 'Limit {no}';
 $string['limitanswers'] = 'Limit the number of responses allowed';
@@ -106,6 +110,6 @@ $string['taken'] = 'Taken';
 $string['timerestrict'] = 'Restrict answering to this time period';
 $string['viewallresponses'] = 'View {$a} responses';
 $string['withselected'] = 'With selected';
-$string['userchoosethisoption'] = 'User choose this option';
+$string['userchoosethisoption'] = 'Users who chose this option';
 $string['yourselection'] = 'Your selection';
 $string['skipresultgraph'] = 'Skip result graph';

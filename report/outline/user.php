@@ -25,6 +25,7 @@
 
 require('../../config.php');
 require_once($CFG->dirroot.'/report/outline/locallib.php');
+require_once($CFG->dirroot.'/report/outline/lib.php');
 
 $userid   = required_param('id', PARAM_INT);
 $courseid = required_param('course', PARAM_INT);
@@ -48,23 +49,27 @@ if ($USER->id != $user->id and has_capability('moodle/user:viewuseractivitiesrep
 } else {
     require_login($course);
 }
+$PAGE->set_url('/report/outline/user.php', array('id'=>$userid, 'course'=>$courseid, 'mode'=>$mode));
 
 if (!report_outline_can_access_user_report($user, $course, true)) {
     require_capability('report/outline:view', $coursecontext);
 }
 
-add_to_log($course->id, 'course', 'report outline', "report/outline/user.php?id=$user->id&course=$course->id&mode=$mode", $course->id);
-
 $stractivityreport = get_string('activityreport');
 
-$PAGE->set_pagelayout('admin');
+$PAGE->set_pagelayout('report');
 $PAGE->set_url('/report/outline/user.php', array('id'=>$user->id, 'course'=>$course->id, 'mode'=>$mode));
 $PAGE->navigation->extend_for_user($user);
 $PAGE->navigation->set_userid_for_parent_checks($user->id); // see MDL-25805 for reasons and for full commit reference for reversal when fixed.
 $PAGE->set_title("$course->shortname: $stractivityreport");
 $PAGE->set_heading($course->fullname);
-echo $OUTPUT->header();
 
+// Trigger a report viewed event.
+$event = \report_outline\event\report_viewed::create(array('context' => context_course::instance($course->id),
+        'relateduserid' => $userid, 'other' => array('mode' => $mode)));
+$event->trigger();
+
+echo $OUTPUT->header();
 
 $modinfo = get_fast_modinfo($course);
 $sections = $modinfo->get_section_info_all();
@@ -105,29 +110,33 @@ foreach ($sections as $i => $section) {
                                 $user_outline = $mod->modname."_user_outline";
                                 if (function_exists($user_outline)) {
                                     $output = $user_outline($course, $user, $mod, $instance);
-                                    report_outline_print_row($mod, $instance, $output);
+                                } else {
+                                    $output = report_outline_user_outline($user->id, $cmid, $mod->modname, $instance->id);
                                 }
+                                report_outline_print_row($mod, $instance, $output);
                                 break;
                             case "complete":
                                 $user_complete = $mod->modname."_user_complete";
+                                $image = $OUTPUT->pix_icon('icon', $mod->modfullname, 'mod_'.$mod->modname, array('class'=>'icon'));
+                                echo "<h4>$image $mod->modfullname: ".
+                                     "<a href=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\">".
+                                     format_string($instance->name,true)."</a></h4>";
+
+                                ob_start();
+
+                                echo "<ul>";
                                 if (function_exists($user_complete)) {
-                                    $image = $OUTPUT->pix_icon('icon', $mod->modfullname, 'mod_'.$mod->modname, array('class'=>'icon'));
-                                    echo "<h4>$image $mod->modfullname: ".
-                                         "<a href=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\">".
-                                         format_string($instance->name,true)."</a></h4>";
-
-                                    ob_start();
-
-                                    echo "<ul>";
                                     $user_complete($course, $user, $mod, $instance);
-                                    echo "</ul>";
+                                } else {
+                                    echo report_outline_user_complete($user->id, $cmid, $mod->modname, $instance->id);
+                                }
+                                echo "</ul>";
 
-                                    $output = ob_get_contents();
-                                    ob_end_clean();
+                                $output = ob_get_contents();
+                                ob_end_clean();
 
-                                    if (str_replace(' ', '', $output) != '<ul></ul>') {
-                                        echo $output;
-                                    }
+                                if (str_replace(' ', '', $output) != '<ul></ul>') {
+                                    echo $output;
                                 }
                                 break;
                             }

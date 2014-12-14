@@ -57,12 +57,7 @@ $_SERVER['HTTP_USER_AGENT'] = 'dummy';
 $_SERVER['SERVER_NAME'] = $CFG->chat_serverhost;
 $_SERVER['PHP_SELF']    = "http://$CFG->chat_serverhost:$CFG->chat_serverport/mod/chat/chatd.php";
 
-$safemode = ini_get('safe_mode');
-if(!empty($safemode)) {
-    die("Error: Cannot run with PHP safe_mode = On. Turn off safe_mode in php.ini.\n");
-}
-
-@set_time_limit (0);
+core_php_time_limit::raise(0);
 error_reporting(E_ALL);
 
 function chat_empty_connection() {
@@ -347,6 +342,7 @@ EOD;
 
         switch($type) {
             case CHAT_SIDEKICK_BEEP:
+
                 // Incoming beep
                 $msg = New stdClass;
                 $msg->chatid    = $this->sets_info[$sessionid]['chatid'];
@@ -357,8 +353,8 @@ EOD;
                 $msg->timestamp = time();
 
                 // Commit to DB
-                $DB->insert_record('chat_messages', $msg, false);
-                $DB->insert_record('chat_messages_current', $msg, false);
+                chat_send_chatmessage($this->sets_info[$sessionid]['chatuser'], $msg->message, false,
+                    $this->sets_info[$sessionid]['cm']);
 
                 // OK, now push it out to all users
                 $this->message_broadcast($msg, $this->sets_info[$sessionid]['user']);
@@ -452,8 +448,8 @@ EOD;
                 $msg->message = $msg->message;
 
                 // Commit to DB
-                $DB->insert_record('chat_messages', $msg, false);
-                $DB->insert_record('chat_messages_current', $msg, false);
+                chat_send_chatmessage($this->sets_info[$sessionid]['chatuser'], $msg->message, false,
+                    $this->sets_info[$sessionid]['cm']);
 
                 // Undo the hack
                 $msg->message = $origmsg;
@@ -519,6 +515,10 @@ EOD;
             $this->dismiss_half($sessionid);
             return false;
         }
+        if (!($cm = get_coursemodule_from_instance('chat', $chat->id, $course->id))) {
+            $this->dismiss_half($sessionid);
+            return false;
+        }
 
         global $CHAT_HTMLHEAD_JS, $CFG;
 
@@ -533,6 +533,7 @@ EOD;
             'courseid'  => $course->id,
             'chatuser'  => $chatuser,
             'chatid'    => $chat->id,
+            'cm'        => $cm,
             'user'      => $user,
             'userid'    => $user->id,
             'groupid'   => $chatuser->groupid,
@@ -575,8 +576,7 @@ EOD;
         $msg->message = 'enter';
         $msg->timestamp = time();
 
-        $DB->insert_record('chat_messages', $msg, false);
-        $DB->insert_record('chat_messages_current', $msg, false);
+        chat_send_chatmessage($chatuser, $msg->message, true);
         $this->message_broadcast($msg, $this->sets_info[$sessionid]['user']);
 
         return true;
@@ -787,8 +787,7 @@ EOD;
         $msg->timestamp = time();
 
         $this->trace('User has disconnected, destroying uid '.$info['userid'].' with SID '.$sessionid, E_USER_WARNING);
-        $DB->insert_record('chat_messages', $msg, false);
-        $DB->insert_record('chat_messages_current', $msg, false);
+        chat_send_chatmessage($info['chatuser'], $msg->message, true);
 
         // *************************** IMPORTANT
         //

@@ -142,7 +142,7 @@ if (!$csv) {
 if ($csv) {
 
     $shortname = format_string($course->shortname, true, array('context' => $context));
-    $shortname = preg_replace('/[^a-z0-9-]/', '_',textlib::strtolower(strip_tags($shortname)));
+    $shortname = preg_replace('/[^a-z0-9-]/', '_',core_text::strtolower(strip_tags($shortname)));
 
     $export = new csv_export_writer();
     $export->set_filename('completion-'.$shortname);
@@ -587,18 +587,17 @@ foreach ($progress as $user) {
             $activity = $modinfo->cms[$criterion->moduleinstance];
 
             // Get progress information and state
+            if (array_key_exists($activity->id, $user->progress)) {
+                $state = $user->progress[$activity->id]->completionstate;
+            } else if ($is_complete) {
+                $state = COMPLETION_COMPLETE;
+            } else {
+                $state = COMPLETION_INCOMPLETE;
+            }
             if ($is_complete) {
                 $date = userdate($criteria_completion->timecompleted, get_string('strftimedatetimeshort', 'langconfig'));
-
-                if (array_key_exists($activity->id, $user->progress)) {
-                    $thisprogress = $user->progress[$activity->id];
-                    $state = $thisprogress->completionstate;
-                } else {
-                    $state = COMPLETION_COMPLETE;
-                }
             } else {
                 $date = '';
-                $state = COMPLETION_INCOMPLETE;
             }
 
             // Work out how it corresponds to an icon
@@ -673,8 +672,9 @@ foreach ($progress as $user) {
                     )
                 );
 
-                print '<a href="'.$toggleurl->out().'"><img src="'.$OUTPUT->pix_url('i/completion-manual-'.($is_complete ? 'y' : 'n')).
-                    '" alt="'.$describe.'" class="icon" title="'.get_string('markcomplete', 'completion').'" /></a></td>';
+                print '<a href="'.$toggleurl->out().'" title="'.get_string('clicktomarkusercomplete', 'report_completion').'">' .
+                    '<img src="'.$OUTPUT->pix_url('i/completion-manual-'.($is_complete ? 'y' : 'n')).
+                    '" alt="'.$describe.'" class="icon" /></a></td>';
             } else {
                 print '<img src="'.$OUTPUT->pix_url('i/'.$completionicon).'" alt="'.$describe.'" class="icon" title="'.$fulldescribe.'" /></td>';
             }
@@ -747,3 +747,7 @@ print '<li><a href="'.$excelurl->out().'">'.get_string('excelcsvdownload','compl
 print '</ul>';
 
 echo $OUTPUT->footer($course);
+
+// Trigger a report viewed event.
+$event = \report_completion\event\report_viewed::create(array('context' => $context));
+$event->trigger();

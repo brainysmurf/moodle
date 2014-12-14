@@ -102,7 +102,7 @@ class quiz_overview_report extends quiz_attempts_report {
             }
         }
 
-        $hasquestions = quiz_questions_in_quiz($quiz->questions);
+        $hasquestions = quiz_has_questions($quiz->id);
         if (!$table->is_downloading()) {
             if (!$hasquestions) {
                 echo quiz_no_questions_message($quiz, $cm, $this->context);
@@ -121,13 +121,6 @@ class quiz_overview_report extends quiz_attempts_report {
             // Construct the SQL.
             $fields = $DB->sql_concat('u.id', "'#'", 'COALESCE(quiza.attempt, 0)') .
                     ' AS uniqueid, ';
-            if ($this->qmsubselect) {
-                $fields .=
-                    "(CASE " .
-                    "   WHEN {$this->qmsubselect} THEN 1" .
-                    "   ELSE 0 " .
-                    "END) AS gradedattempt, ";
-            }
 
             list($fields, $from, $where, $params) = $table->base_sql($allowed);
 
@@ -310,7 +303,7 @@ class quiz_overview_report extends quiz_attempts_report {
      */
     protected function finish_regrade($nexturl) {
         global $OUTPUT, $PAGE;
-        echo $OUTPUT->heading(get_string('regradecomplete', 'quiz_overview'));
+        echo $OUTPUT->heading(get_string('regradecomplete', 'quiz_overview'), 3);
         echo $OUTPUT->continue_button($nexturl);
         echo $OUTPUT->footer();
         die();
@@ -320,7 +313,7 @@ class quiz_overview_report extends quiz_attempts_report {
      * Unlock the session and allow the regrading process to run in the background.
      */
     protected function unlock_session() {
-        session_get_instance()->write_close();
+        \core\session\manager::write_close();
         ignore_user_abort(true);
     }
 
@@ -340,7 +333,7 @@ class quiz_overview_report extends quiz_attempts_report {
     protected function regrade_attempt($attempt, $dryrun = false, $slots = null) {
         global $DB;
         // Need more time for a quiz with many questions.
-        set_time_limit(300);
+        core_php_time_limit::raise(300);
 
         $transaction = $DB->start_delegated_transaction();
 
@@ -526,10 +519,11 @@ class quiz_overview_report extends quiz_attempts_report {
      */
     protected function has_regraded_questions($from, $where, $params) {
         global $DB;
-        $qubaids = new qubaid_join($from, 'uniqueid', $where, $params);
-        return $DB->record_exists_select('quiz_overview_regrades',
-                'questionusageid ' . $qubaids->usage_id_in(),
-                $qubaids->usage_id_in_params());
+        return $DB->record_exists_sql("
+                SELECT 1
+                  FROM {$from}
+                  JOIN {quiz_overview_regrades} qor ON qor.questionusageid = quiza.uniqueid
+                 WHERE {$where}", $params);
     }
 
     /**

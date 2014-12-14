@@ -5,10 +5,10 @@ Feature: Automatic creation of groups
   I need to create groups automatically and allocate them in groupings if necessary
 
   Background:
-    Given the following "courses" exists:
+    Given the following "courses" exist:
       | fullname | shortname | category |
       | Course 1 | C1 | 0 |
-    And the following "users" exists:
+    And the following "users" exist:
       | username | firstname | lastname | email |
       | teacher1 | Teacher | 1 | teacher1@asd.com |
       | student0 | Student | 0 | student0@asd.com |
@@ -21,7 +21,7 @@ Feature: Automatic creation of groups
       | student7 | Student | 7 | student7@asd.com |
       | student8 | Student | 8 | student8@asd.com |
       | student9 | Student | 9 | student9@asd.com |
-    And the following "course enrolments" exists:
+    And the following "course enrolments" exist:
       | user | course | role |
       | teacher1 | C1 | editingteacher |
       | student0 | C1 | student |
@@ -43,10 +43,10 @@ Feature: Automatic creation of groups
 
   @javascript
   Scenario: Split automatically the course users in groups and add the groups to a new grouping
-    Given I fill the moodle form with:
-      | Specify | Number of groups |
+    Given I set the following fields to these values:
+      | Auto create based on | Number of groups |
       | Group/member count | 2 |
-      | Create in grouping | New grouping |
+      | Grouping of auto-created groups | New grouping |
       | Grouping name | Grouping name |
     And I press "Preview"
     Then I should see "Group members"
@@ -64,10 +64,10 @@ Feature: Automatic creation of groups
 
   @javascript
   Scenario: Split automatically the course users in groups based on group member count
-    Given I fill the moodle form with:
-      | Specify | Members per group |
+    Given I set the following fields to these values:
+      | Auto create based on | Members per group |
       | Group/member count | 4 |
-      | Create in grouping | New grouping |
+      | Grouping of auto-created groups | New grouping |
       | Grouping name | Grouping name |
     And I press "Preview"
     Then I should see "Group members"
@@ -78,7 +78,7 @@ Feature: Automatic creation of groups
     And I should see "4" in the "Group A" "table_row"
     And I should see "4" in the "Group B" "table_row"
     And I should see "2" in the "Group C" "table_row"
-    And I check "Prevent last small group"
+    And I set the field "Prevent last small group" to "1"
     And I press "Preview"
     And I should see "Group A" in the ".generaltable" "css_element"
     And I should see "Group B" in the ".generaltable" "css_element"

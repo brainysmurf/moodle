@@ -28,6 +28,8 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
     die; // no access from web!
 }
 
+define('IGNORE_COMPONENT_CACHE', true);
+
 require_once(__DIR__.'/../../../../lib/clilib.php');
 require_once(__DIR__.'/../../../../lib/phpunit/bootstraplib.php');
 require_once(__DIR__.'/../../../../lib/testing/lib.php');
@@ -48,16 +50,13 @@ list($options, $unrecognized) = cli_get_params(
     )
 );
 
-if (file_exists(__DIR__.'/../../../../vendor/phpunit/phpunit/PHPUnit/Autoload.php')) {
+if (file_exists(__DIR__.'/../../../../vendor/phpunit/phpunit/composer.json')) {
     // Composer packages present.
     require_once(__DIR__.'/../../../../vendor/autoload.php');
-    require_once(__DIR__.'/../../../../vendor/phpunit/phpunit/PHPUnit/Autoload.php');
 
 } else {
-    // Verify PHPUnit PEAR libs can be loaded.
-    if (!include('PHPUnit/Autoload.php')) {
-        phpunit_bootstrap_error(PHPUNIT_EXITCODE_PHPUNITMISSING);
-    }
+    // Note: installation via PEAR is not supported any more.
+    phpunit_bootstrap_error(PHPUNIT_EXITCODE_PHPUNITMISSING);
 }
 
 if ($options['install'] or $options['drop']) {
@@ -88,7 +87,6 @@ require(__DIR__ . '/../../../../lib/phpunit/bootstrap.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->libdir.'/upgradelib.php');
 require_once($CFG->libdir.'/clilib.php');
-require_once($CFG->libdir.'/pluginlib.php');
 require_once($CFG->libdir.'/installlib.php');
 
 if ($unrecognized) {

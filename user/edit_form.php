@@ -1,18 +1,54 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Form to edit a users profile
+ *
+ * @copyright 1999 Martin Dougiamas  http://dougiamas.com
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package core_user
+ */
 
 if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
+    die('Direct access to this script is forbidden.');    //  It must be included from a Moodle page.
 }
 
 require_once($CFG->dirroot.'/lib/formslib.php');
 
+/**
+ * Class user_edit_form.
+ *
+ * @copyright 1999 Martin Dougiamas  http://dougiamas.com
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class user_edit_form extends moodleform {
 
+<<<<<<< HEAD
     // Define the form
     function definition () {
         global $CFG, $COURSE, $USER, $SESSION;
+=======
+    /**
+     * Define the form.
+     */
+    public function definition () {
+        global $CFG, $COURSE, $USER;
+>>>>>>> moodle/MOODLE_27_STABLE
 
-        $mform =& $this->_form;
+        $mform = $this->_form;
         $editoroptions = null;
         $filemanageroptions = null;
         $userid = $USER->id;
@@ -28,68 +64,80 @@ class user_edit_form extends moodleform {
                 $userid = $this->_customdata['userid'];
             }
         }
-        //Accessibility: "Required" is bad legend text.
+        // Accessibility: "Required" is bad legend text.
         $strgeneral  = get_string('general');
         $strrequired = get_string('required');
 
-        /// Add some extra hidden fields
+        // Add some extra hidden fields.
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'course', $COURSE->id);
         $mform->setType('course', PARAM_INT);
 
-        /// Print the required moodle fields first
+        // Print the required moodle fields first.
         $mform->addElement('header', 'moodle', $strgeneral);
 
-        /// shared fields
+        // Shared fields.
         useredit_shared_definition($mform, $editoroptions, $filemanageroptions);
 
+<<<<<<< HEAD
         /// extra settigs
         
         //If user image uploads are disabled OR the current user is a student, don't allow them to upload a photo
         //if (!empty($CFG->disableuserimages) || !empty($SESSION->userIsStudent) ) {
         if (!empty($SESSION->userIsStudent) ) {
+=======
+        // Extra settigs.
+        if (!empty($CFG->disableuserimages)) {
+>>>>>>> moodle/MOODLE_27_STABLE
             $mform->removeElement('deletepicture');
             $mform->removeElement('imagefile');
             $mform->removeElement('imagealt');
         }
 
-        /// Next the customisable profile fields
+        // Next the customisable profile fields.
         profile_definition($mform, $userid);
 
         $this->add_action_buttons(false, get_string('updatemyprofile'));
     }
 
+<<<<<<< HEAD
     function definition_after_data() {
         global $CFG, $DB, $OUTPUT, $SESSION;
+=======
+    /**
+     * Extend the form definition after the data has been parsed.
+     */
+    public function definition_after_data() {
+        global $CFG, $DB, $OUTPUT;
+>>>>>>> moodle/MOODLE_27_STABLE
 
-        $mform =& $this->_form;
+        $mform = $this->_form;
         $userid = $mform->getElementValue('id');
 
-        // if language does not exist, use site default lang
+        // If language does not exist, use site default lang.
         if ($langsel = $mform->getElementValue('lang')) {
             $lang = reset($langsel);
-            // check lang exists
+            // Check lang exists.
             if (!get_string_manager()->translation_exists($lang, false)) {
-                $lang_el =& $mform->getElement('lang');
-                $lang_el->setValue($CFG->lang);
+                $langel =& $mform->getElement('lang');
+                $langel->setValue($CFG->lang);
             }
         }
 
+        if ($user = $DB->get_record('user', array('id' => $userid))) {
 
-        if ($user = $DB->get_record('user', array('id'=>$userid))) {
-
-            // remove description
-            if (empty($user->description) && !empty($CFG->profilesforenrolledusersonly) && !$DB->record_exists('role_assignments', array('userid'=>$userid))) {
+            // Remove description.
+            if (empty($user->description) && !empty($CFG->profilesforenrolledusersonly) && !$DB->record_exists('role_assignments', array('userid' => $userid))) {
                 $mform->removeElement('description_editor');
             }
 
-            // print picture
+            // Print picture.
             $context = context_user::instance($user->id, MUST_EXIST);
             $fs = get_file_storage();
             $hasuploadedpicture = ($fs->file_exists($context->id, 'user', 'icon', 0, '/', 'f2.png') || $fs->file_exists($context->id, 'user', 'icon', 0, '/', 'f2.jpg'));
             if (!empty($user->picture) && $hasuploadedpicture) {
-                $imagevalue = $OUTPUT->user_picture($user, array('courseid' => SITEID, 'size'=>64));
+                $imagevalue = $OUTPUT->user_picture($user, array('courseid' => SITEID, 'size' => 64));
             } else {
                 $imagevalue = get_string('none');
             }
@@ -100,7 +148,7 @@ class user_edit_form extends moodleform {
                 $mform->removeElement('deletepicture');
             }
 
-            /// disable fields that are locked by auth plugins
+            // Disable fields that are locked by auth plugins.
             $fields = get_user_fieldnames();
             $authplugin = get_auth_plugin($user->auth);
             
@@ -116,22 +164,28 @@ class user_edit_form extends moodleform {
 			}
             
             foreach ($fields as $field) {
-                if (!$mform->elementExists($field)) {
+                if ($field === 'description') {
+                    // Hard coded hack for description field. See MDL-37704 for details.
+                    $formfield = 'description_editor';
+                } else {
+                    $formfield = $field;
+                }
+                if (!$mform->elementExists($formfield)) {
                     continue;
                 }
                 $configvariable = 'field_lock_' . $field;
                 if (isset($authplugin->config->{$configvariable})) {
                     if ($authplugin->config->{$configvariable} === 'locked') {
-                        $mform->hardFreeze($field);
-                        $mform->setConstant($field, $user->$field);
+                        $mform->hardFreeze($formfield);
+                        $mform->setConstant($formfield, $user->$field);
                     } else if ($authplugin->config->{$configvariable} === 'unlockedifempty' and $user->$field != '') {
-                        $mform->hardFreeze($field);
-                        $mform->setConstant($field, $user->$field);
+                        $mform->hardFreeze($formfield);
+                        $mform->setConstant($formfield, $user->$field);
                     }
                 }
             }
 
-            /// Next the customisable profile fields
+            // Next the customisable profile fields.
             profile_definition_after_data($mform, $user->id);
 
         } else {
@@ -139,20 +193,26 @@ class user_edit_form extends moodleform {
         }
     }
 
-    function validation($usernew, $files) {
+    /**
+     * Validate incoming form data.
+     * @param array $usernew
+     * @param array $files
+     * @return array
+     */
+    public function validation($usernew, $files) {
         global $CFG, $DB;
 
         $errors = parent::validation($usernew, $files);
 
         $usernew = (object)$usernew;
-        $user    = $DB->get_record('user', array('id'=>$usernew->id));
+        $user    = $DB->get_record('user', array('id' => $usernew->id));
 
-        // validate email
+        // Validate email.
         if (!isset($usernew->email)) {
-            // mail not confirmed yet
+            // Mail not confirmed yet.
         } else if (!validate_email($usernew->email)) {
             $errors['email'] = get_string('invalidemail');
-        } else if (($usernew->email !== $user->email) and $DB->record_exists('user', array('email'=>$usernew->email, 'mnethostid'=>$CFG->mnet_localhost_id))) {
+        } else if (($usernew->email !== $user->email) and $DB->record_exists('user', array('email' => $usernew->email, 'mnethostid' => $CFG->mnet_localhost_id))) {
             $errors['email'] = get_string('emailexists');
         }
 
@@ -167,7 +227,7 @@ class user_edit_form extends moodleform {
             }
         }
 
-        /// Next the customisable profile fields
+        // Next the customisable profile fields.
         $errors += profile_validation($usernew, $files);
 
         return $errors;

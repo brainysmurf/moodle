@@ -156,7 +156,7 @@ abstract class core_media {
      * @param moodle_url $url URL
      */
     public static function get_extension(moodle_url $url) {
-        // Note: Does not use textlib (. is UTF8-safe).
+        // Note: Does not use core_text (. is UTF8-safe).
         $filename = self::get_filename($url);
         $dot = strrpos($filename, '.');
         if ($dot === false) {
@@ -983,8 +983,8 @@ class core_media_player_html5video extends core_media_player {
     public function embed($urls, $name, $width, $height, $options) {
         // Special handling to make videos play on Android devices pre 2.3.
         // Note: I tested and 2.3.3 (in emulator) works without, is 533.1 webkit.
-        $oldandroid = check_browser_version('WebKit Android') &&
-                !check_browser_version('WebKit Android', '533.1');
+        $oldandroid = core_useragent::is_webkit_android() &&
+                !core_useragent::check_webkit_android_version('533.1');
 
         // Build array of source tags.
         $sources = array();
@@ -1067,12 +1067,15 @@ OET;
                 // versions or manual plugins.
                 if ($ext === 'ogv' || $ext === 'webm') {
                     // Formats .ogv and .webm are not supported in IE or Safari.
-                    if (check_browser_version('MSIE') || check_browser_version('Safari')) {
+                    if (core_useragent::is_ie() || core_useragent::is_safari()) {
                         continue;
                     }
                 } else {
-                    // Formats .m4v and .mp4 are not supported in Firefox or Opera.
-                    if (check_browser_version('Firefox') || check_browser_version('Opera')) {
+                    // Formats .m4v and .mp4 are not supported in Opera, or in Firefox before 27.
+                    // https://developer.mozilla.org/en-US/docs/Web/HTML/Supported_media_formats
+                    // has the details.
+                    if (core_useragent::is_opera() || (core_useragent::is_firefox() &&
+                            !core_useragent::check_firefox_version(27))) {
                         continue;
                     }
                 }
@@ -1136,18 +1139,25 @@ OET;
             if (in_array($ext, $extensions)) {
                 if ($ext === 'ogg' || $ext === 'oga') {
                     // Formats .ogg and .oga are not supported in IE or Safari.
-                    if (check_browser_version('MSIE') || check_browser_version('Safari')) {
+                    if (core_useragent::is_ie() || core_useragent::is_safari()) {
                         continue;
                     }
                 } else {
-                    // Formats .aac, .mp3, and .m4a are not supported in Firefox or Opera.
-                    if (check_browser_version('Firefox') || check_browser_version('Opera')) {
+                    // Formats .aac, .mp3, and .m4a are not supported in Opera.
+                    if (core_useragent::is_opera()) {
+                        continue;
+                    }
+                    // Formats .mp3 and .m4a were not reliably supported in Firefox before 27.
+                    // https://developer.mozilla.org/en-US/docs/Web/HTML/Supported_media_formats
+                    // has the details. .aac is still not supported.
+                    if (core_useragent::is_firefox() && ($ext === 'aac' ||
+                            !core_useragent::check_firefox_version(27))) {
                         continue;
                     }
                 }
                 // Old Android versions (pre 2.3.3) 'support' audio tag but no codecs.
-                if (check_browser_version('WebKit Android') &&
-                        !check_browser_version('WebKit Android', '533.1')) {
+                if (core_useragent::is_webkit_android() &&
+                        !core_useragent::is_webkit_android('533.1')) {
                     continue;
                 }
 

@@ -61,7 +61,7 @@ $PAGE->set_context($context);
 
 // show some info for guests
 if (isguestuser()) {
-    $PAGE->set_title(format_string($chat->name));
+    $PAGE->set_title($chat->name);
     echo $OUTPUT->header();
     echo $OUTPUT->confirm('<p>'.get_string('noguests', 'chat').'</p>'.get_string('liketologin'),
             get_login_url(), $CFG->wwwroot.'/course/view.php?id='.$course->id);
@@ -70,7 +70,15 @@ if (isguestuser()) {
     exit;
 }
 
-add_to_log($course->id, 'chat', 'view', "view.php?id=$cm->id", $chat->id, $cm->id);
+// Log this request - the problem here is that the view page
+// does not display the chat content which is actually in a new window.
+$params = array(
+    'objectid' => $chat->id,
+    'context' => $context
+);
+$event = \mod_chat\event\course_module_viewed::create($params);
+$event->add_record_snapshot('chat', $chat);
+$event->trigger();
 
 $strenterchat    = get_string('enterchat', 'chat');
 $stridle         = get_string('idle', 'chat');
@@ -95,7 +103,6 @@ echo $OUTPUT->header();
 /// Check to see if groups are being used here
 $groupmode = groups_get_activity_groupmode($cm);
 $currentgroup = groups_get_activity_group($cm, true);
-groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/chat/view.php?id=$cm->id");
 
 // url parameters
 $params = array();
@@ -108,11 +115,13 @@ if ($currentgroup) {
     $groupparam = "";
 }
 
-echo $OUTPUT->heading(format_string($chat->name));
+echo $OUTPUT->heading(format_string($chat->name), 2);
 
 if ($chat->intro) {
     echo $OUTPUT->box(format_module_intro('chat', $chat, $cm->id), 'generalbox', 'intro');
 }
+
+groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/chat/view.php?id=$cm->id");
 
 if (has_capability('mod/chat:chat', $context)) {
     /// Print the main part of the page
@@ -161,7 +170,7 @@ chat_delete_old_users();
 if ($chatusers = chat_get_users($chat->id, $currentgroup, $cm->groupingid)) {
     $timenow = time();
     echo $OUTPUT->box_start('generalbox', 'chatcurrentusers');
-    echo $OUTPUT->heading($strcurrentusers, 4);
+    echo $OUTPUT->heading($strcurrentusers, 3);
     echo '<table>';
     foreach ($chatusers as $chatuser) {
         $lastping = $timenow - $chatuser->lastmessageping;

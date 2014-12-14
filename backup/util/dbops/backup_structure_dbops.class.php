@@ -103,7 +103,18 @@ abstract class backup_structure_dbops extends backup_dbops {
         }
     }
 
-    public static function annotate_files($backupid, $contextid, $component, $filearea, $itemid) {
+    /**
+     * Adds backup id database record for all files in the given file area.
+     *
+     * @param string $backupid Backup ID
+     * @param int $contextid Context id
+     * @param string $component Component
+     * @param string $filearea File area
+     * @param int $itemid Item id
+     * @param \core\progress\base $progress
+     */
+    public static function annotate_files($backupid, $contextid, $component, $filearea, $itemid,
+            \core\progress\base $progress = null) {
         global $DB;
         $sql = 'SELECT id
                   FROM {files}
@@ -120,9 +131,18 @@ abstract class backup_structure_dbops extends backup_dbops {
             $sql .= ' AND itemid = ?';
             $params[] = $itemid;
         }
+        if ($progress) {
+            $progress->start_progress('');
+        }
         $rs = $DB->get_recordset_sql($sql, $params);
         foreach ($rs as $record) {
+            if ($progress) {
+                $progress->progress();
+            }
             self::insert_backup_ids_record($backupid, 'file', $record->id);
+        }
+        if ($progress) {
+            $progress->end_progress();
         }
         $rs->close();
     }
@@ -130,10 +150,16 @@ abstract class backup_structure_dbops extends backup_dbops {
     /**
      * Moves all the existing 'item' annotations to their final 'itemfinal' ones
      * for a given backup.
+     *
+     * @param string $backupid Backup ID
+     * @param string $itemname Item name
+     * @param \core\progress\base $progress Progress tracker
      */
-    public static function move_annotations_to_final($backupid, $itemname) {
+    public static function move_annotations_to_final($backupid, $itemname, \core\progress\base $progress) {
         global $DB;
+        $progress->start_progress('move_annotations_to_final');
         $rs = $DB->get_recordset('backup_ids_temp', array('backupid' => $backupid, 'itemname' => $itemname));
+        $progress->progress();
         foreach($rs as $annotation) {
             // If corresponding 'itemfinal' annotation does not exist, update 'item' to 'itemfinal'
             if (! $DB->record_exists('backup_ids_temp', array('backupid' => $backupid,
@@ -141,10 +167,12 @@ abstract class backup_structure_dbops extends backup_dbops {
                                                               'itemid' => $annotation->itemid))) {
                 $DB->set_field('backup_ids_temp', 'itemname', $itemname . 'final', array('id' => $annotation->id));
             }
+            $progress->progress();
         }
         $rs->close();
         // All the remaining $itemname annotations can be safely deleted
         $DB->delete_records('backup_ids_temp', array('backupid' => $backupid, 'itemname' => $itemname));
+        $progress->end_progress();
     }
 
     /**

@@ -58,7 +58,7 @@ $personalcontext = context_user::instance($user->id);
 $PAGE->set_url('/course/user.php', array('id'=>$id, 'user'=>$user->id, 'mode'=>$mode));
 
 require_login();
-$PAGE->set_pagelayout('admin');
+$PAGE->set_pagelayout('report');
 if (has_capability('moodle/user:viewuseractivitiesreport', $personalcontext) and !is_enrolled($coursecontext)) {
     // do not require parents to be enrolled in courses ;-)
     $PAGE->set_course($course);
@@ -79,6 +79,9 @@ $anyreport  = has_capability('moodle/user:viewuseractivitiesreport', $personalco
 
 $modes = array();
 
+// Used for grade reports, it represents whether we should be viewing the report as ourselves, or as the targetted user.
+$viewasuser = false;
+
 if (has_capability('moodle/grade:viewall', $coursecontext)) {
     //ok - can view all course grades
     $modes[] = 'grade';
@@ -90,10 +93,12 @@ if (has_capability('moodle/grade:viewall', $coursecontext)) {
 } else if ($course->showgrades and has_capability('moodle/grade:viewall', $personalcontext)) {
     // ok - can view grades of this user - parent most probably
     $modes[] = 'grade';
+    $viewasuser = true;
 
 } else if ($course->showgrades and $anyreport) {
     // ok - can view grades of this user - parent most probably
     $modes[] = 'grade';
+    $viewasuser = true;
 }
 
 if (empty($modes)) {
@@ -105,7 +110,13 @@ if (!in_array($mode, $modes)) {
     $mode = reset($modes);
 }
 
-add_to_log($course->id, "course", "user report", "user.php?id=$course->id&amp;user=$user->id&amp;mode=$mode", "$user->id");
+$eventdata = array(
+    'context' => $coursecontext,
+    'relateduserid' => $user->id,
+    'other' => array('mode' => $mode),
+);
+$event = \core\event\course_user_report_viewed::create($eventdata);
+$event->trigger();
 
 $stractivityreport = get_string("activityreport");
 
@@ -126,7 +137,7 @@ switch ($mode) {
 
         $functionname = 'grade_report_'.$CFG->grade_profilereport.'_profilereport';
         if (function_exists($functionname)) {
-            $functionname($course, $user);
+            $functionname($course, $user, $viewasuser);
         }
         break;
 

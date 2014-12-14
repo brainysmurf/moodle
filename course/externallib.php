@@ -140,6 +140,7 @@ class core_course_external extends external_api {
                         //common info (for people being able to see the module or availability dates)
                         $module['id'] = $cm->id;
                         $module['name'] = format_string($cm->name, true);
+                        $module['instance'] = $cm->instance;
                         $module['modname'] = $cm->modname;
                         $module['modplural'] = $cm->modplural;
                         $module['modicon'] = $cm->get_icon_url()->out(false);
@@ -148,15 +149,15 @@ class core_course_external extends external_api {
                         $modcontext = context_module::instance($cm->id);
 
                         if (!empty($cm->showdescription) or $cm->modname == 'label') {
-                            // We want to use the external format. However from reading get_formatted_content(), get_content() format is always FORMAT_HTML.
-                            list($module['description'], $descriptionformat) = external_format_text($cm->get_content(),
+                            // We want to use the external format. However from reading get_formatted_content(), $cm->content format is always FORMAT_HTML.
+                            list($module['description'], $descriptionformat) = external_format_text($cm->content,
                                 FORMAT_HTML, $modcontext->id, $cm->modname, 'intro', $cm->id);
                         }
 
                         //url of the module
-                        $url = $cm->get_url();
+                        $url = $cm->url;
                         if ($url) { //labels don't have url
-                            $module['url'] = $cm->get_url()->out(false);
+                            $module['url'] = $url->out(false);
                         }
 
                         $canviewhidden = has_capability('moodle/course:viewhiddenactivities',
@@ -164,10 +165,9 @@ class core_course_external extends external_api {
                         //user that can view hidden module should know about the visibility
                         $module['visible'] = $cm->visible;
 
-                        //availability date (also send to user who can see hidden module when the showavailabilyt is ON)
-                        if ($canupdatecourse or ($CFG->enableavailability && $canviewhidden && $cm->showavailability)) {
-                            $module['availablefrom'] = $cm->availablefrom;
-                            $module['availableuntil'] = $cm->availableuntil;
+                        // Availability date (also send to user who can see hidden module).
+                        if ($CFG->enableavailability && ($canviewhidden || $canupdatecourse)) {
+                            $module['availability'] = $cm->availability;
                         }
 
                         $baseurl = 'webservice/pluginfile.php';
@@ -222,8 +222,7 @@ class core_course_external extends external_api {
                                     'modicon' => new external_value(PARAM_URL, 'activity icon url'),
                                     'modname' => new external_value(PARAM_PLUGIN, 'activity module type'),
                                     'modplural' => new external_value(PARAM_TEXT, 'activity module plural name'),
-                                    'availablefrom' => new external_value(PARAM_INT, 'module availability start date', VALUE_OPTIONAL),
-                                    'availableuntil' => new external_value(PARAM_INT, 'module availability en date', VALUE_OPTIONAL),
+                                    'availability' => new external_value(PARAM_RAW, 'module availability settings', VALUE_OPTIONAL),
                                     'indent' => new external_value(PARAM_INT, 'number of identation in the site'),
                                     'contents' => new external_multiple_structure(
                                           new external_single_structure(
@@ -528,7 +527,7 @@ class core_course_external extends external_api {
         $params = self::validate_parameters(self::create_courses_parameters(),
                         array('courses' => $courses));
 
-        $availablethemes = get_plugin_list('theme');
+        $availablethemes = core_component::get_plugin_list('theme');
         $availablelangs = get_string_manager()->get_list_of_translations();
 
         $transaction = $DB->start_delegated_transaction();
@@ -692,7 +691,7 @@ class core_course_external extends external_api {
         $params = self::validate_parameters(self::update_courses_parameters(),
                         array('courses' => $courses));
 
-        $availablethemes = get_plugin_list('theme');
+        $availablethemes = core_component::get_plugin_list('theme');
         $availablelangs = get_string_manager()->get_list_of_translations();
 
         foreach ($params['courses'] as $course) {

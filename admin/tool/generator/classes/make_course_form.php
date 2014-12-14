@@ -25,7 +25,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
+<<<<<<< HEAD
 require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/generator/classes/course_backend.php');
+=======
+>>>>>>> moodle/MOODLE_27_STABLE
 
 /**
  * Form with options for creating large course.

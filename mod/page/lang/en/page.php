@@ -18,7 +18,7 @@
 /**
  * Strings for component 'page', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package   page
+ * @package   mod_page
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -45,7 +45,6 @@ Basically, if you want to put something in your course that students see immedia
 If you want to add something to a new page on your course, not on the top level, but one click away, you should use a _Page_.';
 $string['modulename_link'] = 'mod/page/view';
 $string['modulenameplural'] = 'Pages';
-$string['neverseen'] = 'Never seen';
 $string['optionsheader'] = 'Display options';
 $string['page-mod-page-x'] = 'Any page module page';
 $string['page:addinstance'] = 'Add a new page resource';

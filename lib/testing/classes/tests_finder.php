@@ -63,10 +63,10 @@ class tests_finder {
     private static function get_all_plugins_with_tests($testtype) {
         $pluginswithtests = array();
 
-        $plugintypes = get_plugin_types();
+        $plugintypes = core_component::get_plugin_types();
         ksort($plugintypes);
         foreach ($plugintypes as $type => $unused) {
-            $plugs = get_plugin_list($type);
+            $plugs = core_component::get_plugin_list($type);
             ksort($plugs);
             foreach ($plugs as $plug => $fullplug) {
                 // Look for tests recursively
@@ -93,19 +93,18 @@ class tests_finder {
 
         $subsystemswithtests = array();
 
-        $subsystems = get_core_subsystems();
+        $subsystems = core_component::get_core_subsystems();
 
         // Hack the list a bit to cover some well-known ones
-        $subsystems['backup'] = 'backup';
-        $subsystems['db-dml'] = 'lib/dml';
-        $subsystems['db-ddl'] = 'lib/ddl';
+        $subsystems['backup'] = $CFG->dirroot.'/backup';
+        $subsystems['db-dml'] = $CFG->dirroot.'/lib/dml';
+        $subsystems['db-ddl'] = $CFG->dirroot.'/lib/ddl';
 
         ksort($subsystems);
-        foreach ($subsystems as $subsys => $relsubsys) {
-            if ($relsubsys === null) {
+        foreach ($subsystems as $subsys => $fullsubsys) {
+            if ($fullsubsys === null) {
                 continue;
             }
-            $fullsubsys = $CFG->dirroot . '/' . $relsubsys;
             if (!is_dir($fullsubsys)) {
                 continue;
             }

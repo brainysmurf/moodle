@@ -60,7 +60,6 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'showblocks' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '0',
-            'questions' => '3859,3860,0,3861,3862,0,3863,3864,0,3865,3866,0,3867,3868,0',
             'sumgrades' => '50',
             'grade' => '50',
             'timecreated' => '0',
@@ -84,7 +83,6 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'timemodified' => '1177841394',
             'layout' => '3859,3860,0,3861,3862,0,3863,3864,0,3865,3866,0,3867,3868,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '3865',
@@ -193,6 +191,7 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'variant' => 1,
             'maxmark' => 5,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'The term ‘integration server’ is another name for an application server, true or false?',
             'rightanswer' => 'False',
@@ -250,7 +249,6 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'questionsperpage' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '1',
-            'questions' => '9043,0,9057,0,9062,0,9241,0',
             'sumgrades' => '4',
             'grade' => '4',
             'timecreated' => '0',
@@ -274,7 +272,6 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'timemodified' => '1200326384',
             'layout' => '9043,0,9057,0,9062,0,9241,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '9062',
@@ -380,6 +377,7 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'variant' => 1,
             'maxmark' => 1,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => "[my market] \n\nWhat can you buy in this shop? Is this list accurate? \n\nMark true or false (for the list as a whole). \n\n_single tickets_ \n\n_weekly season tickets_ \n\n_monthly season tickets_ \n\n_wine and grappa_ \n\n_fruit and vegetables_ \n\n_tobacco _",
             'rightanswer' => 'False',
@@ -429,7 +427,6 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'questionsperpage' => '0',
             'shufflequestions' => '1',
             'shuffleanswers' => '1',
-            'questions' => '96,98,104,106,101,108,111,102,113,0',
             'sumgrades' => '9',
             'grade' => '9',
             'timecreated' => '0',
@@ -453,7 +450,6 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'timemodified' => '1150454872',
             'layout' => '96,108,102,101,106,113,104,98,111,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '111',
@@ -549,6 +545,7 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'variant' => 1,
             'maxmark' => 1,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'Web services, integration servers, XML, application servers, message-oriented middleware and remote procedure call can be used to enable integrated systems?',
             'rightanswer' => 'True',
@@ -603,7 +600,6 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'questionsperpage' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '1',
-            'questions' => '30,0',
             'sumgrades' => '10.00000',
             'grade' => '10.00000',
             'timecreated' => '0',
@@ -630,7 +626,6 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'timemodified' => '1309103120',
             'layout' => '30,0',
             'preview' => '0',
-            'needsupgradetonewqe' => 1,
         );
         $question = (object) array(
             'id' => '30',
@@ -738,6 +733,7 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'variant' => 1,
             'maxmark' => 10.0000000,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => '1 +1 = 2 ?',
             'rightanswer' => 'True',
@@ -794,7 +790,6 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'questionsperpage' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '1',
-            'questions' => '30,0',
             'sumgrades' => '10.00000',
             'grade' => '10.00000',
             'timecreated' => '0',
@@ -821,7 +816,6 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'timemodified' => '1309103136',
             'layout' => '30,0',
             'preview' => '0',
-            'needsupgradetonewqe' => 1,
         );
         $question = (object) array(
             'id' => '30',
@@ -929,6 +923,7 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'variant' => 1,
             'maxmark' => 10.0000000,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => '1 +1 = 2 ?',
             'rightanswer' => 'True',
@@ -991,7 +986,6 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'questionsperpage' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '1',
-            'questions' => '1,0',
             'sumgrades' => '1.00000',
             'grade' => '10.00000',
             'timecreated' => '0',
@@ -1017,7 +1011,6 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'timemodified' => '1309441969',
             'layout' => '1,0',
             'preview' => '0',
-            'needsupgradetonewqe' => 1,
         );
         $question = (object) array(
             'id' => '1',
@@ -1125,6 +1118,7 @@ class qtype_truefalse_attempt_upgrader_test extends question_attempt_upgrader_te
             'variant' => 1,
             'maxmark' => 1.0000000,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => '',
             'rightanswer' => 'True',

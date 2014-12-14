@@ -51,6 +51,12 @@ class question_dataset_dependent_items_form extends question_wizard_form {
      */
     public $qtypeobj;
 
+    /** @var stdClass the question category. */
+    protected $category;
+
+    /** @var context the context of the question category. */
+    protected $categorycontext;
+
     public $datasetdefs;
 
     public $maxnumber = -1;
@@ -108,8 +114,10 @@ class question_dataset_dependent_items_form extends question_wizard_form {
     }
 
     protected function definition() {
+        global $PAGE;
+
         $labelsharedwildcard = get_string("sharedwildcard", "qtype_calculated");
-        $mform =& $this->_form;
+        $mform = $this->_form;
         $mform->setDisableShortforms();
 
         $strquestionlabel = $this->qtypeobj->comment_header($this->question);
@@ -139,7 +147,7 @@ class question_dataset_dependent_items_form extends question_wizard_form {
                 $name = get_string('wildcard', 'qtype_calculated', $datasetdef->name);
             }
             $mform->addElement('text', "number[$j]", $name);
-            $mform->setType("number[$j]", PARAM_FLOAT);
+            $mform->setType("number[$j]", PARAM_RAW); // This parameter will be validated in validation().
             $this->qtypeobj->custom_generator_tools_part($mform, $idx, $j);
             $idx++;
             $mform->addElement('hidden', "definition[$j]");
@@ -161,11 +169,10 @@ class question_dataset_dependent_items_form extends question_wizard_form {
         $answers = fullclone($this->question->options->answers);
         $key1 =1;
         foreach ($answers as $key => $answer) {
-            if ('' === $answer->answer) {
-                // Do nothing.
-            } else if ('*' === $answer->answer) {
+            $ans = shorten_text($answer->answer, 17, true);
+            if ($ans === '*') {
                 $mform->addElement('static',
-                        'answercomment[' . ($this->noofitems+$key1) . ']', $answer->answer);
+                        'answercomment[' . ($this->noofitems+$key1) . ']', $ans);
                 $mform->addElement('hidden', 'tolerance['.$key.']', '');
                 $mform->setType('tolerance['.$key.']', PARAM_RAW);
                 $mform->setAdvanced('tolerance['.$key.']', true);
@@ -178,9 +185,9 @@ class question_dataset_dependent_items_form extends question_wizard_form {
                 $mform->addElement('hidden', 'correctanswerformat['.$key.']', '');
                 $mform->setType('correctanswerformat['.$key.']', PARAM_RAW);
                 $mform->setAdvanced('correctanswerformat['.$key.']', true);
-            } else {
+            } else if ( $ans !== '' ) {
                 $mform->addElement('static', 'answercomment[' . ($this->noofitems+$key1) . ']',
-                        $answer->answer);
+                        $ans);
                 $mform->addElement('text', 'tolerance['.$key.']',
                         get_string('tolerance', 'qtype_calculated'));
                 $mform->setType('tolerance['.$key.']', PARAM_RAW);
@@ -290,7 +297,7 @@ class question_dataset_dependent_items_form extends question_wizard_form {
                 } else {
                     $mform->addElement('hidden', "number[$j]" , '');
                 }
-                $mform->setType("number[$j]", PARAM_FLOAT);
+                $mform->setType("number[$j]", PARAM_RAW); // This parameter will be validated in validation().
                 $mform->addElement('hidden', "itemid[$j]");
                 $mform->setType("itemid[$j]", PARAM_INT);
 
@@ -312,11 +319,11 @@ class question_dataset_dependent_items_form extends question_wizard_form {
                             'Formulas {=..} in question text');
                     foreach ($textequations as $key => $equation) {
                         if ($formulaerrors = qtype_calculated_find_formula_errors($equation)) {
-                            $str=$formulaerrors;
+                            $str = $formulaerrors;
                         } else {
                             eval('$str = '.$equation.';');
                         }
-
+                        $equation = shorten_text($equation, 17, true);
                         $mform->addElement('static', "textequation", "{=$equation}", "=".$str);
                     }
                 }
@@ -326,11 +333,19 @@ class question_dataset_dependent_items_form extends question_wizard_form {
 
         }
         $mform->addElement('static', 'outsidelimit', '', '');
-        // ...----------------------------------------------------------------------
-        // Non standard name for button element needed so not using add_action_buttons.
-        if (!($this->noofitems==0) ) {
-            $mform->addElement('submit', 'savechanges', get_string('savechanges'));
-            $mform->closeHeaderBefore('savechanges');
+
+        // Submit buttons.
+        if ($this->noofitems > 0) {
+            $buttonarray = array();
+            $buttonarray[] = $mform->createElement(
+                    'submit', 'savechanges', get_string('savechanges'));
+
+            $previewlink = $PAGE->get_renderer('core_question')->question_preview_link(
+                        $this->question->id, $this->categorycontext, true);
+            $buttonarray[] = $mform->createElement('static', 'previewlink', '', $previewlink);
+
+            $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
+            $mform->closeHeaderBefore('buttonar');
         }
 
         $this->add_hidden_fields();
@@ -485,19 +500,18 @@ class question_dataset_dependent_items_form extends question_wizard_form {
         $numbers = $data['number'];
         foreach ($numbers as $key => $number) {
             if (! is_numeric($number)) {
-                if (stristr($number, ', ')) {
-                    $errors['number['.$key.']'] = get_string(
-                        'The , cannot be used, use . as in 0.013 or 1.3e-2', 'qtype_calculated');
+                if (stristr($number, ',')) {
+                    $errors['number['.$key.']'] = get_string('nocommaallowed', 'qtype_calculated');
                 } else {
-                    $errors['number['.$key.']'] = get_string(
-                            'This is not a valid number', 'qtype_calculated');
+                    $errors['number['.$key.']'] = get_string('notvalidnumber', 'qtype_calculated');
                 }
             } else if (stristr($number, 'x')) {
-                $errors['number['.$key.']'] = get_string(
-                        'Hexadecimal format (i.e. 0X12d) is not allowed', 'qtype_calculated');
+                $a = new stdClass();
+                $a->name = '';
+                $a->value = $number;
+                $errors['number['.$key.']'] = get_string('hexanotallowed', 'qtype_calculated', $a);
             } else if (is_nan($number)) {
-                $errors['number['.$key.']'] = get_string(
-                        'is a NAN number', 'qtype_calculated');
+                $errors['number['.$key.']'] = get_string('notvalidnumber', 'qtype_calculated');
             }
         }
         return $errors;

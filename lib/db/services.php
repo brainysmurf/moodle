@@ -99,6 +99,25 @@ $functions = array(
         'type'        => 'read',
         'capabilities'=> 'moodle/cohort:view',
     ),
+    // Grade related functions.
+
+    'core_grades_get_grades' => array(
+        'classname'     => 'core_grades_external',
+        'methodname'    => 'get_grades',
+        'description'   => 'Returns student course total grade and grades for activities.
+                                This function does not return category or manual items.
+                                This function is suitable for managers or teachers not students.',
+        'type'          => 'read',
+        'capabilities'  => 'moodle/grade:view, moodle/grade:viewall, moodle/grade:viewhidden',
+    ),
+
+    'core_grades_update_grades' => array(
+        'classname'     => 'core_grades_external',
+        'methodname'    => 'update_grades',
+        'description'   => 'Update a grade item and associated student grades.',
+        'type'          => 'write',
+        'capabilities'  => '',
+    ),
 
     // === group related functions ===
 
@@ -437,6 +456,15 @@ $functions = array(
         'capabilities'=> 'moodle/user:update',
     ),
 
+    'core_user_add_user_device' => array(
+        'classname'   => 'core_user_external',
+        'methodname'  => 'add_user_device',
+        'classpath'   => 'user/externallib.php',
+        'description' => 'Store mobile user devices information for PUSH Notifications.',
+        'type'        => 'write',
+        'capabilities'=> '',
+    ),
+
     // === enrol related functions ===
 
     'core_enrol_get_enrolled_users_with_capability' => array(
@@ -483,6 +511,14 @@ $functions = array(
         'description' => 'Get the list of courses where a user is enrolled in',
         'type'        => 'read',
         'capabilities'=> 'moodle/course:viewparticipants',
+    ),
+
+    'core_enrol_get_course_enrolment_methods' => array(
+        'classname'   => 'core_enrol_external',
+        'methodname'  => 'get_course_enrolment_methods',
+        'classpath'   => 'enrol/externallib.php',
+        'description' => 'Get the list of course enrolment methods',
+        'type'        => 'read',
     ),
 
     // === Role related functions ===
@@ -774,13 +810,27 @@ $functions = array(
         'capabilities'=> 'moodle/notes:manage',
     ),
 
-    // === grade related functions ===
+    // === grading related functions ===
+
+    'core_grading_get_definitions' => array(
+        'classname'   => 'core_grading_external',
+        'methodname'  => 'get_definitions',
+        'description' => 'Get grading definitions',
+        'type'        => 'read'
+    ),
 
     'core_grade_get_definitions' => array(
         'classname'   => 'core_grade_external',
         'methodname'  => 'get_definitions',
         'classpath'   => 'grade/externallib.php',
-        'description' => 'Get grading definitions',
+        'description' => 'DEPRECATED: this deprecated function will be removed in a future version. This function has been renamed as core_grading_get_definitions()',
+        'type'        => 'read'
+    ),
+
+    'core_grading_get_gradingform_instances' => array(
+        'classname'   => 'core_grading_external',
+        'methodname'  => 'get_gradingform_instances',
+        'description' => 'Get grading form instances',
         'type'        => 'read'
     ),
 
@@ -871,10 +921,41 @@ $services = array(
             'moodle_user_get_users_by_courseid',
             'moodle_message_send_instantmessages',
             'core_course_get_contents',
-            'core_get_component_strings'),
+            'core_get_component_strings',
+            'core_user_add_user_device',
+            'core_calendar_get_calendar_events',
+            'core_enrol_get_users_courses',
+            'core_enrol_get_enrolled_users',
+            'core_user_get_users_by_id',
+            'core_webservice_get_site_info',
+            'core_notes_create_notes',
+            'core_user_get_course_user_profiles',
+            'core_enrol_get_enrolled_users',
+            'core_message_send_instant_messages',
+            'mod_assign_get_grades',
+            'mod_assign_get_assignments',
+            'mod_assign_get_submissions',
+            'mod_assign_get_user_flags',
+            'mod_assign_set_user_flags',
+            'mod_assign_get_user_mappings',
+            'mod_assign_revert_submissions_to_draft',
+            'mod_assign_lock_submissions',
+            'mod_assign_unlock_submissions',
+            'mod_assign_save_submission',
+            'mod_assign_submit_for_grading',
+            'mod_assign_save_grade',
+            'mod_assign_save_user_extensions',
+            'mod_assign_reveal_identities',
+            'message_airnotifier_is_system_configured',
+            'message_airnotifier_are_notification_preferences_configured',
+            'core_grades_update_grades',
+            'mod_forum_get_forums_by_courses',
+            'mod_forum_get_forum_discussions',
+            'mod_forum_get_forum_discussion_posts'),
         'enabled' => 0,
         'restrictedusers' => 0,
         'shortname' => MOODLE_OFFICIAL_MOBILE_SERVICE,
-        'downloadfiles' => 1
+        'downloadfiles' => 1,
+        'uploadfiles' => 1
     ),
 );

@@ -87,7 +87,7 @@ interface cache_store_interface {
  * All cache store plugins must extend this base class.
  * It lays down the foundation for what is required of a cache store plugin.
  *
- * @since 2.4
+ * @since Moodle 2.4
  * @package    core
  * @category   cache
  * @copyright  2012 Sam Hemelryk
@@ -179,7 +179,9 @@ abstract class cache_store implements cache_store_interface {
      * Returns true if this cache store instance is ready to use.
      * @return bool
      */
-    abstract public function is_ready();
+    public function is_ready() {
+        return forward_static_call(array($this, 'are_requirements_met'));
+    }
 
     /**
      * Retrieves an item from the cache store given its key.
@@ -254,7 +256,7 @@ abstract class cache_store implements cache_store_interface {
     /**
      * Performs any necessary operation when the store instance has been created.
      *
-     * @since 2.5
+     * @since Moodle 2.5
      */
     public function instance_created() {
         // By default, do nothing.
@@ -265,7 +267,7 @@ abstract class cache_store implements cache_store_interface {
      *
      * This method may be called before the store has been initialised.
      *
-     * @since 2.5
+     * @since Moodle 2.5
      * @see cleanup()
      */
     public function instance_deleted() {
@@ -337,5 +339,17 @@ abstract class cache_store implements cache_store_interface {
         // By default we just run clone.
         // Any stores that have an issue with this will need to override the create_clone method.
         return clone($this);
+    }
+
+    /**
+     * Can be overridden to return any warnings this store instance should make to the admin.
+     *
+     * This should be used to notify things like configuration conflicts etc.
+     * The warnings returned here will be displayed on the cache configuration screen.
+     *
+     * @return string[] An array of warning strings from the store instance.
+     */
+    public function get_warnings() {
+        return array();
     }
 }

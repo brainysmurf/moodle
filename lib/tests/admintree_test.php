@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -20,7 +19,7 @@
  * functionality.
  *
  * @package     core
- * @category    test
+ * @category    phpunit
  * @copyright   2013 David Mudrak <david@moodle.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -33,10 +32,10 @@ require_once($CFG->libdir.'/adminlib.php');
 /**
  * Provides the unit tests for admin tree functionality.
  */
-class admintree_testcase extends advanced_testcase {
+class core_admintree_testcase extends advanced_testcase {
 
     /**
-     * Adding nodes into the admin tree
+     * Adding nodes into the admin tree.
      */
     public function test_add_nodes() {
 
@@ -72,7 +71,7 @@ class admintree_testcase extends advanced_testcase {
         }
         $this->assertEquals(array('one', 'two', 'three', 'four', 'five'), $map);
 
-        // Insert a node into the middle of the subcategory
+        // Insert a node into the middle of the subcategory.
         $tree->add('one', new admin_category('one-two', 'One-two'), 'one-three');
         $map = array();
         foreach ($one->children as $child) {
@@ -110,6 +109,41 @@ class admintree_testcase extends advanced_testcase {
     public function test_add_nodes_before_invalid2() {
         $tree = new admin_root(true);
         $tree->add('root', new admin_category('bar', 'Bar'), '');
+    }
+
+    /**
+     * Testing whether a configexecutable setting is executable.
+     */
+    public function test_admin_setting_configexecutable() {
+        global $CFG;
+        $this->resetAfterTest();
+
+        $executable = new admin_setting_configexecutable('test1', 'Text 1', 'Help Path', '');
+
+        // Check for an invalid path.
+        $result = $executable->output_html($CFG->dirroot . '/lib/tests/other/file_does_not_exist');
+        $this->assertRegexp('/class="patherror"/', $result);
+
+        // Check for a directory.
+        $result = $executable->output_html($CFG->dirroot);
+        $this->assertRegexp('/class="patherror"/', $result);
+
+        // Check for a file which is not executable.
+        $result = $executable->output_html($CFG->dirroot . '/filter/tex/readme_moodle.txt');
+        $this->assertRegexp('/class="patherror"/', $result);
+
+        // Check for an executable file.
+        if ($CFG->ostype == 'WINDOWS') {
+            $filetocheck = 'mimetex.exe';
+        } else {
+            $filetocheck = 'mimetex.darwin';
+        }
+        $result = $executable->output_html($CFG->dirroot . '/filter/tex/' . $filetocheck);
+        $this->assertRegexp('/class="pathok"/', $result);
+
+        // Check for no file specified.
+        $result = $executable->output_html('');
+        $this->assertRegexp('/name="s__test1" value=""/', $result);
     }
 
     /**
@@ -201,10 +235,89 @@ class admintree_testcase extends advanced_testcase {
                 $adminroot->errors[$fullname]->data  = $data[$fullname];
                 $adminroot->errors[$fullname]->id    = $setting->get_id();
                 $adminroot->errors[$fullname]->error = $error;
+            } else {
+                $setting->write_setting_flags($data);
             }
-            $count++;
+            if ($setting->post_write_settings($original)) {
+                $count++;
+            }
         }
 
         return $count;
+    }
+
+    public function test_preventexecpath() {
+        $this->resetAfterTest();
+
+        set_config('preventexecpath', 0);
+        set_config('execpath', null, 'abc_cde');
+        $this->assertFalse(get_config('abc_cde', 'execpath'));
+        $setting = new admin_setting_configexecutable('abc_cde/execpath', 'some desc', '', '/xx/yy');
+        $setting->write_setting('/oo/pp');
+        $this->assertSame('/oo/pp', get_config('abc_cde', 'execpath'));
+
+        // Prevent changes.
+        set_config('preventexecpath', 1);
+        $setting->write_setting('/mm/nn');
+        $this->assertSame('/oo/pp', get_config('abc_cde', 'execpath'));
+
+        // Use default in install.
+        set_config('execpath', null, 'abc_cde');
+        $setting->write_setting('/mm/nn');
+        $this->assertSame('/xx/yy', get_config('abc_cde', 'execpath'));
+
+        // Use empty value if no default.
+        $setting = new admin_setting_configexecutable('abc_cde/execpath', 'some desc', '', null);
+        set_config('execpath', null, 'abc_cde');
+        $setting->write_setting('/mm/nn');
+        $this->assertSame('', get_config('abc_cde', 'execpath'));
+
+        // This also affects admin_setting_configfile and admin_setting_configdirectory.
+
+        set_config('preventexecpath', 0);
+        set_config('execpath', null, 'abc_cde');
+        $this->assertFalse(get_config('abc_cde', 'execpath'));
+        $setting = new admin_setting_configfile('abc_cde/execpath', 'some desc', '', '/xx/yy');
+        $setting->write_setting('/oo/pp');
+        $this->assertSame('/oo/pp', get_config('abc_cde', 'execpath'));
+
+        // Prevent changes.
+        set_config('preventexecpath', 1);
+        $setting->write_setting('/mm/nn');
+        $this->assertSame('/oo/pp', get_config('abc_cde', 'execpath'));
+
+        // Use default in install.
+        set_config('execpath', null, 'abc_cde');
+        $setting->write_setting('/mm/nn');
+        $this->assertSame('/xx/yy', get_config('abc_cde', 'execpath'));
+
+        // Use empty value if no default.
+        $setting = new admin_setting_configfile('abc_cde/execpath', 'some desc', '', null);
+        set_config('execpath', null, 'abc_cde');
+        $setting->write_setting('/mm/nn');
+        $this->assertSame('', get_config('abc_cde', 'execpath'));
+
+        set_config('preventexecpath', 0);
+        set_config('execpath', null, 'abc_cde');
+        $this->assertFalse(get_config('abc_cde', 'execpath'));
+        $setting = new admin_setting_configdirectory('abc_cde/execpath', 'some desc', '', '/xx/yy');
+        $setting->write_setting('/oo/pp');
+        $this->assertSame('/oo/pp', get_config('abc_cde', 'execpath'));
+
+        // Prevent changes.
+        set_config('preventexecpath', 1);
+        $setting->write_setting('/mm/nn');
+        $this->assertSame('/oo/pp', get_config('abc_cde', 'execpath'));
+
+        // Use default in install.
+        set_config('execpath', null, 'abc_cde');
+        $setting->write_setting('/mm/nn');
+        $this->assertSame('/xx/yy', get_config('abc_cde', 'execpath'));
+
+        // Use empty value if no default.
+        $setting = new admin_setting_configdirectory('abc_cde/execpath', 'some desc', '', null);
+        set_config('execpath', null, 'abc_cde');
+        $setting->write_setting('/mm/nn');
+        $this->assertSame('', get_config('abc_cde', 'execpath'));
     }
 }

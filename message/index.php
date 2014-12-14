@@ -83,9 +83,6 @@ if ($viewing != MESSAGE_VIEW_UNREAD_MESSAGES) {
 
 $PAGE->set_url($url);
 
-$navigationurl = new moodle_url('/message/index.php', array('user1' => $user1id));
-navigation_node::override_active_url($navigationurl);
-
 // Disable message notification popups while the user is viewing their messages
 $PAGE->set_popup_notification_allowed(false);
 
@@ -106,13 +103,15 @@ unset($user1id);
 
 $user2 = null;
 if (!empty($user2id)) {
-    $user2 = $DB->get_record("user", array("id" => $user2id));
+    $user2 = core_user::get_user($user2id);
     if (!$user2) {
         print_error('invaliduserid');
     }
 }
 unset($user2id);
 
+$user2realuser = !empty($user2) && core_user::is_real_user($user2->id);
+$showactionlinks = $showactionlinks && $user2realuser;
 $systemcontext = context_system::instance();
 
 // Is the user involved in the conversation?
@@ -121,26 +120,34 @@ if (!message_current_user_is_involved($user1, $user2) && !has_capability('moodle
     print_error('accessdenied','admin');
 }
 
-$PAGE->set_context(context_user::instance($user1->id));
-$PAGE->set_pagelayout('course');
-$PAGE->navigation->extend_for_user($user1);
+if (substr($viewing, 0, 7) == MESSAGE_VIEW_COURSE) {
+    $courseid = intval(substr($viewing, 7));
+    require_login($courseid);
+    require_capability('moodle/course:viewparticipants', context_course::instance($courseid));
+    $PAGE->set_pagelayout('incourse');
+} else {
+    $PAGE->set_pagelayout('course');
+    $PAGE->set_context(context_user::instance($user1->id));
+}
+if (!empty($user1->id) && $user1->id != $USER->id) {
+    $PAGE->navigation->extend_for_user($user1);
+}
+if (!empty($user2->id) && $user2realuser && ($user2->id != $USER->id)) {
+    $PAGE->navigation->extend_for_user($user2);
+}
 
 /// Process any contact maintenance requests there may be
 if ($addcontact and confirm_sesskey()) {
-    add_to_log(SITEID, 'message', 'add contact', 'index.php?user1='.$addcontact.'&amp;user2='.$USER->id, $addcontact);
     message_add_contact($addcontact);
     redirect($CFG->wwwroot . '/message/index.php?viewing=contacts&id='.$addcontact);
 }
 if ($removecontact and confirm_sesskey()) {
-    add_to_log(SITEID, 'message', 'remove contact', 'index.php?user1='.$removecontact.'&amp;user2='.$USER->id, $removecontact);
     message_remove_contact($removecontact);
 }
 if ($blockcontact and confirm_sesskey()) {
-    add_to_log(SITEID, 'message', 'block contact', 'index.php?user1='.$blockcontact.'&amp;user2='.$USER->id, $blockcontact);
     message_block_contact($blockcontact);
 }
 if ($unblockcontact and confirm_sesskey()) {
-    add_to_log(SITEID, 'message', 'unblock contact', 'index.php?user1='.$unblockcontact.'&amp;user2='.$USER->id, $unblockcontact);
     message_unblock_contact($unblockcontact);
 }
 
@@ -165,6 +172,7 @@ if ($currentuser && !empty($user2) && has_capability('moodle/site:sendmessage', 
         $mform = new send_form();
         $defaultmessage = new stdClass;
         $defaultmessage->id = $user2->id;
+        $defaultmessage->viewing = $viewing;
         $defaultmessage->message = '';
 
         //Check if the current user has sent a message
@@ -177,7 +185,6 @@ if ($currentuser && !empty($user2) && has_capability('moodle/site:sendmessage', 
             if (!empty($messageid)) {
                 //including the id of the user sending the message in the logged URL so the URL works for admins
                 //note message ID may be misleading as the message may potentially get a different ID when moved from message to message_read
-                add_to_log(SITEID, 'message', 'write', 'index.php?user='.$user1->id.'&id='.$user2->id.'&history=1#m'.$messageid, $user1->id);
                 redirect($CFG->wwwroot . '/message/index.php?viewing='.$viewing.'&id='.$user2->id);
             }
         }
@@ -185,7 +192,7 @@ if ($currentuser && !empty($user2) && has_capability('moodle/site:sendmessage', 
 }
 
 $strmessages = get_string('messages', 'message');
-if (!empty($user2)) {
+if ($user2realuser) {
     $user2fullname = fullname($user2);
 
     $PAGE->set_title("$strmessages: $user2fullname");
@@ -290,7 +297,7 @@ echo html_writer::start_tag('div', array('class' => 'messagearea mdl-align'));
         echo html_writer::end_tag('div');
 
         //send message form
-        if ($currentuser && has_capability('moodle/site:sendmessage', $systemcontext)) {
+        if ($currentuser && has_capability('moodle/site:sendmessage', $systemcontext) && $user2realuser) {
             echo html_writer::start_tag('div', array('class' => 'mdl-align messagesend'));
                 if (!empty($messageerror)) {
                     echo html_writer::tag('span', $messageerror, array('id' => 'messagewarning'));
@@ -309,6 +316,7 @@ echo html_writer::start_tag('div', array('class' => 'messagearea mdl-align'));
                     $mform = new send_form();
                     $defaultmessage = new stdClass;
                     $defaultmessage->id = $user2->id;
+                    $defaultmessage->viewing = $viewing;
                     $defaultmessage->message = '';
                     //$defaultmessage->messageformat = FORMAT_MOODLE;
                     $mform->set_data($defaultmessage);

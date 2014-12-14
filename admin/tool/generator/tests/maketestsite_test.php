@@ -24,9 +24,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+<<<<<<< HEAD
 global $CFG;
 require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/generator/classes/site_backend.php');
 
+=======
+>>>>>>> moodle/MOODLE_27_STABLE
 /**
  * Silly class to access site_backend internal methods.
  *

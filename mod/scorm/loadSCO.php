@@ -83,7 +83,7 @@ if (!empty($scoid)) {
                     'scorm_scoes',
                     'scorm = ? AND '.$DB->sql_isnotempty('scorm_scoes', 'launch', false, true).' AND id > ?',
                     array($scorm->id, $sco->id),
-                    'id ASC')) {
+                    'sortorder, id')) {
                 $sco = current($scoes);
             }
         }
@@ -97,7 +97,7 @@ if (!isset($sco)) {
         'scorm_scoes',
         'scorm = ? AND '.$DB->sql_isnotempty('scorm_scoes', 'launch', false, true),
         array($scorm->id),
-        'id ASC'
+        'sortorder, id'
     );
     $sco = current($scoes);
 }
@@ -148,18 +148,27 @@ if (scorm_external_link($sco->launch)) {
     //TODO: does this happen?
     $result = $launcher;
 } else if ($scorm->scormtype === SCORM_TYPE_EXTERNAL) {
-    // Remote learning activity
+    // Remote learning activity.
     $result = dirname($scorm->reference).'/'.$launcher;
-} else if ($scorm->scormtype === SCORM_TYPE_IMSREPOSITORY) {
-    // Repository
-    $result = $CFG->repositorywebroot.substr($scorm->reference, 1).'/'.$sco->launch;
+} else if ($scorm->scormtype === SCORM_TYPE_LOCAL && strtolower($scorm->reference) == 'imsmanifest.xml') {
+    // This SCORM content sits in a repository that allows relative links.
+    $result = "$CFG->wwwroot/pluginfile.php/$context->id/mod_scorm/imsmanifest/$scorm->revision/$launcher";
 } else if ($scorm->scormtype === SCORM_TYPE_LOCAL or $scorm->scormtype === SCORM_TYPE_LOCALSYNC) {
-    //note: do not convert this to use get_file_url() or moodle_url()
-    //SCORM does not work without slasharguments and moodle_url() encodes querystring vars
+    // Note: do not convert this to use get_file_url() or moodle_url()
+    // SCORM does not work without slasharguments and moodle_url() encodes querystring vars.
     $result = "$CFG->wwwroot/pluginfile.php/$context->id/mod_scorm/content/$scorm->revision/$launcher";
 }
 
-add_to_log($course->id, 'scorm', 'launch', 'view.php?id='.$cm->id, $result, $cm->id);
+// Trigger a Sco launched event.
+$event = \mod_scorm\event\sco_launched::create(array(
+    'objectid' => $sco->id,
+    'context' => $context,
+    'other' => array('instanceid' => $scorm->id, 'loadedcontent' => $result)
+));
+$event->add_record_snapshot('course_modules', $cm);
+$event->add_record_snapshot('scorm', $scorm);
+$event->add_record_snapshot('scorm_scoes', $sco);
+$event->trigger();
 
 header('Content-Type: text/html; charset=UTF-8');
 
@@ -220,7 +229,7 @@ $LMS_api = (scorm_version_check($scorm->version, SCORM_12) || empty($scorm->vers
                 location = "<?php echo $result ?>";
             }
             else {
-                document.body.innerHTML = "<p><?php echo get_string('activityloading', 'scorm');?> <span id='countdown'><?php echo $delayseconds ?></span> <?php echo get_string('numseconds', 'moodle', '');?>. &nbsp; <img src='<?php echo $OUTPUT->pix_url('wait', 'scorm') ?>'><p>";
+                document.body.innerHTML = "<p><?php echo get_string('activityloading', 'scorm');?> <span id='countdown'><?php echo $delayseconds ?></span> <?php echo get_string('numseconds', 'moodle', '');?>. &nbsp; <img src='<?php echo $OUTPUT->pix_url('wait', 'scorm') ?>'></p>";
                 var e = document.getElementById("countdown");
                 var cSeconds = parseInt(e.innerHTML);
                 var timer = setInterval(function() {

@@ -65,11 +65,11 @@ class enrol_paypal_edit_form extends moodleform {
         $mform->setDefault('enrolperiod', $plugin->get_config('enrolperiod'));
         $mform->addHelpButton('enrolperiod', 'enrolperiod', 'enrol_paypal');
 
-        $mform->addElement('date_selector', 'enrolstartdate', get_string('enrolstartdate', 'enrol_paypal'), array('optional' => true));
+        $mform->addElement('date_time_selector', 'enrolstartdate', get_string('enrolstartdate', 'enrol_paypal'), array('optional' => true));
         $mform->setDefault('enrolstartdate', 0);
         $mform->addHelpButton('enrolstartdate', 'enrolstartdate', 'enrol_paypal');
 
-        $mform->addElement('date_selector', 'enrolenddate', get_string('enrolenddate', 'enrol_paypal'), array('optional' => true));
+        $mform->addElement('date_time_selector', 'enrolenddate', get_string('enrolenddate', 'enrol_paypal'), array('optional' => true));
         $mform->setDefault('enrolenddate', 0);
         $mform->addHelpButton('enrolenddate', 'enrolenddate', 'enrol_paypal');
 
@@ -78,6 +78,10 @@ class enrol_paypal_edit_form extends moodleform {
 
         $mform->addElement('hidden', 'courseid');
         $mform->setType('courseid', PARAM_INT);
+
+        if (enrol_accessing_via_instance($instance)) {
+            $mform->addElement('static', 'selfwarn', get_string('instanceeditselfwarning', 'core_enrol'), get_string('instanceeditselfwarningtext', 'core_enrol'));
+        }
 
         $this->add_action_buttons(true, ($instance->id ? null : get_string('addinstance', 'enrol')));
 

@@ -18,8 +18,7 @@
 /**
  * Moodle renderer used to display special elements of the lesson module
  *
- * @package    mod
- * @subpackage lesson
+ * @package mod_lesson
  * @copyright  2009 Sam Hemelryk
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
@@ -581,6 +580,7 @@ class mod_lesson_renderer extends plugin_renderer_base {
             $attributes['class'] = $class;
         }
         $output = html_writer::tag('p', $contents, $attributes);
+        return $output;
     }
     /**
      * Returns HTML to display add_highscores_form

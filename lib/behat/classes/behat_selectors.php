@@ -43,6 +43,7 @@ class behat_selectors {
         'block' => 'block',
         'region' => 'region',
         'table_row' => 'table_row',
+        'list_item' => 'list_item',
         'table' => 'table',
         'fieldset' => 'fieldset',
         'css_element' => 'css_element',
@@ -57,6 +58,7 @@ class behat_selectors {
         'block' => 'block',
         'region' => 'region',
         'table_row' => 'table_row',
+        'list_item' => 'list_item',
         'link' => 'link',
         'button' => 'button',
         'link_or_button' => 'link_or_button',
@@ -64,11 +66,13 @@ class behat_selectors {
         'checkbox' => 'checkbox',
         'radio' => 'radio',
         'file' => 'file',
+        'filemanager' => 'filemanager',
         'optgroup' => 'optgroup',
         'option' => 'option',
         'table' => 'table',
         'field' => 'field',
         'fieldset' => 'fieldset',
+        'text' => 'text',
         'css_element' => 'css_element',
         'xpath_element' => 'xpath_element'
     );
@@ -82,17 +86,38 @@ class behat_selectors {
      * @var XPaths for moodle elements.
      */
     protected static $moodleselectors = array(
-        'dialogue' => <<<XPATH
-.//div[contains(concat(' ', normalize-space(@class), ' '), ' moodle-dialogue ')]/descendant::h1[normalize-space(.) = %locator%]/ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' moodle-dialogue ')]
+        'text' => <<<XPATH
+//*[contains(., %locator%)][count(./descendant::*[contains(., %locator%)]) = 0]
+XPATH
+        , 'dialogue' => <<<XPATH
+//div[contains(concat(' ', normalize-space(@class), ' '), ' moodle-dialogue ') and
+    normalize-space(descendant::div[
+        contains(concat(' ', normalize-space(@class), ' '), ' moodle-dialogue-hd ')
+        ]) = %locator%] |
+//div[contains(concat(' ', normalize-space(@class), ' '), ' yui-dialog ') and
+    normalize-space(descendant::div[@class='hd']) = %locator%]
 XPATH
         , 'block' => <<<XPATH
-.//div[contains(concat(' ', normalize-space(@class), ' '), concat(' ', %locator%, ' '))] | .//div[contains(concat(' ', normalize-space(@class), ' '), ' block ')]/descendant::h2[normalize-space(.) = %locator%]/ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' block ')]
+//div[contains(concat(' ', normalize-space(@class), ' '), ' block ') and
+    (contains(concat(' ', normalize-space(@class), ' '), concat(' ', %locator%, ' ')) or
+     descendant::h2[normalize-space(.) = %locator%] or
+     @aria-label = %locator%)]
 XPATH
         , 'region' => <<<XPATH
-.//*[self::div | self::section | self::aside][./@id = %locator%]
+//*[self::div | self::section | self::aside | self::header | self::footer][./@id = %locator%]
 XPATH
         , 'table_row' => <<<XPATH
 .//tr[contains(normalize-space(.), %locator%)]
+XPATH
+        , 'list_item' => <<<XPATH
+.//li[contains(normalize-space(.), %locator%)]
+XPATH
+        , 'filemanager' => <<<XPATH
+//div[contains(concat(' ', normalize-space(@class), ' '), ' ffilemanager ')]
+    /descendant::input[@id = //label[contains(normalize-space(string(.)), %locator%)]/@for]
+XPATH
+        , 'table' => <<<XPATH
+.//table[(./@id = %locator% or contains(.//caption, %locator%) or contains(concat(' ', normalize-space(@class), ' '), %locator% ))]
 XPATH
     );
 

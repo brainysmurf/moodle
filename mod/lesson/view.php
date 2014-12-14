@@ -18,8 +18,7 @@
 /**
  * This page prints a particular instance of lesson
  *
- * @package    mod
- * @subpackage lesson
+ * @package mod_lesson
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or late
  **/
@@ -179,8 +178,6 @@ if (empty($pageid)) {
         }
     }
 
-    add_to_log($course->id, 'lesson', 'start', 'view.php?id='. $cm->id, $lesson->id, $cm->id);
-
     // if no pageid given see if the lesson has been started
     $retries = $DB->count_records('lesson_grades', array("lessonid" => $lesson->id, "userid" => $USER->id));
     if ($retries > 0) {
@@ -191,25 +188,23 @@ if (empty($pageid)) {
         unset($USER->modattempts[$lesson->id]);  // if no pageid, then student is NOT reviewing
     }
 
-    // If there are any questions that have been answered correctly (or not) in this attempt
+    // If there are any questions that have been answered correctly (or not) in this attempt.
     $allattempts = $lesson->get_attempts($retries);
     if (!empty($allattempts)) {
         $attempt = end($allattempts);
+        $attemptpage = $lesson->load_page($attempt->pageid);
         $jumpto = $DB->get_field('lesson_answers', 'jumpto', array('id' => $attempt->answerid));
         // convert the jumpto to a proper page id
         if ($jumpto == 0) {
-            // Check if a question has been incorrectly answered AND no more attempts at it are left
-            $nattempts = $DB->count_records("lesson_attempts", array("pageid" => $attempt->pageid, "userid" => $USER->id, "retry" => $attempt->retry));
-            if ($nattempts >= $lesson->maxattempts) {
-                $lastpageseen = $DB->get_field('lesson_pages', 'nextpageid', array('id' => $attempt->pageid));
+            // Check if a question has been incorrectly answered AND no more attempts at it are left.
+            $nattempts = $lesson->get_attempts($attempt->retry, false, $attempt->pageid, $USER->id);
+            if (count($nattempts) >= $lesson->maxattempts) {
+                $lastpageseen = $lesson->get_next_page($attemptpage->nextpageid);
             } else {
                 $lastpageseen = $attempt->pageid;
             }
         } elseif ($jumpto == LESSON_NEXTPAGE) {
-            if (!$lastpageseen = $DB->get_field('lesson_pages', 'nextpageid', array('id' => $attempt->pageid))) {
-                // no nextpage go to end of lesson
-                $lastpageseen = LESSON_EOL;
-            }
+            $lastpageseen = $lesson->get_next_page($attemptpage->nextpageid);
         } else {
             $lastpageseen = $jumpto;
         }
@@ -289,7 +284,14 @@ if ($pageid != LESSON_EOL) {
         $page = $lesson->load_page($newpageid);
     }
 
-    add_to_log($PAGE->course->id, 'lesson', 'view', 'view.php?id='. $PAGE->cm->id, $page->id, $PAGE->cm->id);
+    // Trigger module viewed event.
+    $event = \mod_lesson\event\course_module_viewed::create(array(
+        'objectid' => $lesson->id,
+        'context' => $context
+    ));
+    $event->add_record_snapshot('course_modules', $cm);
+    $event->add_record_snapshot('course', $course);
+    $event->trigger();
 
     // This is where several messages (usually warnings) are displayed
     // all of this is displayed above the actual page
@@ -419,9 +421,6 @@ if ($pageid != LESSON_EOL) {
     // Used to check to see if the student ran out of time
     $outoftime = optional_param('outoftime', '', PARAM_ALPHA);
 
-    // Update the clock / get time information for this user
-    add_to_log($course->id, "lesson", "end", "view.php?id=".$PAGE->cm->id, "$lesson->id", $PAGE->cm->id);
-
     // We are using level 3 header because the page title is a sub-heading of lesson title (MDL-30911).
     $lessoncontent .= $OUTPUT->heading(get_string("congratulations", "lesson"), 3);
     $lessoncontent .= $OUTPUT->box_start('generalbox boxaligncenter');
@@ -430,6 +429,7 @@ if ($pageid != LESSON_EOL) {
         $ntries--;  // need to look at the old attempts :)
     }
     if (!$canmanage) {
+        // Update the clock / get time information for this user.
         $lesson->stop_timer();
         $gradeinfo = lesson_grade($lesson, $ntries);
 

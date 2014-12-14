@@ -311,8 +311,9 @@ div.editq div.question div.content .singlequestion a .questiontext {
 #page-mod-quiz-view #page .quizattemptsummary td p {
     margin-top: 0;
 }
-table.quizattemptsummary .bestrow td {
-    background-color: #e8e8e8;
+#page-mod-quiz-view table.quizattemptsummary tr.bestrow td {
+    border-color: #bce8f1;
+    background-color: #d9edf7;
 }
 table.quizattemptsummary .noreviewmessage {
     color: gray;
@@ -347,16 +348,28 @@ table.quizattemptsummary .noreviewmessage {
     display: inline;
 }
 
-.mod-quiz .gradedattempt,
-.mod-quiz tr.gradedattempt td {
-    background-color: #e8e8e8;
+body.path-mod-quiz .gradedattempt,
+body.path-mod-quiz table tbody tr.gradedattempt > td {
+    border-color: #bce8f1;
+    background-color: #d9edf7;
 }
 
 .quizattemptcounts {
     clear: left;
     text-align: center;
+    display:inline;
+    margin-left:20%;
 }
-
+.dir-rtl .quizattemptcounts {
+    margin-left:0;
+    margin-right: 20%;
+}
+#page-mod-quiz-view .quizattemptcounts,
+.dir-rtl #page-mod-quiz-view .quizattemptcounts {
+    display: block;
+    margin-left: 0;
+    margin-right: 0;
+}
 /** Mod quiz summary **/
 #page-mod-quiz-summary #content {
     text-align: center;
@@ -420,8 +433,8 @@ table.quizreviewsummary td.cell {
     background-color: #fcc;
 }
 #page-mod-quiz-report .highlight {
-    border : medium solid yellow;
-    background-color: lightYellow;
+    border: 1px solid #bce8f1;
+    background-color: #d9edf7;
 }
 #page-mod-quiz-report .negcovar {
     border : medium solid pink;
@@ -432,11 +445,8 @@ table.quizreviewsummary td.cell {
 #page-mod-quiz-report .gradetheselink {
     font-size: 0.8em;
 }
-#page-mod-quiz-report .mform fieldset {
-    margin: 0;
-}
-#page-mod-quiz-report fieldset.felement.fgroup {
-    margin: 0;
+#page-mod-quiz-report .mform fieldset.fgroup span label {
+    margin-right: 14px;
 }
 #page-mod-quiz-report table th {
     white-space: normal;
@@ -514,6 +524,10 @@ table.quizreviewsummary td.cell {
     font-weight: normal;
 }
 
+#page-mod-quiz-report tr.lastrowforattempt {
+    border-bottom: lightgrey solid 0.2em;
+}
+
 /** Mod quiz edit **/
 #page-mod-quiz-edit h2.main {
     display: inline;
@@ -521,10 +535,10 @@ table.quizreviewsummary td.cell {
     clear: left;
 }
 
-#categoryquestions .r1 {
+#categoryquestions > tbody > tr:nth-of-type(even) {
     background: #e4e4e4;
 }
-#categoryquestions .r1.highlight {
+#categoryquestions > tbody > tr:nth-of-type(even).highlight {
     background-color: #AAFFAA;
 }
 #categoryquestions .header {
@@ -589,6 +603,7 @@ table#categoryquestions {
     float: left;
     position: relative;
     margin-left: 0.3em;
+    margin-right: 0.3em;
     margin-bottom: 0.2em;
     border-left: thin solid #777;
     line-height: 1.3em;
@@ -683,7 +698,6 @@ table#categoryquestions {
 }
 
 #page-mod-quiz-edit .reorder .questioncontentcontainer {
-    position: relative;
     overflow: hidden;
     white-space: nowrap;
 }
@@ -767,7 +781,6 @@ table#categoryquestions {
     width: 1.4em;
     padding-right: 0.3em;
     padding-left: 0;
-    z-index: 99;
     text-align: right;
     color: #333;
 }
@@ -796,7 +809,6 @@ table#categoryquestions {
     border-radius: 0.2em;
     border-bottom-left-radius: 0;
     border-top-left-radius: 0;
-    z-index: 900;
     display: block;
     margin: 0;
     background-color: #ddf;
@@ -812,11 +824,10 @@ table#categoryquestions {
     line-height: 1em;
     max-width: 30%;
     position: absolute;
-    right: 50px;
+    right: 60px;
     border-radius: 0.2em;
     border-bottom-left-radius: 0;
     border-top-left-radius: 0;
-    z-index: 900;
     display: block;
     margin: 0;
     background-color: #ddf;
@@ -860,7 +871,6 @@ table#categoryquestions {
     position: absolute;
     right: 0.3em;
     top: 0;
-    z-index: 900;
     display: block;
     padding: 0.2em;
     background-color: #F9F9F9;
@@ -1070,7 +1080,6 @@ bank window's title is prominent enough*/
     top: 0.2em;
     right: 0.2em;
     display: inline;
-    z-index: 900;
 }
 #page-mod-quiz-edit .quizpagedelete img {
     background-color: #d6d6d6;
@@ -1079,6 +1088,7 @@ bank window's title is prominent enough*/
 #page-mod-quiz-edit .pagecontrols {
     clear: both;
     margin-left: 0.5em;
+    margin-right: 0.5em;
     padding-top: 0.5em;
 }
 #page-mod-quiz-edit .pagecontrols .singlebutton {
@@ -1258,7 +1268,6 @@ bank window's title is prominent enough*/
 }
 #page-mod-quiz-edit.dir-rtl div.editq div.question div.content {
     float: right;
-    height: 40px;
 }
 #page-mod-quiz-edit.dir-rtl div.question div.content div.points {
     left: 60px;
@@ -1285,7 +1294,7 @@ bank window's title is prominent enough*/
     float: right;
 }
 #page-mod-quiz-edit.dir-rtl div.question div.content div.qorder {
-    left: 50px;
+    left: 60px;
     right: auto;
 }
 #page-mod-quiz-edit.dir-rtl .reorder div.question div.content {
@@ -1310,4 +1319,9 @@ bank window's title is prominent enough*/
 #page-mod-quiz-edit.dir-rtl div.points input {
     direction: ltr;
     text-align: left;
+}
+#page-mod-quiz-edit.dir-rtl .pagecontrols .singlebutton {
+    float: right;
+    margin-left: 0;
+    margin-right: 1em;
 }

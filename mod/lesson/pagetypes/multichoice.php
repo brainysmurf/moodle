@@ -18,8 +18,7 @@
 /**
  * Multichoice
  *
- * @package    mod
- * @subpackage lesson
+ * @package mod_lesson
  * @copyright  2009 Sam Hemelryk
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
@@ -496,6 +495,7 @@ class lesson_display_answer_form_multichoice_singleanswer extends moodleform {
         $i = 0;
         foreach ($answers as $answer) {
             $mform->addElement('html', '<div class="answeroption">');
+            $answer->answer = preg_replace('#>$#', '> ', $answer->answer);
             $mform->addElement('radio','answerid',null,format_text($answer->answer, $answer->answerformat, $options),$answer->id, $disabled);
             $mform->setType('answer'.$i, PARAM_INT);
             if ($hasattempt && $answer->id == $USER->modattempts[$lessonid]->answerid) {
@@ -558,6 +558,7 @@ class lesson_display_answer_form_multichoice_multianswer extends moodleform {
                 $mform->setDefault('answer['.$answer->id.']', true);
             }
             // NOTE: our silly checkbox supports only value '1' - we can not use it like the radiobox above!!!!!!
+            $answer->answer = preg_replace('#>$#', '> ', $answer->answer);
             $mform->addElement('checkbox', $answerid, null, format_text($answer->answer, $answer->answerformat, $options), $disabled);
             $mform->setType($answerid, PARAM_INT);
 

@@ -166,15 +166,17 @@ class question_usage_by_activity {
      */
     public function add_question(question_definition $question, $maxmark = null) {
         $qa = new question_attempt($question, $this->get_id(), $this->observer, $maxmark);
-        if (count($this->questionattempts) == 0) {
-            $this->questionattempts[1] = $qa;
-        } else {
-            $this->questionattempts[] = $qa;
-        }
-        end($this->questionattempts); // Ready to get the last key on the next line.
-        $qa->set_slot(key($this->questionattempts));
+        $qa->set_slot($this->next_slot_number());
+        $this->questionattempts[$this->next_slot_number()] = $qa;
         $this->observer->notify_attempt_added($qa);
         return $qa->get_slot();
+    }
+
+    /**
+     * The slot number that will be allotted to the next question added.
+     */
+    public function next_slot_number() {
+        return count($this->questionattempts) + 1;
     }
 
     /**
@@ -308,10 +310,8 @@ class question_usage_by_activity {
     }
 
     /**
-     * Get the current mark awarded for the attempt at a question.
-     * @param int $slot the number used to identify this question within this usage.
-     * @return number|null The current mark for this question, or null if one has
-     * not been assigned yet.
+     * Get the total mark for all questions in this usage.
+     * @return number The sum of marks of all the question_attempts in this usage.
      */
     public function get_total_mark() {
         $mark = 0;
@@ -322,6 +322,27 @@ class question_usage_by_activity {
             $mark += $qa->get_mark();
         }
         return $mark;
+    }
+
+    /**
+     * Get summary information about this usage.
+     *
+     * Some behaviours may be able to provide interesting summary information
+     * about the attempt as a whole, and this method provides access to that data.
+     * To see how this works, try setting a quiz to one of the CBM behaviours,
+     * and then look at the extra information displayed at the top of the quiz
+     * review page once you have sumitted an attempt.
+     *
+     * In the return value, the array keys are identifiers of the form
+     * qbehaviour_behaviourname_meaningfullkey. For qbehaviour_deferredcbm_highsummary.
+     * The values are arrays with two items, title and content. Each of these
+     * will be either a string, or a renderable.
+     *
+     * @return array as described above.
+     */
+    public function get_summary_information(question_display_options $options) {
+        return question_engine::get_behaviour_type($this->preferredbehaviour)
+                ->summarise_usage($this, $options);
     }
 
     /**
@@ -582,6 +603,50 @@ class question_usage_by_activity {
      */
     public function extract_responses($slot, $postdata = null) {
         return $this->get_question_attempt($slot)->get_submitted_data($postdata);
+    }
+
+    /**
+     * Transform an array of response data for slots to an array of post data as you would get from quiz attempt form.
+     *
+     * @param $simulatedresponses array keys are slot nos => contains arrays representing student
+     *                                   responses which will be passed to question_definition::prepare_simulated_post_data method
+     *                                   and then have the appropriate prefix added.
+     * @return array simulated post data
+     */
+    public function prepare_simulated_post_data($simulatedresponses) {
+        $simulatedpostdata = array();
+        $simulatedpostdata['slots'] = implode(',', array_keys($simulatedresponses));
+        foreach ($simulatedresponses as $slot => $responsedata) {
+            $slotresponse = array();
+
+            // Behaviour vars should not be processed by question type, just add prefix.
+            $behaviourvars = $this->get_question_attempt($slot)->get_behaviour()->get_expected_data();
+            foreach (array_keys($responsedata) as $responsedatakey) {
+                if ($responsedatakey{0} === '-') {
+                    $behaviourvarname = substr($responsedatakey, 1);
+                    if (isset($behaviourvars[$behaviourvarname])) {
+                        // Expected behaviour var found.
+                        if ($responsedata[$responsedatakey]) {
+                            // Only set the behaviour var if the column value from the cvs file is non zero.
+                            // The behaviours only look at whether the var is set or not they don't look at the value.
+                            $slotresponse[$responsedatakey] = $responsedata[$responsedatakey];
+                        }
+                    }
+                    // Remove both expected and unexpected vars from data passed to question type.
+                    unset($responsedata[$responsedatakey]);
+                }
+            }
+
+            $slotresponse += $this->get_question($slot)->prepare_simulated_post_data($responsedata);
+            $slotresponse[':sequencecheck'] = $this->get_question_attempt($slot)->get_sequence_check_count();
+
+            // Add this slot's prefix to slot data.
+            $prefix = $this->get_field_prefix($slot);
+            foreach ($slotresponse as $key => $value) {
+                $simulatedpostdata[$prefix.$key] = $value;
+            }
+        }
+        return $simulatedpostdata;
     }
 
     /**

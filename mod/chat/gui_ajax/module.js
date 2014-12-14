@@ -37,11 +37,15 @@ M.mod_chat_ajax.init = function(Y, cfg) {
         init : function(cfg) {
             this.cfg = cfg;
             this.cfg.req_count = this.cfg.req_count || 0;
+            participantswidth = 180;
+            if (Y.one('#input-message').get('docWidth') < 640) {
+                participantswidth = 120;
+            }
             this.layout = new Y.YUI2.widget.Layout({
                 units : [
-                     {position: 'right', width: 180, resize: true, gutter: '5px', scroll: true, body: 'chat-userlist', animate: false},
-                     {position: 'bottom', height: 42, resize: false, body: 'chat-input-area', gutter: '5px', collapse: false, resize: false},
-                     {position: 'center', body: 'chat-messages', gutter: '5px', scroll: true}
+                     {position: 'right', width: participantswidth, resize: true, gutter: '1px', scroll: true, body: 'chat-userlist', animate: false},
+                     {position: 'bottom', height: 42, resize: false, body: 'chat-input-area', gutter: '1px', collapse: false, resize: false},
+                     {position: 'center', body: 'chat-messages', gutter: '0px', scroll: true}
                 ]
             });
 
@@ -112,29 +116,14 @@ M.mod_chat_ajax.init = function(Y, cfg) {
             }, this.cfg.timer, this);
 
             // Create and initalise theme changing menu
-            /*
-            this.thememenu = new Y.Overlay({
-                bodyContent : '<div class="menuitem"><a href="'+this.cfg.chaturl+'&theme=bubble">Bubble</a></div><div class="menuitem"><a href="'+this.cfg.chaturl+'&theme=compact">Compact</a></div>',
-                visible : false,
-                zIndex : 2,
-                align : {
-                    node : '#choosetheme',
-                    points : [Y.WidgetPositionExt.BL, Y.WidgetPositionExt.BR]
-                }
-            });
-            this.thememenu.render(document.body);
-            Y.one('#choosetheme').on('click', function(e){
-                this.show();
-                this.get('boundingBox').setStyle('visibility', 'visible');
-            }, this.thememenu);
-
-            return;
-            */
             this.thememenu = new Y.YUI2.widget.Menu('basicmenu', {xy:[0,0]});
             this.thememenu.addItems([
-                {text: "Bubble", url: this.cfg.chaturl+'&theme=bubble'},
-                {text: "Compact", url: this.cfg.chaturl+'&theme=compact'}
+                {text: M.util.get_string('bubble', 'mod_chat'), url: this.cfg.chaturl+'&theme=bubble'},
+                {text: M.util.get_string('compact', 'mod_chat'), url: this.cfg.chaturl+'&theme=compact'}
             ]);
+            if (this.cfg.showcoursetheme == 1) {
+                this.thememenu.addItem({text: M.util.get_string('coursetheme', 'mod_chat'), url: this.cfg.chaturl+'&theme=course_theme'});
+            }
             this.thememenu.render(document.body);
             Y.one('#choosetheme').on('click', function(e){
                 this.moveTo((e.pageX-20), (e.pageY-20));
@@ -152,26 +141,27 @@ M.mod_chat_ajax.init = function(Y, cfg) {
         },
 
         send : function(e, beep) {
-            this.sendbutton.set('value', M.str.chat.sending);
+            if((this.messageinput.get('value') != '') || (typeof beep != 'undefined')) {
+                this.sendbutton.set('value', M.str.chat.sending);
+                var data = {
+                    chat_message : (!beep) ? this.messageinput.get('value') : '',
+                    chat_sid : this.cfg.sid,
+                    theme : this.cfg.theme
+                };
+                if (beep) {
+                    data.beep = beep
+                }
+                data.action = 'chat';
 
-            var data = {
-                chat_message : (!beep)?this.messageinput.get('value'):'',
-                chat_sid : this.cfg.sid,
-                theme : this.cfg.theme
-            };
-            if (beep) {
-                data.beep = beep
+                Y.io(this.api, {
+                    method : 'POST',
+                    data : build_querystring(data),
+                    on : {
+                        success : this.send_callback
+                    },
+                    context : this
+                });
             }
-            data.action = 'chat';
-
-            Y.io(this.api, {
-                method : 'POST',
-                data : build_querystring(data),
-                on : {
-                    success : this.send_callback
-                },
-                context : this
-            });
         },
 
         send_callback : function(tid, outcome, args) {

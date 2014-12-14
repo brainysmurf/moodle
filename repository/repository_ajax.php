@@ -18,7 +18,7 @@
 /**
  * The Web service script that is called from the filepicker front end
  *
- * @since 2.0
+ * @since Moodle 2.0
  * @package    repository
  * @copyright  2009 Dongsheng Cai {@link http://dongsheng.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -89,37 +89,7 @@ if (!empty($course)) {
 $maxbytes = get_user_max_upload_file_size($context, $CFG->maxbytes, $coursemaxbytes, $maxbytes);
 
 // Wait as long as it takes for this script to finish
-set_time_limit(0);
-
-// Early actions which need to be done before repository instances initialised
-switch ($action) {
-    // global search
-    case 'gsearch':
-        $params = array();
-        $params['context'] = array(context::instance_by_id($contextid), get_system_context());
-        $params['currentcontext'] = context::instance_by_id($contextid);
-        $repos = repository::get_instances($params);
-        $list = array();
-        foreach($repos as $repo){
-            if ($repo->global_search()) {
-                $ret = $repo->search($search_text);
-                array_walk($ret['list'], 'repository_attach_id', $repo->id);  // See function below
-                $tmp = array_merge($list, $ret['list']);
-                $list = $tmp;
-            }
-        }
-        $listing = array('list'=>$list);
-        $listing['gsearch'] = true;
-        die(json_encode($listing));
-        break;
-
-    // remove the cache files & logout
-    case 'ccache':
-        $cache = new curl_cache;
-        $cache->refresh();
-        $action = 'list';
-        break;
-}
+core_php_time_limit::raise();
 
 // These actions all occur on the currently active repository instance
 switch ($action) {
@@ -238,7 +208,7 @@ switch ($action) {
             // note that in this case user may not have permission to access the source file directly
             // so no file_browser/file_info can be used below
             if ($repo->has_moodle_files()) {
-                $file = repository::get_moodle_file($source);
+                $file = repository::get_moodle_file($reference);
                 if ($file && $file->is_external_file()) {
                     $sourcefield = $file->get_source(); // remember the original source
                     $record->source = $repo::build_source_field($sourcefield);

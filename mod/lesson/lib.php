@@ -18,8 +18,7 @@
 /**
  * Standard library of functions and constants for lesson
  *
- * @package    mod
- * @subpackage lesson
+ * @package mod_lesson
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
@@ -528,6 +527,13 @@ function lesson_grade_item_delete($lesson) {
 }
 
 /**
+ * List the actions that correspond to a view of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = 'r' and edulevel = LEVEL_PARTICIPATING will
+ *       be considered as view action.
+ *
  * @return array
  */
 function lesson_get_view_actions() {
@@ -535,6 +541,13 @@ function lesson_get_view_actions() {
 }
 
 /**
+ * List the actions that correspond to a post of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = ('c' || 'u' || 'd') and edulevel = LEVEL_PARTICIPATING
+ *       will be considered as post action.
+ *
  * @return array
  */
 function lesson_get_post_actions() {
@@ -819,7 +832,7 @@ function lesson_extend_settings_navigation($settings, $lessonnode) {
  */
 function lesson_get_import_export_formats($type) {
     global $CFG;
-    $fileformats = get_plugin_list("qformat");
+    $fileformats = core_component::get_plugin_list("qformat");
 
     $fileformatname=array();
     foreach ($fileformats as $fileformat=>$fdir) {
@@ -951,7 +964,6 @@ function lesson_get_file_info($browser, $areas, $course, $cm, $context, $fileare
     }
 
     if (is_null($itemid)) {
-        require_once(__DIR__ . '/locallib.php');
         return new mod_lesson_file_info($browser, $course, $cm, $context, $areas, $filearea);
     }
 

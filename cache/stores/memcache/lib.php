@@ -88,6 +88,12 @@ class cachestore_memcache extends cache_store implements cache_is_configurable {
     protected $definition;
 
     /**
+     * If true data going in and out will be encoded.
+     * @var bool
+     */
+    protected $encode = true;
+
+    /**
      * Default prefix for key names.
      * @var string
      */
@@ -159,6 +165,24 @@ class cachestore_memcache extends cache_store implements cache_is_configurable {
         }
         $this->definition = $definition;
         $this->isinitialised = true;
+        $this->encode = self::require_encoding();
+    }
+
+    /**
+     * Tests if encoding is going to be required.
+     *
+     * Prior to memcache 3.0.3 scalar data types were not preserved.
+     * For earlier versions of the memcache extension we need to encode and decode scalar types
+     * to ensure that it is preserved.
+     *
+     * @param string $version The version to check, if null it is fetched from PHP.
+     * @return bool
+     */
+    public static function require_encoding($version = null) {
+        if (!$version) {
+            $version = phpversion('memcache');
+        }
+        return (version_compare($version, '3.0.3', '<'));
     }
 
     /**
@@ -225,7 +249,7 @@ class cachestore_memcache extends cache_store implements cache_is_configurable {
      * @return int
      */
     public static function get_supported_modes(array $configuration = array()) {
-        return self::MODE_APPLICATION + self::MODE_SESSION;
+        return self::MODE_APPLICATION;
     }
 
     /**
@@ -249,7 +273,11 @@ class cachestore_memcache extends cache_store implements cache_is_configurable {
      * @return mixed The data that was associated with the key, or false if the key did not exist.
      */
     public function get($key) {
-        return $this->connection->get($this->parse_key($key));
+        $result = $this->connection->get($this->parse_key($key));
+        if ($this->encode && $result !== false) {
+            return @unserialize($result);
+        }
+        return $result;
     }
 
     /**
@@ -276,6 +304,9 @@ class cachestore_memcache extends cache_store implements cache_is_configurable {
                 $return[$key] = false;
             } else {
                 $return[$key] = $result[$mkey];
+                if ($this->encode && $return[$key] !== false) {
+                    $return[$key] = @unserialize($return[$key]);
+                }
             }
         }
         return $return;
@@ -289,6 +320,11 @@ class cachestore_memcache extends cache_store implements cache_is_configurable {
      * @return bool True if the operation was a success false otherwise.
      */
     public function set($key, $data) {
+        if ($this->encode) {
+            // We must serialise this data.
+            $data = serialize($data);
+        }
+
         return $this->connection->set($this->parse_key($key), $data, MEMCACHE_COMPRESSED, $this->definition->get_ttl());
     }
 
@@ -303,7 +339,7 @@ class cachestore_memcache extends cache_store implements cache_is_configurable {
     public function set_many(array $keyvaluearray) {
         $count = 0;
         foreach ($keyvaluearray as $pair) {
-            if ($this->connection->set($this->parse_key($pair['key']), $pair['value'], MEMCACHE_COMPRESSED, $this->definition->get_ttl())) {
+            if ($this->set($pair['key'], $pair['value'])) {
                 $count++;
             }
         }
@@ -445,5 +481,29 @@ class cachestore_memcache extends cache_store implements cache_is_configurable {
      */
     public function my_name() {
         return $this->name;
+    }
+
+    /**
+     * Used to notify of configuration conflicts.
+     *
+     * The warnings returned here will be displayed on the cache configuration screen.
+     *
+     * @return string[] Returns an array of warnings (strings)
+     */
+    public function get_warnings() {
+        global $CFG;
+        $warnings = array();
+        if (isset($CFG->session_memcached_save_path) && count($this->servers)) {
+            $bits = explode(':', $CFG->session_memcached_save_path, 3);
+            $host = array_shift($bits);
+            $port = (count($bits)) ? array_shift($bits) : '11211';
+            foreach ($this->servers as $server) {
+                if ($server[0] === $host && $server[1] == $port) {
+                    $warnings[] = get_string('sessionhandlerconflict', 'cachestore_memcache', $this->my_name());
+                    break;
+                }
+            }
+        }
+        return $warnings;
     }
 }

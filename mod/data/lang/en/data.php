@@ -18,7 +18,7 @@
 /**
  * Strings for component 'data', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package   data
+ * @package   mod_data
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -69,6 +69,7 @@ $string['commentsoff'] = 'Comments feature is not enabled';
 $string['configenablerssfeeds'] = 'This switch will enable the possibility of RSS feeds for all databases. You will still need to turn feeds on manually in the settings for each database.';
 $string['confirmdeletefield'] = 'You are about to delete this field, are you sure?';
 $string['confirmdeleterecord'] = 'Are you sure you want to delete this entry?';
+$string['confirmdeleterecords'] = 'Are you sure you want to delete these entries?';
 $string['csstemplate'] = 'CSS template';
 $string['csvfailed'] = 'Unable to read the raw data from the CSV file';
 $string['csvfile'] = 'CSV file';
@@ -76,7 +77,7 @@ $string['csvimport'] = 'CSV file import';
 $string['csvimport_help'] = 'Entries may be imported via a plain text file with a list of field names as the first line, then the data, with one record per line.';
 $string['csvwithselecteddelimiter'] = '<acronym title="Comma Separated Values">CSV</acronym> text with selected delimiter:';
 $string['data:addinstance'] = 'Add a new database';
-$string['data:approve'] = 'Approve unapproved entries';
+$string['data:approve'] = 'Approve and undo approved entries';
 $string['data:comment'] = 'Write comments';
 $string['data:exportallentries'] = 'Export all database entries';
 $string['data:exportentry'] = 'Export a database entry';
@@ -99,6 +100,7 @@ $string['dateentered'] = 'Date entered';
 $string['defaultfielddelimiter'] = '(default is the comma character)';
 $string['defaultfieldenclosure'] = '(default is none)';
 $string['defaultsortfield'] = 'Default sort field';
+$string['delcheck'] = 'Bulk delete checkbox';
 $string['delete'] = 'Delete';
 $string['deleteallentries'] = 'Delete all entries';
 $string['deletecomment'] = 'Are you sure you want to delete this comment?';
@@ -108,6 +110,7 @@ $string['deletenotenrolled'] = 'Delete entries by users not enrolled';
 $string['deletewarning'] = 'Are you sure you want to delete this preset?';
 $string['descending'] = 'Descending';
 $string['directorynotapreset'] = '{$a->directory} Not a preset: missing files: {$a->missing_files}';
+$string['disapprove'] = 'Undo approval';
 $string['download'] = 'Download';
 $string['edit'] = 'Edit';
 $string['editcomment'] = 'Edit comment';
@@ -116,6 +119,14 @@ $string['editordisable'] = 'Disable editor';
 $string['editorenable'] = 'Enable editor';
 $string['emptyadd'] = 'The Add template is empty, generating a default form...';
 $string['emptyaddform'] = 'You did not fill out any fields!';
+$string['eventfieldcreated'] = 'Field created';
+$string['eventfielddeleted'] = 'Field deleted';
+$string['eventfieldupdated'] = 'Field updated';
+$string['eventrecordcreated'] = 'Record created';
+$string['eventrecorddeleted'] = 'Record deleted';
+$string['eventrecordupdated'] = 'Record updated';
+$string['eventtemplateupdated'] = 'Template updated';
+$string['eventtemplateviewed'] = 'Templates viewed';
 $string['fileencoding'] = 'Encoding';
 $string['entries'] = 'Entries';
 $string['entrieslefttoadd'] = 'You must add {$a->entriesleft} more entry/entries in order to complete this activity';
@@ -286,6 +297,7 @@ $string['presets'] = 'Presets';
 $string['radiobutton'] = 'Radio buttons';
 $string['recordapproved'] = 'Entry approved';
 $string['recorddeleted'] = 'Entry deleted';
+$string['recorddisapproved'] = 'Entry unapproved';
 $string['recordsnotsaved'] = 'No entry was saved. Please check the format of the uploaded file.';
 $string['recordssaved'] = 'entries saved';
 $string['requireapproval'] = 'Approval required';

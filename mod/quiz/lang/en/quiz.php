@@ -17,10 +17,9 @@
 /**
  * Strings for component 'quiz', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package    mod
- * @subpackage quiz
- * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_quiz
+ * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['accessnoticesheader'] = 'You can preview this quiz, but if this were a real attempt, you would be blocked because:';
@@ -306,6 +305,21 @@ $string['errornotnumbers'] = 'Error - answers must be numeric';
 $string['errorunexpectedevent'] = 'Unexpected event code {$a->event} found for question {$a->questionid} in attempt {$a->attemptid}.';
 $string['essay'] = 'Essay';
 $string['essayquestions'] = 'Questions';
+$string['eventattemptdeleted'] = 'Quiz attempt deleted';
+$string['eventattemptpreviewstarted'] = 'Quiz attempt preview started';
+$string['eventattemptreviewed'] = 'Quiz attempt reviewed';
+$string['eventattemptsummaryviewed'] = 'Quiz attempt summary viewed';
+$string['eventattemptviewed'] = 'Quiz attempt viewed';
+$string['eventeditpageviewed'] = 'Quiz edit page viewed';
+$string['eventoverridecreated'] = 'Quiz override created';
+$string['eventoverridedeleted'] = 'Quiz override deleted';
+$string['eventoverrideupdated'] = 'Quiz override updated';
+$string['eventquestionmanuallygraded'] = 'Question manually graded';
+$string['eventquizattemptabandoned'] = 'Quiz attempt abandoned';
+$string['eventquizattempttimelimitexceeded'] = 'Quiz attempt time limit exceeded';
+$string['eventquizattemptstarted'] = 'Quiz attempt started';
+$string['eventquizattemptsubmitted'] = 'Quiz attempt submitted';
+$string['eventreportviewed'] = 'Quiz report viewed';
 $string['everynquestions'] = 'Every {$a} questions';
 $string['everyquestion'] = 'Every question';
 $string['everythingon'] = 'Everything on';
@@ -530,8 +544,8 @@ To arrange the questions over a number of pages, click the Repaginate button and
 $string['orderingquiz'] = 'Order and paging';
 $string['orderingquizx'] = 'Order and paging: {$a}';
 $string['outcomesadvanced'] = 'Outcomes are advanced settings';
-$string['outof'] = '{$a->grade} out of a maximum of {$a->maxgrade}';
-$string['outofpercent'] = '{$a->grade} out of a maximum of {$a->maxgrade} ({$a->percent}%)';
+$string['outof'] = '{$a->grade} out of {$a->maxgrade}';
+$string['outofpercent'] = '{$a->grade} out of {$a->maxgrade} ({$a->percent}%)';
 $string['outofshort'] = '{$a->grade}/{$a->maxgrade}';
 $string['overallfeedback'] = 'Overall feedback';
 $string['overallfeedback_help'] = 'Overall feedback is text that is shown after a quiz has been attempted. By specifying additional grade boundaries (as a percentage or as a number), the text shown can depend on the grade obtained.';
@@ -553,7 +567,12 @@ $string['overrides'] = 'Overrides';
 $string['overrideuser'] = 'Override user';
 $string['overrideusereventname'] = '{$a->quiz} - Override';
 $string['page-mod-quiz-x'] = 'Any quiz module page';
+$string['page-mod-quiz-attempt'] = 'Attempt quiz page';
 $string['page-mod-quiz-edit'] = 'Edit quiz page';
+$string['page-mod-quiz-report'] = 'Any quiz report page';
+$string['page-mod-quiz-review'] = 'Review quiz attempt page';
+$string['page-mod-quiz-summary'] = 'Quiz attempt summary page';
+$string['page-mod-quiz-view'] = 'Quiz information page';
 $string['pagesize'] = 'Page size';
 $string['parent'] = 'Parent';
 $string['parentcategory'] = 'Parent category';
@@ -690,6 +709,7 @@ $string['reportregrade'] = 'Regrade attempts';
 $string['reportresponses'] = 'Detailed responses';
 $string['reports'] = 'Reports';
 $string['reportshowonly'] = 'Show only attempts';
+$string['reportshowonlyfinished'] = 'Show at most one finished attempt per user ({$a})';
 $string['reportsimplestat'] = 'Simple statistics';
 $string['reportusersall'] = 'all users who have attempted the quiz';
 $string['reportuserswith'] = 'enrolled users who have attempted the quiz';
@@ -777,9 +797,12 @@ $string['showdetailedmarks'] = 'Show mark details';
 $string['showeachpage'] = 'Show one page at a time';
 $string['showfeedback'] = 'After answering, show feedback?';
 $string['showinsecurepopup'] = 'Use a \'secure\' popup window for attempts';
+$string['showlargeimage'] = 'Large image';
 $string['shownoattempts'] = 'Show students with no attempts';
 $string['shownoattemptsonly'] = 'Show only students with no attempts';
+$string['shownoimage'] = 'No image';
 $string['showreport'] = 'Show report';
+$string['showsmallimage'] = 'Small image';
 $string['showteacherattempts'] = 'Show teacher attempts';
 $string['showuserpicture'] = 'Show the user\'s picture';
 $string['showuserpicture_help'] = 'If enabled, the student\'s name and picture will be shown on-screen during the attempt, and on the review screen, making it easier to check that the student is logged in as themself in an invigilated (proctored) exam.';

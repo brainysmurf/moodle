@@ -52,6 +52,7 @@ $url->param('mode', $mode);
 $PAGE->set_url($url);
 
 require_login($course, false, $cm);
+$PAGE->set_pagelayout('report');
 
 require_capability('mod/scorm:viewreport', $contextmodule);
 
@@ -59,7 +60,18 @@ if (count($reportlist) < 1) {
     print_error('erroraccessingreport', 'scorm');
 }
 
-add_to_log($course->id, 'scorm', 'report', 'report.php?id='.$cm->id, $scorm->id, $cm->id);
+// Trigger a report viewed event.
+$event = \mod_scorm\event\report_viewed::create(array(
+    'context' => $contextmodule,
+    'other' => array(
+        'scormid' => $scorm->id,
+        'mode' => $mode
+    )
+));
+$event->add_record_snapshot('course_modules', $cm);
+$event->add_record_snapshot('scorm', $scorm);
+$event->trigger();
+
 $userdata = null;
 if (!empty($download)) {
     $noheader = true;
@@ -74,9 +86,9 @@ if (empty($noheader)) {
     $PAGE->navbar->add($strreport, new moodle_url('/mod/scorm/report.php', array('id'=>$cm->id)));
 
     echo $OUTPUT->header();
+    echo $OUTPUT->heading(format_string($scorm->name));
     $currenttab = 'reports';
     require($CFG->dirroot . '/mod/scorm/tabs.php');
-    echo $OUTPUT->heading(format_string($scorm->name));
 }
 
 // Open the selected Scorm report and display it

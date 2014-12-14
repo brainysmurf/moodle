@@ -15,37 +15,41 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Quiz statistics report, table for showing statistics about a particular question.
+ * Quiz statistics report, table for showing response analysis for a particular question (or sub question).
  *
  * @package   quiz_statistics
- * @copyright 2008 Jamie Pratt
+ * @copyright 2014 Open University
+ * @author    James Pratt <me@jamiep.org>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/tablelib.php');
-
 
 /**
  * This table shows statistics about a particular question.
  *
  * Lists the responses that students made to this question, with frequency counts.
  *
- * The responses may be grouped, either by subpart of the question, or by the
+ * The responses may be grouped, either by sub-part of the question, or by the
  * answer they match.
  *
- * @copyright 2008 Jamie Pratt
+ * @copyright 2014 Open University
+ * @author    James Pratt <me@jamiep.org>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quiz_statistics_question_table extends flexible_table {
-    /** @var object this question with a _stats field. */
+    /** @var object full question object for this question. */
     protected $questiondata;
+
+    /** @var  int no of attempts. */
+    protected $s;
 
     /**
      * Constructor.
-     * @param $qid the id of the particular question whose statistics are being
+     *
+     * @param int $qid the id of the particular question whose statistics are being
      * displayed.
      */
     public function __construct($qid) {
@@ -53,16 +57,16 @@ class quiz_statistics_question_table extends flexible_table {
     }
 
     /**
-     * Set up the columns and headers and other properties of the table and then
-     * call flexible_table::setup() method.
+     * Set up columns and column names and other table settings.
      *
-     * @param moodle_url $reporturl the URL to redisplay this report.
-     * @param object $question a question with a _stats field
-     * @param bool $hassubqs
+     * @param moodle_url $reporturl
+     * @param object     $questiondata
+     * @param integer    $s             number of attempts on this question.
+     * @param \core_question\statistics\responses\analysis_for_question $responseanalysis
      */
-    public function question_setup($reporturl, $questiondata,
-            quiz_statistics_response_analyser $responesstats) {
+    public function question_setup($reporturl, $questiondata, $s, $responseanalysis) {
         $this->questiondata = $questiondata;
+        $this->s = $s;
 
         $this->define_baseurl($reporturl->out());
         $this->collapsible(false);
@@ -72,16 +76,16 @@ class quiz_statistics_question_table extends flexible_table {
         $columns = array();
         $headers = array();
 
-        if ($responesstats->has_subparts()) {
+        if ($responseanalysis->has_subparts()) {
             $columns[] = 'part';
             $headers[] = get_string('partofquestion', 'quiz_statistics');
         }
 
-        if ($responesstats->has_response_classes()) {
+        if ($responseanalysis->has_multiple_response_classes()) {
             $columns[] = 'responseclass';
             $headers[] = get_string('modelresponse', 'quiz_statistics');
 
-            if ($responesstats->has_actual_responses()) {
+            if ($responseanalysis->has_actual_responses()) {
                 $columns[] = 'response';
                 $headers[] = get_string('actualresponse', 'quiz_statistics');
             }
@@ -94,8 +98,16 @@ class quiz_statistics_question_table extends flexible_table {
         $columns[] = 'fraction';
         $headers[] = get_string('optiongrade', 'quiz_statistics');
 
-        $columns[] = 'count';
-        $headers[] = get_string('count', 'quiz_statistics');
+        if (!$responseanalysis->has_multiple_tries_data()) {
+            $columns[] = 'totalcount';
+            $headers[] = get_string('count', 'quiz_statistics');
+        } else {
+            $countcolumns = range(1, $responseanalysis->get_maximum_tries());
+            foreach ($countcolumns as $countcolumn) {
+                $columns[] = 'trycount'.$countcolumn;
+                $headers[] = get_string('counttryno', 'quiz_statistics', $countcolumn);
+            }
+        }
 
         $columns[] = 'frequency';
         $headers[] = get_string('frequency', 'quiz_statistics');
@@ -114,6 +126,12 @@ class quiz_statistics_question_table extends flexible_table {
         parent::setup();
     }
 
+    /**
+     * Take a float where 1 represents 100% and return a string representing the percentage.
+     *
+     * @param float $fraction The fraction.
+     * @return string The fraction as a percentage.
+     */
     protected function format_percentage($fraction) {
         return format_float($fraction * 100, 2) . '%';
     }
@@ -133,14 +151,34 @@ class quiz_statistics_question_table extends flexible_table {
 
     /**
      * The frequency with which this response was given.
-     * @param object $response containst the data to display.
+     * @param object $response contains the data to display.
      * @return string contents of this table cell.
      */
     protected function col_frequency($response) {
-        if (!$this->questiondata->_stats->s) {
+        if (!$this->s) {
             return '';
         }
+        return $this->format_percentage($response->totalcount / $this->s);
+    }
 
-        return $this->format_percentage($response->count / $this->questiondata->_stats->s);
+    /**
+     * If there is not a col_{column name} method then we call this method. If it returns null
+     * that means just output the property as in the table raw data. If this returns none null
+     * then this is the output for this cell of the table.
+     *
+     * @param string $colname  The name of this column.
+     * @param object $response The raw data for this row.
+     * @return string|null The value for this cell of the table or null means use raw data.
+     */
+    public function other_cols($colname, $response) {
+        if (preg_match('/^trycount(\d+)$/', $colname, $matches)) {
+            if (isset($response->trycount[$matches[1]])) {
+                return $response->trycount[$matches[1]];
+            } else {
+                return 0;
+            }
+        } else {
+            return null;
+        }
     }
 }

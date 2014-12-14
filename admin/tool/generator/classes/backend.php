@@ -177,7 +177,11 @@ abstract class tool_generator_backend {
 
         // Update time limit so PHP doesn't time out.
         if (!CLI_SCRIPT) {
+<<<<<<< HEAD
             set_time_limit(120);
+=======
+            core_php_time_limit::raise(120);
+>>>>>>> moodle/MOODLE_27_STABLE
         }
     }
 

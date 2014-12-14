@@ -27,7 +27,10 @@ define('NO_OUTPUT_BUFFERING', true);
 
 require(dirname(__FILE__) . '/../../../../config.php');
 require_once($CFG->libdir. '/clilib.php');
+<<<<<<< HEAD
 require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/generator/classes/testplan_backend.php');
+=======
+>>>>>>> moodle/MOODLE_27_STABLE
 
 // CLI options.
 list($options, $unrecognized) = cli_get_params(
@@ -61,14 +64,22 @@ $testplansizes
 Consider that, the server resources you will need to run the test plan will be higher as the test plan size is higher.
 
 Example from Moodle root directory:
+<<<<<<< HEAD
 \$sudo -u www-data /usr/bin/php admin/tool/generator/cli/maketestplan.php --shortname=\"testcourse_12\" --size=S
+=======
+\$ sudo -u www-data /usr/bin/php admin/tool/generator/cli/maketestplan.php --shortname=\"testcourse_12\" --size=S
+>>>>>>> moodle/MOODLE_27_STABLE
 ";
     // Exit with error unless we're showing this because they asked for it.
     exit(empty($options['help']) ? 1 : 0);
 }
 
 // Check debugging is set to developer level.
+<<<<<<< HEAD
 if (empty($options['bypasscheck']) && !debugging('', DEBUG_DEVELOPER)) {
+=======
+if (empty($options['bypasscheck']) && !$CFG->debugdeveloper) {
+>>>>>>> moodle/MOODLE_27_STABLE
     cli_error(get_string('error_notdebugging', 'tool_generator'));
 }
 
@@ -95,7 +106,11 @@ if (empty($CFG->tool_generator_users_password) || is_bool($CFG->tool_generator_u
 }
 
 // Switch to admin user account.
+<<<<<<< HEAD
 session_set_user(get_admin());
+=======
+\core\session\manager::set_user(get_admin());
+>>>>>>> moodle/MOODLE_27_STABLE
 
 // Create files.
 $courseid = $DB->get_field('course', 'id', array('shortname' => $shortname));

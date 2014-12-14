@@ -120,7 +120,7 @@ class MoodleExcelWorkbook {
             header('Pragma: no-cache');
         }
 
-        if (check_browser_version('MSIE')) {
+        if (core_useragent::is_ie()) {
             $filename = rawurlencode($filename);
         } else {
             $filename = s($filename);
@@ -166,7 +166,7 @@ class MoodleExcelWorksheet {
         // Replace any characters in the name that Excel cannot cope with.
         $name = strtr($name, '[]*/\?:', '       ');
         // Shorten the title if necessary.
-        $name = textlib::substr($name, 0, 31);
+        $name = core_text::substr($name, 0, 31);
 
         if ($name === '') {
             // Name is required!
@@ -444,8 +444,7 @@ class MoodleExcelWorksheet {
 /**
  * Define and operate over one Format.
  *
- * A big part of this class acts as a wrapper over the PEAR
- * Spreadsheet_Excel_Writer_Workbook and OLE libraries
+ * A big part of this class acts as a wrapper over other libraries
  * maintaining Moodle functions isolated from underlying code.
  *
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}

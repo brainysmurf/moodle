@@ -17,8 +17,7 @@
 /**
  * Version information for the calculated question type.
  *
- * @package    qformat
- * @subpackage gift
+ * @package    qformat_gift
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,8 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qformat_gift';
-$plugin->version   = 2013050100;
+$plugin->version   = 2014051200;
 
-$plugin->requires  = 2013050100;
+$plugin->requires  = 2014050800;
 
 $plugin->maturity  = MATURITY_STABLE;

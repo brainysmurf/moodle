@@ -23,8 +23,7 @@
  * workshop_something() taking the workshop instance as the first
  * parameter, we use a class workshop that provides all methods.
  *
- * @package    mod
- * @subpackage workshop
+ * @package    mod_workshop
  * @copyright  2009 David Mudrak <david.mudrak@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -212,7 +211,7 @@ class workshop {
      * @return array Array ['string' => 'string'] of localized allocation method names
      */
     public static function installed_allocators() {
-        $installed = get_plugin_list('workshopallocation');
+        $installed = core_component::get_plugin_list('workshopallocation');
         $forms = array();
         foreach ($installed as $allocation => $allocationpath) {
             if (file_exists($allocationpath . '/lib.php')) {
@@ -287,7 +286,7 @@ class workshop {
      * @return array ['string' => 'string']
      */
     public static function available_strategies_list() {
-        $installed = get_plugin_list('workshopform');
+        $installed = core_component::get_plugin_list('workshopform');
         $forms = array();
         foreach ($installed as $strategy => $strategypath) {
             if (file_exists($strategypath . '/lib.php')) {
@@ -304,7 +303,7 @@ class workshop {
      */
     public static function available_evaluators_list() {
         $evals = array();
-        foreach (get_plugin_list_with_file('workshopeval', 'lib.php', false) as $eval => $evalpath) {
+        foreach (core_component::get_plugin_list_with_file('workshopeval', 'lib.php', false) as $eval => $evalpath) {
             $evals[$eval] = get_string('pluginname', 'workshopeval_' . $eval);
         }
         return $evals;
@@ -1047,8 +1046,14 @@ class workshop {
      */
     public function delete_submission(stdclass $submission) {
         global $DB;
+
         $assessments = $DB->get_records('workshop_assessments', array('submissionid' => $submission->id), '', 'id');
         $this->delete_assessment(array_keys($assessments));
+
+        $fs = get_file_storage();
+        $fs->delete_area_files($this->context->id, 'mod_workshop', 'submission_content', $submission->id);
+        $fs->delete_area_files($this->context->id, 'mod_workshop', 'submission_attachment', $submission->id);
+
         $DB->delete_records('workshop_submissions', array('id' => $submission->id));
     }
 
@@ -1252,21 +1257,39 @@ class workshop {
     }
 
     /**
-     * Delete assessment record or records
+     * Delete assessment record or records.
      *
-     * @param mixed $id int|array assessment id or array of assessments ids
-     * @return bool false if $id not a valid parameter, true otherwise
+     * Removes associated records from the workshop_grades table, too.
+     *
+     * @param int|array $id assessment id or array of assessments ids
+     * @todo Give grading strategy plugins a chance to clean up their data, too.
+     * @return bool true
      */
     public function delete_assessment($id) {
         global $DB;
 
-        // todo remove all given grades from workshop_grades;
+        if (empty($id)) {
+            return true;
+        }
+
+        $fs = get_file_storage();
 
         if (is_array($id)) {
-            return $DB->delete_records_list('workshop_assessments', 'id', $id);
+            $DB->delete_records_list('workshop_grades', 'assessmentid', $id);
+            foreach ($id as $itemid) {
+                $fs->delete_area_files($this->context->id, 'mod_workshop', 'overallfeedback_content', $itemid);
+                $fs->delete_area_files($this->context->id, 'mod_workshop', 'overallfeedback_attachment', $itemid);
+            }
+            $DB->delete_records_list('workshop_assessments', 'id', $id);
+
         } else {
-            return $DB->delete_records('workshop_assessments', array('id' => $id));
+            $DB->delete_records('workshop_grades', array('assessmentid' => $id));
+            $fs->delete_area_files($this->context->id, 'mod_workshop', 'overallfeedback_content', $id);
+            $fs->delete_area_files($this->context->id, 'mod_workshop', 'overallfeedback_attachment', $id);
+            $DB->delete_records('workshop_assessments', array('id' => $id));
         }
+
+        return true;
     }
 
     /**
@@ -1506,12 +1529,16 @@ class workshop {
 
     /**
      * Workshop wrapper around {@see add_to_log()}
+     * @deprecated since 2.7 Please use the provided event classes for logging actions.
      *
      * @param string $action to be logged
      * @param moodle_url $url absolute url as returned by {@see workshop::submission_url()} and friends
      * @param mixed $info additional info, usually id in a table
+     * @param bool $return true to return the arguments for add_to_log.
+     * @return void|array array of arguments for add_to_log if $return is true
      */
-    public function log($action, moodle_url $url = null, $info = null) {
+    public function log($action, moodle_url $url = null, $info = null, $return = false) {
+        debugging('The log method is now deprecated, please use event classes instead', DEBUG_DEVELOPER);
 
         if (is_null($url)) {
             $url = $this->view_url();
@@ -1522,7 +1549,11 @@ class workshop {
         }
 
         $logurl = $this->log_convert_url($url);
-        add_to_log($this->course->id, 'workshop', $action, $logurl, $info, $this->cm->id);
+        $args = array($this->course->id, 'workshop', $action, $logurl, $info, $this->cm->id);
+        if ($return) {
+            return $args;
+        }
+        call_user_func_array('add_to_log', $args);
     }
 
     /**
@@ -1685,6 +1716,15 @@ class workshop {
 
         $DB->set_field('workshop', 'phase', $newphase, array('id' => $this->id));
         $this->phase = $newphase;
+        $eventdata = array(
+            'objectid' => $this->id,
+            'context' => $this->context,
+            'other' => array(
+                'workshopphase' => $this->phase
+            )
+        );
+        $event = \mod_workshop\event\phase_switched::create($eventdata);
+        $event->trigger();
         return true;
     }
 
@@ -1761,8 +1801,8 @@ class workshop {
                 $sqlsort[] = $sqlsortfieldname . ' ' . $sqlsortfieldhow;
             }
             $sqlsort = implode(',', $sqlsort);
-            $sql = "SELECT u.id AS userid,u.firstname,u.lastname,u.picture,u.imagealt,u.email,
-                           s.title AS submissiontitle, s.grade AS submissiongrade, ag.gradinggrade
+            $picturefields = user_picture::fields('u', array(), 'userid');
+            $sql = "SELECT $picturefields, s.title AS submissiontitle, s.grade AS submissiongrade, ag.gradinggrade
                       FROM {user} u
                  LEFT JOIN {workshop_submissions} s ON (s.authorid = u.id AND s.workshopid = :workshopid1 AND s.example = 0)
                  LEFT JOIN {workshop_aggregations} ag ON (ag.userid = u.id AND ag.workshopid = :workshopid2)
@@ -1777,15 +1817,17 @@ class workshop {
         $userinfo = array();
 
         // get the user details for all participants to display
+        $additionalnames = get_all_user_name_fields();
         foreach ($participants as $participant) {
             if (!isset($userinfo[$participant->userid])) {
                 $userinfo[$participant->userid]            = new stdclass();
                 $userinfo[$participant->userid]->id        = $participant->userid;
-                $userinfo[$participant->userid]->firstname = $participant->firstname;
-                $userinfo[$participant->userid]->lastname  = $participant->lastname;
                 $userinfo[$participant->userid]->picture   = $participant->picture;
                 $userinfo[$participant->userid]->imagealt  = $participant->imagealt;
                 $userinfo[$participant->userid]->email     = $participant->email;
+                foreach ($additionalnames as $addname) {
+                    $userinfo[$participant->userid]->$addname = $participant->$addname;
+                }
             }
         }
 
@@ -1797,22 +1839,25 @@ class workshop {
             if (!isset($userinfo[$submission->gradeoverby])) {
                 $userinfo[$submission->gradeoverby]            = new stdclass();
                 $userinfo[$submission->gradeoverby]->id        = $submission->gradeoverby;
-                $userinfo[$submission->gradeoverby]->firstname = $submission->overfirstname;
-                $userinfo[$submission->gradeoverby]->lastname  = $submission->overlastname;
                 $userinfo[$submission->gradeoverby]->picture   = $submission->overpicture;
                 $userinfo[$submission->gradeoverby]->imagealt  = $submission->overimagealt;
                 $userinfo[$submission->gradeoverby]->email     = $submission->overemail;
+                foreach ($additionalnames as $addname) {
+                    $temp = 'over' . $addname;
+                    $userinfo[$submission->gradeoverby]->$addname = $submission->$temp;
+                }
             }
         }
 
         // get the user details for all reviewers of the displayed participants
         $reviewers = array();
+
         if ($submissions) {
             list($submissionids, $params) = $DB->get_in_or_equal(array_keys($submissions), SQL_PARAMS_NAMED);
             list($sort, $sortparams) = users_order_by_sql('r');
+            $picturefields = user_picture::fields('r', array(), 'reviewerid');
             $sql = "SELECT a.id AS assessmentid, a.submissionid, a.grade, a.gradinggrade, a.gradinggradeover, a.weight,
-                           r.id AS reviewerid, r.lastname, r.firstname, r.picture, r.imagealt, r.email,
-                           s.id AS submissionid, s.authorid
+                           $picturefields, s.id AS submissionid, s.authorid
                       FROM {workshop_assessments} a
                       JOIN {user} r ON (a.reviewerid = r.id)
                       JOIN {workshop_submissions} s ON (a.submissionid = s.id AND s.example = 0)
@@ -1823,11 +1868,12 @@ class workshop {
                 if (!isset($userinfo[$reviewer->reviewerid])) {
                     $userinfo[$reviewer->reviewerid]            = new stdclass();
                     $userinfo[$reviewer->reviewerid]->id        = $reviewer->reviewerid;
-                    $userinfo[$reviewer->reviewerid]->firstname = $reviewer->firstname;
-                    $userinfo[$reviewer->reviewerid]->lastname  = $reviewer->lastname;
                     $userinfo[$reviewer->reviewerid]->picture   = $reviewer->picture;
                     $userinfo[$reviewer->reviewerid]->imagealt  = $reviewer->imagealt;
                     $userinfo[$reviewer->reviewerid]->email     = $reviewer->email;
+                    foreach ($additionalnames as $addname) {
+                        $userinfo[$reviewer->reviewerid]->$addname = $reviewer->$addname;
+                    }
                 }
             }
         }
@@ -1838,9 +1884,9 @@ class workshop {
             list($participantids, $params) = $DB->get_in_or_equal(array_keys($participants), SQL_PARAMS_NAMED);
             list($sort, $sortparams) = users_order_by_sql('e');
             $params['workshopid'] = $this->id;
+            $picturefields = user_picture::fields('e', array(), 'authorid');
             $sql = "SELECT a.id AS assessmentid, a.submissionid, a.grade, a.gradinggrade, a.gradinggradeover, a.reviewerid, a.weight,
-                           s.id AS submissionid,
-                           e.id AS authorid, e.lastname, e.firstname, e.picture, e.imagealt, e.email
+                           s.id AS submissionid, $picturefields
                       FROM {user} u
                       JOIN {workshop_assessments} a ON (a.reviewerid = u.id)
                       JOIN {workshop_submissions} s ON (a.submissionid = s.id AND s.example = 0)
@@ -1852,11 +1898,12 @@ class workshop {
                 if (!isset($userinfo[$reviewee->authorid])) {
                     $userinfo[$reviewee->authorid]            = new stdclass();
                     $userinfo[$reviewee->authorid]->id        = $reviewee->authorid;
-                    $userinfo[$reviewee->authorid]->firstname = $reviewee->firstname;
-                    $userinfo[$reviewee->authorid]->lastname  = $reviewee->lastname;
                     $userinfo[$reviewee->authorid]->picture   = $reviewee->picture;
                     $userinfo[$reviewee->authorid]->imagealt  = $reviewee->imagealt;
                     $userinfo[$reviewee->authorid]->email     = $reviewee->email;
+                    foreach ($additionalnames as $addname) {
+                        $userinfo[$reviewee->authorid]->$addname = $reviewee->$addname;
+                    }
                 }
             }
         }
@@ -2331,6 +2378,71 @@ class workshop {
         );
     }
 
+    /**
+     * Performs the reset of this workshop instance.
+     *
+     * @since Moodle 2.6.6, 2.7.3
+     *
+     * @param stdClass $data The actual course reset settings.
+     * @return array List of results, each being array[(string)component, (string)item, (string)error]
+     */
+    public function reset_userdata(stdClass $data) {
+
+        $componentstr = get_string('pluginname', 'workshop').': '.format_string($this->name);
+        $status = array();
+
+        if (!empty($data->reset_workshop_assessments) or !empty($data->reset_workshop_submissions)) {
+            // Reset all data related to assessments, including assessments of
+            // example submissions.
+            $result = $this->reset_userdata_assessments($data);
+            if ($result === true) {
+                $status[] = array(
+                    'component' => $componentstr,
+                    'item' => get_string('resetassessments', 'mod_workshop'),
+                    'error' => false,
+                );
+            } else {
+                $status[] = array(
+                    'component' => $componentstr,
+                    'item' => get_string('resetassessments', 'mod_workshop'),
+                    'error' => $result,
+                );
+            }
+        }
+
+        if (!empty($data->reset_workshop_submissions)) {
+            // Reset all remaining data related to submissions.
+            $result = $this->reset_userdata_submissions($data);
+            if ($result === true) {
+                $status[] = array(
+                    'component' => $componentstr,
+                    'item' => get_string('resetsubmissions', 'mod_workshop'),
+                    'error' => false,
+                );
+            } else {
+                $status[] = array(
+                    'component' => $componentstr,
+                    'item' => get_string('resetsubmissions', 'mod_workshop'),
+                    'error' => $result,
+                );
+            }
+        }
+
+        if (!empty($data->reset_workshop_phase)) {
+            // Do not use the {@link workshop::switch_phase()} here, we do not
+            // want to trigger events.
+            $this->reset_phase();
+            $status[] = array(
+                'component' => $componentstr,
+                'item' => get_string('resetsubmissions', 'mod_workshop'),
+                'error' => false,
+            );
+        }
+
+        return $status;
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////////
     // Internal methods (implementation details)                                  //
     ////////////////////////////////////////////////////////////////////////////////
@@ -2438,8 +2550,21 @@ class workshop {
         if ($count > 0) {
             $finalgrade = grade_floatval($sumgrades / $count);
         }
+
+        // Event information.
+        $params = array(
+            'context' => $this->context,
+            'courseid' => $this->course->id,
+            'relateduserid' => $reviewerid
+        );
+
         // check if the new final grade differs from the one stored in the database
         if (grade_floats_different($finalgrade, $current)) {
+            $params['other'] = array(
+                'currentgrade' => $current,
+                'finalgrade' => $finalgrade
+            );
+
             // we need to save new calculation into the database
             if (is_null($agid)) {
                 // no aggregation record yet
@@ -2448,13 +2573,19 @@ class workshop {
                 $record->userid = $reviewerid;
                 $record->gradinggrade = $finalgrade;
                 $record->timegraded = $timegraded;
-                $DB->insert_record('workshop_aggregations', $record);
+                $record->id = $DB->insert_record('workshop_aggregations', $record);
+                $params['objectid'] = $record->id;
+                $event = \mod_workshop\event\assessment_evaluated::create($params);
+                $event->trigger();
             } else {
                 $record = new stdclass();
                 $record->id = $agid;
                 $record->gradinggrade = $finalgrade;
                 $record->timegraded = $timegraded;
                 $DB->update_record('workshop_aggregations', $record);
+                $params['objectid'] = $agid;
+                $event = \mod_workshop\event\assessment_reevaluated::create($params);
+                $event->trigger();
             }
         }
     }
@@ -2568,6 +2699,65 @@ class workshop {
         }
 
         return substr($fullurl->out(), strlen($baseurl));
+    }
+
+    /**
+     * Removes all user data related to assessments (including allocations).
+     *
+     * This includes assessments of example submissions as long as they are not
+     * referential assessments.
+     *
+     * @since Moodle 2.6.6, 2.7.3
+     *
+     * @param stdClass $data The actual course reset settings.
+     * @return bool|string True on success, error message otherwise.
+     */
+    protected function reset_userdata_assessments(stdClass $data) {
+        global $DB;
+
+        $sql = "SELECT a.id
+                  FROM {workshop_assessments} a
+                  JOIN {workshop_submissions} s ON (a.submissionid = s.id)
+                 WHERE s.workshopid = :workshopid
+                       AND (s.example = 0 OR (s.example = 1 AND a.weight = 0))";
+
+        $assessments = $DB->get_records_sql($sql, array('workshopid' => $this->id));
+        $this->delete_assessment(array_keys($assessments));
+
+        $DB->delete_records('workshop_aggregations', array('workshopid' => $this->id));
+
+        return true;
+    }
+
+    /**
+     * Removes all user data related to participants' submissions.
+     *
+     * @since Moodle 2.6.6, 2.7.3
+     *
+     * @param stdClass $data The actual course reset settings.
+     * @return bool|string True on success, error message otherwise.
+     */
+    protected function reset_userdata_submissions(stdClass $data) {
+        global $DB;
+
+        $submissions = $this->get_submissions();
+        foreach ($submissions as $submission) {
+            $this->delete_submission($submission);
+        }
+
+        return true;
+    }
+
+    /**
+     * Hard set the workshop phase to the setup one.
+     *
+     * @since Moodle 2.6.6, 2.7.3
+     */
+    protected function reset_phase() {
+        global $DB;
+
+        $DB->set_field('workshop', 'phase', self::PHASE_SETUP, array('id' => $this->id));
+        $this->phase = self::PHASE_SETUP;
     }
 }
 
@@ -3062,9 +3252,10 @@ abstract class workshop_submission_base {
      * Usually this is called by the contructor but can be called explicitely, too.
      */
     public function anonymize() {
-        foreach (array('authorid', 'authorfirstname', 'authorlastname',
-               'authorpicture', 'authorimagealt', 'authoremail') as $field) {
-            unset($this->{$field});
+        $authorfields = explode(',', user_picture::fields());
+        foreach ($authorfields as $field) {
+            $prefixedusernamefield = 'author' . $field;
+            unset($this->{$prefixedusernamefield});
         }
         $this->anonymous = true;
     }
@@ -3102,6 +3293,14 @@ class workshop_submission_summary extends workshop_submission_base implements re
     public $authorfirstname;
     /** @var string */
     public $authorlastname;
+    /** @var string */
+    public $authorfirstnamephonetic;
+    /** @var string */
+    public $authorlastnamephonetic;
+    /** @var string */
+    public $authormiddlename;
+    /** @var string */
+    public $authoralternatename;
     /** @var int */
     public $authorpicture;
     /** @var string */
@@ -3117,7 +3316,8 @@ class workshop_submission_summary extends workshop_submission_base implements re
      */
     protected $fields = array(
         'id', 'title', 'timecreated', 'timemodified',
-        'authorid', 'authorfirstname', 'authorlastname', 'authorpicture',
+        'authorid', 'authorfirstname', 'authorlastname', 'authorfirstnamephonetic', 'authorlastnamephonetic',
+        'authormiddlename', 'authoralternatename', 'authorpicture',
         'authorimagealt', 'authoremail');
 }
 
@@ -3143,8 +3343,8 @@ class workshop_submission extends workshop_submission_summary implements rendera
      */
     protected $fields = array(
         'id', 'title', 'timecreated', 'timemodified', 'content', 'contentformat', 'contenttrust',
-        'attachment', 'authorid', 'authorfirstname', 'authorlastname', 'authorpicture',
-        'authorimagealt', 'authoremail');
+        'attachment', 'authorid', 'authorfirstname', 'authorlastname', 'authorfirstnamephonetic', 'authorlastnamephonetic',
+        'authormiddlename', 'authoralternatename', 'authorpicture', 'authorimagealt', 'authoremail');
 }
 
 /**
@@ -3376,10 +3576,10 @@ class workshop_assessment extends workshop_assessment_base implements renderable
             return null;
         }
 
-        $content = format_text($this->feedbackauthor, $this->feedbackauthorformat,
-            array('overflowdiv' => true, 'context' => $this->workshop->context));
-        $content = file_rewrite_pluginfile_urls($content, 'pluginfile.php', $this->workshop->context->id,
+        $content = file_rewrite_pluginfile_urls($this->feedbackauthor, 'pluginfile.php', $this->workshop->context->id,
             'mod_workshop', 'overallfeedback_content', $this->id);
+        $content = format_text($content, $this->feedbackauthorformat,
+            array('overflowdiv' => true, 'context' => $this->workshop->context));
 
         return $content;
     }

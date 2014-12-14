@@ -99,21 +99,6 @@ class mssql_native_moodle_database extends moodle_database {
     }
 
     /**
-     * Returns localised database description
-     * Note: can be used before connect()
-     * @return string
-     */
-    public function get_configuration_hints() {
-        $str = get_string('databasesettingssub_mssql', 'install');
-        $str .= "<p style='text-align:right'><a href=\"javascript:void(0)\" ";
-        $str .= "onclick=\"return window.open('http://docs.moodle.org/en/Installing_MSSQL_for_PHP')\"";
-        $str .= ">";
-        $str .= '<img src="pix/docs.gif' . '" alt="Docs" class="iconhelp" />';
-        $str .= get_string('moodledocslink', 'install') . '</a></p>';
-        return $str;
-    }
-
-    /**
      * Connect to db
      * Must be called before other methods.
      * @param string $dbhost The database host.
@@ -140,7 +125,8 @@ class mssql_native_moodle_database extends moodle_database {
         $this->store_settings($dbhost, $dbuser, $dbpass, $dbname, $prefix, $dboptions);
 
         $dbhost = $this->dbhost;
-        if (isset($dboptions['dbport'])) {
+        // Zero shouldn't be used as a port number so doing a check with empty() should be fine.
+        if (!empty($dboptions['dbport'])) {
             if (stristr(PHP_OS, 'win') && !stristr(PHP_OS, 'darwin')) {
                 $dbhost .= ','.$dboptions['dbport'];
             } else {
@@ -341,7 +327,7 @@ class mssql_native_moodle_database extends moodle_database {
         if ($result) {
             while ($row = mssql_fetch_row($result)) {
                 $tablename = reset($row);
-                if ($this->prefix !== '') {
+                if ($this->prefix !== false && $this->prefix !== '') {
                     if (strpos($tablename, $this->prefix) !== 0) {
                         continue;
                     }
@@ -478,12 +464,18 @@ class mssql_native_moodle_database extends moodle_database {
             // id columns being auto_incremnt are PK by definition
             $info->primary_key = ($info->name == 'id' && $info->meta_type == 'R' && $info->auto_increment);
 
-            // Put correct length for character and LOB types
-            $info->max_length = $info->meta_type == 'C' ? $rawcolumn->char_max_length : $rawcolumn->max_length;
-            $info->max_length = ($info->meta_type == 'X' || $info->meta_type == 'B') ? -1 : $info->max_length;
+            if ($info->meta_type === 'C' and $rawcolumn->char_max_length == -1) {
+                // This is NVARCHAR(MAX), not a normal NVARCHAR.
+                $info->max_length = -1;
+                $info->meta_type = 'X';
+            } else {
+                // Put correct length for character and LOB types
+                $info->max_length = $info->meta_type == 'C' ? $rawcolumn->char_max_length : $rawcolumn->max_length;
+                $info->max_length = ($info->meta_type == 'X' || $info->meta_type == 'B') ? -1 : $info->max_length;
+            }
 
             // Scale
-            $info->scale = $rawcolumn->scale ? $rawcolumn->scale : false;
+            $info->scale = $rawcolumn->scale;
 
             // Prepare not_null info
             $info->not_null = $rawcolumn->is_nullable == 'NO'  ? true : false;
@@ -504,7 +496,7 @@ class mssql_native_moodle_database extends moodle_database {
         $this->free_result($result);
 
         if ($usecache) {
-            $result = $cache->set($table, $structure);
+            $cache->set($table, $structure);
         }
 
         return $structure;
@@ -587,6 +579,7 @@ class mssql_native_moodle_database extends moodle_database {
                 $type = 'X';
                 break;
             case 'IMAGE':
+            case 'VARBINARY':
             case 'VARBINARY(MAX)':
                 $type = 'B';
                 break;
@@ -602,17 +595,26 @@ class mssql_native_moodle_database extends moodle_database {
 
     /**
      * Do NOT use in code, to be used by database_manager only!
-     * @param string $sql query
+     * @param string|array $sql query
      * @return bool true
-     * @throws dml_exception A DML specific exception is thrown for any errors.
+     * @throws ddl_change_structure_exception A DDL specific exception is thrown for any errors.
      */
     public function change_database_structure($sql) {
+        $this->get_manager(); // Includes DDL exceptions classes ;-)
+        $sqls = (array)$sql;
+
+        try {
+            foreach ($sqls as $sql) {
+                $this->query_start($sql, null, SQL_QUERY_STRUCTURE);
+                $result = mssql_query($sql, $this->mssql);
+                $this->query_end($result);
+            }
+        } catch (ddl_change_structure_exception $e) {
+            $this->reset_caches();
+            throw $e;
+        }
+
         $this->reset_caches();
-
-        $this->query_start($sql, null, SQL_QUERY_STRUCTURE);
-        $result = mssql_query($sql, $this->mssql);
-        $this->query_end($result);
-
         return true;
     }
 
@@ -700,10 +702,9 @@ class mssql_native_moodle_database extends moodle_database {
      * @throws dml_exception A DML specific exception is thrown for any errors.
      */
     public function get_recordset_sql($sql, array $params=null, $limitfrom=0, $limitnum=0) {
-        $limitfrom = (int)$limitfrom;
-        $limitnum  = (int)$limitnum;
-        $limitfrom = ($limitfrom < 0) ? 0 : $limitfrom;
-        $limitnum  = ($limitnum < 0)  ? 0 : $limitnum;
+
+        list($limitfrom, $limitnum) = $this->normalise_limit_from_num($limitfrom, $limitnum);
+
         if ($limitfrom or $limitnum) {
             if ($limitnum >= 1) { // Only apply TOP clause if we have any limitnum (limitfrom offset is handled later)
                 $fetch = $limitfrom + $limitnum;
@@ -910,6 +911,9 @@ class mssql_native_moodle_database extends moodle_database {
         $dataobject = (array)$dataobject;
 
         $columns = $this->get_columns($table);
+        if (empty($columns)) {
+            throw new dml_exception('ddltablenotexist', $table);
+        }
         $cleaned = array();
 
         foreach ($dataobject as $field => $value) {
@@ -1257,6 +1261,16 @@ s only returning name of SQL substring function, it now requires all parameters.
         } else {
             return "SUBSTRING($expr, $start, $length)";
         }
+    }
+
+    /**
+     * Does this driver support tool_replace?
+     *
+     * @since Moodle 2.6.1
+     * @return bool
+     */
+    public function replace_all_text_supported() {
+        return true;
     }
 
     public function session_lock_supported() {

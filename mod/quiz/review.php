@@ -85,10 +85,6 @@ if ($options->flags == question_display_options::EDITABLE && optional_param('sav
     redirect($attemptobj->review_url(null, $page, $showall));
 }
 
-// Log this review.
-add_to_log($attemptobj->get_courseid(), 'quiz', 'review', 'review.php?attempt=' .
-        $attemptobj->get_attemptid(), $attemptobj->get_quizid(), $attemptobj->get_cmid());
-
 // Work out appropriate title and whether blocks should be shown.
 if ($attemptobj->is_preview_user() && $attemptobj->is_own_attempt()) {
     $strreviewtitle = get_string('reviewofpreview', 'quiz');
@@ -103,7 +99,7 @@ if ($attemptobj->is_preview_user() && $attemptobj->is_own_attempt()) {
 
 // Set up the page header.
 $headtags = $attemptobj->get_html_head_contributions($page, $showall);
-$PAGE->set_title(format_string($attemptobj->get_quiz_name()));
+$PAGE->set_title($attemptobj->get_quiz_name());
 $PAGE->set_heading($attemptobj->get_course()->fullname);
 
 // Summary table start. ============================================================================
@@ -225,6 +221,9 @@ if ($options->marks >= question_display_options::MARK_AND_MAX && quiz_has_grades
     }
 }
 
+// Any additional summary data from the behaviour.
+$summarydata = array_merge($summarydata, $attemptobj->get_additional_summary_data($options));
+
 // Feedback if there is any, and the user is allowed to see it now.
 $feedback = $attemptobj->get_overall_feedback($grade);
 if ($options->overallfeedback && $feedback) {
@@ -252,3 +251,17 @@ $regions = $PAGE->blocks->get_regions();
 $PAGE->blocks->add_fake_block($navbc, reset($regions));
 
 echo $output->review_page($attemptobj, $slots, $page, $showall, $lastpage, $options, $summarydata);
+
+// Trigger an event for this review.
+$params = array(
+    'objectid' => $attemptobj->get_attemptid(),
+    'relateduserid' => $attemptobj->get_userid(),
+    'courseid' => $attemptobj->get_courseid(),
+    'context' => context_module::instance($attemptobj->get_cmid()),
+    'other' => array(
+        'quizid' => $attemptobj->get_quizid()
+    )
+);
+$event = \mod_quiz\event\attempt_reviewed::create($params);
+$event->add_record_snapshot('quiz_attempts', $attemptobj->get_attempt());
+$event->trigger();

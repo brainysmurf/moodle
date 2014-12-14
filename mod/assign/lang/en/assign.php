@@ -29,6 +29,8 @@ $string['addnewattempt'] = 'Add a new attempt';
 $string['addnewattempt_help'] = 'This will create a new blank submission for you to work on.';
 $string['addnewattemptfromprevious'] = 'Add a new attempt based on previous submission';
 $string['addnewattemptfromprevious_help'] = 'This will copy the contents of your previous submission to a new submission for you to work on.';
+$string['allocatedmarker'] = 'Allocated Marker';
+$string['allocatedmarker_help'] = 'Marker allocated to this submission';
 $string['allowsubmissions'] = 'Allow the user to continue making submissions to this assignment.';
 $string['allowsubmissionsshort'] = 'Allow submission changes';
 $string['allowsubmissionsfromdate'] = 'Allow submissions from';
@@ -40,9 +42,15 @@ $string['alwaysshowdescription_help'] = 'If disabled, the Assignment Description
 $string['applytoteam'] = 'Apply grades and feedback to entire group';
 $string['assign:addinstance'] = 'Add a new assignment';
 $string['assign:exportownsubmission'] = 'Export own submission';
+$string['assign:editothersubmission'] = 'Edit another student\'s submission';
 $string['assign:grade'] = 'Grade assignment';
 $string['assign:grantextension'] = 'Grant extension';
+$string['assign:manageallocations'] = 'Manage markers allocated to submissions';
+$string['assign:managegrades'] = 'Review and release grades';
+$string['assign:releasegrades'] = 'Release grades';
 $string['assign:revealidentities'] = 'Reveal student identities';
+$string['assign:reviewgrades'] = 'Review grades';
+$string['assign:viewgrades'] = 'View grades';
 $string['assign:submit'] = 'Submit assignment';
 $string['assign:view'] = 'View assignment';
 $string['assignfeedback'] = 'Feedback plugin';
@@ -81,13 +89,18 @@ $string['batchoperationconfirmgrantextension'] = 'Grant an extension to all sele
 $string['batchoperationconfirmunlock'] = 'Unlock all selected submissions?';
 $string['batchoperationconfirmreverttodraft'] = 'Revert selected submissions to draft?';
 $string['batchoperationconfirmaddattempt'] = 'Allow another attempt for selected submissions?';
+$string['batchoperationconfirmsetmarkingworkflowstate'] = 'Set marking workflow state for all selected submissions?';
+$string['batchoperationconfirmsetmarkingallocation'] = 'Set marking allocation for all selected submissions?';
 $string['batchoperationlock'] = 'lock submissions';
 $string['batchoperationunlock'] = 'unlock submissions';
 $string['batchoperationreverttodraft'] = 'revert submissions to draft';
+$string['batchsetallocatedmarker'] = 'Set allocated marker for {$a} selected user(s).';
+$string['batchsetmarkingworkflowstateforusers'] = 'Set marking workflow state for {$a} selected user(s).';
 $string['blindmarking'] = 'Blind marking';
 $string['blindmarking_help'] = 'Blind marking hides the identity of students to markers. Blind marking settings will be locked once a submission or grade has been made in relation to this assignment.';
 $string['changegradewarning'] = 'This assignment has graded submissions and changing the grade will not automatically re-calculate existing submission grades. You must re-grade all existing submissions, if you wish to change the grade.';
 $string['choosegradingaction'] = 'Grading action';
+$string['choosemarker'] = 'Choose...';
 $string['chooseoperation'] = 'Choose operation';
 $string['comment'] = 'Comment';
 $string['completionsubmit'] = 'Student must submit to this activity to complete it';
@@ -107,13 +120,10 @@ $string['cutoffdate'] = 'Cut-off date';
 $string['cutoffdate_help'] = 'If set, the assignment will not accept submissions after this date without an extension.';
 $string['cutoffdatevalidation'] = 'The cut-off date cannot be earlier than the due date.';
 $string['cutoffdatefromdatevalidation'] = 'Cut-off date must be after the allow submissions from date.';
-$string['defaultplugins'] = 'Default assignment settings';
-$string['defaultplugins_help'] = 'These settings define the defaults for all new assignments.';
+$string['defaultsettings'] = 'Default assignment settings';
+$string['defaultsettings_help'] = 'These settings define the defaults for all new assignments.';
 $string['defaultteam'] = 'Default group';
 $string['deleteallsubmissions'] = 'Delete all submissions';
-$string['deletepluginareyousure'] = 'Delete assignment plugin {$a}: are you sure?';
-$string['deletepluginareyousuremessage'] = 'You are about to completely delete the assignment plugin {$a}. This will completely delete everything in the database associated with this assignment plugin. Are you SURE you want to continue?';
-$string['deletingplugin'] = 'Deleting plugin {$a}.';
 $string['description'] = 'Description';
 $string['downloadall'] = 'Download all submissions';
 $string['download all submissions'] = 'Download all submissions in a zip file.';
@@ -126,12 +136,39 @@ $string['duedatevalidation'] = 'Due date must be after the allow submissions fro
 $string['editattemptfeedback'] = 'Edit the grade and feedback for attempt number {$a}.';
 $string['editingpreviousfeedbackwarning'] = 'You are editing the feedback for a previous attempt. This is attempt {$a->attemptnumber} out of {$a->totalattempts}.';
 $string['editsubmission'] = 'Edit submission';
+$string['editsubmissionother'] = 'Edit submission for {$a}';
 $string['editsubmission_help'] = 'Make changes to your submission';
 $string['editingstatus'] = 'Editing status';
 $string['editaction'] = 'Actions...';
+$string['eventallsubmissionsdownloaded'] = 'All the submissions are being downloaded.';
+$string['eventassessablesubmitted'] = 'A submission has been submitted.';
+$string['eventbatchsetmarkerallocationviewed'] = 'Batch set marker allocation viewed';
+$string['eventbatchsetworkflowstateviewed'] = 'Batch set workflow state viewed.';
+$string['eventextensiongranted'] = 'An extension has been granted.';
+$string['eventfeedbackupdated'] = 'Feedback updated';
+$string['eventfeedbackviewed'] = 'Feedback viewed';
+$string['eventgradingformviewed'] = 'Grading form viewed';
+$string['eventgradingtableviewed'] = 'Grading table viewed';
+$string['eventidentitiesrevealed'] = 'The identities have been revealed.';
+$string['eventmarkerupdated'] = 'The allocated marker has been updated.';
+$string['eventrevealidentitiesconfirmationpageviewed'] = 'Reveal identities confirmation page viewed.';
+$string['eventstatementaccepted'] = 'The user has accepted the statement of the submission.';
+$string['eventsubmissionconfirmationformviewed'] = 'Submission confirmation form viewed.';
+$string['eventsubmissioncreated'] = 'Submission created.';
+$string['eventsubmissionduplicated'] = 'The user duplicated his submission.';
+$string['eventsubmissionformviewed'] = 'Submission form viewed.';
+$string['eventsubmissiongraded'] = 'The submission has been graded.';
+$string['eventsubmissionlocked'] = 'The submissions have been locked for a user.';
+$string['eventsubmissionstatusupdated'] = 'The status of the submission has been updated.';
+$string['eventsubmissionstatusviewed'] = 'The status of the submission has been viewed.';
+$string['eventsubmissionunlocked'] = 'The submissions have been unlocked for a user.';
+$string['eventsubmissionupdated'] = 'Submission updated.';
+$string['eventsubmissionviewed'] = 'Submission viewed.';
+$string['eventworkflowstateupdated'] = 'The state of the workflow has been updated.';
 $string['extensionduedate'] = 'Extension due date';
 $string['extensionnotafterduedate'] = 'Extension date must be after the due date';
 $string['extensionnotafterfromdate'] = 'Extension date must be after the allow submissions from date';
+$string['gradecanbechanged'] = 'Grade can be changed';
 $string['gradersubmissionupdatedtext'] = '{$a->username} has updated their assignment submission
 for \'{$a->assignment}\' at {$a->timeupdated}
 
@@ -168,6 +205,7 @@ $string['feedbacksettings'] = 'Feedback settings';
 $string['filesubmissions'] = 'File submissions';
 $string['filter'] = 'Filter';
 $string['filternone'] = 'No filter';
+$string['filternotsubmitted'] = 'Not submitted';
 $string['filterrequiregrading'] = 'Requires grading';
 $string['filtersubmitted'] = 'Submitted';
 $string['gradedby'] = 'Graded by';
@@ -200,9 +238,32 @@ $string['locksubmissionforstudent'] = 'Prevent any more submissions for student:
 $string['locksubmissions'] = 'Lock submissions';
 $string['manageassignfeedbackplugins'] = 'Manage assignment feedback plugins';
 $string['manageassignsubmissionplugins'] = 'Manage assignment submission plugins';
+$string['marker'] = 'Marker';
+$string['markerfilter'] = 'Marker filter';
+$string['markerfilternomarker'] = 'No marker';
+$string['markingallocation'] = 'Use marking allocation';
+$string['markingallocation_help'] = 'If enabled together with marking workflow, markers can be allocated to particular students.';
+$string['markingworkflow'] = 'Use marking workflow';
+$string['markingworkflow_help'] = 'If enabled, marks will go through a series of workflow stages before being released to students. This allows for multiple rounds of marking and allows marks to be released to all students at the same time.';
+$string['markingworkflowstate'] = 'Marking workflow state';
+$string['markingworkflowstate_help'] = 'Possible workflow states may include (depending on your permissions):
+
+* Not marked - the marker has not yet started
+* In marking - the marker has started but not yet finished
+* Marking completed - the marker has finished but might need to go back for checking/corrections
+* In review - the marking is now with the teacher in charge for quality checking
+* Ready for release - the teacher in charge is satisfied with the marking but wait before giving students access to the marking
+* Released - the student can access the grades/feedback';
+$string['markingworkflowstateinmarking'] = 'In marking';
+$string['markingworkflowstateinreview'] = 'In review';
+$string['markingworkflowstatenotmarked'] = 'Not marked';
+$string['markingworkflowstatereadyforreview'] = 'Marking completed';
+$string['markingworkflowstatereadyforrelease'] = 'Ready for release';
+$string['markingworkflowstatereleased'] = 'Released';
 $string['maxattempts'] = 'Maximum attempts';
 $string['maxattempts_help'] = 'The maximum number of submissions attempts that can be made by a student. After this number of attempts has been made the student&apos;s submission will not be able to be reopened.';
 $string['maxgrade'] = 'Maximum grade';
+$string['maxgrade'] = 'Maximum Grade';
 $string['messageprovider:assign_notification'] = 'Assignment notifications';
 $string['modulename'] = 'Assignment';
 $string['modulename_help'] = 'An _Assignment_ allows students to submit files or plain text to teachers for marking. 
@@ -212,6 +273,7 @@ Parents do see the results of the marks, and will see no data if it is not marke
 The difference between an _Assignment_ and _Turnitin_ is that the latter has a built-in plagriarism check.';
 $string['modulename_link'] = 'mod/assignment/view';
 $string['modulenameplural'] = 'Assignments';
+$string['moreusers'] = '{$a} more...';
 $string['mysubmission'] = 'My submission: ';
 $string['newsubmissions'] = 'Assignments submitted';
 $string['noattempt'] = 'No attempt';
@@ -251,9 +313,7 @@ $string['quickgradingresult'] = 'Quick grading';
 $string['quickgradingchangessaved'] = 'The grade changes were saved';
 $string['quickgrading_help'] = 'Quick grading allows you to assign grades (and outcomes) directly in the submissions table. Quick grading is not compatible with advanced grading and is not recommended when there are multiple markers.';
 $string['requiresubmissionstatement'] = 'Require that students accept the submission statement';
-$string['requiresubmissionstatement_help'] = 'Require that students accept the submission statement for all assignment submissions for this entire Moodle installation. If this setting is not enabled, then submission statements can be enabled or disabled in the settings for each assignment.';
-$string['requiresubmissionstatementassignment'] = 'Require that students accept the submission statement';
-$string['requiresubmissionstatementassignment_help'] = 'Require that students accept the submission statement for all submissions to this assignment.';
+$string['requiresubmissionstatement_help'] = 'Require that students accept the submission statement for all submissions to this assignment.';
 $string['requireallteammemberssubmit'] = 'Require all group members submit';
 $string['requireallteammemberssubmit_help'] = 'If enabled, all members of the student group must click the submit button for this assignment before the group submission will be considered as submitted. If disabled, the group submission will be considered as submitted as soon as any member of the student group clicks the submit button.';
 $string['recordid'] = 'Identifier';
@@ -268,6 +328,10 @@ $string['savegradingresult'] = 'Grade';
 $string['saveallquickgradingchanges'] = 'Save all quick grading changes';
 $string['savenext'] = 'Save and show next';
 $string['scale'] = 'Scale';
+$string['sendstudentnotificationsdefault'] = 'Default setting for "Notify students"';
+$string['sendstudentnotificationsdefault_help'] = 'Set the default value for the "Notify students" checkbox on the grading form.';
+$string['sendstudentnotifications'] = 'Notify students';
+$string['sendstudentnotifications_help'] = 'If enabled, students receive a message about the updated grade or feedback.';
 $string['sendnotifications'] = 'Notify graders about submissions';
 $string['sendnotifications_help'] = 'If enabled, graders (usually teachers) receive a message whenever a student submits an assignment, early, on time and late. Message methods are configurable.';
 $string['selectlink'] = 'Select...';
@@ -276,8 +340,14 @@ $string['sendlatenotifications'] = 'Notify graders about late submissions';
 $string['sendlatenotifications_help'] = 'If enabled, graders (usually teachers) receive a message whenever a student submits an assignment late. Message methods are configurable.';
 $string['sendsubmissionreceipts'] = 'Send submission receipt to students';
 $string['sendsubmissionreceipts_help'] = 'This switch will enable submission receipts for students. Students will receive a notification every time they successfully submit an assignment';
+$string['setmarkingallocation'] = 'Set allocated marker';
+$string['setmarkingworkflowstate'] = 'Set marking workflow state';
+$string['selectedusers'] = 'Selected users';
+$string['setmarkingworkflowstateforlog'] = 'Set marking workflow state : (id={$a->id}, fullname={$a->fullname}, state={$a->state}). ';
+$string['setmarkerallocationforlog'] = 'Set marking allocation : (id={$a->id}, fullname={$a->fullname}, marker={$a->marker}). ';
 $string['settings'] = 'Assignment settings';
 $string['showrecentsubmissions'] = 'Show recent submissions';
+$string['status'] = 'Status';
 $string['submissioncopiedtext'] = 'You have made a copy of your previous
 assignment submission for \'{$a->assignment}\'
 
@@ -296,6 +366,16 @@ $string['submissionnoteditable'] = 'Student cannot edit this submission';
 $string['submissionnotready'] = 'This assignment is not ready to submit:';
 $string['submissionplugins'] = 'Submission plugins';
 $string['submissionreceipts'] = 'Send submission receipts';
+$string['submissionreceiptothertext'] = 'Your assignment submission for
+\'{$a->assignment}\' has been submitted.
+
+You can see the status of your assignment submission:
+
+    {$a->url}';
+$string['submissionreceiptotherhtml'] = 'Your assignment submission for
+\'<i>{$a->assignment}</i>\' has been submitted.<br /><br />
+You can see the status of your <a href="{$a->url}">assignment submission</a>.';
+$string['submissionreceiptothersmall'] = 'Your assignment submission for {$a->assignment} has been submitted.';
 $string['submissionreceipttext'] = 'You have submitted an
 assignment submission for \'{$a->assignment}\'
 
@@ -327,12 +407,17 @@ $string['submissionsummary'] = '{$a->status}. Last modified on {$a->timemodified
 $string['submissionteam'] = 'Group';
 $string['submission'] = 'Submission';
 $string['submitaction'] = 'Submit';
+$string['submitforgrading'] = 'Submit for grading';
 $string['submitassignment_help'] = 'Once this assignment is submitted you will not be able to make any more changes.';
 $string['submitassignment'] = 'Submit assignment';
 $string['submittedearly'] = 'Assignment was submitted {$a} early';
 $string['submittedlate'] = 'Assignment was submitted {$a} late';
 $string['submittedlateshort'] = '{$a} late';
 $string['submitted'] = 'Submitted';
+$string['subplugintype_assignsubmission'] = 'Submission plugin';
+$string['subplugintype_assignsubmission_plural'] = 'Submission plugins';
+$string['subplugintype_assignfeedback'] = 'Feedback plugin';
+$string['subplugintype_assignfeedback_plural'] = 'Feedback plugins';
 $string['teamsubmission'] = 'Students submit in groups';
 $string['teamsubmission_help'] = 'If enabled students will be divided into groups based on the default set of groups or a custom grouping. A group submission will be shared among group members and all members of the group will see each others changes to the submission.';
 $string['teamsubmissiongroupingid'] = 'Grouping for student groups';
@@ -351,6 +436,9 @@ $string['upgradenotimplemented'] = 'Upgrade not implemented in plugin ({$a->type
 $string['userextensiondate'] = 'Extension granted until: {$a}';
 $string['userswhoneedtosubmit'] = 'Users who need to submit: {$a}';
 $string['usergrade'] = 'User grade';
+$string['validmarkingworkflowstates'] = 'Valid marking workflow states';
+$string['viewbatchsetmarkingworkflowstate'] = 'View batch set marking workflow state page.';
+$string['viewbatchmarkingallocation'] = 'View batch set marking allocation page.';
 $string['viewfeedback'] = 'View feedback';
 $string['viewfeedbackforuser'] = 'View feedback for user: {$a}';
 $string['viewfullgradingpage'] = 'Open the full grading page to provide feedback';
@@ -365,7 +453,8 @@ $string['viewfull'] = 'View full';
 $string['viewsummary'] = 'View summary';
 $string['viewsubmissiongradingtable'] = 'View submission grading table.';
 $string['viewrevealidentitiesconfirm'] = 'View reveal student identities confirmation page.';
+$string['workflowfilter'] = 'Workflow filter';
 $string['submissiontypes'] = 'Submission types';
 $string['feedbacktypes'] = 'Feedback types';
 $string['groupsubmissionsettings'] = 'Group submission settings';
-
+$string['submissionlog'] = 'Student: {$a->fullname}, Status: {$a->status}';

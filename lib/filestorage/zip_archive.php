@@ -170,7 +170,7 @@ class zip_archive extends file_archive {
             $name = $localname;
             // This should not happen.
             if (!empty($this->encoding) and $this->encoding !== 'utf-8') {
-                $name = @textlib::convert($name, $this->encoding, 'utf-8');
+                $name = @core_text::convert($name, $this->encoding, 'utf-8');
             }
             $name = str_replace('\\', '/', $name);   // no MS \ separators
             $name = clean_param($name, PARAM_PATH);  // only safe chars
@@ -258,11 +258,14 @@ class zip_archive extends file_archive {
             return false;
         }
 
-        if ($index < 0 or $index >=$this->count()) {
+        // Need to use the ZipArchive's numfiles, as $this->count() relies on this function to count actual files (skipping OSX junk).
+        if ($index < 0 or $index >=$this->za->numFiles) {
             return false;
         }
 
-        $result = $this->za->statIndex($index);
+        // PHP 5.6 introduced encoding guessing logic, we need to fall back
+        // to raw ZIP_FL_ENC_RAW (== 64) to get consistent results as in PHP 5.5.
+        $result = $this->za->statIndex($index, 64);
 
         if ($result === false) {
             return false;
@@ -282,6 +285,11 @@ class zip_archive extends file_archive {
             $info->size         = (int)$result['size'];
         }
 
+        if ($this->is_system_file($info)) {
+            // Don't return system files.
+            return false;
+        }
+
         return $info;
     }
 
@@ -297,15 +305,29 @@ class zip_archive extends file_archive {
 
         $infos = array();
 
-        for ($i=0; $i<$this->count(); $i++) {
-            $info = $this->get_info($i);
-            if ($info === false) {
-                continue;
-            }
-            $infos[$i] = $info;
+        foreach ($this as $info) {
+            // Simply iterating over $this will give us info only for files we're interested in.
+            array_push($infos, $info);
         }
 
         return $infos;
+    }
+
+    public function is_system_file($fileinfo) {
+        if (substr($fileinfo->pathname, 0, 8) === '__MACOSX' or substr($fileinfo->pathname, -9) === '.DS_Store') {
+            // Mac OSX system files.
+            return true;
+        }
+        if (substr($fileinfo->pathname, -9) === 'Thumbs.db') {
+            $stream = $this->za->getStream($fileinfo->pathname);
+            $info = base64_encode(fread($stream, 8));
+            fclose($stream);
+            if ($info === '0M8R4KGxGuE=') {
+                // It's an OLE Compound File - so it's almost certainly a Windows thumbnail cache.
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -314,6 +336,20 @@ class zip_archive extends file_archive {
      * @return int number of files
      */
     public function count() {
+        if (!isset($this->za)) {
+            return false;
+        }
+
+        return count($this->list_files());
+    }
+
+    /**
+     * Returns approximate number of files in archive. This may be a slight
+     * overestimate.
+     *
+     * @return int|bool Estimated number of files, or false if not opened
+     */
+    public function estimated_count() {
         if (!isset($this->za)) {
             return false;
         }
@@ -485,7 +521,17 @@ class zip_archive extends file_archive {
             return false;
         }
 
-        return ($this->pos < $this->count());
+        // Skip over unwanted system files (get_info will return false).
+        while (!$this->get_info($this->pos) && $this->pos < $this->za->numFiles) {
+            $this->next();
+        }
+
+        // No files left - we're at the end.
+        if ($this->pos >= $this->za->numFiles) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -566,8 +612,8 @@ class zip_archive extends file_archive {
                 }
                 if (!$found and !empty($this->encoding) and $this->encoding !== 'utf-8') {
                     // Try the encoding from open().
-                    $newname = @textlib::convert($name, $this->encoding, 'utf-8');
-                    $original  = textlib::convert($newname, 'utf-8', $this->encoding);
+                    $newname = @core_text::convert($name, $this->encoding, 'utf-8');
+                    $original  = core_text::convert($newname, 'utf-8', $this->encoding);
                     if ($original === $name) {
                         $found = true;
                         $name = $newname;
@@ -619,8 +665,8 @@ class zip_archive extends file_archive {
                                 break;
                         }
                     }
-                    $newname = @textlib::convert($name, $encoding, 'utf-8');
-                    $original  = textlib::convert($newname, 'utf-8', $encoding);
+                    $newname = @core_text::convert($name, $encoding, 'utf-8');
+                    $original  = core_text::convert($newname, 'utf-8', $encoding);
 
                     if ($original === $name) {
                         $name = $newname;

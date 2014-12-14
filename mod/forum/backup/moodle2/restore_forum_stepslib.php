@@ -16,10 +16,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package moodlecore
+ * @package    mod_forum
  * @subpackage backup-moodle2
- * @copyright 2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright  2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
@@ -42,6 +42,7 @@ class restore_forum_activity_structure_step extends restore_activity_structure_s
             $paths[] = new restore_path_element('forum_post', '/activity/forum/discussions/discussion/posts/post');
             $paths[] = new restore_path_element('forum_rating', '/activity/forum/discussions/discussion/posts/post/ratings/rating');
             $paths[] = new restore_path_element('forum_subscription', '/activity/forum/subscriptions/subscription');
+            $paths[] = new restore_path_element('forum_digest', '/activity/forum/digests/digest');
             $paths[] = new restore_path_element('forum_read', '/activity/forum/readposts/read');
             $paths[] = new restore_path_element('forum_track', '/activity/forum/trackedprefs/track');
         }
@@ -147,6 +148,18 @@ class restore_forum_activity_structure_step extends restore_activity_structure_s
         $data->userid = $this->get_mappingid('user', $data->userid);
 
         $newitemid = $DB->insert_record('forum_subscriptions', $data);
+    }
+
+    protected function process_forum_digest($data) {
+        global $DB;
+
+        $data = (object)$data;
+        $oldid = $data->id;
+
+        $data->forum = $this->get_new_parentid('forum');
+        $data->userid = $this->get_mappingid('user', $data->userid);
+
+        $newitemid = $DB->insert_record('forum_digests', $data);
     }
 
     protected function process_forum_read($data) {

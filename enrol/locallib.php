@@ -61,6 +61,16 @@ class course_enrolment_manager {
      * @var string
      */
     protected $searchfilter = '';
+    /**
+     * Limits the focus of the manager to users in specified group
+     * @var int
+     */
+    protected $groupfilter = 0;
+    /**
+     * Limits the focus of the manager to users who match status active/inactive
+     * @var int
+     */
+    protected $statusfilter = -1;
 
     /**
      * The total number of users enrolled in the course
@@ -120,15 +130,19 @@ class course_enrolment_manager {
      * @param string $instancefilter
      * @param int $rolefilter If non-zero, filters to users with specified role
      * @param string $searchfilter If non-blank, filters to users with search text
+     * @param int $groupfilter if non-zero, filter users with specified group
+     * @param int $statusfilter if not -1, filter users with active/inactive enrollment.
      */
     public function __construct(moodle_page $moodlepage, $course, $instancefilter = null,
-            $rolefilter = 0, $searchfilter = '') {
+            $rolefilter = 0, $searchfilter = '', $groupfilter = 0, $statusfilter = -1) {
         $this->moodlepage = $moodlepage;
         $this->context = context_course::instance($course->id);
         $this->course = $course;
         $this->instancefilter = $instancefilter;
         $this->rolefilter = $rolefilter;
         $this->searchfilter = $searchfilter;
+        $this->groupfilter = $groupfilter;
+        $this->statusfilter = $statusfilter;
     }
 
     /**
@@ -158,6 +172,7 @@ class course_enrolment_manager {
                            FROM {user} u
                            JOIN {user_enrolments} ue ON (ue.userid = u.id  AND ue.enrolid $instancessql)
                            JOIN {enrol} e ON (e.id = ue.enrolid)
+                      LEFT JOIN {groups_members} gm ON u.id = gm.userid
                           WHERE $filtersql";
             $this->totalusers = (int)$DB->count_records_sql($sqltotal, $params);
         }
@@ -176,7 +191,7 @@ class course_enrolment_manager {
     public function get_total_other_users() {
         global $DB;
         if ($this->totalotherusers === null) {
-            list($ctxcondition, $params) = $DB->get_in_or_equal(get_parent_contexts($this->context, true), SQL_PARAMS_NAMED, 'ctx');
+            list($ctxcondition, $params) = $DB->get_in_or_equal($this->context->get_parent_context_ids(true), SQL_PARAMS_NAMED, 'ctx');
             $params['courseid'] = $this->course->id;
             $sql = "SELECT COUNT(DISTINCT u.id)
                       FROM {role_assignments} ra
@@ -227,6 +242,7 @@ class course_enrolment_manager {
                       JOIN {user_enrolments} ue ON (ue.userid = u.id  AND ue.enrolid $instancessql)
                       JOIN {enrol} e ON (e.id = ue.enrolid)
                  LEFT JOIN {user_lastaccess} ul ON (ul.courseid = e.courseid AND ul.userid = u.id)
+                 LEFT JOIN {groups_members} gm ON u.id = gm.userid
                      WHERE $filtersql";
             if ($sort === 'firstname') {
                 $sql .= " ORDER BY u.firstname $direction, u.lastname $direction";
@@ -270,6 +286,31 @@ class course_enrolment_manager {
             $params['roleid'] = $this->rolefilter;
         }
 
+        // Group condition.
+        if ($this->groupfilter) {
+            $sql .= " AND gm.groupid = :groupid";
+            $params['groupid'] = $this->groupfilter;
+        }
+
+        // Status condition.
+        if ($this->statusfilter === ENROL_USER_ACTIVE) {
+            $sql .= " AND ue.status = :active AND e.status = :enabled AND ue.timestart < :now1
+                    AND (ue.timeend = 0 OR ue.timeend > :now2)";
+            $now = round(time(), -2); // rounding helps caching in DB
+            $params += array('enabled' => ENROL_INSTANCE_ENABLED,
+                             'active' => ENROL_USER_ACTIVE,
+                             'now1' => $now,
+                             'now2' => $now);
+        } else if ($this->statusfilter === ENROL_USER_SUSPENDED) {
+            $sql .= " AND (ue.status = :inactive OR e.status = :disabled OR ue.timestart > :now1
+                    OR (ue.timeend <> 0 AND ue.timeend < :now2))";
+            $now = round(time(), -2); // rounding helps caching in DB
+            $params += array('disabled' => ENROL_INSTANCE_DISABLED,
+                             'inactive' => ENROL_USER_SUSPENDED,
+                             'now1' => $now,
+                             'now2' => $now);
+        }
+
         return array($sql, $params);
     }
 
@@ -293,7 +334,7 @@ class course_enrolment_manager {
         }
         $key = md5("$sort-$direction-$page-$perpage");
         if (!array_key_exists($key, $this->otherusers)) {
-            list($ctxcondition, $params) = $DB->get_in_or_equal(get_parent_contexts($this->context, true), SQL_PARAMS_NAMED, 'ctx');
+            list($ctxcondition, $params) = $DB->get_in_or_equal($this->context->get_parent_context_ids(true), SQL_PARAMS_NAMED, 'ctx');
             $params['courseid'] = $this->course->id;
             $params['cid'] = $this->course->id;
             $sql = "SELECT ra.id as raid, ra.contextid, ra.component, ctx.contextlevel, ra.roleid, u.*, ue.lastseen
@@ -852,6 +893,12 @@ class course_enrolment_manager {
         if ($this->searchfilter !== '') {
             $args['search'] = $this->searchfilter;
         }
+        if (!empty($this->groupfilter)) {
+            $args['group'] = $this->groupfilter;
+        }
+        if ($this->statusfilter !== -1) {
+            $args['status'] = $this->statusfilter;
+        }
         return $args;
     }
 
@@ -1052,18 +1099,25 @@ class course_enrolment_manager {
      */
     private function prepare_user_for_display($user, $extrafields, $now) {
         $details = array(
-            'userid'    => $user->id,
-            'courseid'  => $this->get_course()->id,
-            'picture'   => new user_picture($user),
-            'firstname' => fullname($user, has_capability('moodle/site:viewfullnames', $this->get_context())),
-            'lastseen'  => get_string('never'),
+            'userid'           => $user->id,
+            'courseid'         => $this->get_course()->id,
+            'picture'          => new user_picture($user),
+            'firstname'        => fullname($user, has_capability('moodle/site:viewfullnames', $this->get_context())),
+            'lastseen'         => get_string('never'),
+            'lastcourseaccess' => get_string('never'),
         );
         foreach ($extrafields as $field) {
             $details[$field] = $user->{$field};
         }
 
+        // Last time user has accessed the site.
         if ($user->lastaccess) {
             $details['lastseen'] = format_time($now - $user->lastaccess);
+        }
+
+        // Last time user has accessed the course.
+        if ($user->lastseen) {
+            $details['lastcourseaccess'] = format_time($now - $user->lastseen);
         }
         return $details;
     }
@@ -1213,15 +1267,18 @@ class enrol_user_button extends single_button {
      * @param string|array $modules One or more modules to require
      * @param string $function The JS function to call
      * @param array $arguments An array of arguments to pass to the function
-     * @param string $galleryversion The YUI gallery version of any modules required
+     * @param string $galleryversion Deprecated: The gallery version to use
      * @param bool $ondomready If true the call is postponed until the DOM is finished loading
      */
-    public function require_yui_module($modules, $function, array $arguments = null, $galleryversion = '2010.04.08-12-35', $ondomready = false) {
+    public function require_yui_module($modules, $function, array $arguments = null, $galleryversion = null, $ondomready = false) {
+        if ($galleryversion != null) {
+            debugging('The galleryversion parameter to yui_module has been deprecated since Moodle 2.3.', DEBUG_DEVELOPER);
+        }
+
         $js = new stdClass;
         $js->modules = (array)$modules;
         $js->function = $function;
         $js->arguments = $arguments;
-        $js->galleryversion = $galleryversion;
         $js->ondomready = $ondomready;
         $this->jsyuimodules[] = $js;
     }
@@ -1265,7 +1322,7 @@ class enrol_user_button extends single_button {
      */
     public function initialise_js(moodle_page $page) {
         foreach ($this->jsyuimodules as $js) {
-            $page->requires->yui_module($js->modules, $js->function, $js->arguments, $js->galleryversion, $js->ondomready);
+            $page->requires->yui_module($js->modules, $js->function, $js->arguments, null, $js->ondomready);
         }
         foreach ($this->jsinitcalls as $js) {
             $page->requires->js_init_call($js->function, $js->extraarguments, $js->ondomready, $js->module);

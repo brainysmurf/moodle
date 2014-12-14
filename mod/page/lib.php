@@ -16,8 +16,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    mod
- * @subpackage page
+ * @package mod_page
  * @copyright  2009 Petr Skoda (http://skodak.org)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -64,7 +63,13 @@ function page_reset_userdata($data) {
 }
 
 /**
- * List of view style log actions
+ * List the actions that correspond to a view of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = 'r' and edulevel = LEVEL_PARTICIPATING will
+ *       be considered as view action.
+ *
  * @return array
  */
 function page_get_view_actions() {
@@ -72,7 +77,13 @@ function page_get_view_actions() {
 }
 
 /**
- * List of update style log actions
+ * List the actions that correspond to a post of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = ('c' || 'u' || 'd') and edulevel = LEVEL_PARTICIPATING
+ *       will be considered as post action.
+ *
  * @return array
  */
 function page_get_post_actions() {
@@ -178,57 +189,6 @@ function page_delete_instance($id) {
     $DB->delete_records('page', array('id'=>$page->id));
 
     return true;
-}
-
-/**
- * Return use outline
- * @param object $course
- * @param object $user
- * @param object $mod
- * @param object $page
- * @return object|null
- */
-function page_user_outline($course, $user, $mod, $page) {
-    global $DB;
-
-    if ($logs = $DB->get_records('log', array('userid'=>$user->id, 'module'=>'page',
-                                              'action'=>'view', 'info'=>$page->id), 'time ASC')) {
-
-        $numviews = count($logs);
-        $lastlog = array_pop($logs);
-
-        $result = new stdClass();
-        $result->info = get_string('numviews', '', $numviews);
-        $result->time = $lastlog->time;
-
-        return $result;
-    }
-    return NULL;
-}
-
-/**
- * Return use complete
- * @param object $course
- * @param object $user
- * @param object $mod
- * @param object $page
- */
-function page_user_complete($course, $user, $mod, $page) {
-    global $CFG, $DB;
-
-    if ($logs = $DB->get_records('log', array('userid'=>$user->id, 'module'=>'page',
-                                              'action'=>'view', 'info'=>$page->id), 'time ASC')) {
-        $numviews = count($logs);
-        $lastlog = array_pop($logs);
-
-        $strmostrecently = get_string('mostrecently');
-        $strnumviews = get_string('numviews', '', $numviews);
-
-        echo "$strnumviews - $strmostrecently ".userdate($lastlog->time);
-
-    } else {
-        print_string('neverseen', 'page');
-    }
 }
 
 /**
@@ -407,7 +367,7 @@ function page_pluginfile($course, $cm, $context, $filearea, $args, $forcedownloa
         }
 
         // finally send the file
-        send_stored_file($file, 86400, 0, $forcedownload, $options);
+        send_stored_file($file, null, 0, $forcedownload, $options);
     }
 }
 

@@ -113,47 +113,6 @@ function book_delete_instance($id) {
 }
 
 /**
- * Return use outline
- *
- * @param stdClass $course
- * @param stdClass $user
- * @param stdClass $mod
- * @param object $book
- * @return object|null
- */
-function book_user_outline($course, $user, $mod, $book) {
-    global $DB;
-
-    if ($logs = $DB->get_records('log', array('userid'=>$user->id, 'module'=>'book',
-                                              'action'=>'view', 'info'=>$book->id), 'time ASC')) {
-
-        $numviews = count($logs);
-        $lastlog = array_pop($logs);
-
-        $result = new stdClass();
-        $result->info = get_string('numviews', '', $numviews);
-        $result->time = $lastlog->time;
-
-        return $result;
-    }
-    return null;
-}
-
-/**
- * Print a detailed representation of what a  user has done with
- * a given particular instance of this module, for user activity reports.
- *
- * @param stdClass $course
- * @param stdClass $user
- * @param stdClass $mod
- * @param stdClass $book
- * @return bool
- */
-function book_user_complete($course, $user, $mod, $book) {
-    return true;
-}
-
-/**
  * Given a course and a time, this module should find recent activity
  * that has occurred in book activities and print it out.
  *
@@ -222,6 +181,11 @@ function book_scale_used_anywhere($scaleid) {
 
 /**
  * Return read actions.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = 'r' and edulevel = LEVEL_PARTICIPATING will
+ *       be considered as view action.
+ *
  * @return array
  */
 function book_get_view_actions() {
@@ -229,7 +193,7 @@ function book_get_view_actions() {
 
     $return = array('view', 'view all');
 
-    $plugins = get_plugin_list('booktool');
+    $plugins = core_component::get_plugin_list('booktool');
     foreach ($plugins as $plugin => $dir) {
         if (file_exists("$dir/lib.php")) {
             require_once("$dir/lib.php");
@@ -247,6 +211,11 @@ function book_get_view_actions() {
 
 /**
  * Return write actions.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = ('c' || 'u' || 'd') and edulevel = LEVEL_PARTICIPATING
+ *       will be considered as post action.
+ *
  * @return array
  */
 function book_get_post_actions() {
@@ -254,7 +223,7 @@ function book_get_post_actions() {
 
     $return = array('update');
 
-    $plugins = get_plugin_list('booktool');
+    $plugins = core_component::get_plugin_list('booktool');
     foreach ($plugins as $plugin => $dir) {
         if (file_exists("$dir/lib.php")) {
             require_once("$dir/lib.php");
@@ -303,7 +272,7 @@ function book_supports($feature) {
 function book_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $booknode) {
     global $USER, $PAGE;
 
-    $plugins = get_plugin_list('booktool');
+    $plugins = core_component::get_plugin_list('booktool');
     foreach ($plugins as $plugin => $dir) {
         if (file_exists("$dir/lib.php")) {
             require_once("$dir/lib.php");
@@ -405,7 +374,7 @@ function book_get_file_info($browser, $areas, $course, $cm, $context, $filearea,
  * @return bool false if file not found, does not return if found - just send the file
  */
 function book_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
-    global $DB;
+    global $CFG, $DB;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
         return false;
@@ -442,8 +411,14 @@ function book_pluginfile($course, $cm, $context, $filearea, $args, $forcedownloa
         return false;
     }
 
+    // Nasty hack because we do not have file revisions in book yet.
+    $lifetime = $CFG->filelifetime;
+    if ($lifetime > 60*10) {
+        $lifetime = 60*10;
+    }
+
     // finally send the file
-    send_stored_file($file, 360, 0, $forcedownload, $options);
+    send_stored_file($file, $lifetime, 0, $forcedownload, $options);
 }
 
 /**

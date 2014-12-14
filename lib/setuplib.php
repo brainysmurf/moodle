@@ -51,19 +51,6 @@ define('MEMORY_EXTRA', -3);
 /** Extremely large memory limit - not recommended for standard scripts */
 define('MEMORY_HUGE', -4);
 
-/**
- * Software maturity levels used by the core and plugins
- */
-define('MATURITY_ALPHA',    50);    // internals can be tested using white box techniques
-define('MATURITY_BETA',     100);   // feature complete, ready for preview and testing
-define('MATURITY_RC',       150);   // tested, will be released unless there are fatal bugs
-define('MATURITY_STABLE',   200);   // ready for production deployment
-
-/**
- * Special value that can be used in $plugin->dependencies in version.php files.
- */
-define('ANY_VERSION', 'any');
-
 
 /**
  * Simple class. It is usually used instead of stdClass because it looks
@@ -215,10 +202,10 @@ class required_capability_exception extends moodle_exception {
         $capabilityname = get_capability_string($capability);
         if ($context->contextlevel == CONTEXT_MODULE and preg_match('/:view$/', $capability)) {
             // we can not go to mod/xx/view.php because we most probably do not have cap to view it, let's go to course instead
-            $paranetcontext = context::instance_by_id(get_parent_contextid($context));
-            $link = get_context_url($paranetcontext);
+            $parentcontext = $context->get_parent_context();
+            $link = $parentcontext->get_url();
         } else {
-            $link = get_context_url($context);
+            $link = $context->get_url();
         }
         parent::__construct($errormessage, $stringfile, $link, $capabilityname);
     }
@@ -529,8 +516,7 @@ function get_exception_info($ex) {
     // Remove some absolute paths from message and debugging info.
     $searches = array();
     $replaces = array();
-    $cfgnames = array('tempdir', 'cachedir', 'themedir',
-        'langmenucachefile', 'langcacheroot', 'dataroot', 'dirroot');
+    $cfgnames = array('tempdir', 'cachedir', 'localcachedir', 'themedir', 'dataroot', 'dirroot');
     foreach ($cfgnames as $cfgname) {
         if (property_exists($CFG, $cfgname)) {
             $searches[] = $CFG->$cfgname;
@@ -643,10 +629,16 @@ function get_docs_url($path = null) {
         // that will ensure people end up at the latest version of the docs.
         $branch = '.';
     }
-    if (!empty($CFG->docroot)) {
-        return $CFG->docroot . '/' . $branch . '/' . current_language() . '/' . $path;
+    if (empty($CFG->doclang)) {
+        $lang = current_language();
     } else {
-        return 'http://docs.moodle.org/'. $branch . '/' . current_language() . '/' . $path;
+        $lang = $CFG->doclang;
+    }
+    $end = '/' . $branch . '/' . $lang . '/' . $path;
+    if (empty($CFG->docroot)) {
+        return 'http://docs.moodle.org'. $end;
+    } else {
+        return $CFG->docroot . $end ;
     }
 }
 
@@ -665,7 +657,7 @@ function format_backtrace($callers, $plaintext = false) {
         return '';
     }
 
-    $from = $plaintext ? '' : '<ul style="text-align: left">';
+    $from = $plaintext ? '' : '<ul style="text-align: left" data-rel="backtrace">';
     foreach ($callers as $caller) {
         if (!isset($caller['line'])) {
             $caller['line'] = '?'; // probably call_user_func()
@@ -718,37 +710,34 @@ function ini_get_bool($ini_get_arg) {
 function setup_validate_php_configuration() {
    // this must be very fast - no slow checks here!!!
 
-   if (ini_get_bool('register_globals')) {
-       print_error('globalswarning', 'admin');
-   }
    if (ini_get_bool('session.auto_start')) {
        print_error('sessionautostartwarning', 'admin');
-   }
-   if (ini_get_bool('magic_quotes_runtime')) {
-       print_error('fatalmagicquotesruntime', 'admin');
    }
 }
 
 /**
- * Initialise global $CFG variable
- * @return void
+ * Initialise global $CFG variable.
+ * @private to be used only from lib/setup.php
  */
 function initialise_cfg() {
     global $CFG, $DB;
 
+    if (!$DB) {
+        // This should not happen.
+        return;
+    }
+
     try {
-        if ($DB) {
-            $localcfg = get_config('core');
-            foreach ($localcfg as $name => $value) {
-                if (property_exists($CFG, $name)) {
-                    // config.php settings always take precedence
-                    continue;
-                }
-                $CFG->{$name} = $value;
-            }
-        }
+        $localcfg = get_config('core');
     } catch (dml_exception $e) {
-        // most probably empty db, going to install soon
+        // Most probably empty db, going to install soon.
+        return;
+    }
+
+    foreach ($localcfg as $name => $value) {
+        // Note that get_config() keeps forced settings
+        // and normalises values to string if possible.
+        $CFG->{$name} = $value;
     }
 }
 
@@ -803,11 +792,6 @@ function initialise_fullme() {
                 throw new moodle_exception('requirecorrectaccess', 'error', '', null,
                     'You called ' . $calledurl .', you should have called ' . $correcturl);
             }
-
-            header('Expires: Sun, 01 Jan 2014 00:00:00 GMT');
-            header('Cache-Control: no-store, no-cache, must-revalidate');
-            header('Cache-Control: post-check=0, pre-check=0', FALSE);
-            header('Pragma: no-cache');
             redirect($CFG->wwwroot, get_string('wwwrootmismatch', 'error', $CFG->wwwroot), 3);
         }
     }
@@ -899,11 +883,19 @@ function setup_get_remote_url() {
         //IIS - needs a lot of tweaking to make it work
         $rurl['fullpath'] = $_SERVER['SCRIPT_NAME'];
 
-        // NOTE: ignore PATH_INFO because it is incorrectly encoded using 8bit filesystem legacy encoding in IIS
-        //       since 2.0 we rely on iis rewrite extenssion like Helicon ISAPI_rewrite
-        //       example rule: RewriteRule ^([^\?]+?\.php)(\/.+)$ $1\?file=$2 [QSA]
+        // NOTE: we should ignore PATH_INFO because it is incorrectly encoded using 8bit filesystem legacy encoding in IIS.
+        //       Since 2.0, we rely on IIS rewrite extensions like Helicon ISAPI_rewrite
+        //         example rule: RewriteRule ^([^\?]+?\.php)(\/.+)$ $1\?file=$2 [QSA]
+        //       OR
+        //       we rely on a proper IIS 6.0+ configuration: the 'FastCGIUtf8ServerVariables' registry key.
+        if (isset($_SERVER['PATH_INFO']) and $_SERVER['PATH_INFO'] !== '') {
+            // Check that PATH_INFO works == must not contain the script name.
+            if (strpos($_SERVER['PATH_INFO'], $_SERVER['SCRIPT_NAME']) === false) {
+                $rurl['fullpath'] .= clean_param(urldecode($_SERVER['PATH_INFO']), PARAM_PATH);
+            }
+        }
 
-        if ($_SERVER['QUERY_STRING'] != '') {
+        if (isset($_SERVER['QUERY_STRING']) and $_SERVER['QUERY_STRING'] !== '') {
             $rurl['fullpath'] .= '?'.$_SERVER['QUERY_STRING'];
         }
         $_SERVER['REQUEST_URI'] = $rurl['fullpath']; // extra IIS compatibility
@@ -1009,11 +1001,6 @@ function workaround_max_input_vars() {
     foreach ($chunks as $chunk) {
         $values = array();
         parse_str($chunk, $values);
-
-        if (ini_get_bool('magic_quotes_gpc')) {
-            // Use the same logic as lib/setup.php to work around deprecated magic quotes.
-            $values = array_map('stripslashes_deep', $values);
-        }
 
         merge_query_params($_POST, $values);
         merge_query_params($_REQUEST, $values);
@@ -1136,7 +1123,14 @@ function raise_memory_limit($newlimit) {
         }
 
     } else if ($newlimit == MEMORY_HUGE) {
+        // MEMORY_HUGE uses 2G or MEMORY_EXTRA, whichever is bigger.
         $newlimit = get_real_size('2G');
+        if (!empty($CFG->extramemorylimit)) {
+            $extra = get_real_size($CFG->extramemorylimit);
+            if ($extra > $newlimit) {
+                $newlimit = $extra;
+            }
+        }
 
     } else {
         $newlimit = get_real_size($newlimit);
@@ -1275,11 +1269,11 @@ function disable_output_buffering() {
  */
 function redirect_if_major_upgrade_required() {
     global $CFG;
-    $lastmajordbchanges = 2013041800.00;
+    $lastmajordbchanges = 2014040800.00;
     if (empty($CFG->version) or (float)$CFG->version < $lastmajordbchanges or
             during_initial_install() or !empty($CFG->adminsetuppending)) {
         try {
-            @session_get_instance()->terminate_current();
+            @\core\session\manager::terminate_current();
         } catch (Exception $e) {
             // Ignore any errors, redirect to upgrade anyway.
         }
@@ -1334,7 +1328,7 @@ function upgrade_ensure_not_running($warningonly = false) {
 function check_dir_exists($dir, $create = true, $recursive = true) {
     global $CFG;
 
-    umask(0000); // just in case some evil code changed it
+    umask($CFG->umaskpermissions);
 
     if (is_dir($dir)) {
         return true;
@@ -1366,7 +1360,7 @@ function make_writable_directory($dir, $exceptiononerror = true) {
         }
     }
 
-    umask(0000); // just in case some evil code changed it
+    umask($CFG->umaskpermissions);
 
     if (!file_exists($dir)) {
         if (!mkdir($dir, $CFG->directorypermissions, true)) {
@@ -1402,11 +1396,13 @@ function make_writable_directory($dir, $exceptiononerror = true) {
  * @param string $dir  the full path of the directory to be protected
  */
 function protect_directory($dir) {
+    global $CFG;
     // Make sure a .htaccess file is here, JUST IN CASE the files area is in the open and .htaccess is supported
     if (!file_exists("$dir/.htaccess")) {
         if ($handle = fopen("$dir/.htaccess", 'w')) {   // For safety
             @fwrite($handle, "deny from all\r\nAllowOverride None\r\nNote: this file is broken intentionally, we do not want anybody to undo it in subdirectory!\r\n");
             @fclose($handle);
+            @chmod("$dir/.htaccess", $CFG->filepermissions);
         }
     }
 }
@@ -1426,7 +1422,10 @@ function make_upload_directory($directory, $exceptiononerror = true) {
         debugging('Use make_temp_directory() for creation of temporary directory and $CFG->tempdir to get the location.');
 
     } else if (strpos($directory, 'cache/') === 0 or $directory === 'cache') {
-        debugging('Use make_cache_directory() for creation of chache directory and $CFG->cachedir to get the location.');
+        debugging('Use make_cache_directory() for creation of cache directory and $CFG->cachedir to get the location.');
+
+    } else if (strpos($directory, 'localcache/') === 0 or $directory === 'localcache') {
+        debugging('Use make_localcache_directory() for creation of local cache directory and $CFG->localcachedir to get the location.');
     }
 
     protect_directory($CFG->dataroot);
@@ -1455,6 +1454,8 @@ function make_temp_directory($directory, $exceptiononerror = true) {
 /**
  * Create a directory under cachedir and make sure it is writable.
  *
+ * Note: this cache directory is shared by all cluster nodes.
+ *
  * @param string $directory  the full path of the directory to be created under $CFG->cachedir
  * @param bool $exceptiononerror throw exception if error encountered
  * @return string|false Returns full path to directory if successful, false if not; may throw exception
@@ -1468,6 +1469,58 @@ function make_cache_directory($directory, $exceptiononerror = true) {
         protect_directory($CFG->dataroot);
     }
     return make_writable_directory("$CFG->cachedir/$directory", $exceptiononerror);
+}
+
+/**
+ * Create a directory under localcachedir and make sure it is writable.
+ * The files in this directory MUST NOT change, use revisions or content hashes to
+ * work around this limitation - this means you can only add new files here.
+ *
+ * The content of this directory gets purged automatically on all cluster nodes
+ * after calling purge_all_caches() before new data is written to this directory.
+ *
+ * Note: this local cache directory does not need to be shared by cluster nodes.
+ *
+ * @param string $directory the relative path of the directory to be created under $CFG->localcachedir
+ * @param bool $exceptiononerror throw exception if error encountered
+ * @return string|false Returns full path to directory if successful, false if not; may throw exception
+ */
+function make_localcache_directory($directory, $exceptiononerror = true) {
+    global $CFG;
+
+    make_writable_directory($CFG->localcachedir, $exceptiononerror);
+
+    if ($CFG->localcachedir !== "$CFG->dataroot/localcache") {
+        protect_directory($CFG->localcachedir);
+    } else {
+        protect_directory($CFG->dataroot);
+    }
+
+    if (!isset($CFG->localcachedirpurged)) {
+        $CFG->localcachedirpurged = 0;
+    }
+    $timestampfile = "$CFG->localcachedir/.lastpurged";
+
+    if (!file_exists($timestampfile)) {
+        touch($timestampfile);
+        @chmod($timestampfile, $CFG->filepermissions);
+
+    } else if (filemtime($timestampfile) <  $CFG->localcachedirpurged) {
+        // This means our local cached dir was not purged yet.
+        remove_dir($CFG->localcachedir, true);
+        if ($CFG->localcachedir !== "$CFG->dataroot/localcache") {
+            protect_directory($CFG->localcachedir);
+        }
+        touch($timestampfile);
+        @chmod($timestampfile, $CFG->filepermissions);
+        clearstatcache();
+    }
+
+    if ($directory === '') {
+        return $CFG->localcachedir;
+    }
+
+    return make_writable_directory("$CFG->localcachedir/$directory", $exceptiononerror);
 }
 
 /**
@@ -1617,8 +1670,8 @@ class bootstrap_renderer {
     public static function early_error_content($message, $moreinfourl, $link, $backtrace, $debuginfo = null) {
         global $CFG;
 
-        $content = '<div style="font-family:Tahoma,sans-serif;margin-top: 6em; margin-left:auto; margin-right:auto; color:#4D63A3; text-align:center; font-size:large; border-width:5px;
-border-color:black; background-color:#eee; border-style:solid; border-color:#999; border-radius: 20px; border-collapse: collapse;
+        $content = '<div style="margin-top: 6em; margin-left:auto; margin-right:auto; color:#990000; text-align:center; font-size:large; border-width:1px;
+border-color:black; background-color:#ffffee; border-style:solid; border-radius: 20px; border-collapse: collapse;
 width: 80%; -moz-border-radius: 20px; padding: 15px">
 ' . $message . '
 </div>';

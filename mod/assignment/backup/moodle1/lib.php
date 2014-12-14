@@ -19,8 +19,7 @@
  * Provides support for the conversion of moodle1 backup to the moodle2 format
  * Based off of a template @ http://docs.moodle.org/dev/Backup_1.9_conversion_for_developers
  *
- * @package    mod
- * @subpackage assignment
+ * @package    mod_assignment
  * @copyright  2011 Aparup Banerjee <aparup@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -181,7 +180,7 @@ class moodle1_mod_assignment_handler extends moodle1_mod_handler {
 
         if (is_null($this->subpluginhandlers)) {
             $this->subpluginhandlers = array();
-            $subplugins = get_plugin_list('assignment');
+            $subplugins = core_component::get_plugin_list('assignment');
             foreach ($subplugins as $name => $dir) {
                 $handlerfile  = $dir.'/backup/moodle1/lib.php';
                 $handlerclass = "moodle1_mod_assignment_{$name}_subplugin_handler";

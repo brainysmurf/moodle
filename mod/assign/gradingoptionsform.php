@@ -49,17 +49,32 @@ class mod_assign_grading_options_form extends moodleform {
         $options = array(-1=>get_string('all'), 10=>'10', 20=>'20', 50=>'50', 100=>'100');
         $mform->addElement('select', 'perpage', get_string('assignmentsperpage', 'assign'), $options, $dirtyclass);
         $options = array('' => get_string('filternone', 'assign'),
+                         ASSIGN_FILTER_NOT_SUBMITTED => get_string('filternotsubmitted', 'assign'),
                          ASSIGN_FILTER_SUBMITTED => get_string('filtersubmitted', 'assign'),
                          ASSIGN_FILTER_REQUIRE_GRADING => get_string('filterrequiregrading', 'assign'));
         if ($instance['submissionsenabled']) {
             $mform->addElement('select', 'filter', get_string('filter', 'assign'), $options, $dirtyclass);
         }
-
+        if (!empty($instance['markingallocationopt'])) {
+            $markingfilter = get_string('markerfilter', 'assign');
+            $mform->addElement('select', 'markerfilter', $markingfilter, $instance['markingallocationopt'], $dirtyclass);
+        }
+        if (!empty($instance['markingworkflowopt'])) {
+            $workflowfilter = get_string('workflowfilter', 'assign');
+            $mform->addElement('select', 'workflowfilter', $workflowfilter, $instance['markingworkflowopt'], $dirtyclass);
+        }
         // Quickgrading.
         if ($instance['showquickgrading']) {
             $mform->addElement('checkbox', 'quickgrading', get_string('quickgrading', 'assign'), '', $dirtyclass);
             $mform->addHelpButton('quickgrading', 'quickgrading', 'assign');
             $mform->setDefault('quickgrading', $instance['quickgrading']);
+        }
+
+        // Show active/suspended user option.
+        if ($instance['showonlyactiveenrolopt']) {
+            $mform->addElement('checkbox', 'showonlyactiveenrol', get_string('showonlyactiveenrol', 'grades'), '', $dirtyclass);
+            $mform->addHelpButton('showonlyactiveenrol', 'showonlyactiveenrol', 'grades');
+            $mform->setDefault('showonlyactiveenrol', $instance['showonlyactiveenrol']);
         }
 
         // Hidden params.

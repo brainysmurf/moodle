@@ -36,51 +36,82 @@ require_once($CFG->dirroot . '/mod/quiz/editlib.php');
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_quiz_editlib_testcase extends basic_testcase {
-    public function test_quiz_move_question_up() {
-        $this->assertEquals(quiz_move_question_up('0', 123), '0');
-        $this->assertEquals(quiz_move_question_up('1,2,0', 1), '1,2,0');
-        $this->assertEquals(quiz_move_question_up('1,2,0', 0), '1,2,0');
-        $this->assertEquals(quiz_move_question_up('1,2,0', 2), '2,1,0');
-        $this->assertEquals(quiz_move_question_up('1,2,0,3,4,0', 3), '1,2,3,0,4,0');
-        $this->assertEquals(quiz_move_question_up('1,2,3,0,4,0', 4), '1,2,3,4,0,0');
+class mod_quiz_editlib_testcase extends advanced_testcase {
+    public function test_quiz_question_tostring() {
+        $question = new stdClass();
+        $question->qtype = 'multichoice';
+        $question->name = 'The question name';
+        $question->questiontext = '<p>What sort of <b>inequality</b> is x &lt; y<img alt="?" src="..."></p>';
+        $question->questiontextformat = FORMAT_HTML;
+
+        $summary = quiz_question_tostring($question);
+        $this->assertEquals('<span class="questionname">The question name</span>' .
+                '<span class="questiontext">What sort of INEQUALITY is x &lt; y[?]</span>', $summary);
     }
 
-    public function test_quiz_move_question_down() {
-        $this->assertEquals(quiz_move_question_down('0', 123), '0');
-        $this->assertEquals(quiz_move_question_down('1,2,0', 2), '1,2,0');
-        $this->assertEquals(quiz_move_question_down('1,2,0', 0), '1,2,0');
-        $this->assertEquals(quiz_move_question_down('1,2,0', 1), '2,1,0');
-        $this->assertEquals(quiz_move_question_down('1,2,0,3,4,0', 2), '1,0,2,3,4,0');
-        $this->assertEquals(quiz_move_question_down('1,0,2,3,0,4,0', 1), '0,1,2,3,0,4,0');
-    }
+    /**
+     * Test removing slots from a quiz.
+     */
+    public function test_quiz_remove_slot() {
+        global $SITE, $DB;
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
 
-    public function test_quiz_delete_empty_page() {
-        $this->assertEquals(quiz_delete_empty_page('0', 0), '0');
-        $this->assertEquals(quiz_delete_empty_page('1,2,0', 2), '1,2,0');
-        $this->assertEquals(quiz_delete_empty_page('0,1,2,0', -1), '1,2,0');
-        $this->assertEquals(quiz_delete_empty_page('0,1,2,0', 0), '0,1,2,0');
-        $this->assertEquals(quiz_delete_empty_page('1,2,0', 3), '1,2,0');
-        $this->assertEquals(quiz_delete_empty_page('1,2,0', -1), '1,2,0');
-        $this->assertEquals(quiz_delete_empty_page('1,2,0,0', 2), '1,2,0');
-        $this->assertEquals(quiz_delete_empty_page('1,2,0,0', 1), '1,2,0,0');
-        $this->assertEquals(quiz_delete_empty_page('1,2,0,0,3,4,0', 2), '1,2,0,3,4,0');
-        $this->assertEquals(quiz_delete_empty_page('0,0,1,2,0', 0), '0,1,2,0');
-    }
+        // Setup a quiz with 1 standard and 1 random question.
+        $quizgenerator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
+        $quiz = $quizgenerator->create_instance(array('course' => $SITE->id, 'questionsperpage' => 3, 'grade' => 100.0));
 
-    public function test_quiz_add_page_break_after() {
-        $this->assertEquals(quiz_add_page_break_after('0', 1), '0');
-        $this->assertEquals(quiz_add_page_break_after('1,2,0', 1), '1,0,2,0');
-        $this->assertEquals(quiz_add_page_break_after('1,2,0', 2), '1,2,0,0');
-        $this->assertEquals(quiz_add_page_break_after('1,2,0', 0), '1,2,0');
-    }
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $cat = $questiongenerator->create_question_category();
+        $standardq = $questiongenerator->create_question('shortanswer', null, array('category' => $cat->id));
 
-    public function test_quiz_add_page_break_at() {
-        $this->assertEquals(quiz_add_page_break_at('0', 0), '0,0');
-        $this->assertEquals(quiz_add_page_break_at('1,2,0', 0), '0,1,2,0');
-        $this->assertEquals(quiz_add_page_break_at('1,2,0', 1), '1,0,2,0');
-        $this->assertEquals(quiz_add_page_break_at('1,2,0', 2), '1,2,0,0');
-        $this->assertEquals(quiz_add_page_break_at('1,2,0', 3), '1,2,0');
+        quiz_add_quiz_question($standardq->id, $quiz);
+        quiz_add_random_questions($quiz, 0, $cat->id, 1, false);
+
+        // Get the random question.
+        $randomq = $DB->get_record('question', array('qtype' => 'random'));
+
+        $slotssql = "SELECT qs.*, q.qtype AS qtype
+                       FROM {quiz_slots} qs
+                       JOIN {question} q ON qs.questionid = q.id
+                      WHERE qs.quizid = ?
+                   ORDER BY qs.slot";
+        $slots = $DB->get_records_sql($slotssql, array($quiz->id));
+
+        // Check that the setup looks right.
+        $this->assertEquals(2, count($slots));
+        $slot = array_shift($slots);
+        $this->assertEquals($standardq->id, $slot->questionid);
+        $slot = array_shift($slots);
+        $this->assertEquals($randomq->id, $slot->questionid);
+        $this->assertEquals(2, $slot->slot);
+
+        // Remove the standard question.
+        quiz_remove_slot($quiz, 1);
+
+        $slots = $DB->get_records_sql($slotssql, array($quiz->id));
+
+        // Check the new ordering, and that the slot number was updated.
+        $this->assertEquals(1, count($slots));
+        $slot = array_shift($slots);
+        $this->assertEquals($randomq->id, $slot->questionid);
+        $this->assertEquals(1, $slot->slot);
+
+        // Check the the standard question was not deleted.
+        $count = $DB->count_records('question', array('id' => $standardq->id));
+        $this->assertEquals(1, $count);
+
+        // Remove the random question.
+        quiz_remove_slot($quiz, 1);
+
+        $slots = $DB->get_records_sql($slotssql, array($quiz->id));
+
+        // Check that new ordering.
+        $this->assertEquals(0, count($slots));
+
+        // Check that the random question was deleted.
+        $count = $DB->count_records('question', array('id' => $randomq->id));
+        $this->assertEquals(0, $count);
     }
 
     public function test_quiz_question_tostring() {

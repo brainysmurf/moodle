@@ -31,8 +31,15 @@ class enrol_database_testcase extends advanced_testcase {
     protected static $users = array();
     protected static $roles = array();
 
+    /** @var string Original error log */
+    protected $oldlog;
+
     protected function init_enrol_database() {
         global $DB, $CFG;
+
+        // Discard error logs from AdoDB.
+        $this->oldlog = ini_get('error_log');
+        ini_set('error_log', "$CFG->dataroot/testlog.log");
 
         $dbman = $DB->get_manager();
 
@@ -47,13 +54,9 @@ class enrol_database_testcase extends advanced_testcase {
             set_config('dbhost', $CFG->dbhost.':'.$CFG->dboptions['dbport'], 'enrol_database');
         }
 
-        switch (get_class($DB)) {
-            case 'mssql_native_moodle_database':
-                set_config('dbtype', 'mssql_n', 'enrol_database');
-                set_config('dbsybasequoting', '1', 'enrol_database');
-                break;
+        switch ($DB->get_dbfamily()) {
 
-            case 'mysqli_native_moodle_database':
+            case 'mysql':
                 set_config('dbtype', 'mysqli', 'enrol_database');
                 set_config('dbsetupsql', "SET NAMES 'UTF-8'", 'enrol_database');
                 set_config('dbsybasequoting', '0', 'enrol_database');
@@ -66,12 +69,12 @@ class enrol_database_testcase extends advanced_testcase {
                 }
                 break;
 
-            case 'oci_native_moodle_database':
+            case 'oracle':
                 set_config('dbtype', 'oci8po', 'enrol_database');
                 set_config('dbsybasequoting', '1', 'enrol_database');
                 break;
 
-            case 'pgsql_native_moodle_database':
+            case 'postgres':
                 set_config('dbtype', 'postgres7', 'enrol_database');
                 $setupsql = "SET NAMES 'UTF-8'";
                 if (!empty($CFG->dboptions['dbschema'])) {
@@ -81,15 +84,23 @@ class enrol_database_testcase extends advanced_testcase {
                 set_config('dbsybasequoting', '0', 'enrol_database');
                 if (!empty($CFG->dboptions['dbsocket']) and ($CFG->dbhost === 'localhost' or $CFG->dbhost === '127.0.0.1')) {
                     if (strpos($CFG->dboptions['dbsocket'], '/') !== false) {
-                      set_config('dbhost', $CFG->dboptions['dbsocket'], 'enrol_database');
+                        $socket = $CFG->dboptions['dbsocket'];
+                        if (!empty($CFG->dboptions['dbport'])) {
+                            $socket .= ':' . $CFG->dboptions['dbport'];
+                        }
+                        set_config('dbhost', $socket, 'enrol_database');
                     } else {
                       set_config('dbhost', '', 'enrol_database');
                     }
                 }
                 break;
 
-            case 'sqlsrv_native_moodle_database':
-                set_config('dbtype', 'mssqlnative', 'enrol_database');
+            case 'mssql':
+                if (get_class($DB) == 'mssql_native_moodle_database') {
+                    set_config('dbtype', 'mssql_n', 'enrol_database');
+                } else {
+                    set_config('dbtype', 'mssqlnative', 'enrol_database');
+                }
                 set_config('dbsybasequoting', '1', 'enrol_database');
                 break;
 
@@ -159,6 +170,8 @@ class enrol_database_testcase extends advanced_testcase {
         self::$courses = null;
         self::$users = null;
         self::$roles = null;
+
+        ini_set('error_log', $this->oldlog);
     }
 
     protected function reset_enrol_database() {

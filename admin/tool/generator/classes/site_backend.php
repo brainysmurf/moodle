@@ -24,8 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+<<<<<<< HEAD
 require_once(__DIR__ . '/backend.php');
 
+=======
+>>>>>>> moodle/MOODLE_27_STABLE
 /**
  * Backend code for the site generator.
  *
@@ -151,16 +154,26 @@ class tool_generator_site_backend extends tool_generator_backend {
             $options[] = '--quiet';
         }
 
+<<<<<<< HEAD
+=======
+        if ($this->filesizelimit) {
+            $options[] = '--filesizelimit="' . $this->filesizelimit . '"';
+        }
+
+>>>>>>> moodle/MOODLE_27_STABLE
         // Extend options.
         $optionstoextend = array(
             'fixeddataset' => 'fixeddataset',
             'bypasscheck' => 'bypasscheck',
         );
 
+<<<<<<< HEAD
         if ($this->filesizelimit) {
             $options[] = '--filesizelimit="' . $this->filesizelimit . '"';
         }
 
+=======
+>>>>>>> moodle/MOODLE_27_STABLE
         // Getting an options string.
         foreach ($optionstoextend as $attribute => $option) {
             if (!empty($this->{$attribute})) {
@@ -196,7 +209,11 @@ class tool_generator_site_backend extends tool_generator_backend {
         }
         // SQL order by is not appropiate here as is ordering strings.
         $shortnames = array_keys($testcourses);
+<<<<<<< HEAD
         collatorlib::asort($shortnames, collatorlib::SORT_NATURAL);
+=======
+        core_collator::asort($shortnames, core_collator::SORT_NATURAL);
+>>>>>>> moodle/MOODLE_27_STABLE
         $shortnames = array_reverse($shortnames);
 
         // They come ordered by shortname DESC, so non-numeric values will be the first ones.

@@ -326,7 +326,7 @@ function grade_update_outcomes($source, $courseid, $itemtype, $itemmodule, $item
 }
 
 /**
- * Returns grading information for given activity, optionally with user grades
+ * Returns grading information for one or more activities, optionally with user grades
  * Manual, course or category items can not be queried.
  *
  * @category grade
@@ -337,8 +337,13 @@ function grade_update_outcomes($source, $courseid, $itemtype, $itemmodule, $item
  * @param mixed  $userid_or_ids Either a single user ID, an array of user IDs or null. If user ID or IDs are not supplied returns information about grade_item
  * @return array Array of grade information objects (scaleid, name, grade and locked status, etc.) indexed with itemnumbers
  */
-function grade_get_grades($courseid, $itemtype, $itemmodule, $iteminstance, $userid_or_ids=null) {
+function grade_get_grades($courseid, $itemtype = null, $itemmodule = null, $iteminstance = null, $userid_or_ids=null) {
     global $CFG;
+
+    if (empty($itemtype) or empty($itemmodule) or empty($iteminstance)) {
+        debugging('itemtype, itemmodule or iteminstance parameters should not be empty. For Moodle 2.8 and onwards are required',
+                    DEBUG_DEVELOPER);
+    }
 
     $return = new stdClass();
     $return->items    = array();
@@ -353,14 +358,28 @@ function grade_get_grades($courseid, $itemtype, $itemmodule, $iteminstance, $use
         }
     }
 
-    if ($grade_items = grade_item::fetch_all(array('itemtype'=>$itemtype, 'itemmodule'=>$itemmodule, 'iteminstance'=>$iteminstance, 'courseid'=>$courseid))) {
+    $params = array('courseid' => $courseid);
+    if (!empty($itemtype)) {
+        $params['itemtype'] = $itemtype;
+    }
+    if (!empty($itemmodule)) {
+        $params['itemmodule'] = $itemmodule;
+    }
+    if (!empty($iteminstance)) {
+        $params['iteminstance'] = $iteminstance;
+    }
+    if ($grade_items = grade_item::fetch_all($params)) {
         foreach ($grade_items as $grade_item) {
             $decimalpoints = null;
 
             if (empty($grade_item->outcomeid)) {
                 // prepare information about grade item
                 $item = new stdClass();
+                $item->id = $grade_item->id;
                 $item->itemnumber = $grade_item->itemnumber;
+                $item->itemtype  = $grade_item->itemtype;
+                $item->itemmodule = $grade_item->itemmodule;
+                $item->iteminstance = $grade_item->iteminstance;
                 $item->scaleid    = $grade_item->scaleid;
                 $item->name       = $grade_item->get_name();
                 $item->grademin   = $grade_item->grademin;
@@ -459,7 +478,11 @@ function grade_get_grades($courseid, $itemtype, $itemmodule, $iteminstance, $use
 
                 // outcome info
                 $outcome = new stdClass();
+                $outcome->id = $grade_item->id;
                 $outcome->itemnumber = $grade_item->itemnumber;
+                $outcome->itemtype   = $grade_item->itemtype;
+                $outcome->itemmodule = $grade_item->itemmodule;
+                $outcome->iteminstance = $grade_item->iteminstance;
                 $outcome->scaleid    = $grade_outcome->scaleid;
                 $outcome->name       = $grade_outcome->get_name();
                 $outcome->locked     = $grade_item->is_locked();
@@ -808,7 +831,7 @@ function grade_get_categories_menu($courseid, $includenew=false) {
     foreach ($categories as $category) {
         $cats[$category->id] = $category->get_name();
     }
-    collatorlib::asort($cats);
+    core_collator::asort($cats);
 
     return ($result+$cats);
 }
@@ -839,7 +862,7 @@ function grade_get_letters($context=null) {
 
     $letters = array();
 
-    $contexts = get_parent_contexts($context);
+    $contexts = $context->get_parent_context_ids();
     array_unshift($contexts, $context->id);
 
     foreach ($contexts as $ctxid) {
@@ -1138,7 +1161,7 @@ function grade_grab_course_grades($courseid, $modname=null, $userid=0) {
         return;
     }
 
-    if (!$mods = get_plugin_list('mod') ) {
+    if (!$mods = core_component::get_plugin_list('mod') ) {
         print_error('nomodules', 'debug');
     }
 
@@ -1437,7 +1460,7 @@ function grade_floats_different($f1, $f2) {
  * Do not use rounding for 10,5 at the database level as the results may be
  * different from php round() function.
  *
- * @since 2.0
+ * @since Moodle 2.0
  * @param float $f1 Float one to compare
  * @param float $f2 Float two to compare
  * @return bool True if the values should be considered as the same grades

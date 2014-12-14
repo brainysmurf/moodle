@@ -5,17 +5,18 @@ Feature: Users can search their message history
   I need to search in my messages history
 
   Background:
-    Given the following "users" exists:
+    Given the following "users" exist:
       | username | firstname | lastname | email |
       | user1 | User | One | one@asd.com |
       | user2 | User | Two | two@asd.com |
     And I log in as "user1"
-    When I send "Give me your biscuits" message to "user2"
-    And I follow "Messages"
-    And I fill in "Search people and messages" with "your biscuits"
+    When I send "Give me your biscuits" message to "User Two" user
+    And I expand "My profile" node
+    And I click on "Messages" "link" in the "Navigation" "block"
+    And I set the field "Search people and messages" to "your biscuits"
     And I press "Search people and messages"
     Then I should see "User Two"
-    And I click on "context" "link" in the "User Two" table row
+    And I click on "context" "link" in the "User Two" "table_row"
     And I should see "Give me your biscuits"
 
   @javascript

@@ -61,7 +61,7 @@ function pear_handle_error($error){
     print_object($error->backtrace);
 }
 
-if (!empty($CFG->debug) and ($CFG->debug >= DEBUG_ALL or $CFG->debug == -1)){
+if ($CFG->debugdeveloper) {
     //TODO: this is a wrong place to init PEAR!
     $GLOBALS['_PEAR_default_error_mode'] = PEAR_ERROR_CALLBACK;
     $GLOBALS['_PEAR_default_error_options'] = 'pear_handle_error';
@@ -211,7 +211,9 @@ abstract class moodleform {
      * @return string form identifier.
      */
     protected function get_form_identifier() {
-        return get_class($this);
+        $class = get_class($this);
+
+        return preg_replace('/[^a-z0-9_]/i', '_', $class);
     }
 
     /**
@@ -345,16 +347,8 @@ abstract class moodleform {
                 continue;
             }
 
-/*
-  // TODO: rethink the file scanning MDL-19380
-            if ($CFG->runclamonupload) {
-                if (!clam_scan_moodle_file($_FILES[$elname], $COURSE)) {
-                    $errors[$elname] = $_FILES[$elname]['uploadlog'];
-                    unset($_FILES[$elname]);
-                    continue;
-                }
-            }
-*/
+            // NOTE: the viruses are scanned in file picker, no need to deal with them here.
+
             $filename = clean_param($_FILES[$elname]['name'], PARAM_FILE);
             if ($filename === '') {
                 // TODO: improve error message - wrong chars
@@ -1278,7 +1272,9 @@ abstract class moodleform {
      * @return void
      */
     private function detectMissingSetType() {
-        if (!debugging('', DEBUG_DEVELOPER)) {
+        global $CFG;
+
+        if (!$CFG->debugdeveloper) {
             // Only for devs.
             return;
         }
@@ -2552,7 +2548,7 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
        "\n\t\t<legend class=\"ftoggler\">{header}</legend>\n\t\t<div class=\"fcontainer clearfix\">\n\t\t";
 
     /** @var string Template used when opening a fieldset */
-    var $_openFieldsetTemplate = "\n\t<fieldset class=\"{classes}\" {id} {aria-live}>";
+    var $_openFieldsetTemplate = "\n\t<fieldset class=\"{classes}\" {id}>";
 
     /** @var string Template used when closing a fieldset */
     var $_closeFieldsetTemplate = "\n\t\t</div></fieldset>";
@@ -2598,15 +2594,15 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
         // switch next two lines for ol li containers for form items.
         //        $this->_elementTemplates=array('default'=>"\n\t\t".'<li class="fitem"><label>{label}{help}<!-- BEGIN required -->{req}<!-- END required --></label><div class="qfelement<!-- BEGIN error --> error<!-- END error --> {type}"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div></li>');
         $this->_elementTemplates = array(
-        'default'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type}" {aria-live}><div class="fitemtitle"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg}{help} </label></div><div class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div></div>',
+        'default'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type} {emptylabel}" {aria-live}><div class="fitemtitle"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg} </label>{help}</div><div class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div></div>',
 
         'actionbuttons'=>"\n\t\t".'<div id="{id}" class="fitem fitem_actionbuttons fitem_{type}"><div class="felement {type}">{element}</div></div>',
 
-        'fieldset'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type}"><div class="fitemtitle"><div class="fgrouplabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg}{help} </label></div></div><fieldset class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</fieldset></div>',
+        'fieldset'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type} {emptylabel}"><div class="fitemtitle"><div class="fgrouplabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg} </label>{help}</div></div><fieldset class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</fieldset></div>',
 
-        'static'=>"\n\t\t".'<div class="fitem {advanced}"><div class="fitemtitle"><div class="fstaticlabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg}{help} </label></div></div><div class="felement fstatic <!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}&nbsp;</div></div>',
+        'static'=>"\n\t\t".'<div class="fitem {advanced} {emptylabel}"><div class="fitemtitle"><div class="fstaticlabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg} </label>{help}</div></div><div class="felement fstatic <!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div></div>',
 
-        'warning'=>"\n\t\t".'<div class="fitem {advanced}">{element}</div>',
+        'warning'=>"\n\t\t".'<div class="fitem {advanced} {emptylabel}">{element}</div>',
 
         'nodisplay'=>'');
 
@@ -2707,6 +2703,11 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
         $html =str_replace('{id}', 'fgroup_' . $group->getAttribute('id'), $html);
         $html =str_replace('{name}', $group->getName(), $html);
         $html =str_replace('{type}', 'fgroup', $html);
+        $emptylabel = '';
+        if ($group->getLabel() == '') {
+            $emptylabel = 'femptylabel';
+        }
+        $html = str_replace('{emptylabel}', $emptylabel, $html);
 
         $this->_templates[$group->getName()]=$html;
         // Fix for bug in tableless quickforms that didn't allow you to stop a
@@ -2758,6 +2759,11 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
         $html =str_replace('{id}', 'fitem_' . $element->getAttribute('id'), $html);
         $html =str_replace('{type}', 'f'.$element->getType(), $html);
         $html =str_replace('{name}', $element->getName(), $html);
+        $emptylabel = '';
+        if ($element->getLabel() == '') {
+            $emptylabel = 'femptylabel';
+        }
+        $html = str_replace('{emptylabel}', $emptylabel, $html);
         if (method_exists($element, 'getHelpButton')){
             $html = str_replace('{help}', $element->getHelpButton(), $html);
         }else{
@@ -2826,7 +2832,6 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
         $fieldsetclasses = array('clearfix');
         if (isset($this->_collapsibleElements[$header->getName()])) {
             $fieldsetclasses[] = 'collapsible';
-            $arialive = 'aria-live="polite"';
             if ($this->_collapsibleElements[$header->getName()]) {
                 $fieldsetclasses[] = 'collapsed';
             }
@@ -2838,7 +2843,6 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
 
         $openFieldsetTemplate = str_replace('{id}', $id, $this->_openFieldsetTemplate);
         $openFieldsetTemplate = str_replace('{classes}', join(' ', $fieldsetclasses), $openFieldsetTemplate);
-        $openFieldsetTemplate = str_replace('{aria-live}', $arialive, $openFieldsetTemplate);
 
         $this->_html .= $openFieldsetTemplate . $header_html;
         $this->_fieldsetsOpen++;
@@ -2884,7 +2888,7 @@ class MoodleQuickForm_Rule_Required extends HTML_QuickForm_Rule {
         }
         $stripvalues = array(
             '#</?(?!img|canvas|hr).*?>#im', // all tags except img, canvas and hr
-            '#(\xc2|\xa0|\s|&nbsp;)#', //any whitespaces actually
+            '#(\xc2\xa0|\s|&nbsp;)#', // Any whitespaces actually.
         );
         if (!empty($CFG->strictformsrequired)) {
             $value = preg_replace($stripvalues, '', (string)$value);

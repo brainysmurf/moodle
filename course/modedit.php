@@ -83,7 +83,7 @@ if (!empty($add)) {
 
     if (plugin_supports('mod', $data->modulename, FEATURE_MOD_INTRO, true)) {
         $draftid_editor = file_get_submitted_draft_itemid('introeditor');
-        file_prepare_draft_area($draftid_editor, null, null, null, null);
+        file_prepare_draft_area($draftid_editor, null, null, null, null, array('subdirs'=>true));
         $data->introeditor = array('text'=>'', 'format'=>FORMAT_HTML, 'itemid'=>$draftid_editor); // TODO: add better default
     }
 
@@ -126,6 +126,9 @@ if (!empty($add)) {
     $url->param('update', $update);
     $PAGE->set_url($url);
 
+    // Select the "Edit settings" from navigation.
+    navigation_node::override_active_url(new moodle_url('/course/modedit.php', array('update'=>$update, 'return'=>1)));
+
     // Check the course module exists.
     $cm = get_coursemodule_from_id('', $update, 0, false, MUST_EXIST);
 
@@ -157,9 +160,7 @@ if (!empty($add)) {
     $data->completionusegrade = is_null($cm->completiongradeitemnumber) ? 0 : 1;
     $data->showdescription    = $cm->showdescription;
     if (!empty($CFG->enableavailability)) {
-        $data->availablefrom      = $cm->availablefrom;
-        $data->availableuntil     = $cm->availableuntil;
-        $data->showavailability   = $cm->showavailability;
+        $data->availabilityconditionsjson = $cm->availability;
     }
 
     if (plugin_supports('mod', $data->modulename, FEATURE_MOD_INTRO, true)) {
@@ -248,8 +249,6 @@ if (file_exists($modmoodleform)) {
 } else {
     print_error('noformdesc');
 }
-
-include_modulelib($module->name);
 
 $mformclassname = 'mod_'.$module->name.'_mod_form';
 $mform = new $mformclassname($data, $cw->section, $cm, $course);

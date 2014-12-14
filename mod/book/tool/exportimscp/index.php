@@ -43,7 +43,7 @@ $context = context_module::instance($cm->id);
 require_capability('mod/book:read', $context);
 require_capability('booktool/exportimscp:export', $context);
 
-add_to_log($course->id, 'book', 'exportimscp', 'tool/exportimscp/index.php?id='.$cm->id, $book->id, $cm->id);
+\booktool_exportimscp\event\book_exported::create_from_book($book, $context)->trigger();
 
 $file = booktool_exportimscp_build_package($book, $context);
 

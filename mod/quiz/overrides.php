@@ -72,6 +72,7 @@ $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string('overrides', 'quiz'));
 $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
+echo $OUTPUT->heading(format_string($quiz->name, true, array('context' => $context)));
 
 // Delete orphaned group overrides.
 $sql = 'SELECT o.id
@@ -98,11 +99,11 @@ if ($groupmode) {
 } else {
     $colname = get_string('user');
     list($sort, $params) = users_order_by_sql('u');
-    $sql = 'SELECT o.*, u.firstname, u.lastname
-                FROM {quiz_overrides} o
-                JOIN {user} u ON o.userid = u.id
-                WHERE o.quiz = :quizid
-                ORDER BY ' . $sort;
+    $sql = 'SELECT o.*, ' . get_all_user_name_fields(true, 'u') . '
+            FROM {quiz_overrides} o
+            JOIN {user} u ON o.userid = u.id
+            WHERE o.quiz = :quizid
+            ORDER BY ' . $sort;
     $params['quizid'] = $quiz->id;
 }
 
@@ -285,7 +286,7 @@ if ($groupmode) {
     }
     echo $OUTPUT->single_button($overrideediturl->out(true,
             array('action' => 'adduser', 'cmid' => $cm->id)),
-            get_string('addnewuseroverride', 'quiz'), 'post', $options);
+            get_string('addnewuseroverride', 'quiz'), 'get', $options);
 }
 echo html_writer::end_tag('div');
 echo html_writer::end_tag('div');

@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -18,8 +17,7 @@
 /**
  * Strings for component 'workshop', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package    mod
- * @subpackage workshop
+ * @package    mod_workshop
  * @copyright  2009 David Mudrak <david@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -106,6 +104,17 @@ $string['evaluation'] = 'Grading evaluation';
 $string['evaluationmethod'] = 'Grading evaluation method';
 $string['evaluationmethod_help'] = 'The grading evaluation method determines how the grade for assessment is calculated. You can let it re-calculate grades repeatedly with different settings unless you are happy with the result.';
 $string['evaluationsettings'] = 'Grading evaluation settings';
+$string['eventassessableuploaded'] = 'A submission has been uploaded.';
+$string['eventassessmentevaluationsreset'] = 'Assessment evaluations reset';
+$string['eventassessmentevaluated'] = 'Assessment evaluated';
+$string['eventassessmentreevaluated'] = 'Assessment re-evaluated';
+$string['eventsubmissionassessed'] = 'Submission assessed';
+$string['eventsubmissionassessmentsreset'] = 'Submission assessments cleared';
+$string['eventsubmissioncreated'] = 'Submission created';
+$string['eventsubmissionreassessed'] = 'Submission re-assessed';
+$string['eventsubmissionupdated'] = 'Submission updated';
+$string['eventsubmissionviewed'] = 'Submission viewed';
+$string['eventphaseswitched'] = 'Phase switched';
 $string['example'] = 'Example submission';
 $string['exampleadd'] = 'Add example submission';
 $string['exampleassess'] = 'Assess example submission';
@@ -215,6 +224,12 @@ $string['reassess'] = 'Re-assess';
 $string['receivedgrades'] = 'Grades received';
 $string['recentassessments'] = 'Workshop assessments:';
 $string['recentsubmissions'] = 'Workshop submissions:';
+$string['resetassessments'] = 'Delete all assessments';
+$string['resetassessments_help'] = 'You can choose to delete just allocated assessments without affecting submissions. If submissions are to be deleted, their assessments will be deleted implicitly and this option is ignored. Note this also includes assessments of example submissions.';
+$string['resetsubmissions'] = 'Delete all submissions';
+$string['resetsubmissions_help'] = 'All the submissions and their assessments will be deleted. This does not affect example submissions.';
+$string['resetphase'] = 'Switch to the setup phase';
+$string['resetphase_help'] = 'If enabled, all workshops will be put into the initial setup phase.';
 $string['saveandclose'] = 'Save and close';
 $string['saveandcontinue'] = 'Save and continue editing';
 $string['saveandpreview'] = 'Save and preview';
@@ -234,8 +249,8 @@ $string['strategy_help'] = 'The grading strategy determines the assessment form 
 * Rubric - A level assessment is given regarding specified criteria';
 $string['strategyhaschanged'] = 'The workshop grading strategy has changed since the form was opened for editing.';
 $string['submission'] = 'Submission';
-$string['submissionby'] = 'Submission by {$a}';
 $string['submissionattachment'] = 'Attachment';
+$string['submissionby'] = 'Submission by {$a}';
 $string['submissioncontent'] = 'Submission content';
 $string['submissionend'] = 'Submissions deadline';
 $string['submissionendbeforestart'] = 'Submissions deadline can not be specified before the open for submissions date';

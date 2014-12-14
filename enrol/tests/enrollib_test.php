@@ -34,7 +34,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2012 Petr Skoda {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class core_enrol_testcase extends advanced_testcase {
+class core_enrollib_testcase extends advanced_testcase {
 
     public function test_enrol_get_all_users_courses() {
         global $DB, $CFG;
@@ -144,9 +144,9 @@ class core_enrol_testcase extends advanced_testcase {
         $course = (array)$course;
         $this->assertEquals($basefields, array_keys($course), '', 0, 10, true);
 
-        $courses = enrol_get_all_users_courses($user2->id, false, 'modinfo');
+        $courses = enrol_get_all_users_courses($user2->id, false, 'timecreated');
         $course = reset($courses);
-        $this->assertTrue(property_exists($course, 'modinfo'));
+        $this->assertTrue(property_exists($course, 'timecreated'));
 
         $courses = enrol_get_all_users_courses($user2->id, false, null, 'id DESC');
         $this->assertEquals(array($course3->id, $course2->id, $course1->id), array_keys($courses));
@@ -278,5 +278,88 @@ class core_enrol_testcase extends advanced_testcase {
         $sharedcourse = array_shift($sharedcourses);
         // It should be course 1.
         $this->assertEquals($sharedcourse->id, $course1->id);
+    }
+
+    /**
+     * Test user enrolment created event.
+     */
+    public function test_user_enrolment_created_event() {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        $studentrole = $DB->get_record('role', array('shortname'=>'student'));
+        $this->assertNotEmpty($studentrole);
+
+        $admin = get_admin();
+
+        $course1 = $this->getDataGenerator()->create_course();
+
+        $maninstance1 = $DB->get_record('enrol', array('courseid'=>$course1->id, 'enrol'=>'manual'), '*', MUST_EXIST);
+
+        $manual = enrol_get_plugin('manual');
+        $this->assertNotEmpty($manual);
+
+        // Enrol user and capture event.
+        $sink = $this->redirectEvents();
+        $manual->enrol_user($maninstance1, $admin->id, $studentrole->id);
+        $events = $sink->get_events();
+        $sink->close();
+        $event = array_shift($events);
+
+        $dbuserenrolled = $DB->get_record('user_enrolments', array('userid' => $admin->id));
+        $this->assertInstanceOf('\core\event\user_enrolment_created', $event);
+        $this->assertEquals($dbuserenrolled->id, $event->objectid);
+        $this->assertEquals(context_course::instance($course1->id), $event->get_context());
+        $this->assertEquals('user_enrolled', $event->get_legacy_eventname());
+        $expectedlegacyeventdata = $dbuserenrolled;
+        $expectedlegacyeventdata->enrol = $manual->get_name();
+        $expectedlegacyeventdata->courseid = $course1->id;
+        $this->assertEventLegacyData($expectedlegacyeventdata, $event);
+        $expected = array($course1->id, 'course', 'enrol', '../enrol/users.php?id=' . $course1->id, $course1->id);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
+    }
+
+    /**
+     * Test user_enrolment_deleted event.
+     */
+    public function test_user_enrolment_deleted_event() {
+        global $DB;
+
+        $this->resetAfterTest(true);
+
+        $manualplugin = enrol_get_plugin('manual');
+        $user = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $student = $DB->get_record('role', array('shortname' => 'student'));
+
+        $enrol = $DB->get_record('enrol', array('courseid' => $course->id, 'enrol' => 'manual'), '*', MUST_EXIST);
+
+        // Enrol user.
+        $manualplugin->enrol_user($enrol, $user->id, $student->id);
+
+        // Get the user enrolment information, used to validate legacy event data.
+        $dbuserenrolled = $DB->get_record('user_enrolments', array('userid' => $user->id));
+
+        // Unenrol user and capture event.
+        $sink = $this->redirectEvents();
+        $manualplugin->unenrol_user($enrol, $user->id);
+        $events = $sink->get_events();
+        $sink->close();
+        $event = array_pop($events);
+
+        // Validate the event.
+        $this->assertInstanceOf('\core\event\user_enrolment_deleted', $event);
+        $this->assertEquals(context_course::instance($course->id), $event->get_context());
+        $this->assertEquals('user_unenrolled', $event->get_legacy_eventname());
+        $expectedlegacyeventdata = $dbuserenrolled;
+        $expectedlegacyeventdata->enrol = $manualplugin->get_name();
+        $expectedlegacyeventdata->courseid = $course->id;
+        $expectedlegacyeventdata->lastenrol = true;
+        $this->assertEventLegacyData($expectedlegacyeventdata, $event);
+        $expected = array($course->id, 'course', 'unenrol', '../enrol/users.php?id=' . $course->id, $course->id);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 }

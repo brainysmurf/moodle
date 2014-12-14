@@ -27,7 +27,10 @@ define('NO_OUTPUT_BUFFERING', true);
 
 require(__DIR__ . '/../../../../config.php');
 require_once($CFG->libdir. '/clilib.php');
+<<<<<<< HEAD
 require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/generator/classes/site_backend.php');
+=======
+>>>>>>> moodle/MOODLE_27_STABLE
 
 // CLI options.
 list($options, $unrecognized) = cli_get_params(
@@ -68,14 +71,22 @@ Options:
 -h, --help     Print out this help
 
 Example from Moodle root directory:
+<<<<<<< HEAD
 \$sudo -u www-data /usr/bin/php admin/tool/generator/cli/maketestsite.php --size=S
+=======
+\$ php admin/tool/generator/cli/maketestsite.php --size=S
+>>>>>>> moodle/MOODLE_27_STABLE
 ";
     // Exit with error unless we're showing this because they asked for it.
     exit(empty($options['help']) ? 1 : 0);
 }
 
 // Check debugging is set to developer level.
+<<<<<<< HEAD
 if (empty($options['bypasscheck']) && !debugging('', DEBUG_DEVELOPER)) {
+=======
+if (empty($options['bypasscheck']) && !$CFG->debugdeveloper) {
+>>>>>>> moodle/MOODLE_27_STABLE
     cli_error(get_string('error_notdebugging', 'tool_generator'));
 }
 
@@ -92,7 +103,11 @@ try {
 }
 
 // Switch to admin user account.
+<<<<<<< HEAD
 session_set_user(get_admin());
+=======
+\core\session\manager::set_user(get_admin());
+>>>>>>> moodle/MOODLE_27_STABLE
 
 // Do backend code to generate site.
 $backend = new tool_generator_site_backend($size, $options['bypasscheck'], $fixeddataset, $filesizelimit, empty($options['quiet']));

@@ -24,9 +24,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+<<<<<<< HEAD
 require_once(__DIR__ . '/backend.php');
 require_once(__DIR__ . '/course_backend.php');
 
+=======
+>>>>>>> moodle/MOODLE_27_STABLE
 /**
  * Generates the files required by JMeter.
  *

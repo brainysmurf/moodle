@@ -30,14 +30,23 @@ if (isset($userdata->status)) {
 if (!isset($currentorg)) {
     $currentorg = '';
 }
+
+// If SCORM 1.2 standard mode is disabled allow higher datamodel limits.
+if (intval(get_config("scorm", "scorm12standard"))) {
+    $cmistring256 = '^[\\u0000-\\uFFFF]{0,255}$';
+    $cmistring4096 = '^[\\u0000-\\uFFFF]{0,4096}$';
+} else {
+    $cmistring256 = '^[\\u0000-\\uFFFF]{0,64000}$';
+    $cmistring4096 = $cmistring256;
+}
 ?>
 //
 // SCORM 1.2 API Implementation
 //
 function SCORMapi1_2() {
     // Standard Data Type Definition
-    CMIString256 = '^[\\u0000-\\uffff]{0,255}$';
-    CMIString4096 = '^[\\u0000-\\uffff]{0,4096}$';
+    CMIString256 = '<?php echo $cmistring256 ?>';
+    CMIString4096 = '<?php echo $cmistring4096 ?>';
     CMITime = '^([0-2]{1}[0-9]{1}):([0-5]{1}[0-9]{1}):([0-5]{1}[0-9]{1})(\.[0-9]{1,2})?$';
     CMITimespan = '^([0-9]{2,4}):([0-9]{2}):([0-9]{2})(\.[0-9]{1,2})?$';
     CMIInteger = '^\\d+$';
@@ -231,8 +240,9 @@ function SCORMapi1_2() {
                 // trigger TOC update
                 var sURL = "<?php echo $CFG->wwwroot; ?>" + "/mod/scorm/prereqs.php?a=<?php echo $scorm->id ?>&scoid=<?php echo $scoid ?>&attempt=<?php echo $attempt ?>&mode=<?php echo $mode ?>&currentorg=<?php echo $currentorg ?>&sesskey=<?php echo sesskey(); ?>";
                 var callback = M.mod_scorm.connectPrereqCallback;
-                YUI().use('yui2-connection', function(Y) {
-                    Y.YUI2.util.Connect.asyncRequest('GET', sURL, callback, null);
+                YUI().use('io-base', function(Y) {
+                    Y.on('io:complete', callback.success, Y);
+                    Y.io(sURL);
                 });
                 return result;
             } else {
@@ -430,8 +440,9 @@ function SCORMapi1_2() {
                 // trigger TOC update
                 var sURL = "<?php echo $CFG->wwwroot; ?>" + "/mod/scorm/prereqs.php?a=<?php echo $scorm->id ?>&scoid=<?php echo $scoid ?>&attempt=<?php echo $attempt ?>&mode=<?php echo $mode ?>&currentorg=<?php echo $currentorg ?>&sesskey=<?php echo sesskey(); ?>";
                 var callback = M.mod_scorm.connectPrereqCallback;
-                YUI().use('yui2-connection', function(Y) {
-                    Y.YUI2.util.Connect.asyncRequest('GET', sURL, callback, null);
+                YUI().use('io-base', function(Y) {
+                    Y.on('io:complete', callback.success, Y);
+                    Y.io(sURL);
                 });
                 <?php
                     if (scorm_debugging($scorm)) {
@@ -445,7 +456,7 @@ function SCORMapi1_2() {
                 ?>
                 result = ('true' == result) ? 'true' : 'false';
                 errorCode = (result =='true')? '0' : '101';
-                <?php 
+                <?php
                     if (scorm_debugging($scorm)) {
                         echo 'LogAPICall("LMSCommit", "result", result, 0);';
                         echo 'LogAPICall("LMSCommit", "errorCode", errorCode, 0);';

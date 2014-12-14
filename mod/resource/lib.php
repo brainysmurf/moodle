@@ -16,8 +16,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    mod
- * @subpackage resource
+ * @package    mod_resource
  * @copyright  2009 Petr Skoda  {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -64,7 +63,13 @@ function resource_reset_userdata($data) {
 }
 
 /**
- * List of view style log actions
+ * List the actions that correspond to a view of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = 'r' and edulevel = LEVEL_PARTICIPATING will
+ *       be considered as view action.
+ *
  * @return array
  */
 function resource_get_view_actions() {
@@ -72,7 +77,13 @@ function resource_get_view_actions() {
 }
 
 /**
- * List of update style log actions
+ * List the actions that correspond to a post of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = ('c' || 'u' || 'd') and edulevel = LEVEL_PARTICIPATING
+ *       will be considered as post action.
+ *
  * @return array
  */
 function resource_get_post_actions() {
@@ -136,7 +147,6 @@ function resource_set_display_options($data) {
         $displayoptions['popupheight'] = $data->popupheight;
     }
     if (in_array($data->display, array(RESOURCELIB_DISPLAY_AUTO, RESOURCELIB_DISPLAY_EMBED, RESOURCELIB_DISPLAY_FRAME))) {
-        $displayoptions['printheading'] = (int)!empty($data->printheading);
         $displayoptions['printintro']   = (int)!empty($data->printintro);
     }
     if (!empty($data->showsize)) {
@@ -165,57 +175,6 @@ function resource_delete_instance($id) {
     $DB->delete_records('resource', array('id'=>$resource->id));
 
     return true;
-}
-
-/**
- * Return use outline
- * @param object $course
- * @param object $user
- * @param object $mod
- * @param object $resource
- * @return object|null
- */
-function resource_user_outline($course, $user, $mod, $resource) {
-    global $DB;
-
-    if ($logs = $DB->get_records('log', array('userid'=>$user->id, 'module'=>'resource',
-                                              'action'=>'view', 'info'=>$resource->id), 'time ASC')) {
-
-        $numviews = count($logs);
-        $lastlog = array_pop($logs);
-
-        $result = new stdClass();
-        $result->info = get_string('numviews', '', $numviews);
-        $result->time = $lastlog->time;
-
-        return $result;
-    }
-    return NULL;
-}
-
-/**
- * Return use complete
- * @param object $course
- * @param object $user
- * @param object $mod
- * @param object $resource
- */
-function resource_user_complete($course, $user, $mod, $resource) {
-    global $CFG, $DB;
-
-    if ($logs = $DB->get_records('log', array('userid'=>$user->id, 'module'=>'resource',
-                                              'action'=>'view', 'info'=>$resource->id), 'time ASC')) {
-        $numviews = count($logs);
-        $lastlog = array_pop($logs);
-
-        $strmostrecently = get_string('mostrecently');
-        $strnumviews = get_string('numviews', '', $numviews);
-
-        echo "$strnumviews - $strmostrecently ".userdate($lastlog->time);
-
-    } else {
-        print_string('neverseen', 'resource');
-    }
 }
 
 /**
@@ -289,7 +248,7 @@ function resource_get_coursemodule_info($coursemodule) {
  * @param cm_info $cm Course module information
  */
 function resource_cm_info_view(cm_info $cm) {
-    $details = $cm->get_custom_data();
+    $details = $cm->customdata;
     if ($details) {
         $cm->set_after_link(' ' . html_writer::tag('span', $details,
                 array('class' => 'resourcelinkdetails')));
@@ -433,7 +392,7 @@ function resource_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
     }
 
     // finally send the file
-    send_stored_file($file, 86400, $filter, $forcedownload, $options);
+    send_stored_file($file, null, $filter, $forcedownload, $options);
 }
 
 /**
@@ -510,7 +469,6 @@ function resource_dndupload_handle($uploadinfo) {
     $data->display = $config->display;
     $data->popupheight = $config->popupheight;
     $data->popupwidth = $config->popupwidth;
-    $data->printheading = $config->printheading;
     $data->printintro = $config->printintro;
     $data->showsize = (isset($config->showsize)) ? $config->showsize : 0;
     $data->showtype = (isset($config->showtype)) ? $config->showtype : 0;

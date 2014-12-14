@@ -17,7 +17,7 @@
 /**
  * This plugin is used to access box.net repository
  *
- * @since 2.0
+ * @since Moodle 2.0
  * @package    repository_boxnet
  * @copyright  2010 Dongsheng Cai {@link http://dongsheng.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -28,7 +28,7 @@ require_once($CFG->libdir . '/boxlib.php');
 /**
  * repository_boxnet class implements box.net client
  *
- * @since 2.0
+ * @since Moodle 2.0
  * @package    repository_boxnet
  * @copyright  2010 Dongsheng Cai {@link http://dongsheng.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -184,12 +184,14 @@ class repository_boxnet extends repository {
      * @return array
      */
     public function get_file($ref, $filename = '') {
+        global $CFG;
+
         $ref = unserialize(self::convert_to_valid_reference($ref));
         $path = $this->prepare_file($filename);
         if (!empty($ref->downloadurl)) {
             $c = new curl();
             $result = $c->download_one($ref->downloadurl, null, array('filepath' => $filename,
-                'timeout' => self::GETFILE_TIMEOUT, 'followlocation' => true));
+                'timeout' => $CFG->repositorygetfiletimeout, 'followlocation' => true));
             $info = $c->get_info();
             if ($result !== true || !isset($info['http_code']) || $info['http_code'] != 200) {
                 throw new moodle_exception('errorwhiledownload', 'repository', '', $result);
@@ -263,8 +265,8 @@ class repository_boxnet extends repository {
             }
         }
 
-        collatorlib::ksort($folders, collatorlib::SORT_NATURAL);
-        collatorlib::ksort($files, collatorlib::SORT_NATURAL);
+        collatorlib::ksort($folders, core_collator::SORT_NATURAL);
+        collatorlib::ksort($files, core_collator::SORT_NATURAL);
         $ret['list'] = array_merge($folders, $files);
         $ret['list'] = array_filter($ret['list'], array($this, 'filter'));
 
@@ -330,7 +332,7 @@ class repository_boxnet extends repository {
         $mform->addRule('clientsecret', $strrequired, 'required', null, 'client');
         $mform->setType('clientsecret', PARAM_RAW_TRIMMED);
 
-        $mform->addElement('static', null, '',  get_string('informationapiv2', 'repository_boxnet'));
+        $mform->addElement('static', null, '',  get_string('information', 'repository_boxnet'));
 
         if (strpos($CFG->wwwroot, 'https') !== 0) {
             $mform->addElement('static', null, '',  get_string('warninghttps', 'repository_boxnet'));
@@ -414,29 +416,43 @@ class repository_boxnet extends repository {
         return $shareinfo->url;
     }
 
-     /**
-     * Returns information about file in this repository by reference
-     * {@link repository::get_file_reference()}
-     * {@link repository::get_file()}
+    /**
+     * Synchronize the references.
      *
-     * Returns null if file not found or is not readable
-     *
-     * @param stdClass $reference file reference db record
-     * @return null|stdClass with attribute 'filepath'
+     * @param stored_file $file Stored file.
+     * @return boolean
      */
-    public function get_file_by_reference($reference) {
-        $reference = unserialize(self::convert_to_valid_reference($reference->reference));
-        $url = $reference->downloadurl;
+    public function sync_reference(stored_file $file) {
+        global $CFG;
+        if ($file->get_referencelastsync() + DAYSECS > time()) {
+            // Synchronise not more often than once a day.
+            return false;
+        }
         $c = new curl();
-        $c->get($url, null, array('timeout' => self::SYNCIMAGE_TIMEOUT, 'followlocation' => true, 'nobody' => true));
+        $reference = unserialize(self::convert_to_valid_reference($file->get_reference()));
+        $url = $reference->downloadurl;
+        if (file_extension_in_typegroup($file->get_filename(), 'web_image')) {
+            $path = $this->prepare_file('');
+            $result = $c->download_one($url, null, array('filepath' => $path, 'timeout' => $CFG->repositorysyncimagetimeout));
+            $info = $c->get_info();
+            if ($result === true && isset($info['http_code']) && $info['http_code'] == 200) {
+                $fs = get_file_storage();
+                list($contenthash, $filesize, $newfile) = $fs->add_file_to_pool($path);
+                $file->set_synchronized($contenthash, $filesize);
+                return true;
+            }
+        }
+        $c->get($url, null, array('timeout' => $CFG->repositorysyncimagetimeout, 'followlocation' => true, 'nobody' => true));
         $info = $c->get_info();
         if (isset($info['http_code']) && $info['http_code'] == 200 &&
                 array_key_exists('download_content_length', $info) &&
                 $info['download_content_length'] >= 0) {
             $filesize = (int)$info['download_content_length'];
-            return (object) array('filesize' => $filesize);
+            $file->set_synchronized(null, $filesize);
+            return true;
         }
-        return null;
+        $file->set_missingsource();
+        return true;
     }
 
     /**
@@ -473,12 +489,12 @@ class repository_boxnet extends repository {
      * Repository method to serve the referenced file
      *
      * @param stored_file $storedfile the file that contains the reference
-     * @param int $lifetime Number of seconds before the file should expire from caches (default 24 hours)
+     * @param int $lifetime Number of seconds before the file should expire from caches (null means $CFG->filelifetime)
      * @param int $filter 0 (default)=no filtering, 1=all files, 2=html files only
      * @param bool $forcedownload If true (default false), forces download of file rather than view in browser/plugin
      * @param array $options additional options affecting the file serving
      */
-    public function send_file($storedfile, $lifetime=86400 , $filter=0, $forcedownload=false, array $options = null) {
+    public function send_file($storedfile, $lifetime=null , $filter=0, $forcedownload=false, array $options = null) {
         $ref = unserialize(self::convert_to_valid_reference($storedfile->get_reference()));
         header('Location: ' . $ref->downloadurl);
     }

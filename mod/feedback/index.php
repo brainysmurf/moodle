@@ -19,7 +19,7 @@
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package feedback
+ * @package mod_feedback
  */
 
 require_once("../../config.php");
@@ -40,17 +40,20 @@ $context = context_course::instance($course->id);
 require_login($course);
 $PAGE->set_pagelayout('incourse');
 
-add_to_log($course->id, 'feedback', 'view all', $url->out(false), $course->id);
-
+// Trigger instances list viewed event.
+$event = \mod_feedback\event\course_module_instance_list_viewed::create(array('context' => $context));
+$event->add_record_snapshot('course', $course);
+$event->trigger();
 
 /// Print the page header
 $strfeedbacks = get_string("modulenameplural", "feedback");
 $strfeedback  = get_string("modulename", "feedback");
 
 $PAGE->navbar->add($strfeedbacks);
-$PAGE->set_heading(format_string($course->fullname));
+$PAGE->set_heading($course->fullname);
 $PAGE->set_title(get_string('modulename', 'feedback').' '.get_string('activities'));
 echo $OUTPUT->header();
+echo $OUTPUT->heading($strfeedbacks);
 
 /// Get all the appropriate data
 

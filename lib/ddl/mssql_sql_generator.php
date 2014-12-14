@@ -218,13 +218,13 @@ class mssql_sql_generator extends sql_generator {
                 if (empty($xmldb_length)) {
                     $xmldb_length='255';
                 }
-                $dbtype .= '(' . $xmldb_length . ')';
+                $dbtype .= '(' . $xmldb_length . ') COLLATE database_default';
                 break;
             case XMLDB_TYPE_TEXT:
-                $dbtype = 'NTEXT';
+                $dbtype = 'NVARCHAR(MAX) COLLATE database_default';
                 break;
             case XMLDB_TYPE_BINARY:
-                $dbtype = 'IMAGE';
+                $dbtype = 'VARBINARY(MAX)';
                 break;
             case XMLDB_TYPE_DATETIME:
                 $dbtype = 'DATETIME';

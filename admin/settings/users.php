@@ -127,6 +127,7 @@ if ($hassiteconfig
                              'msnid' => new lang_string('msnid'),
                              'firstaccess' => new lang_string('firstaccess'),
                              'lastaccess' => new lang_string('lastaccess'),
+                             'lastip' => new lang_string('lastip'),
                              'mycourses' => new lang_string('mycourses'),
                              'groups' => new lang_string('groups'),
                              'suspended' => new lang_string('suspended', 'auth'),
@@ -150,6 +151,7 @@ if ($hassiteconfig
                     'department'  => new lang_string('department'),
                     'institution' => new lang_string('institution'),
                 )));
+        $temp->add(new admin_setting_configtext('fullnamedisplay', new lang_string('fullnamedisplay', 'admin'), new lang_string('configfullnamedisplay', 'admin'), 'language', PARAM_TEXT, 50));
         $temp->add(new admin_setting_configtext('maxusersperpage', new lang_string('maxusersperpage','admin'), new lang_string('configmaxusersperpage','admin'), 100, PARAM_INT));
         $temp->add(new admin_setting_configcheckbox('enablegravatar', new lang_string('enablegravatar', 'admin'), new lang_string('enablegravatar_help', 'admin'), 0));
         $temp->add(new admin_setting_configtext('gravatardefaulturl', new lang_string('gravatardefaulturl', 'admin'), new lang_string('gravatardefaulturl_help', 'admin'), 'mm'));

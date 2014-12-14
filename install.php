@@ -46,6 +46,8 @@ if (file_exists($configfile)) {
 define('CLI_SCRIPT', false); // prevents some warnings later
 define('AJAX_SCRIPT', false); // prevents some warnings later
 define('CACHE_DISABLE_ALL', true); // Disables caching.. just in case.
+define('PHPUNIT_TEST', false);
+define('IGNORE_COMPONENT_CACHE', true);
 
 // Servers should define a default timezone in php.ini, but if they don't then make sure something is defined.
 // This is a quick hack.  Ideally we should ask the admin for a value.  See MDL-22625 for more on this.
@@ -58,10 +60,10 @@ if (function_exists('date_default_timezone_set') and function_exists('date_defau
 @ini_set('display_errors', '1');
 
 // Check that PHP is of a sufficient version.
-if (version_compare(phpversion(), '5.3.3') < 0) {
+if (version_compare(phpversion(), '5.4.4') < 0) {
     $phpversion = phpversion();
     // do NOT localise - lang strings would not work here and we CAN not move it after installib
-    echo "Moodle 2.5 or later requires at least PHP 5.3.3 (currently using version $phpversion).<br />";
+    echo "Moodle 2.7 or later requires at least PHP 5.4.4 (currently using version $phpversion).<br />";
     echo "Please upgrade your server software or install older Moodle version.";
     die;
 }
@@ -88,7 +90,8 @@ if (PHP_INT_SIZE > 4) {
 /** Used by library scripts to check they are being called by Moodle */
 define('MOODLE_INTERNAL', true);
 
-require dirname(__FILE__).'/lib/installlib.php';
+require_once(__DIR__.'/lib/classes/component.php');
+require_once(__DIR__.'/lib/installlib.php');
 
 // TODO: add lang detection here if empty $_REQUEST['lang']
 
@@ -105,10 +108,6 @@ $config = new stdClass();
 $config->lang = $lang;
 
 if (!empty($_POST)) {
-    if (install_ini_get_bool('magic_quotes_gpc')) {
-        $_POST = array_map('stripslashes', $_POST);
-    }
-
     $config->stage = (int)$_POST['stage'];
 
     if (isset($_POST['previous'])) {
@@ -129,7 +128,12 @@ if (!empty($_POST)) {
     $config->dbpass   = trim($_POST['dbpass']);
     $config->dbname   = trim($_POST['dbname']);
     $config->prefix   = trim($_POST['prefix']);
-    $config->dbsocket = (int)(!empty($_POST['dbsocket']));
+    $config->dbport   = (int)trim($_POST['dbport']);
+    $config->dbsocket = trim($_POST['dbsocket']);
+
+    if ($config->dbport <= 0) {
+        $config->dbport = '';
+    }
 
     $config->admin    = empty($_POST['admin']) ? 'admin' : trim($_POST['admin']);
 
@@ -144,7 +148,8 @@ if (!empty($_POST)) {
     $config->dbpass   = '';
     $config->dbname   = 'moodle';
     $config->prefix   = 'mdl_';
-    $config->dbsocket = 0;
+    $config->dbport   = empty($distro->dbport) ? '' : $distro->dbport;
+    $config->dbsocket = empty($distro->dbsocket) ? '' : $distro->dbsocket;
 
     $config->admin    = 'admin';
 
@@ -152,6 +157,7 @@ if (!empty($_POST)) {
 }
 
 // Fake some settings so that we can use selected functions from moodlelib.php, weblib.php and filelib.php.
+global $CFG;
 $CFG = new stdClass();
 $CFG->lang                 = $config->lang;
 $CFG->dirroot              = dirname(__FILE__);
@@ -161,14 +167,20 @@ $CFG->httpswwwroot         = $CFG->wwwroot;
 $CFG->dataroot             = $config->dataroot;
 $CFG->tempdir              = $CFG->dataroot.'/temp';
 $CFG->cachedir             = $CFG->dataroot.'/cache';
+$CFG->localcachedir        = $CFG->dataroot.'/localcache';
 $CFG->admin                = $config->admin;
 $CFG->docroot              = 'http://docs.moodle.org';
 $CFG->langotherroot        = $CFG->dataroot.'/lang';
 $CFG->langlocalroot        = $CFG->dataroot.'/lang';
 $CFG->directorypermissions = isset($distro->directorypermissions) ? $distro->directorypermissions : 00777; // let distros set dir permissions
+$CFG->filepermissions      = ($CFG->directorypermissions & 0666);
+$CFG->umaskpermissions     = (($CFG->directorypermissions & 0777) ^ 0777);
 $CFG->running_installer    = true;
 $CFG->early_install_lang   = true;
 $CFG->ostype               = (stristr(PHP_OS, 'win') && !stristr(PHP_OS, 'darwin')) ? 'WINDOWS' : 'UNIX';
+$CFG->debug                = (E_ALL | E_STRICT);
+$CFG->debugdisplay         = true;
+$CFG->debugdeveloper       = true;
 
 // Require all needed libs
 require_once($CFG->libdir.'/setuplib.php');
@@ -185,7 +197,10 @@ if (!empty($memlimit) and $memlimit != -1) {
 }
 
 // Continue with lib loading
-require_once($CFG->libdir.'/textlib.class.php');
+require_once($CFG->libdir.'/classes/text.php');
+require_once($CFG->libdir.'/classes/string_manager.php');
+require_once($CFG->libdir.'/classes/string_manager_install.php');
+require_once($CFG->libdir.'/classes/string_manager_standard.php');
 require_once($CFG->libdir.'/weblib.php');
 require_once($CFG->libdir.'/outputlib.php');
 require_once($CFG->libdir.'/dmllib.php');
@@ -203,20 +218,28 @@ ini_set('include_path', $CFG->libdir.'/pear' . PATH_SEPARATOR . ini_get('include
 //point zend include path to moodles lib/zend so that includes and requires will search there for files before anywhere else
 ini_set('include_path', $CFG->libdir.'/zend' . PATH_SEPARATOR . ini_get('include_path'));
 
+// Register our classloader, in theory somebody might want to replace it to load other hacked core classes.
+// Required because the database checks below lead to session interaction which is going to lead us to requiring autoloaded classes.
+if (defined('COMPONENT_CLASSLOADER')) {
+    spl_autoload_register(COMPONENT_CLASSLOADER);
+} else {
+    spl_autoload_register('core_component::classloader');
+}
+
 require('version.php');
 $CFG->target_release = $release;
 
-$SESSION = new stdClass();
-$SESSION->lang = $CFG->lang;
+\core\session\manager::init_empty_session();
+global $SESSION;
+global $USER;
 
-$USER = new stdClass();
-$USER->id = 0;
-
+global $COURSE;
 $COURSE = new stdClass();
-$COURSE->id = 0;
+$COURSE->id = 1;
 
+global $SITE;
 $SITE = $COURSE;
-define('SITEID', 0);
+define('SITEID', 1);
 
 $hint_dataroot = '';
 $hint_admindir = '';
@@ -263,9 +286,9 @@ if ($config->stage == INSTALL_SAVE) {
         $config->stage = INSTALL_DATABASETYPE;
     } else {
         if (function_exists('distro_pre_create_db')) { // Hook for distros needing to do something before DB creation
-            $distro = distro_pre_create_db($database, $config->dbhost, $config->dbuser, $config->dbpass, $config->dbname, $config->prefix, array('dbpersist'=>0, 'dbsocket'=>$config->dbsocket), $distro);
+            $distro = distro_pre_create_db($database, $config->dbhost, $config->dbuser, $config->dbpass, $config->dbname, $config->prefix, array('dbpersist'=>0, 'dbport'=>$config->dbport, 'dbsocket'=>$config->dbsocket), $distro);
         }
-        $hint_database = install_db_validate($database, $config->dbhost, $config->dbuser, $config->dbpass, $config->dbname, $config->prefix, array('dbpersist'=>0, 'dbsocket'=>$config->dbsocket));
+        $hint_database = install_db_validate($database, $config->dbhost, $config->dbuser, $config->dbpass, $config->dbname, $config->prefix, array('dbpersist'=>0, 'dbport'=>$config->dbport, 'dbsocket'=>$config->dbsocket));
 
         if ($hint_database === '') {
             $configphp = install_generate_configphp($database, $CFG);
@@ -283,7 +306,7 @@ if ($config->stage == INSTALL_SAVE) {
 
             install_print_header($config, 'config.php',
                                           get_string('configurationcompletehead', 'install'),
-                                          get_string('configurationcompletesub', 'install').get_string('configfilenotwritten', 'install'));
+                                          get_string('configurationcompletesub', 'install').get_string('configfilenotwritten', 'install'), 'alert-error');
             echo '<div class="configphp"><pre>';
             echo p($configphp);
             echo '</pre></div>';
@@ -405,42 +428,47 @@ if ($config->stage == INSTALL_DATABASE) {
     $strdbuser   = get_string('databaseuser', 'install');
     $strdbpass   = get_string('databasepass', 'install');
     $strprefix   = get_string('dbprefix', 'install');
+    $strdbport   = get_string('databaseport', 'install');
     $strdbsocket = get_string('databasesocket', 'install');
 
     echo '<div class="userinput">';
 
     $disabled = empty($distro->dbhost) ? '' : 'disabled="disabled';
-    echo '<div class="formrow"><label for="id_dbhost" class="formlabel">'.$strdbhost.'</label>';
-    echo '<input id="id_dbhost" name="dbhost" '.$disabled.' type="text" value="'.s($config->dbhost).'" size="50" class="forminput" />';
+    echo '<div class="fitem"><div class="fitemtitle"><label for="id_dbhost">'.$strdbhost.'</label></div>';
+    echo '<div class="fitemelement"><input id="id_dbhost" name="dbhost" '.$disabled.' type="text" value="'.s($config->dbhost).'" size="50" /></div>';
     echo '</div>';
 
-    echo '<div class="formrow"><label for="id_dbname" class="formlabel">'.$strdbname.'</label>';
-    echo '<input id="id_dbname" name="dbname" type="text" value="'.s($config->dbname).'" size="50" class="forminput" />';
+    echo '<div class="fitem"><div class="fitemtitle"><label for="id_dbname">'.$strdbname.'</label></div>';
+    echo '<div class="fitemelement"><input id="id_dbname" name="dbname" type="text" value="'.s($config->dbname).'" size="50" /></div>';
     echo '</div>';
 
     $disabled = empty($distro->dbuser) ? '' : 'disabled="disabled';
-    echo '<div class="formrow"><label for="id_dbuser" class="formlabel">'.$strdbuser.'</label>';
-    echo '<input id="id_dbuser" name="dbuser" '.$disabled.' type="text" value="'.s($config->dbuser).'" size="50" class="forminput" />';
+    echo '<div class="fitem"><div class="fitemtitle"><label for="id_dbuser">'.$strdbuser.'</label></div>';
+    echo '<div class="fitemelement"><input id="id_dbuser" name="dbuser" '.$disabled.' type="text" value="'.s($config->dbuser).'" size="50" /></div>';
     echo '</div>';
 
-    echo '<div class="formrow"><label for="id_dbpass" class="formlabel">'.$strdbpass.'</label>';
+    echo '<div class="fitem"><div class="fitemtitle"><label for="id_dbpass">'.$strdbpass.'</label></div>';
     // no password field here, the password may be visible in config.php if we can not write it to disk
-    echo '<input id="id_dbpass" name="dbpass" type="text" value="'.s($config->dbpass).'" size="50" class="forminput" />';
+    echo '<div class="fitemelement"><input id="id_dbpass" name="dbpass" type="text" value="'.s($config->dbpass).'" size="50" /></div>';
     echo '</div>';
 
-    echo '<div class="formrow"><label for="id_prefix" class="formlabel">'.$strprefix.'</label>';
-    echo '<input id="id_prefix" name="prefix" type="text" value="'.s($config->prefix).'" size="10" class="forminput" />';
+    echo '<div class="fitem"><div class="fitemtitle"><label for="id_prefix">'.$strprefix.'</label></div>';
+    echo '<div class="fitemelement"><input id="id_prefix" name="prefix" type="text" value="'.s($config->prefix).'" size="10" /></div>';
+    echo '</div>';
+
+    echo '<div class="fitem"><div class="fitemtitle"><label for="id_prefix">'.$strdbport.'</label></div>';
+    echo '<div class="fitemelement"><input id="id_dbport" name="dbport" type="text" value="'.s($config->dbport).'" size="10" /></div>';
     echo '</div>';
 
     if (!(stristr(PHP_OS, 'win') && !stristr(PHP_OS, 'darwin'))) {
-        $checked = $config->dbsocket ? 'checked="checked' : '';
-        echo '<div class="formrow"><label for="id_dbsocket" class="formlabel">'.$strdbsocket.'</label>';
-        echo '<input type="hidden" value="0" name="dbsocket" />';
-        echo '<input type="checkbox" id="id_dbsocket" value="1" name="dbsocket" '.$checked.' class="forminput" />';
+        echo '<div class="fitem"><div class="fitemtitle"><label for="id_dbsocket">'.$strdbsocket.'</label></div>';
+        echo '<div class="fitemelement"><input id="id_dbsocket" name="dbsocket" type="text" value="'.s($config->dbsocket).'" size="50" /></div>';
         echo '</div>';
     }
 
-    echo '<div class="hint">'.$hint_database.'</div>';
+    if ($hint_database !== '') {
+        echo '<div class="alert alert-error">'.$hint_database.'</div>';
+    }
     echo '</div>';
     install_print_footer($config);
     die;
@@ -456,6 +484,7 @@ if ($config->stage == INSTALL_DATABASETYPE) {
                                   get_string('databasetypesub', 'install'));
 
     $databases = array('mysqli' => moodle_database::get_driver_instance('mysqli', 'native'),
+                       'mariadb'=> moodle_database::get_driver_instance('mariadb', 'native'),
                        'pgsql'  => moodle_database::get_driver_instance('pgsql',  'native'),
                        'oci'    => moodle_database::get_driver_instance('oci',    'native'),
                        'sqlsrv' => moodle_database::get_driver_instance('sqlsrv', 'native'), // MS SQL*Server PHP driver
@@ -463,8 +492,8 @@ if ($config->stage == INSTALL_DATABASETYPE) {
                       );
 
     echo '<div class="userinput">';
-    echo '<div class="formrow"><label class="formlabel" for="dbtype">'.get_string('dbtype', 'install').'</label>';
-    echo '<select id="dbtype" name="dbtype" class="forminput">';
+    echo '<div class="fitem"><div class="fitemtitle"><label for="dbtype">'.get_string('dbtype', 'install').'</label></div>';
+    echo '<div class="fitemelement"><select id="dbtype" name="dbtype">';
     $disabled = array();
     $options = array();
     foreach ($databases as $type=>$database) {
@@ -481,7 +510,7 @@ if ($config->stage == INSTALL_DATABASETYPE) {
         }
         echo '</optgroup>';
     }
-    echo '</select></div>';
+    echo '</select></div></div>';
     echo '</div>';
 
     install_print_footer($config);
@@ -491,11 +520,10 @@ if ($config->stage == INSTALL_DATABASETYPE) {
 
 
 if ($config->stage == INSTALL_ENVIRONMENT or $config->stage == INSTALL_PATHS) {
-    $version_fail = (version_compare(phpversion(), "5.3.3") < 0);
     $curl_fail    = ($lang !== 'en' and !extension_loaded('curl')); // needed for lang pack download
     $zip_fail     = ($lang !== 'en' and !extension_loaded('zip'));  // needed for lang pack download
 
-    if ($version_fail or $curl_fail or $zip_fail) {
+    if ($curl_fail or $zip_fail) {
         $config->stage = INSTALL_ENVIRONMENT;
 
         install_print_header($config, get_string('environmenthead', 'install'),
@@ -503,10 +531,6 @@ if ($config->stage == INSTALL_ENVIRONMENT or $config->stage == INSTALL_PATHS) {
                                       get_string('environmentsub2', 'install'));
 
         echo '<div id="envresult"><dl>';
-        if ($version_fail) {
-            $a = (object)array('needed'=>'5.3.3', 'current'=>phpversion());
-            echo '<dt>'.get_string('phpversion', 'install').'</dt><dd>'.get_string('environmentrequireversion', 'admin', $a).'</dd>';
-        }
         if ($curl_fail) {
             echo '<dt>'.get_string('phpextension', 'install', 'cURL').'</dt><dd>'.get_string('environmentrequireinstall', 'admin').'</dd>';
         }
@@ -547,27 +571,27 @@ if ($config->stage == INSTALL_PATHS) {
     $stradmindirname = get_string('admindirname', 'install');
 
     echo '<div class="userinput">';
-    echo '<div class="formrow"><label for="id_wwwroot" class="formlabel">'.$paths['wwwroot'].'</label>';
-    echo '<input id="id_wwwroot" name="wwwroot" type="text" value="'.s($CFG->wwwroot).'" disabled="disabled" size="70" class="forminput" />';
+    echo '<div class="fitem"><div class="fitemtitle"><label for="id_wwwroot">'.$paths['wwwroot'].'</label></div>';
+    echo '<div class="fitemelement"><input id="id_wwwroot" name="wwwroot" type="text" value="'.s($CFG->wwwroot).'" disabled="disabled" size="70" /></div>';
     echo '</div>';
 
-    echo '<div class="formrow"><label for="id_dirroot" class="formlabel">'.$paths['dirroot'].'</label>';
-    echo '<input id="id_dirroot" name="dirroot" type="text" value="'.s($CFG->dirroot).'" disabled="disabled" size="70"class="forminput" />';
+    echo '<div class="fitem"><div class="fitemtitle"><label for="id_dirroot">'.$paths['dirroot'].'</label></div>';
+    echo '<div class="fitemelement"><input id="id_dirroot" name="dirroot" type="text" value="'.s($CFG->dirroot).'" disabled="disabled" size="70" /></div>';
     echo '</div>';
 
-    echo '<div class="formrow"><label for="id_dataroot" class="formlabel">'.$paths['dataroot'].'</label>';
-    echo '<input id="id_dataroot" name="dataroot" type="text" value="'.s($config->dataroot).'" size="70" class="forminput" />';
+    echo '<div class="fitem"><div class="fitemtitle"><label for="id_dataroot">'.$paths['dataroot'].'</label></div>';
+    echo '<div class="fitemelement"><input id="id_dataroot" name="dataroot" type="text" value="'.s($config->dataroot).'" size="70" /></div>';
     if ($hint_dataroot !== '') {
-        echo '<div class="hint">'.$hint_dataroot.'</div>';
+        echo '<div class="alert alert-error">'.$hint_dataroot.'</div>';
     }
     echo '</div>';
 
 
     if (!file_exists("$CFG->dirroot/admin/environment.xml")) {
-        echo '<div class="formrow"><label for="id_admin" class="formlabel">'.$paths['admindir'].'</label>';
-        echo '<input id="id_admin" name="admin" type="text" value="'.s($config->admin).'" size="10" class="forminput" />';
+        echo '<div class="fitem"><div class="fitemtitle"><label for="id_admin">'.$paths['admindir'].'</label></div>';
+        echo '<div class="fitemelement"><input id="id_admin" name="admin" type="text" value="'.s($config->admin).'" size="10" /></div>';
         if ($hint_admindir !== '') {
-            echo '<div class="hint">'.$hint_admindir.'</div>';
+            echo '<div class="alert alert-error">'.$hint_admindir.'</div>';
         }
         echo '</div>';
     }
@@ -589,7 +613,7 @@ if ($distro) {
 
     install_print_header($config, get_string('language'),
                                   get_string('chooselanguagehead', 'install'),
-                                  $sub);
+                                  $sub, 'alert-success');
 
 } else {
     install_print_header($config, get_string('language'),
@@ -599,13 +623,13 @@ if ($distro) {
 
 $languages = get_string_manager()->get_list_of_translations();
 echo '<div class="userinput">';
-echo '<div class="formrow"><label class="formlabel" for="langselect">'.get_string('language').'</label>';
-echo '<select id="langselect" name="lang" class="forminput" onchange="this.form.submit()">';
+echo '<div class="fitem"><div class="fitemtitle"><label for="langselect">'.get_string('language').'</label></div>';
+echo '<div class="fitemelement"><select id="langselect" name="lang" onchange="this.form.submit()">';
 foreach ($languages as $name=>$value) {
     $selected = ($name == $CFG->lang) ? 'selected="selected"' : '';
     echo '<option value="'.s($name).'" '.$selected.'>'.$value.'</option>';
 }
-echo '</select></div>';
+echo '</select></div></div>';
 echo '</div>';
 
 install_print_footer($config);

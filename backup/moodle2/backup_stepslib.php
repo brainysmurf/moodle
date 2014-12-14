@@ -28,26 +28,27 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * create the temp dir where backup/restore will happen,
- * delete old directories and create temp ids table
+ * Create the temp dir where backup/restore will happen and create temp ids table.
  */
 class create_and_clean_temp_stuff extends backup_execution_step {
 
     protected function define_execution() {
+        $progress = $this->task->get_progress();
+        $progress->start_progress('Deleting backup directories');
         backup_helper::check_and_create_backup_dir($this->get_backupid());// Create backup temp dir
-        backup_helper::clear_backup_dir($this->get_backupid());           // Empty temp dir, just in case
-        backup_helper::delete_old_backup_dirs(time() - (4 * 60 * 60));    // Delete > 4 hours temp dirs
+        backup_helper::clear_backup_dir($this->get_backupid(), $progress);           // Empty temp dir, just in case
         backup_controller_dbops::drop_backup_ids_temp_table($this->get_backupid()); // Drop ids temp table
         backup_controller_dbops::create_backup_ids_temp_table($this->get_backupid()); // Create ids temp table
+        $progress->end_progress();
     }
 }
 
 /**
- * delete the temp dir used by backup/restore (conditionally),
- * delete old directories and drop tem ids table. Note we delete
+ * Delete the temp dir used by backup/restore (conditionally),
+ * delete old directories and drop temp ids table. Note we delete
  * the directory but not the corresponding log file that will be
- * there for, at least, 4 hours - only delete_old_backup_dirs()
- * deletes log files (for easier access to them)
+ * there for, at least, 1 week - only delete_old_backup_dirs() or cron
+ * deletes log files (for easier access to them).
  */
 class drop_and_clean_temp_stuff extends backup_execution_step {
 
@@ -57,12 +58,15 @@ class drop_and_clean_temp_stuff extends backup_execution_step {
         global $CFG;
 
         backup_controller_dbops::drop_backup_ids_temp_table($this->get_backupid()); // Drop ids temp table
-        backup_helper::delete_old_backup_dirs(time() - (4 * 60 * 60));              // Delete > 4 hours temp dirs
+        backup_helper::delete_old_backup_dirs(strtotime('-1 week'));                // Delete > 1 week old temp dirs.
         // Delete temp dir conditionally:
         // 1) If $CFG->keeptempdirectoriesonbackup is not enabled
         // 2) If backup temp dir deletion has been marked to be avoided
         if (empty($CFG->keeptempdirectoriesonbackup) && !$this->skipcleaningtempdir) {
-            backup_helper::delete_backup_dir($this->get_backupid()); // Empty backup dir
+            $progress = $this->task->get_progress();
+            $progress->start_progress('Deleting backup dir');
+            backup_helper::delete_backup_dir($this->get_backupid(), $progress); // Empty backup dir
+            $progress->end_progress();
         }
     }
 
@@ -122,7 +126,7 @@ abstract class backup_activity_structure_step extends backup_structure_step {
         $element->add_child($optigroup); // Add optigroup to stay connected since beginning
 
         // Get all the optigroup_elements, looking across all the subplugin dirs
-        $subpluginsdirs = get_plugin_list($subplugintype);
+        $subpluginsdirs = core_component::get_plugin_list($subplugintype);
         foreach ($subpluginsdirs as $name => $subpluginsdir) {
             $classname = 'backup_' . $subplugintype . '_' . $name . '_subplugin';
             $backupfile = $subpluginsdir . '/backup/moodle2/' . $classname . '.class.php';
@@ -210,7 +214,7 @@ abstract class backup_questions_activity_structure_step extends backup_activity_
 
         $qas = new backup_nested_element($nameprefix . 'question_attempts');
         $qa = new backup_nested_element($nameprefix . 'question_attempt', array('id'), array(
-                'slot', 'behaviour', 'questionid', 'maxmark', 'minfraction',
+                'slot', 'behaviour', 'questionid', 'variant', 'maxmark', 'minfraction', 'maxfraction',
                 'flagged', 'questionsummary', 'rightanswer', 'responsesummary',
                 'timemodified'));
 
@@ -308,6 +312,7 @@ abstract class backup_block_structure_step extends backup_structure_step {
 class backup_module_structure_step extends backup_structure_step {
 
     protected function define_structure() {
+        global $DB;
 
         // Define each element separated
 
@@ -316,13 +321,7 @@ class backup_module_structure_step extends backup_structure_step {
             'added', 'score', 'indent', 'visible',
             'visibleold', 'groupmode', 'groupingid', 'groupmembersonly',
             'completion', 'completiongradeitemnumber', 'completionview', 'completionexpected',
-            'availablefrom', 'availableuntil', 'showavailability', 'showdescription'));
-
-        $availinfo = new backup_nested_element('availability_info');
-        $availability = new backup_nested_element('availability', array('id'), array(
-            'sourcecmid', 'requiredcompletion', 'gradeitemid', 'grademin', 'grademax'));
-        $availabilityfield = new backup_nested_element('availability_field', array('id'), array(
-            'userfield', 'customfield', 'customfieldtype', 'operator', 'value'));
+            'availability', 'showdescription'));
 
         // attach format plugin structure to $module element, only one allowed
         $this->add_plugin_structure('format', $module, false);
@@ -334,25 +333,15 @@ class backup_module_structure_step extends backup_structure_step {
         // attach local plugin structure to $module, multiple allowed
         $this->add_plugin_structure('local', $module, true);
 
-        // Define the tree
-        $module->add_child($availinfo);
-        $availinfo->add_child($availability);
-        $availinfo->add_child($availabilityfield);
-
         // Set the sources
-        $module->set_source_sql('
-            SELECT cm.*, m.version, m.name AS modulename, s.id AS sectionid, s.section AS sectionnumber
+        $concat = $DB->sql_concat("'mod_'", 'm.name');
+        $module->set_source_sql("
+            SELECT cm.*, cp.value AS version, m.name AS modulename, s.id AS sectionid, s.section AS sectionnumber
               FROM {course_modules} cm
               JOIN {modules} m ON m.id = cm.module
+              JOIN {config_plugins} cp ON cp.plugin = $concat AND cp.name = 'version'
               JOIN {course_sections} s ON s.id = cm.section
-             WHERE cm.id = ?', array(backup::VAR_MODID));
-
-        $availability->set_source_table('course_modules_availability', array('coursemoduleid' => backup::VAR_MODID));
-        $availabilityfield->set_source_sql('
-            SELECT cmaf.*, uif.shortname AS customfield, uif.datatype AS customfieldtype
-              FROM {course_modules_avail_fields} cmaf
-         LEFT JOIN {user_info_field} uif ON uif.id = cmaf.customfieldid
-             WHERE cmaf.coursemoduleid = ?', array(backup::VAR_MODID));
+             WHERE cm.id = ?", array(backup::VAR_MODID));
 
         // Define annotations
         $module->annotate_ids('grouping', 'groupingid');
@@ -374,7 +363,7 @@ class backup_section_structure_step extends backup_structure_step {
 
         $section = new backup_nested_element('section', array('id'), array(
                 'number', 'name', 'summary', 'summaryformat', 'sequence', 'visible',
-                'availablefrom', 'availableuntil', 'showavailability', 'groupingid'));
+                'availabilityjson'));
 
         // attach format plugin structure to $section element, only one allowed
         $this->add_plugin_structure('format', $section, false);
@@ -382,27 +371,13 @@ class backup_section_structure_step extends backup_structure_step {
         // attach local plugin structure to $section element, multiple allowed
         $this->add_plugin_structure('local', $section, true);
 
-        // Add nested elements for _availability table
-        $avail = new backup_nested_element('availability', array('id'), array(
-                'sourcecmid', 'requiredcompletion', 'gradeitemid', 'grademin', 'grademax'));
-        $availfield = new backup_nested_element('availability_field', array('id'), array(
-            'userfield', 'operator', 'value', 'customfield', 'customfieldtype'));
-        $section->add_child($avail);
-        $section->add_child($availfield);
-
         // Add nested elements for course_format_options table
         $formatoptions = new backup_nested_element('course_format_options', array('id'), array(
             'format', 'name', 'value'));
         $section->add_child($formatoptions);
 
-        // Define sources
+        // Define sources.
         $section->set_source_table('course_sections', array('id' => backup::VAR_SECTIONID));
-        $avail->set_source_table('course_sections_availability', array('coursesectionid' => backup::VAR_SECTIONID));
-        $availfield->set_source_sql('
-            SELECT csaf.*, uif.shortname AS customfield, uif.datatype AS customfieldtype
-              FROM {course_sections_avail_fields} csaf
-         LEFT JOIN {user_info_field} uif ON uif.id = csaf.customfieldid
-             WHERE csaf.coursesectionid = ?', array(backup::VAR_SECTIONID));
         $formatoptions->set_source_sql('SELECT cfo.id, cfo.format, cfo.name, cfo.value
               FROM {course} c
               JOIN {course_format_options} cfo
@@ -412,9 +387,11 @@ class backup_section_structure_step extends backup_structure_step {
 
         // Aliases
         $section->set_source_alias('section', 'number');
+        // The 'availability' field needs to be renamed because it clashes with
+        // the old nested element structure for availability data.
+        $section->set_source_alias('availability', 'availabilityjson');
 
         // Set annotations
-        $section->annotate_ids('grouping', 'groupingid');
         $section->annotate_files('course', 'section', 'id');
 
         return $section;
@@ -570,7 +547,8 @@ class backup_enrolments_structure_step extends backup_structure_step {
 
         $enrol->annotate_ids('role', 'roleid');
 
-        //TODO: let plugins annotate custom fields too and add more children
+        // Add enrol plugin structure.
+        $this->add_plugin_structure('enrol', $enrol, false);
 
         return $enrolments;
     }
@@ -1189,18 +1167,18 @@ class backup_users_structure_step extends backup_structure_step {
             'confirmed', 'policyagreed', 'deleted',
             'lang', 'theme', 'timezone', 'firstaccess',
             'lastaccess', 'lastlogin', 'currentlogin',
-            'mailformat', 'maildigest', 'maildisplay', 'htmleditor',
+            'mailformat', 'maildigest', 'maildisplay',
             'autosubscribe', 'trackforums', 'timecreated',
             'timemodified', 'trustbitmask');
 
         // Then, the fields potentially needing anonymization
         $anonfields = array(
-            'username', 'idnumber', 'firstname', 'lastname',
-            'email', 'icq', 'skype',
+            'username', 'idnumber', 'email', 'icq', 'skype',
             'yahoo', 'aim', 'msn', 'phone1',
             'phone2', 'institution', 'department', 'address',
             'city', 'country', 'lastip', 'picture',
             'url', 'description', 'descriptionformat', 'imagealt', 'auth');
+        $anonfields = array_merge($anonfields, get_all_user_name_fields());
 
         // Add anonymized fields to $userfields with custom final element
         foreach ($anonfields as $field) {
@@ -1364,7 +1342,7 @@ class backup_block_instance_structure_step extends backup_structure_step {
         }
         $blockrec->contextid = $this->task->get_contextid();
         // Get the version of the block
-        $blockrec->version = $DB->get_field('block', 'version', array('name' => $this->task->get_blockname()));
+        $blockrec->version = get_config('block_'.$this->task->get_blockname(), 'version');
 
         // Define sources
 
@@ -1500,10 +1478,16 @@ class move_inforef_annotations_to_final extends backup_execution_step {
 
         // Items we want to include in the inforef file
         $items = backup_helper::get_inforef_itemnames();
+        $progress = $this->task->get_progress();
+        $progress->start_progress($this->get_name(), count($items));
+        $done = 1;
         foreach ($items as $itemname) {
             // Delegate to dbops
-            backup_structure_dbops::move_annotations_to_final($this->get_backupid(), $itemname);
+            backup_structure_dbops::move_annotations_to_final($this->get_backupid(),
+                    $itemname, $progress);
+            $progress->progress($done++);
         }
+        $progress->end_progress();
     }
 }
 
@@ -1567,6 +1551,7 @@ class backup_main_structure_step extends backup_structure_step {
         $info['backup_date']    = time();
         $info['backup_uniqueid']= $this->get_backupid();
         $info['mnet_remoteusers']=backup_controller_dbops::backup_includes_mnet_remote_users($this->get_backupid());
+        $info['include_files'] = backup_controller_dbops::backup_includes_files($this->get_backupid());
         $info['include_file_references_to_external_content'] =
                 backup_controller_dbops::backup_includes_file_references($this->get_backupid());
         $info['original_wwwroot']=$CFG->wwwroot;
@@ -1580,7 +1565,8 @@ class backup_main_structure_step extends backup_structure_step {
         $info['original_system_contextid'] = context_system::instance()->id;
 
         // Get more information from controller
-        list($dinfo, $cinfo, $sinfo) = backup_controller_dbops::get_moodle_backup_information($this->get_backupid());
+        list($dinfo, $cinfo, $sinfo) = backup_controller_dbops::get_moodle_backup_information(
+                $this->get_backupid(), $this->get_task()->get_progress());
 
         // Define elements
 
@@ -1588,7 +1574,7 @@ class backup_main_structure_step extends backup_structure_step {
 
         $information = new backup_nested_element('information', null, array(
             'name', 'moodle_version', 'moodle_release', 'backup_version',
-            'backup_release', 'backup_date', 'mnet_remoteusers', 'include_file_references_to_external_content', 'original_wwwroot',
+            'backup_release', 'backup_date', 'mnet_remoteusers', 'include_files', 'include_file_references_to_external_content', 'original_wwwroot',
             'original_site_identifier_hash', 'original_course_id',
             'original_course_fullname', 'original_course_shortname', 'original_course_startdate',
             'original_course_contextid', 'original_system_contextid'));
@@ -1667,7 +1653,11 @@ class backup_main_structure_step extends backup_structure_step {
 /**
  * Execution step that will generate the final zip (.mbz) file with all the contents
  */
-class backup_zip_contents extends backup_execution_step {
+class backup_zip_contents extends backup_execution_step implements file_progress {
+    /**
+     * @var bool True if we have started tracking progress
+     */
+    protected $startedprogress;
 
     protected function define_execution() {
 
@@ -1691,10 +1681,24 @@ class backup_zip_contents extends backup_execution_step {
         $zipfile = $basepath . '/backup.mbz';
 
         // Get the zip packer
-        $zippacker = get_file_packer('application/zip');
+        $zippacker = get_file_packer('application/vnd.moodle.backup');
+
+        // Track overall progress for the 2 long-running steps (archive to
+        // pathname, get backup information).
+        $reporter = $this->task->get_progress();
+        $reporter->start_progress('backup_zip_contents', 2);
 
         // Zip files
         $result = $zippacker->archive_to_pathname($files, $zipfile, true, $this);
+
+        // If any sub-progress happened, end it.
+        if ($this->startedprogress) {
+            $this->task->get_progress()->end_progress();
+            $this->startedprogress = false;
+        } else {
+            // No progress was reported, manually move it on to the next overall task.
+            $reporter->progress(1);
+        }
 
         // Something went wrong.
         if ($result === false) {
@@ -1703,12 +1707,42 @@ class backup_zip_contents extends backup_execution_step {
         }
         // Read to make sure it is a valid backup. Refer MDL-37877 . Delete it, if found not to be valid.
         try {
-            backup_general_helper::get_backup_information_from_mbz($zipfile);
+            backup_general_helper::get_backup_information_from_mbz($zipfile, $this);
         } catch (backup_helper_exception $e) {
             @unlink($zipfile);
             throw new backup_step_exception('error_zip_packing', '', $e->debuginfo);
         }
+
+        // If any sub-progress happened, end it.
+        if ($this->startedprogress) {
+            $this->task->get_progress()->end_progress();
+            $this->startedprogress = false;
+        } else {
+            $reporter->progress(2);
+        }
+        $reporter->end_progress();
     }
+
+    /**
+     * Implementation for file_progress interface to display unzip progress.
+     *
+     * @param int $progress Current progress
+     * @param int $max Max value
+     */
+    public function progress($progress = file_progress::INDETERMINATE, $max = file_progress::INDETERMINATE) {
+        $reporter = $this->task->get_progress();
+
+        // Start tracking progress if necessary.
+        if (!$this->startedprogress) {
+            $reporter->start_progress('extract_file_to_dir', ($max == file_progress::INDETERMINATE)
+                    ? \core\progress\base::INDETERMINATE : $max);
+            $this->startedprogress = true;
+        }
+
+        // Pass progress through to whatever handles it.
+        $reporter->progress(($progress == file_progress::INDETERMINATE)
+                ? \core\progress\base::INDETERMINATE : $progress);
+     }
 }
 
 /**
@@ -1727,7 +1761,8 @@ class backup_store_backup_file extends backup_execution_step {
         $has_file_references = backup_controller_dbops::backup_includes_file_references($this->get_backupid());
         // Perform storage and return it (TODO: shouldn't be array but proper result object)
         return array(
-            'backup_destination' => backup_helper::store_backup_file($this->get_backupid(), $zipfile),
+            'backup_destination' => backup_helper::store_backup_file($this->get_backupid(), $zipfile,
+                    $this->task->get_progress()),
             'include_file_references_to_external_content' => $has_file_references
         );
     }
@@ -1751,6 +1786,47 @@ class backup_activity_grade_items_to_ids extends backup_execution_step {
                 backup_structure_dbops::insert_backup_ids_record($this->get_backupid(), 'grade_item', $item->id);
             }
         }
+    }
+}
+
+
+/**
+ * This step allows enrol plugins to annotate custom fields.
+ *
+ * @package   core_backup
+ * @copyright 2014 University of Wisconsin
+ * @author    Matt Petro
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class backup_enrolments_execution_step extends backup_execution_step {
+
+    /**
+     * Function that will contain all the code to be executed.
+     */
+    protected function define_execution() {
+        global $DB;
+
+        $plugins = enrol_get_plugins(true);
+        $enrols = $DB->get_records('enrol', array(
+                'courseid' => $this->task->get_courseid()));
+
+        // Allow each enrol plugin to add annotations.
+        foreach ($enrols as $enrol) {
+            if (isset($plugins[$enrol->enrol])) {
+                $plugins[$enrol->enrol]->backup_annotate_custom_fields($this, $enrol);
+            }
+        }
+    }
+
+    /**
+     * Annotate a single name/id pair.
+     * This can be called from {@link enrol_plugin::backup_annotate_custom_fields()}.
+     *
+     * @param string $itemname
+     * @param int $itemid
+     */
+    public function annotate_id($itemname, $itemid) {
+        backup_structure_dbops::insert_backup_ids_record($this->get_backupid(), $itemname, $itemid);
     }
 }
 
@@ -1849,13 +1925,22 @@ class backup_annotate_all_question_files extends backup_execution_step {
         $components = backup_qtype_plugin::get_components_and_fileareas();
         // Let's loop
         foreach($rs as $record) {
-            // We don't need to specify filearea nor itemid as far as by
-            // component and context it's enough to annotate the whole bank files
-            // This backups "questiontext", "generalfeedback" and "answerfeedback" fileareas (all them
-            // belonging to the "question" component
-            backup_structure_dbops::annotate_files($this->get_backupid(), $record->contextid, 'question', null, null);
-            // Again, it is enough to pick files only by context and component
-            // Do it for qtype specific components
+            // Backup all the file areas the are managed by the core question component.
+            // That is, by the question_type base class. In particular, we don't want
+            // to include files belonging to responses here.
+            backup_structure_dbops::annotate_files($this->get_backupid(), $record->contextid, 'question', 'questiontext', null);
+            backup_structure_dbops::annotate_files($this->get_backupid(), $record->contextid, 'question', 'generalfeedback', null);
+            backup_structure_dbops::annotate_files($this->get_backupid(), $record->contextid, 'question', 'answer', null);
+            backup_structure_dbops::annotate_files($this->get_backupid(), $record->contextid, 'question', 'answerfeedback', null);
+            backup_structure_dbops::annotate_files($this->get_backupid(), $record->contextid, 'question', 'hint', null);
+            backup_structure_dbops::annotate_files($this->get_backupid(), $record->contextid, 'question', 'correctfeedback', null);
+            backup_structure_dbops::annotate_files($this->get_backupid(), $record->contextid, 'question', 'partiallycorrectfeedback', null);
+            backup_structure_dbops::annotate_files($this->get_backupid(), $record->contextid, 'question', 'incorrectfeedback', null);
+
+            // For files belonging to question types, we make the leap of faith that
+            // all the files belonging to the question type are part of the question definition,
+            // so we can just backup all the files in bulk, without specifying each
+            // file area name separately.
             foreach ($components as $component => $fileareas) {
                 backup_structure_dbops::annotate_files($this->get_backupid(), $record->contextid, $component, null, null);
             }
@@ -1968,6 +2053,8 @@ class backup_annotate_all_user_files extends backup_execution_step {
         // Fetch all annotated (final) users
         $rs = $DB->get_recordset('backup_ids_temp', array(
             'backupid' => $this->get_backupid(), 'itemname' => 'userfinal'));
+        $progress = $this->task->get_progress();
+        $progress->start_progress($this->get_name());
         foreach ($rs as $record) {
             $userid = $record->itemid;
             $userctx = context_user::instance($userid, IGNORE_MISSING);
@@ -1979,8 +2066,10 @@ class backup_annotate_all_user_files extends backup_execution_step {
                 // We don't need to specify itemid ($userid - 5th param) as far as by
                 // context we can get all the associated files. See MDL-22092
                 backup_structure_dbops::annotate_files($this->get_backupid(), $userctx->id, 'user', $filearea, null);
+                $progress->progress();
             }
         }
+        $progress->end_progress();
         $rs->close();
     }
 }

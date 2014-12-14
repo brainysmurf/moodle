@@ -27,7 +27,10 @@ define('NO_OUTPUT_BUFFERING', true);
 
 require(dirname(__FILE__) . '/../../../../config.php');
 require_once($CFG->libdir. '/clilib.php');
+<<<<<<< HEAD
 require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/generator/classes/course_backend.php');
+=======
+>>>>>>> moodle/MOODLE_27_STABLE
 
 // CLI options.
 list($options, $unrecognized) = cli_get_params(
@@ -64,7 +67,11 @@ Options:
 -h, --help     Print out this help
 
 Example from Moodle root directory:
+<<<<<<< HEAD
 \$sudo -u www-data /usr/bin/php admin/tool/generator/cli/maketestcourse.php --shortname=SIZE_S --size=S
+=======
+\$ php admin/tool/generator/cli/maketestcourse.php --shortname=SIZE_S --size=S
+>>>>>>> moodle/MOODLE_27_STABLE
 ";
     // Exit with error unless we're showing this because they asked for it.
     exit(empty($options['help']) ? 1 : 0);
@@ -94,7 +101,11 @@ if ($error = tool_generator_course_backend::check_shortname_available($shortname
 }
 
 // Switch to admin user account.
+<<<<<<< HEAD
 session_set_user(get_admin());
+=======
+\core\session\manager::set_user(get_admin());
+>>>>>>> moodle/MOODLE_27_STABLE
 
 // Do backend code to generate course.
 $backend = new tool_generator_course_backend($shortname, $size, $fixeddataset, $filesizelimit, empty($options['quiet']));

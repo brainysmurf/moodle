@@ -28,18 +28,6 @@ $currentorg = optional_param('currentorg', '', PARAM_RAW); // selected organizat
 $newattempt = optional_param('newattempt', 'off', PARAM_ALPHA); // the user request to start a new attempt.
 $displaymode = optional_param('display', '', PARAM_ALPHA);
 
-// IE 9 workaround for Flash bug: MDL-29213
-// Note that it's not clear if appending the meta tag via $CFG->additionalhtmlhead
-// is correct at all, both because of the mechanism itself and because MS says
-// the tag must be used *before* including other stuff. See the issue for more info.
-// TODO: Once we implement some way to inject meta tags, change this to use it. MDL-30039
-if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE 9') !== false) {
-    if (!isset($CFG->additionalhtmlhead)) { //check to make sure set first - that way we can use .=
-        $CFG->additionalhtmlhead = '';
-    }
-    $CFG->additionalhtmlhead .= '<meta http-equiv="X-UA-Compatible" content="IE=8" />';
-}
-
 if (!empty($id)) {
     if (! $cm = get_coursemodule_from_id('scorm', $id)) {
         print_error('invalidcoursemodule');
@@ -66,7 +54,7 @@ if (!empty($id)) {
 // If new attempt is being triggered set normal mode and increment attempt number.
 $attempt = scorm_get_last_attempt($scorm->id, $USER->id);
 
-// Check mode is correct and set mode/attempt (uses pass by reference).
+// Check mode is correct and set/validate mode/attempt/newattempt (uses pass by reference).
 scorm_check_mode($scorm, $newattempt, $attempt, $USER->id, $mode);
 
 $url = new moodle_url('/mod/scorm/player.php', array('scoid'=>$scoid, 'cm'=>$cm->id));
@@ -84,6 +72,13 @@ $forcejs = get_config('scorm', 'forcejavascript');
 if (!empty($forcejs)) {
     $PAGE->add_body_class('forcejavascript');
 }
+$collapsetocwinsize = get_config('scorm', 'collapsetocwinsize');
+if (empty($collapsetocwinsize)) {
+    // Set as default window size to collapse TOC.
+    $collapsetocwinsize = 767;
+} else {
+    $collapsetocwinsize = intval($collapsetocwinsize);
+}
 
 require_login($course, false, $cm);
 
@@ -95,14 +90,14 @@ $strexit = get_string('exitactivity', 'scorm');
 $coursecontext = context_course::instance($course->id);
 
 if ($displaymode == 'popup') {
-    $PAGE->set_pagelayout('popup');
+    $PAGE->set_pagelayout('embedded');
 } else {
     $shortname = format_string($course->shortname, true, array('context' => $coursecontext));
     $pagetitle = strip_tags("$shortname: ".format_string($scorm->name));
     $PAGE->set_title($pagetitle);
     $PAGE->set_heading($course->fullname);
 }
-if (!$cm->visible and !has_capability('moodle/course:viewhiddenactivities', $coursecontext)) {
+if (!$cm->visible and !has_capability('moodle/course:viewhiddenactivities', context_module::instance($cm->id))) {
     echo $OUTPUT->header();
     notice(get_string("activityiscurrentlyhidden"));
     echo $OUTPUT->footer();
@@ -141,9 +136,6 @@ if ($scorm->lastattemptlock == 1 && $result->attemptleft == 0) {
     exit;
 }
 
-add_to_log($course->id, 'scorm', 'view', "player.php?cm=$cm->id&scoid=$sco->id", "$scorm->id", $cm->id);
-
-
 $scoidstr = '&amp;scoid='.$sco->id;
 $modestr = '&amp;mode='.$mode;
 
@@ -174,6 +166,9 @@ $PAGE->requires->data_for_js('scormplayerdata', Array('launch' => false,
 $PAGE->requires->js('/mod/scorm/request.js', true);
 $PAGE->requires->js('/lib/cookies.js', true);
 echo $OUTPUT->header();
+if (!empty($scorm->displayactivityname)) {
+    echo $OUTPUT->heading(format_string($scorm->name));
+}
 
 $PAGE->requires->string_for_js('navigation', 'scorm');
 $PAGE->requires->string_for_js('toc', 'scorm');
@@ -245,7 +240,7 @@ if ($result->prerequisites) {
 ?>
     </div> <!-- SCORM page -->
 <?php
-$scoes = scorm_get_toc_object($USER, $scorm, "", $sco->id, $mode, $attempt);
+$scoes = scorm_get_toc_object($USER, $scorm, $currentorg, $sco->id, $mode, $attempt);
 $adlnav = scorm_get_adlnav_json($scoes['scoes']);
 
 if (empty($scorm->popup) || $displaymode == 'popup') {
@@ -257,9 +252,17 @@ if (empty($scorm->popup) || $displaymode == 'popup') {
         'fullpath' => '/mod/scorm/module.js',
         'requires' => array('json'),
     );
-    $PAGE->requires->js_init_call('M.mod_scorm.init', array($scorm->hidenav, $scorm->hidetoc, $result->toctitle, $name, $sco->id, $adlnav), false, $jsmodule);
+    $scorm->nav = intval($scorm->nav);
+    $PAGE->requires->js_init_call('M.mod_scorm.init', array($scorm->nav, $scorm->navpositionleft, $scorm->navpositiontop, $scorm->hidetoc,
+                                                            $collapsetocwinsize, $result->toctitle, $name, $sco->id, $adlnav), false, $jsmodule);
 }
 if (!empty($forcejs)) {
     echo $OUTPUT->box(get_string("forcejavascriptmessage", "scorm"), "generalbox boxaligncenter forcejavascriptmessage");
 }
+
+// Add the checknet system to keep checking for a connection.
+$PAGE->requires->string_for_js('networkdropped', 'mod_scorm');
+$PAGE->requires->yui_module('moodle-core-checknet', 'M.core.checknet.init', array(array(
+    'message' => array('networkdropped', 'mod_scorm'),
+)));
 echo $OUTPUT->footer();

@@ -255,7 +255,7 @@ class qtype_calculatedsimple_edit_form extends qtype_calculated_edit_form {
                     !($datasettoremove ||$newdataset ||$newdatasetvalues)) {
                 $i = 1;
                 $fromformdefinition = optional_param_array('definition', '', PARAM_NOTAGS);
-                $fromformnumber = optional_param_array('number', '', PARAM_INT);
+                $fromformnumber = optional_param_array('number', '', PARAM_RAW);// This parameter will be validated in the form.
                 $fromformitemid = optional_param_array('itemid', '', PARAM_INT);
                 ksort($fromformdefinition);
 
@@ -508,7 +508,7 @@ class qtype_calculatedsimple_edit_form extends qtype_calculated_edit_form {
                             $mform->addElement('hidden', "number[$j]", get_string(
                                     'wildcard', 'qtype_calculatedsimple', $datasetdef->name));
                         }
-                        $mform->setType("number[$j]", PARAM_FLOAT);
+                        $mform->setType("number[$j]", PARAM_RAW); // This parameter will be validated in validation().
 
                         $mform->addElement('hidden', "itemid[$j]");
                         $mform->setType("itemid[$j]", PARAM_INT);
@@ -566,6 +566,11 @@ class qtype_calculatedsimple_edit_form extends qtype_calculated_edit_form {
         }
     }
 
+    protected function can_preview() {
+        return empty($this->question->beingcopied) && !empty($this->question->id) &&
+                $this->question->formoptions->canedit && $this->noofitems > 0;
+    }
+
     public function data_preprocessing($question) {
         $question = parent::data_preprocessing($question);
         $question = $this->data_preprocessing_answers($question);
@@ -585,6 +590,28 @@ class qtype_calculatedsimple_edit_form extends qtype_calculated_edit_form {
 
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
+
+        if (array_key_exists('number', $data)) {
+            $numbers = $data['number'];
+        } else {
+            $numbers = array();
+        }
+        foreach ($numbers as $key => $number) {
+            if (! is_numeric($number)) {
+                if (stristr($number, ',')) {
+                    $errors['number['.$key.']'] = get_string('nocommaallowed', 'qtype_calculated');
+                } else {
+                    $errors['number['.$key.']'] = get_string('notvalidnumber', 'qtype_calculated');
+                }
+            } else if (stristr($number, 'x')) {
+                $a = new stdClass();
+                $a->name = '';
+                $a->value = $number;
+                $errors['number['.$key.']'] = get_string('hexanotallowed', 'qtype_calculated', $a);
+            } else if (is_nan($number)) {
+                $errors['number['.$key.']'] = get_string('notvalidnumber', 'qtype_calculated');
+            }
+        }
 
         if (empty($data['definition'])) {
             $errors['selectadd'] = get_string('youmustaddatleastonevalue', 'qtype_calculatedsimple');

@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * A popup layout for the Bootstrapbase theme.
+ *
+ * @package   theme_bootstrapbase
+ * @copyright 2012 Bas Brands, www.basbrands.nl
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 echo $OUTPUT->doctype() ?>
 <html <?php echo $OUTPUT->htmlattributes(); ?>>
 <head>
@@ -23,26 +31,26 @@ echo $OUTPUT->doctype() ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
-<?php
-// If on desktop, then hide the header/footer.
-$hideclass = '';
-$bodynoheader = '';
-$devicetype = get_device_type();
-if ($devicetype !== 'mobile' and $devicetype !== 'tablet') {
-    // We can not use the Bootstrap responsive css classes because popups are phone sized on desktop.
-    $hideclass = 'hide';
-    $bodynoheader = 'bodynoheader';
-}
-?>
-
-<body <?php echo $OUTPUT->body_attributes(array($bodynoheader)); ?>>
+<body <?php echo $OUTPUT->body_attributes(); ?>>
 
 <?php echo $OUTPUT->standard_top_of_body_html() ?>
+
+<?php
+    // If on desktop, then hide the header/footer.
+    $hideclass = '';
+    $devicetype = core_useragent::get_device_type();
+    if($devicetype !== 'mobile' and $devicetype !== 'tablet') {
+        // We can not use the Bootstrap responsive css classes because popups are phone sized on desktop.
+        $hideclass = 'hide';
+    }
+?>
 
 <header role="banner" class="navbar navbar-fixed-top moodle-has-zindex <?php echo $hideclass; ?>">
     <nav role="navigation" class="navbar-inner">
         <div class="container-fluid">
-            <a class="brand" href="<?php echo $CFG->wwwroot;?>"><?php echo $SITE->shortname; ?></a>
+            <a class="brand" href="<?php echo $CFG->wwwroot;?>"><?php echo
+                format_string($SITE->shortname, true, array('context' => context_course::instance(SITEID)));
+                ?></a>
             <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>

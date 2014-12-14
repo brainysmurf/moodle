@@ -130,7 +130,11 @@ class enrol_ldap_plugin extends enrol_plugin {
         global $DB;
 
         // Do not try to print anything to the output because this method is called during interactive login.
-        $trace = new error_log_progress_trace($this->errorlogtag);
+        if (PHPUNIT_TEST) {
+            $trace = new null_progress_trace();
+        } else {
+            $trace = new error_log_progress_trace($this->errorlogtag);
+        }
 
         if (!$this->ldap_connect($trace)) {
             $trace->finished();
@@ -147,7 +151,7 @@ class enrol_ldap_plugin extends enrol_plugin {
         }
 
         // We may need a lot of memory here
-        @set_time_limit(0);
+        core_php_time_limit::raise();
         raise_memory_limit(MEMORY_HUGE);
 
         // Get enrolments for each type of role.
@@ -311,7 +315,7 @@ class enrol_ldap_plugin extends enrol_plugin {
         $ldap_pagedresults = ldap_paged_results_supported($this->get_config('ldap_version'));
 
         // we may need a lot of memory here
-        @set_time_limit(0);
+        core_php_time_limit::raise();
         raise_memory_limit(MEMORY_HUGE);
 
         $oneidnumber = null;
@@ -327,7 +331,7 @@ class enrol_ldap_plugin extends enrol_plugin {
                 $trace->finished();
                 return;
             }
-            $oneidnumber = ldap_filter_addslashes(textlib::convert($course->idnumber, 'utf-8', $this->get_config('ldapencoding')));
+            $oneidnumber = ldap_filter_addslashes(core_text::convert($course->idnumber, 'utf-8', $this->get_config('ldapencoding')));
         }
 
         // Get enrolments for each type of role.
@@ -430,6 +434,8 @@ class enrol_ldap_plugin extends enrol_plugin {
                                 $trace->output(get_string('createnotcourseextid', 'enrol_ldap', array('courseextid'=>$idnumber)));
                                 continue; // Next; skip this one!
                             }
+                        } else {  // Check if course needs update & update as needed.
+                            $this->update_course($course_obj, $course, $trace);
                         }
 
                         // Enrol & unenrol
@@ -689,7 +695,7 @@ class enrol_ldap_plugin extends enrol_plugin {
             return array();
         }
 
-        $extmemberuid = textlib::convert($memberuid, 'utf-8', $this->get_config('ldapencoding'));
+        $extmemberuid = core_text::convert($memberuid, 'utf-8', $this->get_config('ldapencoding'));
 
         if($this->get_config('memberattribute_isdn')) {
             if (!($extmemberuid = $this->ldap_find_userdn($extmemberuid))) {
@@ -702,6 +708,7 @@ class enrol_ldap_plugin extends enrol_plugin {
             $usergroups = $this->ldap_find_user_groups($extmemberuid);
             if(count($usergroups) > 0) {
                 foreach ($usergroups as $group) {
+                    $group = ldap_filter_addslashes($group);
                     $ldap_search_pattern .= '('.$this->get_config('memberattribute_role'.$role->id).'='.$group.')';
                 }
             }
@@ -998,6 +1005,78 @@ class enrol_ldap_plugin extends enrol_plugin {
 
         $newcourse = create_course($course);
         return $newcourse->id;
+    }
+
+    /**
+     * Will update a moodle course with new values from LDAP
+     * A field will be updated only if it is marked to be updated
+     * on sync in plugin settings
+     *
+     * @param object $course
+     * @param array $externalcourse
+     * @param progress_trace $trace
+     * @return bool
+     */
+    protected function update_course($course, $externalcourse, progress_trace $trace) {
+        global $CFG, $DB;
+
+        $coursefields = array ('shortname', 'fullname', 'summary');
+        static $shouldupdate;
+
+        // Initialize $shouldupdate variable. Set to true if one or more fields are marked for update.
+        if (!isset($shouldupdate)) {
+            $shouldupdate = false;
+            foreach ($coursefields as $field) {
+                $shouldupdate = $shouldupdate || $this->get_config('course_'.$field.'_updateonsync');
+            }
+        }
+
+        // If we should not update return immediately.
+        if (!$shouldupdate) {
+            return false;
+        }
+
+        require_once("$CFG->dirroot/course/lib.php");
+        $courseupdated = false;
+        $updatedcourse = new stdClass();
+        $updatedcourse->id = $course->id;
+
+        // Update course fields if necessary.
+        foreach ($coursefields as $field) {
+            // If field is marked to be updated on sync && field data was changed update it.
+            if ($this->get_config('course_'.$field.'_updateonsync')
+                    && isset($externalcourse[$this->get_config('course_'.$field)][0])
+                    && $course->{$field} != $externalcourse[$this->get_config('course_'.$field)][0]) {
+                $updatedcourse->{$field} = $externalcourse[$this->get_config('course_'.$field)][0];
+                $courseupdated = true;
+            }
+        }
+
+        if (!$courseupdated) {
+            $trace->output(get_string('courseupdateskipped', 'enrol_ldap', $course));
+            return false;
+        }
+
+        // Do not allow empty fullname or shortname.
+        if ((isset($updatedcourse->fullname) && empty($updatedcourse->fullname))
+                || (isset($updatedcourse->shortname) && empty($updatedcourse->shortname))) {
+            // We are in trouble!
+            $trace->output(get_string('cannotupdatecourse', 'enrol_ldap', $course));
+            return false;
+        }
+
+        // Check if the shortname already exists if it does - skip course updating.
+        if (isset($updatedcourse->shortname)
+                && $DB->record_exists('course', array('shortname' => $updatedcourse->shortname))) {
+            $trace->output(get_string('cannotupdatecourse_duplicateshortname', 'enrol_ldap', $course));
+            return false;
+        }
+
+        // Finally - update course in DB.
+        update_course($updatedcourse);
+        $trace->output(get_string('courseupdated', 'enrol_ldap', $course));
+
+        return true;
     }
 
     /**

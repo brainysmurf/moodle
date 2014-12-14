@@ -27,6 +27,7 @@ require('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->libdir.'/csvlib.class.php');
 require_once($CFG->dirroot.'/user/profile/lib.php');
+require_once($CFG->dirroot.'/user/lib.php');
 require_once($CFG->dirroot.'/group/lib.php');
 require_once($CFG->dirroot.'/cohort/lib.php');
 require_once('locallib.php');
@@ -35,7 +36,7 @@ require_once('user_form.php');
 $iid         = optional_param('iid', '', PARAM_INT);
 $previewrows = optional_param('previewrows', 10, PARAM_INT);
 
-@set_time_limit(60*60); // 1 hour should be enough
+core_php_time_limit::raise(60*60); // 1 hour should be enough
 raise_memory_limit(MEMORY_HUGE);
 
 require_login();
@@ -84,7 +85,7 @@ $today = time();
 $today = make_timestamp(date('Y', $today), date('m', $today), date('d', $today), 0, 0, 0);
 
 // array of all valid fields for validation
-$STD_FIELDS = array('id', 'firstname', 'lastname', 'username', 'email',
+$STD_FIELDS = array('id', 'username', 'email',
         'city', 'country', 'lang', 'timezone', 'mailformat',
         'maildisplay', 'maildigest', 'htmleditor', 'autosubscribe',
         'institution', 'department', 'idnumber', 'skype',
@@ -96,6 +97,8 @@ $STD_FIELDS = array('id', 'firstname', 'lastname', 'username', 'email',
         'deleted',     // 1 means delete user
         'mnethostid',  // Can not be used for adding, updating or deleting of users - only for enrolments, groups, cohorts and suspending.
     );
+// Include all name fields.
+$STD_FIELDS = array_merge($STD_FIELDS, get_all_user_name_fields());
 
 $PRF_FIELDS = array();
 
@@ -120,12 +123,11 @@ if (empty($iid)) {
         $content = $mform1->get_file_content('userfile');
 
         $readcount = $cir->load_csv_content($content, $formdata->encoding, $formdata->delimiter_name);
+        $csvloaderror = $cir->get_error();
         unset($content);
 
-        if ($readcount === false) {
-            print_error('csvloaderror', '', $returnurl);
-        } else if ($readcount == 0) {
-            print_error('csvemptyfile', 'error', $returnurl);
+        if (!is_null($csvloaderror)) {
+            print_error('csvloaderror', '', $returnurl, $csvloaderror);
         }
         // test if columns ok
         $filecolumns = uu_validate_user_upload_columns($cir, $STD_FIELDS, $PRF_FIELDS, $returnurl);
@@ -666,9 +668,8 @@ if ($formdata = $mform2->is_cancelled()) {
             }
 
             if ($doupdate or $existinguser->password !== $oldpw) {
-                // we want only users that were really updated
-
-                $DB->update_record('user', $existinguser);
+                // We want only users that were really updated.
+                user_update_user($existinguser, false, false);
 
                 $upt->track('status', $struserupdated);
                 $usersupdated++;
@@ -680,13 +681,14 @@ if ($formdata = $mform2->is_cancelled()) {
                     profile_save_data($existinguser);
                 }
 
-                events_trigger('user_updated', $existinguser);
-
                 if ($bulk == UU_BULK_UPDATED or $bulk == UU_BULK_ALL) {
                     if (!in_array($user->id, $SESSION->bulk_users)) {
                         $SESSION->bulk_users[] = $user->id;
                     }
                 }
+
+                // Trigger event.
+                \core\event\user_updated::create_from_userid($existinguser->id)->trigger();
 
             } else {
                 // no user information changed
@@ -701,7 +703,7 @@ if ($formdata = $mform2->is_cancelled()) {
             }
 
             if ($dologout) {
-                session_kill_user($existinguser->id);
+                \core\session\manager::kill_user_sessions($existinguser->id);
             }
 
         } else {
@@ -801,8 +803,7 @@ if ($formdata = $mform2->is_cancelled()) {
                 $upt->track('password', '-', 'normal', false);
             }
 
-            // create user - insert_record ignores any extra properties
-            $user->id = $DB->insert_record('user', $user);
+            $user->id = user_create_user($user, false, false);
             $upt->track('username', html_writer::link(new moodle_url('/user/profile.php', array('id'=>$user->id)), s($user->username)), 'normal', false);
 
             // pre-process custom profile menu fields data from csv file
@@ -817,14 +818,15 @@ if ($formdata = $mform2->is_cancelled()) {
                 set_user_preference('create_password', 1, $user);
             }
 
+            // Trigger event.
+            \core\event\user_created::create_from_userid($user->id)->trigger();
+
             $upt->track('status', $struseradded);
             $upt->track('id', $user->id, 'normal', false);
             $usersnew++;
 
             // make sure user context exists
             context_user::instance($user->id);
-
-            events_trigger('user_created', $user);
 
             if ($bulk == UU_BULK_NEW or $bulk == UU_BULK_ALL) {
                 if (!in_array($user->id, $SESSION->bulk_users)) {
@@ -962,8 +964,27 @@ if ($formdata = $mform2->is_cancelled()) {
                 }
 
                 if ($rid) {
+<<<<<<< HEAD
                     // find duration
                     $timeend   = 0;
+=======
+                    // Find duration and/or enrol status.
+                    $timeend = 0;
+                    $status = null;
+
+                    if (isset($user->{'enrolstatus'.$i})) {
+                        $enrolstatus = $user->{'enrolstatus'.$i};
+                        if ($enrolstatus == '') {
+                            $status = null;
+                        } else if ($enrolstatus === (string)ENROL_USER_ACTIVE) {
+                            $status = ENROL_USER_ACTIVE;
+                        } else if ($enrolstatus === (string)ENROL_USER_SUSPENDED) {
+                            $status = ENROL_USER_SUSPENDED;
+                        } else {
+                            debugging('Unknown enrolment status.');
+                        }
+                    }
+>>>>>>> moodle/MOODLE_27_STABLE
 
                     if (!empty($user->{'enrolperiod'.$i})) {
                         $duration = (int)$user->{'enrolperiod'.$i} * 60*60*24; // convert days to seconds
@@ -974,7 +995,7 @@ if ($formdata = $mform2->is_cancelled()) {
                         $timeend = $today + $manualcache[$courseid]->enrolperiod;
                     }
 
-                    $manual->enrol_user($manualcache[$courseid], $user->id, $rid, $today, $timeend);
+                    $manual->enrol_user($manualcache[$courseid], $user->id, $rid, $today, $timeend, $status);
 
                     $a = new stdClass();
                     $a->course = $shortname;
@@ -1123,9 +1144,12 @@ while ($linenum <= $previewrows and $fields = $cir->next()) {
 
     if (isset($rowcols['city'])) {
         $rowcols['city'] = $rowcols['city'];
+<<<<<<< HEAD
         if (empty($rowcols['city'])) {
             $rowcols['status'][] = get_string('fieldrequired', 'error', 'city');
         }
+=======
+>>>>>>> moodle/MOODLE_27_STABLE
     }
     // Check if rowcols have custom profile field with correct data and update error state.
     $noerror = uu_check_custom_profile_data($rowcols) && $noerror;

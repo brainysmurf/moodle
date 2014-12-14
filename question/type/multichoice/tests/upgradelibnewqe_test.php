@@ -59,7 +59,6 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'questionsperpage' => '0',
             'shufflequestions' => '0',
             'shuffleanswers' => '1',
-            'questions' => '1,0',
             'timecreated' => '0',
             'timemodified' => '1278603396',
             'timelimit' => '0',
@@ -94,7 +93,6 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'layout' => '2,0',
             'preview' => '0',
             'sumgrades' => '0.90000',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '2',
@@ -239,6 +237,7 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'variant' => 1,
             'maxmark' => 1,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'Which is the amphibian?',
             'rightanswer' => 'Frog',
@@ -296,7 +295,6 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'questionsperpage' => '0',
             'shufflequestions' => '1',
             'shuffleanswers' => '1',
-            'questions' => '71,72,73,89,74,75,76,92,77,78,79,93,80,90,81,91,94,95,82,83,84,85,86,87,88,0',
             'sumgrades' => '25',
             'grade' => '25',
             'timecreated' => '0',
@@ -320,7 +318,6 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'timemodified' => '1150203042',
             'layout' => '93,76,82,75,87,74,90,94,73,77,81,95,79,92,88,80,91,86,72,83,84,89,85,78,71,0',
             'preview' => '1',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '72',
@@ -415,6 +412,7 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'variant' => 1,
             'maxmark' => 1,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'Why were standards such an important driver in the growth of systems integration?',
             'rightanswer' => 'Because they enable stored data and interfaces to be standardised.',
@@ -464,7 +462,6 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'questionsperpage' => '0',
             'shufflequestions' => '0',
             'shuffleanswers' => '0',
-            'questions' => '218,221,219,220,223,224,222,0',
             'sumgrades' => '7',
             'grade' => '0',
             'timecreated' => '0',
@@ -488,7 +485,6 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'timemodified' => '1161947130',
             'layout' => '218,221,219,220,223,224,222,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '218',
@@ -610,6 +606,7 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'variant' => 1,
             'maxmark' => 1,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'I have demonstrated the ability to analyse and ANSWER THE QUESTION that is asked. (Click for advice on this skill)',
             'rightanswer' => '',
@@ -659,7 +656,6 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'questionsperpage' => '2',
             'shufflequestions' => '0',
             'shuffleanswers' => '0',
-            'questions' => '2855,2856,0,2857,2858,0,2859,2860,0,2861,2862,0,2863,2864,0,2865,0',
             'sumgrades' => '59',
             'grade' => '59',
             'timecreated' => '0',
@@ -683,7 +679,6 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'timemodified' => '1177008794',
             'layout' => '2855,2856,0,2857,2858,0,2859,2860,0,2861,2862,0,2863,2864,0,2865,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '2855',
@@ -833,6 +828,7 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'variant' => 1,
             'maxmark' => 5,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'Which of the following techniques can identify non-functional requirements?',
             'rightanswer' => 'Verb identification.; Misuse cases.',
@@ -898,7 +894,6 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'questionsperpage' => '0',
             'shufflequestions' => '1',
             'shuffleanswers' => '1',
-            'questions' => '71,72,73,89,74,75,76,92,77,78,79,93,80,90,81,91,94,95,82,83,84,85,86,87,88,0',
             'sumgrades' => '25',
             'grade' => '25',
             'timecreated' => '0',
@@ -922,7 +917,6 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'timemodified' => '1150203042',
             'layout' => '93,76,82,75,87,74,90,94,73,77,81,95,79,92,88,80,91,86,72,83,84,89,85,78,71,0',
             'preview' => '1',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '72',
@@ -991,6 +985,7 @@ class qtype_multichoice_attempt_upgrader_test extends question_attempt_upgrader_
             'variant' => 1,
             'maxmark' => 1,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'Why were standards such an important driver in the growth of systems integration?',
             'rightanswer' => 'Because they enable stored data and interfaces to be standardised.',
@@ -1032,7 +1027,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'questionsperpage' => '2',
             'shufflequestions' => '0',
             'shuffleanswers' => '1',
-            'questions' => '178,179,0,180,181,0,182,183,0,184,185,0,189,187,0',
             'sumgrades' => '10',
             'grade' => '10',
             'timecreated' => '0',
@@ -1057,7 +1051,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'timemodified' => '1198254352',
             'layout' => '178,179,180,181,182,183,184,185,189,187,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '179',
@@ -1185,6 +1178,7 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'variant' => 1,
             'maxmark' => 1,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'Where will the 19th International Biology Olympiad be held?',
             'rightanswer' => 'Mumbai, India',
@@ -1236,7 +1230,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'questionsperpage' => '2',
             'shufflequestions' => '0',
             'shuffleanswers' => '0',
-            'questions' => '26132,26128,0,26143,26140,0,26144,26141,0,26145,26142,0,26126,26127,0,26134,26135,0,26131,26133,0,26130,26129,0,26136,26137,0,26139,26138,0',
             'sumgrades' => '0',
             'grade' => '0',
             'timecreated' => '0',
@@ -1261,7 +1254,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'timemodified' => '1249488674',
             'layout' => '26132,26128,0,26143,26140,0,26144,26141,0,26145,26142,0,26126,26127,0,26134,26135,0,26131,26133,0,26130,26129,0,26136,26137,0,26139,26138,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '26132',
@@ -1423,6 +1415,7 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'variant' => 1,
             'maxmark' => 0,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'Which was the most useful K315 information literacy or ICT activity?',
             'rightanswer' => 'Values Exchange case studies',
@@ -1506,7 +1499,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'timemodified' => '1258492857',
             'layout' => '60135,60136,60137,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '60137',
@@ -1655,6 +1647,7 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'variant' => 1,
             'maxmark' => 1,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => "For source 3, the 'Loose Change' video, select the statements to indicate 'yes':",
             'rightanswer' => 'Would you regard this source as objective?; Does the source provide references?; Are all viewpoints considered?; Are quotations placed in their full context?; Does the source include conclusions based on evidence?; Would you trust this source?; Has it been peer-reviewed?',
@@ -1712,7 +1705,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'questionsperpage' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '1',
-            'questions' => '161,0,160,0,162,0,163,0,164,0,165,0,166,0,190,0,191,0,192,0,193,0,194,0,195,0,196,0,197,0,198,0,168,0,169,0,170,0,171,0,172,0,173,0,174,0,175,0,176,0,177,0,178,0,179,0,180,0,181,0',
             'sumgrades' => '30',
             'grade' => '10',
             'timecreated' => '0',
@@ -1737,7 +1729,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'timemodified' => '1166546472',
             'layout' => '161,0,160,0,162,0,163,0,164,0,165,0,166,0,190,0,191,0,192,0,193,0,194,0,195,0,196,0,197,0,198,0,168,0,169,0,170,0,171,0,172,0,173,0,174,0,175,0,176,0,177,0,178,0,179,0,180,0,181,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '163',
@@ -1884,6 +1875,7 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'variant' => 1,
             'maxmark' => 1,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'Can we have a \'realist\' or objective social science?',
             'rightanswer' => 'Sometimes',
@@ -1950,7 +1942,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'questionsperpage' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '1',
-            'questions' => '89002,0,89040,0,89042,0,89043,0,89044,0,89045,0,89046,0,89047,0',
             'sumgrades' => '8',
             'grade' => '8',
             'timecreated' => '0',
@@ -1976,7 +1967,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'timemodified' => '1275089451',
             'layout' => '89002,0,89040,0,89042,0,89043,0,89044,0,89045,0,89046,0,89047,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '89040',
@@ -2097,6 +2087,7 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'variant' => 1,
             'maxmark' => 1,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => "Read the text below and then answer the question based on the information given.\n\n我大哥没有我二哥高，我比我二哥高。\n\nWho is the tallest?",
             'rightanswer' => '我。',
@@ -2154,7 +2145,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'questionsperpage' => '2',
             'shufflequestions' => '0',
             'shuffleanswers' => '0',
-            'questions' => '3859,3860,0,3861,3862,0,3863,3864,0,3865,3866,0,3867,3868,0',
             'sumgrades' => '50',
             'grade' => '50',
             'timecreated' => '0',
@@ -2178,7 +2168,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'timemodified' => '1179303420',
             'layout' => '3859,3860,0,3861,3862,0,3863,3864,0,3865,3866,0,3867,3868,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '3863',
@@ -2312,6 +2301,7 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'variant' => 1,
             'maxmark' => 5,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'What is SOAP?',
             'rightanswer' => 'It is the transport mechanism used with web services.',
@@ -2376,7 +2366,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'questionsperpage' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '0',
-            'questions' => '242,0,243,0,244,0,245,0,246,0,247,0',
             'sumgrades' => '0',
             'grade' => '0',
             'timecreated' => '0',
@@ -2400,7 +2389,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'layout' => '242,0,243,0,244,0,245,0,246,0,247,0',
             'preview' => '0',
             'sumgrades' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '247',
@@ -2521,6 +2509,7 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'variant' => 1,
             'maxmark' => 0,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => '[CUT]',
             'rightanswer' => 'Well developed',
@@ -2585,7 +2574,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'questionsperpage' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '0',
-            'questions' => '242,0,243,0,244,0,245,0,246,0,247,0',
             'sumgrades' => '0',
             'grade' => '0',
             'timecreated' => '0',
@@ -2609,7 +2597,6 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'layout' => '242,0,243,0,244,0,245,0,246,0,247,0',
             'preview' => '0',
             'sumgrades' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '242',
@@ -2732,6 +2719,7 @@ public function test_multichoice_deferredfeedback_qsession140() {
             'variant' => 1,
             'maxmark' => 0,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => "USING THE INTERNET \n\nMany study resources are available online, and you will also be expected to find things out yourself using the web. \n\n_How would you rate your skills in using browsers and managing documents you find on the internet? _",
             'rightanswer' => 'Well developed',

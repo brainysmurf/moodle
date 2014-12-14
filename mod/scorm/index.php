@@ -32,7 +32,10 @@ if (!empty($id)) {
 require_course_login($course);
 $PAGE->set_pagelayout('incourse');
 
-add_to_log($course->id, "scorm", "view all", "index.php?id=$course->id", "");
+// Trigger instances list viewed event.
+$event = \mod_scorm\event\course_module_instance_list_viewed::create(array('context' => context_course::instance($course->id)));
+$event->add_record_snapshot('course', $course);
+$event->trigger();
 
 $strscorm = get_string("modulename", "scorm");
 $strscorms = get_string("modulenameplural", "scorm");
@@ -45,6 +48,7 @@ $PAGE->set_title($strscorms);
 $PAGE->set_heading($course->fullname);
 $PAGE->navbar->add($strscorms);
 echo $OUTPUT->header();
+echo $OUTPUT->heading($strscorms);
 
 $usesections = course_format_uses_sections($course->format);
 
@@ -85,7 +89,7 @@ foreach ($scorms as $scorm) {
     if (has_capability('mod/scorm:viewreport', $context)) {
         $trackedusers = scorm_get_count_users($scorm->id, $scorm->groupingid);
         if ($trackedusers > 0) {
-            $reportshow = '<a href="report.php?id='.$scorm->coursemodule.'">'.get_string('viewallreports', 'scorm', $trackedusers).'</a></div>';
+            $reportshow = '<a href="report.php?id='.$scorm->coursemodule.'">'.get_string('viewallreports', 'scorm', $trackedusers).'</a>';
         } else {
             $reportshow = get_string('noreports', 'scorm');
         }

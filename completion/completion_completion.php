@@ -143,23 +143,25 @@ class completion_completion extends data_object {
      * @return void
      */
     public function mark_complete($timecomplete = null) {
+        global $USER;
 
-        // Never change a completion time
+        // Never change a completion time.
         if ($this->timecompleted) {
             return;
         }
 
-        // Use current time if nothing supplied
+        // Use current time if nothing supplied.
         if (!$timecomplete) {
             $timecomplete = time();
         }
 
-        // Set time complete
+        // Set time complete.
         $this->timecompleted = $timecomplete;
 
-        // Save record
+        // Save record.
         if ($result = $this->_save()) {
-            events_trigger('course_completed', $this->get_record_data());
+            $data = $this->get_record_data();
+            \core\event\course_completed::create_from_completion($data)->trigger();
         }
 
         return $result;

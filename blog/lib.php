@@ -181,9 +181,11 @@ function blog_sync_external_entries($externalblog) {
             $filtertags = array_map('trim', $filtertags);
             $filtertags = array_map('strtolower', $filtertags);
 
-            foreach ($categories as $category) {
-                if (in_array(trim(strtolower($category->term)), $filtertags)) {
-                    $containsfiltertag = true;
+            if (!empty($categories)) {
+                foreach ($categories as $category) {
+                    if (in_array(trim(strtolower($category->term)), $filtertags)) {
+                        $containsfiltertag = true;
+                    }
                 }
             }
 
@@ -205,8 +207,8 @@ function blog_sync_external_entries($externalblog) {
         $newentry->subject = clean_param($entry->get_title(), PARAM_TEXT);
         // Observe 128 max chars in DB
         // TODO: +1 to raise this to 255
-        if (textlib::strlen($newentry->subject) > 128) {
-            $newentry->subject = textlib::substr($newentry->subject, 0, 125) . '...';
+        if (core_text::strlen($newentry->subject) > 128) {
+            $newentry->subject = core_text::substr($newentry->subject, 0, 125) . '...';
         }
         $newentry->summary = $entry->get_description();
 
@@ -241,7 +243,7 @@ function blog_sync_external_entries($externalblog) {
             $oldesttimestamp = $timestamp;
         }
 
-        if (textlib::strlen($newentry->uniquehash) > 255) {
+        if (core_text::strlen($newentry->uniquehash) > 255) {
             // The URL for this item is too long for the field. Rather than add
             // the entry without the link we will skip straight over it.
             // RSS spec says recommended length 500, we use 255.
@@ -254,7 +256,7 @@ function blog_sync_external_entries($externalblog) {
 
             // Set tags
             if ($tags = tag_get_tags_array('blog_external', $externalblog->id)) {
-                tag_set('post', $id, $tags);
+                tag_set('post', $id, $tags, 'core', context_user::instance($externalblog->userid)->id);
             }
         } else {
             $newentry->id = $postid;

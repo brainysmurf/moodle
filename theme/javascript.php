@@ -35,7 +35,8 @@ require_once("$CFG->dirroot/lib/jslib.php");
 if ($slashargument = min_get_slash_argument()) {
     $slashargument = ltrim($slashargument, '/');
     if (substr_count($slashargument, '/') < 2) {
-        image_not_found();
+        header('HTTP/1.0 404 not found');
+        die('Slash argument must contain both a revision and a file path');
     }
     // image must be last because it may contain "/"
     list($themename, $rev, $type) = explode('/', $slashargument, 3);
@@ -45,7 +46,7 @@ if ($slashargument = min_get_slash_argument()) {
 
 } else {
     $themename = min_optional_param('theme', 'standard', 'SAFEDIR');
-    $rev       = min_optional_param('rev', 0, 'INT');
+    $rev       = min_optional_param('rev', -1, 'INT');
     $type      = min_optional_param('type', 'head', 'RAW');
 }
 
@@ -63,10 +64,10 @@ if (file_exists("$CFG->dirroot/theme/$themename/config.php")) {
     die('Theme was not found, sorry.');
 }
 
-$candidate = "$CFG->cachedir/theme/$themename/javascript_$type.js";
-$etag = sha1("$themename/$rev/$type");
+$candidate = "$CFG->localcachedir/theme/$rev/$themename/javascript_$type.js";
+$etag = sha1("$rev/$themename/$type");
 
-if ($rev > -1 and file_exists($candidate)) {
+if ($rev > 0 and file_exists($candidate)) {
     if (!empty($_SERVER['HTTP_IF_NONE_MATCH']) || !empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
         // we do not actually need to verify the etag value because our files
         // never change in cache because we increment the rev parameter
@@ -85,17 +86,21 @@ define('NO_UPGRADE_CHECK', true);  // Ignore upgrade check
 require("$CFG->dirroot/lib/setup.php");
 
 $theme = theme_config::load($themename);
+$themerev = theme_get_revision();
 
-$rev = theme_get_revision();
-$etag = sha1("$themename/$rev/$type");
+if ($themerev <= 0 or $rev != $themerev) {
+    // Do not send caching headers if they do not request current revision,
+    // we do not want to pollute browser caches with outdated JS.
+    js_send_uncached($theme->javascript_content($type));
+}
 
-if ($rev > -1) {
-    js_write_cache_file_content($candidate, js_minify($theme->javascript_files($type)));
-    // verify nothing failed in cache file creation
-    clearstatcache();
-    if (file_exists($candidate)) {
-        js_send_cached($candidate, $etag);
-    }
+make_localcache_directory('theme', false);
+
+js_write_cache_file_content($candidate, core_minify::js_files($theme->javascript_files($type)));
+// Verify nothing failed in cache file creation.
+clearstatcache();
+if (file_exists($candidate)) {
+    js_send_cached($candidate, $etag);
 }
 
 js_send_uncached($theme->javascript_content($type));

@@ -25,7 +25,7 @@
  *
  * @copyright 2005 Martin Dougiamas  http://dougiamas.com
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @package mod-data
+ * @package mod_data
  */
 
 require_once('../../config.php');
@@ -62,7 +62,8 @@ $presets = data_get_available_presets($context);
 $strdelete = get_string('deleted', 'data');
 foreach ($presets as &$preset) {
     if (!empty($preset->userid)) {
-        $presetuser = $DB->get_record('user', array('id'=>$preset->userid), 'id,firstname,lastname', MUST_EXIST);
+        $namefields = get_all_user_name_fields(true);
+        $presetuser = $DB->get_record('user', array('id' => $preset->userid), 'id, ' . $namefields, MUST_EXIST);
         $preset->description = $preset->name.' ('.fullname($presetuser, true).')';
     } else {
         $preset->userid = 0;
@@ -98,12 +99,14 @@ $form_save->set_data(array('d' => $data->id, 'name'=>$data->name));
 /* Output */
 if (!$form_export->is_submitted()) {
     echo $OUTPUT->header();
-    echo $OUTPUT->heading(format_string($data->name));
+    echo $OUTPUT->heading(format_string($data->name), 2);
 
     // Needed for tabs.php
     $currenttab = 'presets';
     $currentgroup = groups_get_activity_group($cm);
     $groupmode = groups_get_activity_groupmode($cm);
+    echo $OUTPUT->box(format_module_intro('data', $data, $cm->id), 'generalbox', 'intro');
+
     include('tabs.php');
 }
 
@@ -242,12 +245,12 @@ if (optional_param('sesskey', false, PARAM_BOOL) && confirm_sesskey()) {
 }
 
 // Export forms
-echo $OUTPUT->heading(get_string('export', 'data'));
+echo $OUTPUT->heading(get_string('export', 'data'), 3);
 $form_export->display();
 $form_save->display();
 
 // Import forms
-echo $OUTPUT->heading(get_string('import'));
+echo $OUTPUT->heading(get_string('import'), 3);
 $form_importzip->display();
 $form_importexisting->display();
 

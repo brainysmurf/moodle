@@ -21,13 +21,12 @@ if (!$course = $DB->get_record('course', array('id'=>$chatuser->course))) {
 }
 
 //Get the user theme and enough info to be used in chat_format_message() which passes it along to
-if (!$USER = $DB->get_record('user', array('id'=>$chatuser->userid))) { // no optimisation here, it would break again in future!
+if (!$user = $DB->get_record('user', array('id'=>$chatuser->userid, 'deleted'=>0, 'suspended'=>0))) { // no optimisation here, it would break again in future!
     print_error('invaliduser');
 }
+\core\session\manager::set_user($user);
 
 $PAGE->set_pagelayout('embedded');
-
-$USER->description = '';
 
 //Setup course, lang and theme
 $PAGE->set_course($course);
@@ -39,17 +38,7 @@ if (!$cm = get_coursemodule_from_instance('chat', $chatuser->chatid, $courseid))
 }
 
 if ($beep) {
-    $message = new stdClass();
-    $message->chatid    = $chatuser->chatid;
-    $message->userid    = $chatuser->userid;
-    $message->groupid   = $chatuser->groupid;
-    $message->message   = "beep $beep";
-    $message->system    = 0;
-    $message->timestamp = time();
-
-    $DB->insert_record('chat_messages', $message);
-    $DB->insert_record('chat_messages_current', $message);
-
+    chat_send_chatmessage($chatuser, "beep $beep", 0, $cm);
     $chatuser->lastmessageping = time();          // A beep is a ping  ;-)
 }
 
@@ -106,7 +95,8 @@ foreach ($chatusers as $chatuser) {
 
 ob_start();
 echo $OUTPUT->header();
-echo html_writer::tag('div', html_writer::tag('a', 'Refresh link', array('href'=>$refreshurl, 'id'=>'refreshLink')), array('style'=>'display:none')); //TODO: localize
+echo html_writer::tag('div', html_writer::tag('a', get_string('refresh'),
+        array('href' => $refreshurl, 'id' => 'refreshLink')), array('style' => 'display:none'));
 echo html_writer::table($table);
 echo $OUTPUT->footer();
 

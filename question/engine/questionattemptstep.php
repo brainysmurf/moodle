@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
  *
  * The most important attributes of a step are the state, which is one of the
  * {@link question_state} constants, the fraction, which may be null, or a
- * number bewteen the attempt's minfraction and 1.0, and the array of submitted
+ * number bewteen the attempt's minfraction and maxfraction, and the array of submitted
  * data, about which more later.
  *
  * A step also tracks the time it was created, and the user responsible for
@@ -76,7 +76,10 @@ class question_attempt_step {
      */
     private $state;
 
-    /** @var null|number the fraction (grade on a scale of minfraction .. 1.0) or null. */
+    /**
+     * @var null|number the fraction (grade on a scale of
+     * minfraction .. maxfraction, normally 0..1) or null.
+     */
     private $fraction = null;
 
     /** @var integer the timestamp when this step was created. */
@@ -148,7 +151,8 @@ class question_attempt_step {
     }
 
     /**
-     * @return null|number the fraction (grade on a scale of minfraction .. 1.0)
+     * @return null|number the fraction (grade on a scale of
+     * minfraction .. maxfraction, normally 0..1),
      * or null if this step has not been marked.
      */
     public function get_fraction() {
@@ -291,7 +295,7 @@ class question_attempt_step {
     }
 
     /**
-     * @param string $name the name of an behaviour variable to look for in the submitted data.
+     * @param string $name the name of a behaviour variable to look for in the submitted data.
      * @return bool whether a variable with this name exists in the question type data.
      */
     public function has_behaviour_var($name) {
@@ -299,7 +303,7 @@ class question_attempt_step {
     }
 
     /**
-     * @param string $name the name of an behaviour variable to look for in the submitted data.
+     * @param string $name the name of a behaviour variable to look for in the submitted data.
      * @return string the requested variable, or null if the variable is not set.
      */
     public function get_behaviour_var($name) {
@@ -428,14 +432,22 @@ class question_attempt_step {
 
 
 /**
- * A subclass with a bit of additional funcitonality, for pending steps.
+ * A subclass of {@link question_attempt_step} used when processing a new submission.
+ *
+ * When we are processing some new submitted data, which may or may not lead to
+ * a new step being added to the {@link question_usage_by_activity} we create an
+ * instance of this class. which is then passed to the question behaviour and question
+ * type for processing. At the end of processing we then may, or may not, keep it.
  *
  * @copyright  2010 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_attempt_pending_step extends question_attempt_step {
-    /** @var string . */
+    /** @var string the new response summary, if there is one. */
     protected $newresponsesummary = null;
+
+    /** @var int the new variant number, if there is one. */
+    protected $newvariant = null;
 
     /**
      * If as a result of processing this step, the response summary for the
@@ -447,14 +459,47 @@ class question_attempt_pending_step extends question_attempt_step {
         $this->newresponsesummary = $responsesummary;
     }
 
-    /** @return string the new response summary, if any. */
+    /**
+     * Get the new response summary, if there is one.
+     * @return string the new response summary, or null if it has not changed.
+     */
     public function get_new_response_summary() {
         return $this->newresponsesummary;
     }
 
-    /** @return string whether this step changes the response summary. */
+    /**
+     * Whether this processing this step has changed the response summary.
+     * @return bool true if there is a new response summary.
+     */
     public function response_summary_changed() {
         return !is_null($this->newresponsesummary);
+    }
+
+    /**
+     * If as a result of processing this step, you identify that this variant of the
+     * question is acutally identical to the another one, you may change the
+     * variant number recorded, in order to give better statistics. For an example
+     * see qbehaviour_opaque.
+     * @param int $variant the new variant number.
+     */
+    public function set_new_variant_number($variant) {
+        $this->newvariant = $variant;
+    }
+
+    /**
+     * Get the new variant number, if there is one.
+     * @return int the new variant number, or null if it has not changed.
+     */
+    public function get_new_variant_number() {
+        return $this->newvariant;
+    }
+
+    /**
+     * Whether this processing this step has changed the variant number.
+     * @return bool true if there is a new variant number.
+     */
+    public function variant_number_changed() {
+        return !is_null($this->newvariant);
     }
 }
 

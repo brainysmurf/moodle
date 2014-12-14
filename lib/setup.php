@@ -37,7 +37,8 @@
  *  - $CFG->dirroot  - Path to moodle's library folder on server's filesystem.
  *  - $CFG->libdir   - Path to moodle's library folder on server's filesystem.
  *  - $CFG->tempdir  - Path to moodle's temp file directory on server's filesystem.
- *  - $CFG->cachedir - Path to moodle's cache directory on server's filesystem.
+ *  - $CFG->cachedir - Path to moodle's cache directory on server's filesystem (shared by cluster nodes).
+ *  - $CFG->localcachedir - Path to moodle's local cache directory (not shared by cluster nodes).
  *
  * @global object $CFG
  * @name $CFG
@@ -57,6 +58,80 @@ if (!isset($CFG)) {
 // We can detect real dirroot path reliably since PHP 4.0.2,
 // it can not be anything else, there is no point in having this in config.php
 $CFG->dirroot = dirname(dirname(__FILE__));
+
+// File permissions on created directories in the $CFG->dataroot
+if (!isset($CFG->directorypermissions)) {
+    $CFG->directorypermissions = 02777;      // Must be octal (that's why it's here)
+}
+if (!isset($CFG->filepermissions)) {
+    $CFG->filepermissions = ($CFG->directorypermissions & 0666); // strip execute flags
+}
+// Better also set default umask because developers often forget to include directory
+// permissions in mkdir() and chmod() after creating new files.
+if (!isset($CFG->umaskpermissions)) {
+    $CFG->umaskpermissions = (($CFG->directorypermissions & 0777) ^ 0777);
+}
+umask($CFG->umaskpermissions);
+
+if (defined('BEHAT_SITE_RUNNING')) {
+    // We already switched to behat test site previously.
+
+} else if (!empty($CFG->behat_wwwroot) or !empty($CFG->behat_dataroot) or !empty($CFG->behat_prefix)) {
+    // The behat is configured on this server, we need to find out if this is the behat test
+    // site based on the URL used for access.
+    require_once(__DIR__ . '/../lib/behat/lib.php');
+    if (behat_is_test_site()) {
+        // Checking the integrity of the provided $CFG->behat_* vars and the
+        // selected wwwroot to prevent conflicts with production and phpunit environments.
+        behat_check_config_vars();
+
+        // Check that the directory does not contains other things.
+        if (!file_exists("$CFG->behat_dataroot/behattestdir.txt")) {
+            if ($dh = opendir($CFG->behat_dataroot)) {
+                while (($file = readdir($dh)) !== false) {
+                    if ($file === 'behat' or $file === '.' or $file === '..' or $file === '.DS_Store') {
+                        continue;
+                    }
+                    behat_error(BEHAT_EXITCODE_CONFIG, '$CFG->behat_dataroot directory is not empty, ensure this is the directory where you want to install behat test dataroot');
+                }
+                closedir($dh);
+                unset($dh);
+                unset($file);
+            }
+
+            if (defined('BEHAT_UTIL')) {
+                // Now we create dataroot directory structure for behat tests.
+                testing_initdataroot($CFG->behat_dataroot, 'behat');
+            } else {
+                behat_error(BEHAT_EXITCODE_INSTALL);
+            }
+        }
+
+        if (!defined('BEHAT_UTIL') and !defined('BEHAT_TEST')) {
+            // Somebody tries to access test site directly, tell them if not enabled.
+            if (!file_exists($CFG->behat_dataroot . '/behat/test_environment_enabled.txt')) {
+                behat_error(BEHAT_EXITCODE_CONFIG, 'Behat is configured but not enabled on this test site.');
+            }
+        }
+
+        // Constant used to inform that the behat test site is being used,
+        // this includes all the processes executed by the behat CLI command like
+        // the site reset, the steps executed by the browser drivers when simulating
+        // a user session and a real session when browsing manually to $CFG->behat_wwwroot
+        // like the browser driver does automatically.
+        // Different from BEHAT_TEST as only this last one can perform CLI
+        // actions like reset the site or use data generators.
+        define('BEHAT_SITE_RUNNING', true);
+
+        // Clean extra config.php settings.
+        behat_clean_init_config();
+
+        // Now we can begin switching $CFG->X for $CFG->behat_X.
+        $CFG->wwwroot = $CFG->behat_wwwroot;
+        $CFG->prefix = $CFG->behat_prefix;
+        $CFG->dataroot = $CFG->behat_dataroot;
+    }
+}
 
 // Normalise dataroot - we do not want any symbolic links, trailing / or any other weirdness there
 if (!isset($CFG->dataroot)) {
@@ -90,82 +165,9 @@ if (!isset($CFG->wwwroot) or $CFG->wwwroot === 'http://example.com/moodle') {
     exit(1);
 }
 
-// Test environment is requested if:
-// * If $CFG->behat_switchcompletely has been set (maintains CLI scripts behaviour, which ATM is only preventive).
-// * If we are accessing though the built-in web server (cli-server).
-// * Behat is running (constant set hooking the behat init process before requiring config.php).
-// * If $CFG->behat_wwwroot has been set and the hostname/port match what the page was requested with.
-// Test environment is enabled if:
-// * User has previously enabled through admin/tool/behat/cli/util.php --enable or admin/tool/behat/cli/init.php
-// Both are required to switch to test mode
-if (!defined('BEHAT_SITE_RUNNING') && !empty($CFG->behat_dataroot) &&
-        !empty($CFG->behat_prefix) && file_exists($CFG->behat_dataroot)) {
-
-    // Only included if behat_* are set, it is not likely to be a production site.
-    require_once(__DIR__ . '/../lib/behat/lib.php');
-
-    $defaultbehatwwwroot = behat_get_wwwroot();
-
-    if (!empty($CFG->behat_switchcompletely) && php_sapi_name() !== 'cli') {
-        // Switch completely uses the production wwwroot as the test site URL.
-        $behatwwwroot = $defaultbehatwwwroot;
-
-    } elseif (php_sapi_name() === 'cli-server') {
-        // If we are using the built-in server we use the provided $CFG->behat_wwwroot
-        // value or the default one if $CFG->behat_wwwroot is not set, only if it matches
-        // the requested URL.
-        if (behat_is_requested_url($defaultbehatwwwroot)) {
-            $behatwwwroot = $defaultbehatwwwroot;
-        }
-
-    } elseif (defined('BEHAT_TEST')) {
-        // This is when moodle codebase runs through vendor/bin/behat, we "are not supposed"
-        // to need a wwwroot, but before using the production one we should set something else
-        // as an alternative.
-        $behatwwwroot = $defaultbehatwwwroot;
-
-    } elseif (!empty($CFG->behat_wwwroot) && !empty($_SERVER['HTTP_HOST'])) {
-        // If $CFG->behat_wwwroot was set and matches the requested URL we
-        // use $CFG->behat_wwwroot as our wwwroot.
-        if (behat_is_requested_url($CFG->behat_wwwroot)) {
-            $behatwwwroot = $CFG->behat_wwwroot;
-        }
-    }
-
-    // If we found a proper behatwwwroot then we consider the behat test as requested.
-    $testenvironmentrequested = !empty($behatwwwroot);
-
-    // Only switch to test environment if it has been enabled.
-    $CFG->behat_dataroot = realpath($CFG->behat_dataroot);
-    $testenvironmentenabled = file_exists($CFG->behat_dataroot . '/behat/test_environment_enabled.txt');
-
-    if ($testenvironmentenabled && $testenvironmentrequested) {
-
-        // Now we know which one will be our behat wwwroot.
-        $CFG->behat_wwwroot = $behatwwwroot;
-
-        // Checking the integrity of the provided $CFG->behat_* vars and the
-        // selected wwwroot to prevent conflicts with production and phpunit environments.
-        behat_check_config_vars();
-
-        // Constant used to inform that the behat test site is being used,
-        // this includes all the processes executed by the behat CLI command like
-        // the site reset, the steps executed by the browser drivers when simulating
-        // a user session and a real session when browsing manually to $CFG->behat_wwwroot
-        // like the browser driver does automatically.
-        // Different from BEHAT_TEST as only this last one can perform CLI
-        // actions like reset the site or use data generators.
-        define('BEHAT_SITE_RUNNING', true);
-
-        // Clean extra config.php settings.
-        behat_clean_init_config();
-
-        // Now we can begin switching $CFG->X for $CFG->behat_X.
-        $CFG->wwwroot = $CFG->behat_wwwroot;
-        $CFG->passwordsaltmain = 'moodle';
-        $CFG->prefix = $CFG->behat_prefix;
-        $CFG->dataroot = $CFG->behat_dataroot;
-    }
+// Make sure there is some database table prefix.
+if (!isset($CFG->prefix)) {
+    $CFG->prefix = '';
 }
 
 // Define admin directory
@@ -186,6 +188,21 @@ if (!isset($CFG->cachedir)) {
     $CFG->cachedir = "$CFG->dataroot/cache";
 }
 
+// Allow overriding of localcachedir.
+if (!isset($CFG->localcachedir)) {
+    $CFG->localcachedir = "$CFG->dataroot/localcache";
+}
+
+// Location of all languages except core English pack.
+if (!isset($CFG->langotherroot)) {
+    $CFG->langotherroot = $CFG->dataroot.'/lang';
+}
+
+// Location of local lang pack customisations (dirs with _local suffix).
+if (!isset($CFG->langlocalroot)) {
+    $CFG->langlocalroot = $CFG->dataroot.'/lang';
+}
+
 // The current directory in PHP version 4.3.0 and above isn't necessarily the
 // directory of the script when run from the command line. The require_once()
 // would fail, so we'll have to chdir()
@@ -198,12 +215,19 @@ if (!isset($_SERVER['REMOTE_ADDR']) && isset($_SERVER['argv'][0])) {
 
 // sometimes default PHP settings are borked on shared hosting servers, I wonder why they have to do that??
 ini_set('precision', 14); // needed for upgrades and gradebook
+ini_set('serialize_precision', 17); // Make float serialization consistent on all systems.
 
 // Scripts may request no debug and error messages in output
 // please note it must be defined before including the config.php script
 // and in some cases you also need to set custom default exception handler
 if (!defined('NO_DEBUG_DISPLAY')) {
-    define('NO_DEBUG_DISPLAY', false);
+    if (defined('AJAX_SCRIPT') and AJAX_SCRIPT) {
+        // Moodle AJAX scripts are expected to return json data, any PHP notices or errors break it badly,
+        // developers simply must learn to watch error log.
+        define('NO_DEBUG_DISPLAY', true);
+    } else {
+        define('NO_DEBUG_DISPLAY', false);
+    }
 }
 
 // Some scripts such as upgrade may want to prevent output buffering
@@ -280,6 +304,11 @@ if (defined('WEB_CRON_EMULATED_CLI')) {
     }
 }
 
+// All web service requests have WS_SERVER == true.
+if (!defined('WS_SERVER')) {
+    define('WS_SERVER', false);
+}
+
 // Detect CLI maintenance mode - this is useful when you need to mess with database, such as during upgrades
 if (file_exists("$CFG->dataroot/climaintenance.html")) {
     if (!CLI_SCRIPT) {
@@ -307,10 +336,10 @@ if (file_exists("$CFG->dataroot/climaintenance.html")) {
 
 if (CLI_SCRIPT) {
     // sometimes people use different PHP binary for web and CLI, make 100% sure they have the supported PHP version
-    if (version_compare(phpversion(), '5.3.3') < 0) {
+    if (version_compare(phpversion(), '5.4.4') < 0) {
         $phpversion = phpversion();
         // do NOT localise - lang strings would not work here and we CAN NOT move it to later place
-        echo "Moodle 2.5 or later requires at least PHP 5.3.3 (currently using version $phpversion).\n";
+        echo "Moodle 2.7 or later requires at least PHP 5.4.4 (currently using version $phpversion).\n";
         echo "Some servers may have multiple PHP versions installed, are you using the correct executable?\n";
         exit(1);
     }
@@ -321,30 +350,51 @@ if (!defined('AJAX_SCRIPT')) {
     define('AJAX_SCRIPT', false);
 }
 
-// File permissions on created directories in the $CFG->dataroot
-if (empty($CFG->directorypermissions)) {
-    $CFG->directorypermissions = 02777;      // Must be octal (that's why it's here)
-}
-if (empty($CFG->filepermissions)) {
-    $CFG->filepermissions = ($CFG->directorypermissions & 0666); // strip execute flags
-}
-// better also set default umask because recursive mkdir() does not apply permissions recursively otherwise
-umask(0000);
-
-// exact version of currently used yui2 and 3 library
+// Exact version of currently used yui2 and 3 library.
 $CFG->yui2version = '2.9.0';
-$CFG->yui3version = '3.9.1';
+$CFG->yui3version = '3.15.0';
 
+// Patching the upstream YUI release.
+// For important information on patching YUI modules, please see http://docs.moodle.org/dev/YUI/Patching.
+// If we need to patch a YUI modules between official YUI releases, the yuipatchlevel will need to be manually
+// incremented here. The module will also need to be listed in the yuipatchedmodules.
+// When upgrading to a subsequent version of YUI, these should be reset back to 0 and an empty array.
+$CFG->yuipatchlevel = 1;
+$CFG->yuipatchedmodules = array(
+    'dd-drag',
+    'dd-gestures',
+);
+
+// Store settings from config.php in array in $CFG - we can use it later to detect problems and overrides.
+if (!isset($CFG->config_php_settings)) {
+    $CFG->config_php_settings = (array)$CFG;
+    // Forced plugin settings override values from config_plugins table.
+    unset($CFG->config_php_settings['forced_plugin_settings']);
+    if (!isset($CFG->forced_plugin_settings)) {
+        $CFG->forced_plugin_settings = array();
+    }
+}
+
+if (isset($CFG->debug)) {
+    $CFG->debug = (int)$CFG->debug;
+} else {
+    $CFG->debug = 0;
+}
+$CFG->debugdeveloper = (($CFG->debug & (E_ALL | E_STRICT)) === (E_ALL | E_STRICT)); // DEBUG_DEVELOPER is not available yet.
+
+if (!defined('MOODLE_INTERNAL')) { // Necessary because cli installer has to define it earlier.
+    /** Used by library scripts to check they are being called by Moodle. */
+    define('MOODLE_INTERNAL', true);
+}
+
+// core_component can be used in any scripts, it does not need anything else.
+require_once($CFG->libdir .'/classes/component.php');
 
 // special support for highly optimised scripts that do not need libraries and DB connection
 if (defined('ABORT_AFTER_CONFIG')) {
     if (!defined('ABORT_AFTER_CONFIG_CANCEL')) {
         // hide debugging if not enabled in config.php - we do not want to disclose sensitive info
-        if (isset($CFG->debug)) {
-            error_reporting($CFG->debug);
-        } else {
-            error_reporting(0);
-        }
+        error_reporting($CFG->debug);
         if (NO_DEBUG_DISPLAY) {
             // Some parts of Moodle cannot display errors and debug at all.
             ini_set('display_errors', '0');
@@ -360,17 +410,10 @@ if (defined('ABORT_AFTER_CONFIG')) {
     }
 }
 
-/** Used by library scripts to check they are being called by Moodle */
-if (!defined('MOODLE_INTERNAL')) { // necessary because cli installer has to define it earlier
-    define('MOODLE_INTERNAL', true);
-}
-
 // Early profiling start, based exclusively on config.php $CFG settings
 if (!empty($CFG->earlyprofilingenabled)) {
     require_once($CFG->libdir . '/xhprof/xhprof_moodle.php');
-    if (profiling_start()) {
-        register_shutdown_function('profiling_stop');
-    }
+    profiling_start();
 }
 
 /**
@@ -478,13 +521,6 @@ global $FULLSCRIPT;
  */
 global $SCRIPT;
 
-// Store settings from config.php in array in $CFG - we can use it later to detect problems and overrides
-$CFG->config_php_settings = (array)$CFG;
-// Forced plugin settings override values from config_plugins table
-unset($CFG->config_php_settings['forced_plugin_settings']);
-if (!isset($CFG->forced_plugin_settings)) {
-    $CFG->forced_plugin_settings = array();
-}
 // Set httpswwwroot default value (this variable will replace $CFG->wwwroot
 // inside some URLs used in HTTPSPAGEREQUIRED pages.
 $CFG->httpswwwroot = $CFG->wwwroot;
@@ -529,20 +565,6 @@ if (!empty($_SERVER['HTTP_X_moz']) && $_SERVER['HTTP_X_moz'] === 'prefetch'){
     exit(1);
 }
 
-if (!isset($CFG->prefix)) {   // Just in case it isn't defined in config.php
-    $CFG->prefix = '';
-}
-
-// location of all languages except core English pack
-if (!isset($CFG->langotherroot)) {
-    $CFG->langotherroot = $CFG->dataroot.'/lang';
-}
-
-// location of local lang pack customisations (dirs with _local suffix)
-if (!isset($CFG->langlocalroot)) {
-    $CFG->langlocalroot = $CFG->dataroot.'/lang';
-}
-
 //point pear include path to moodles lib/pear so that includes and requires will search there for files before anywhere else
 //the problem is that we need specific version of quickforms and hacked excel files :-(
 ini_set('include_path', $CFG->libdir.'/pear' . PATH_SEPARATOR . ini_get('include_path'));
@@ -550,8 +572,14 @@ ini_set('include_path', $CFG->libdir.'/pear' . PATH_SEPARATOR . ini_get('include
 //please note zend library is supposed to be used only from web service protocol classes, it may be removed in future
 ini_set('include_path', $CFG->libdir.'/zend' . PATH_SEPARATOR . ini_get('include_path'));
 
+// Register our classloader, in theory somebody might want to replace it to load other hacked core classes.
+if (defined('COMPONENT_CLASSLOADER')) {
+    spl_autoload_register(COMPONENT_CLASSLOADER);
+} else {
+    spl_autoload_register('core_component::classloader');
+}
+
 // Load up standard libraries
-require_once($CFG->libdir .'/textlib.class.php');   // Functions to handle multibyte strings
 require_once($CFG->libdir .'/filterlib.php');       // Functions for filtering test as it is output
 require_once($CFG->libdir .'/ajax/ajaxlib.php');    // Functions for managing our use of JavaScript and YUI
 require_once($CFG->libdir .'/weblib.php');          // Functions relating to HTTP and content
@@ -572,9 +600,6 @@ require_once($CFG->libdir .'/editorlib.php');       // All text editor related f
 require_once($CFG->libdir .'/messagelib.php');      // Messagelib functions
 require_once($CFG->libdir .'/modinfolib.php');      // Cached information on course-module instances
 require_once($CFG->dirroot.'/cache/lib.php');       // Cache API
-
-require_once($CFG->libdir .'/ssis.php'); //SSIS functions
-
 
 // make sure PHP is not severly misconfigured
 setup_validate_php_configuration();
@@ -600,21 +625,44 @@ if (PHPUNIT_TEST and !PHPUNIT_UTIL) {
     unset($dbhash);
 }
 
-// Disable errors for now - needed for installation when debug enabled in config.php
-if (isset($CFG->debug)) {
-    $originalconfigdebug = $CFG->debug;
-    unset($CFG->debug);
-} else {
-    $originalconfigdebug = null;
-}
-
-// Load up any configuration from the config table
-
+// Load up any configuration from the config table or MUC cache.
 if (PHPUNIT_TEST) {
     phpunit_util::initialise_cfg();
 } else {
     initialise_cfg();
 }
+
+if (isset($CFG->debug)) {
+    $CFG->debug = (int)$CFG->debug;
+    error_reporting($CFG->debug);
+}  else {
+    $CFG->debug = 0;
+}
+$CFG->debugdeveloper = (($CFG->debug & DEBUG_DEVELOPER) === DEBUG_DEVELOPER);
+
+// Find out if PHP configured to display warnings,
+// this is a security problem because some moodle scripts may
+// disclose sensitive information.
+if (ini_get_bool('display_errors')) {
+    define('WARN_DISPLAY_ERRORS_ENABLED', true);
+}
+// If we want to display Moodle errors, then try and set PHP errors to match.
+if (!isset($CFG->debugdisplay)) {
+    // Keep it "as is" during installation.
+} else if (NO_DEBUG_DISPLAY) {
+    // Some parts of Moodle cannot display errors and debug at all.
+    ini_set('display_errors', '0');
+    ini_set('log_errors', '1');
+} else if (empty($CFG->debugdisplay)) {
+    ini_set('display_errors', '0');
+    ini_set('log_errors', '1');
+} else {
+    // This is very problematic in XHTML strict mode!
+    ini_set('display_errors', '1');
+}
+
+// Register our shutdown manager, do NOT use register_shutdown_function().
+core_shutdown_manager::initialize();
 
 // Verify upgrade is not running unless we are in a script that needs to execute in any case
 if (!defined('NO_UPGRADE_CHECK') and isset($CFG->upgraderunning)) {
@@ -630,57 +678,10 @@ if (!empty($CFG->logsql)) {
     $DB->set_logging(true);
 }
 
-// Prevent warnings from roles when upgrading with debug on
-if (isset($CFG->debug)) {
-    $originaldatabasedebug = $CFG->debug;
-    unset($CFG->debug);
-} else {
-    $originaldatabasedebug = null;
-}
-
 // enable circular reference collector in PHP 5.3,
 // it helps a lot when using large complex OOP structures such as in amos or gradebook
 if (function_exists('gc_enable')) {
     gc_enable();
-}
-
-// Register default shutdown tasks - such as Apache memory release helper, perf logging, etc.
-if (function_exists('register_shutdown_function')) {
-    register_shutdown_function('moodle_request_shutdown');
-}
-
-// Set error reporting back to normal
-if ($originaldatabasedebug === null) {
-    $CFG->debug = DEBUG_MINIMAL;
-} else {
-    $CFG->debug = $originaldatabasedebug;
-}
-if ($originalconfigdebug !== null) {
-    $CFG->debug = $originalconfigdebug;
-}
-unset($originalconfigdebug);
-unset($originaldatabasedebug);
-error_reporting($CFG->debug);
-
-// find out if PHP configured to display warnings,
-// this is a security problem because some moodle scripts may
-// disclose sensitive information
-if (ini_get_bool('display_errors')) {
-    define('WARN_DISPLAY_ERRORS_ENABLED', true);
-}
-// If we want to display Moodle errors, then try and set PHP errors to match
-if (!isset($CFG->debugdisplay)) {
-    // keep it "as is" during installation
-} else if (NO_DEBUG_DISPLAY) {
-    // some parts of Moodle cannot display errors and debug at all.
-    ini_set('display_errors', '0');
-    ini_set('log_errors', '1');
-} else if (empty($CFG->debugdisplay)) {
-    ini_set('display_errors', '0');
-    ini_set('log_errors', '1');
-} else {
-    // This is very problematic in XHTML strict mode!
-    ini_set('display_errors', '1');
 }
 
 // detect unsupported upgrade jump as soon as possible - do not change anything, do not use system functions
@@ -710,39 +711,6 @@ ini_set('pcre.backtrack_limit', 20971520);  // 20 MB
 $CFG->wordlist = $CFG->libdir .'/wordlist.txt';
 $CFG->moddata  = 'moddata';
 
-// A hack to get around magic_quotes_gpc being turned on
-// It is strongly recommended to disable "magic_quotes_gpc"!
-if (ini_get_bool('magic_quotes_gpc')) {
-    function stripslashes_deep($value) {
-        $value = is_array($value) ?
-                array_map('stripslashes_deep', $value) :
-                stripslashes($value);
-        return $value;
-    }
-    $_POST = array_map('stripslashes_deep', $_POST);
-    $_GET = array_map('stripslashes_deep', $_GET);
-    $_COOKIE = array_map('stripslashes_deep', $_COOKIE);
-    $_REQUEST = array_map('stripslashes_deep', $_REQUEST);
-    if (!empty($_SERVER['REQUEST_URI'])) {
-        $_SERVER['REQUEST_URI'] = stripslashes($_SERVER['REQUEST_URI']);
-    }
-    if (!empty($_SERVER['QUERY_STRING'])) {
-        $_SERVER['QUERY_STRING'] = stripslashes($_SERVER['QUERY_STRING']);
-    }
-    if (!empty($_SERVER['HTTP_REFERER'])) {
-        $_SERVER['HTTP_REFERER'] = stripslashes($_SERVER['HTTP_REFERER']);
-    }
-   if (!empty($_SERVER['PATH_INFO'])) {
-        $_SERVER['PATH_INFO'] = stripslashes($_SERVER['PATH_INFO']);
-    }
-    if (!empty($_SERVER['PHP_SELF'])) {
-        $_SERVER['PHP_SELF'] = stripslashes($_SERVER['PHP_SELF']);
-    }
-    if (!empty($_SERVER['PATH_TRANSLATED'])) {
-        $_SERVER['PATH_TRANSLATED'] = stripslashes($_SERVER['PATH_TRANSLATED']);
-    }
-}
-
 // neutralise nasty chars in PHP_SELF
 if (isset($_SERVER['PHP_SELF'])) {
     $phppos = strpos($_SERVER['PHP_SELF'], '.php');
@@ -758,13 +726,13 @@ initialise_fullme();
 // define SYSCONTEXTID in config.php if you want to save some queries,
 // after install it must match the system context record id.
 if (!defined('SYSCONTEXTID')) {
-    get_system_context();
+    context_system::instance();
 }
 
 // Defining the site - aka frontpage course
 try {
     $SITE = get_site();
-} catch (dml_exception $e) {
+} catch (moodle_exception $e) {
     $SITE = null;
     if (empty($CFG->version)) {
         $SITE = new stdClass();
@@ -776,12 +744,16 @@ try {
 }
 // And the 'default' course - this will usually get reset later in require_login() etc.
 $COURSE = clone($SITE);
-/** @deprecated Id of the frontpage course, use $SITE->id instead */
+// Id of the frontpage course.
 define('SITEID', $SITE->id);
 
 // init session prevention flag - this is defined on pages that do not want session
 if (CLI_SCRIPT) {
     // no sessions in CLI scripts possible
+    define('NO_MOODLE_COOKIES', true);
+
+} else if (WS_SERVER) {
+    // No sessions possible in web services.
     define('NO_MOODLE_COOKIES', true);
 
 } else if (!defined('NO_MOODLE_COOKIES')) {
@@ -796,17 +768,39 @@ if (CLI_SCRIPT) {
     }
 }
 
-// start session and prepare global $SESSION, $USER
-session_get_instance();
-$SESSION = &$_SESSION['SESSION'];
-$USER    = &$_SESSION['USER'];
+// Start session and prepare global $SESSION, $USER.
+if (empty($CFG->sessiontimeout)) {
+    $CFG->sessiontimeout = 7200;
+}
+\core\session\manager::start();
+
+// Set default content type and encoding, developers are still required to use
+// echo $OUTPUT->header() everywhere, anything that gets set later should override these headers.
+// This is intended to mitigate some security problems.
+if (AJAX_SCRIPT) {
+    if (!core_useragent::supports_json_contenttype()) {
+        // Some bloody old IE.
+        @header('Content-type: text/plain; charset=utf-8');
+        @header('X-Content-Type-Options: nosniff');
+    } else if (!empty($_FILES)) {
+        // Some ajax code may have problems with json and file uploads.
+        @header('Content-type: text/plain; charset=utf-8');
+    } else {
+        @header('Content-type: application/json; charset=utf-8');
+    }
+} else if (!CLI_SCRIPT) {
+    @header('Content-type: text/html; charset=utf-8');
+}
+
+// Initialise some variables that are supposed to be set in config.php only.
+if (!isset($CFG->filelifetime)) {
+    $CFG->filelifetime = 60*60*6;
+}
 
 // Late profiling, only happening if early one wasn't started
 if (!empty($CFG->profilingenabled)) {
     require_once($CFG->libdir . '/xhprof/xhprof_moodle.php');
-    if (profiling_start()) {
-        register_shutdown_function('profiling_stop');
-    }
+    profiling_start();
 }
 
 // Hack to get around max_input_vars restrictions,
@@ -835,7 +829,7 @@ unset($urlthemename);
 
 // Ensure a valid theme is set.
 if (!isset($CFG->theme)) {
-    $CFG->theme = 'standardwhite';
+    $CFG->theme = 'clean';
 }
 
 // Set language/locale of printed times.  If user has chosen a language that
@@ -850,6 +844,21 @@ if (isset($_GET['lang']) and ($lang = optional_param('lang', '', PARAM_SAFEDIR))
     }
 }
 unset($lang);
+
+// PARAM_SAFEDIR used instead of PARAM_LANG because using PARAM_LANG results
+// in an empty string being returned when a non-existant language is specified,
+// which would make it necessary to log out to undo the forcelang setting.
+// With PARAM_SAFEDIR, it's possible to specify ?forcelang=none to drop the forcelang effect.
+if ($forcelang = optional_param('forcelang', '', PARAM_SAFEDIR)) {
+    if (isloggedin()
+        && get_string_manager()->translation_exists($forcelang, false)
+        && has_capability('moodle/site:forcelanguage', context_system::instance())) {
+        $SESSION->forcelang = $forcelang;
+    } else if (isset($SESSION->forcelang)) {
+        unset($SESSION->forcelang);
+    }
+}
+unset($forcelang);
 
 setup_lang_from_browser();
 
@@ -879,7 +888,7 @@ unset($classname);
 
 
 if (!empty($CFG->debugvalidators) and !empty($CFG->guestloginbutton)) {
-    if ($CFG->theme == 'standard' or $CFG->theme == 'standardwhite') {    // Temporary measure to help with XHTML validation
+    if ($CFG->theme == 'standard') {    // Temporary measure to help with XHTML validation
         if (isset($_SERVER['HTTP_USER_AGENT']) and empty($USER->id)) {      // Allow W3CValidator in as user called w3cvalidator (or guest)
             if ((strpos($_SERVER['HTTP_USER_AGENT'], 'W3C_Validator') !== false) or
                 (strpos($_SERVER['HTTP_USER_AGENT'], 'Cynthia') !== false )) {
@@ -888,7 +897,7 @@ if (!empty($CFG->debugvalidators) and !empty($CFG->guestloginbutton)) {
                 } else {
                     $user = guest_user();
                 }
-                session_set_user($user);
+                \core\session\manager::set_user($user);
             }
         }
     }
@@ -907,8 +916,8 @@ if ($USER && function_exists('apache_note')
         $apachelog_name = clean_filename($USER->firstname . " " .
                                          $USER->lastname);
     }
-    if (session_is_loggedinas()) {
-        $realuser = session_get_realuser();
+    if (\core\session\manager::is_loggedinas()) {
+        $realuser = \core\session\manager::get_realuser();
         $apachelog_username = clean_filename($realuser->username." as ".$apachelog_username);
         $apachelog_name = clean_filename($realuser->firstname." ".$realuser->lastname ." as ".$apachelog_name);
         $apachelog_userid = clean_filename($realuser->id." as ".$apachelog_userid);
@@ -991,9 +1000,9 @@ if (PHPUNIT_TEST) {
 
 // // try to detect IE6 and prevent gzip because it is extremely buggy browser
 if (!empty($_SERVER['HTTP_USER_AGENT']) and strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE 6') !== false) {
-    @ini_set('zlib.output_compression', 'Off');
+    ini_set('zlib.output_compression', 'Off');
     if (function_exists('apache_setenv')) {
-        @apache_setenv('no-gzip', 1);
+        apache_setenv('no-gzip', 1);
     }
 }
 

@@ -18,8 +18,7 @@
 /**
  * Short answer
  *
- * @package    mod
- * @subpackage lesson
+ * @package mod_lesson
  * @copyright  2009 Sam Hemelryk
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
@@ -78,7 +77,8 @@ class lesson_page_type_shortanswer extends lesson_page {
         $answers = $this->get_answers();
         foreach ($answers as $answer) {
             $i++;
-            $expectedanswer  = $answer->answer; // for easier handling of $answer->answer
+            // Applying PARAM_TEXT as it is applied to the answer submitted by the user.
+            $expectedanswer  = clean_param($answer->answer, PARAM_TEXT);
             $ismatch         = false;
             $markit          = false;
             $useregexp       = ($this->qoption);

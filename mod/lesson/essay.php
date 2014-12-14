@@ -18,8 +18,7 @@
 /**
  * Provides the interface for grading essay questions
  *
- * @package    mod
- * @subpackage lesson
+ * @package mod_lesson
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
@@ -34,7 +33,8 @@ $mode = optional_param('mode', 'display', PARAM_ALPHA);
 
 $cm = get_coursemodule_from_id('lesson', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$lesson = new lesson($DB->get_record('lesson', array('id' => $cm->instance), '*', MUST_EXIST));
+$dblesson = $DB->get_record('lesson', array('id' => $cm->instance), '*', MUST_EXIST);
+$lesson = new lesson($dblesson);
 
 require_login($course, false, $cm);
 $context = context_module::instance($cm->id);
@@ -129,8 +129,20 @@ switch ($mode) {
             $updategrade->id = $grade->id;
             $updategrade->grade = $gradeinfo->grade;
             $DB->update_record('lesson_grades', $updategrade);
-            // Log it
-            add_to_log($course->id, 'lesson', 'update grade', "essay.php?id=$cm->id", $lesson->name, $cm->id);
+
+            $params = array(
+                'context' => $context,
+                'objectid' => $grade->id,
+                'courseid' => $course->id,
+                'relateduserid' => $attempt->userid,
+                'other' => array(
+                    'lessonid' => $lesson->id,
+                    'attemptid' => $attemptid
+                )
+            );
+            $event = \mod_lesson\event\essay_assessed::create($params);
+            $event->add_record_snapshot('lesson', $dblesson);
+            $event->trigger();
 
             $lesson->add_message(get_string('changessaved'), 'notifysuccess');
 
@@ -170,7 +182,7 @@ switch ($mode) {
 
         $pages = $lesson->load_all_pages();
         foreach ($pages as $key=>$page) {
-            if ($page->qtype !== LESSON_PAGE_ESSAY) {
+            if ($page->qtype != LESSON_PAGE_ESSAY) {
                 unset($pages[$key]);
             }
         }
@@ -243,8 +255,6 @@ switch ($mode) {
                 $essayinfo->sent = 1;
                 $attempt->useranswer = serialize($essayinfo);
                 $DB->update_record('lesson_attempts', $attempt);
-                // Log it
-                add_to_log($course->id, 'lesson', 'update email essay grade', "essay.php?id=$cm->id", format_string($pages[$attempt->pageid]->title,true).': '.fullname($users[$attempt->userid]), $cm->id);
             }
         }
         $lesson->add_message(get_string('emailsuccess', 'lesson'), 'notifysuccess');
@@ -255,7 +265,7 @@ switch ($mode) {
         // Get lesson pages that are essay
         $pages = $lesson->load_all_pages();
         foreach ($pages as $key=>$page) {
-            if ($page->qtype !== LESSON_PAGE_ESSAY) {
+            if ($page->qtype != LESSON_PAGE_ESSAY) {
                 unset($pages[$key]);
             }
         }
@@ -288,8 +298,6 @@ switch ($mode) {
         }
         break;
 }
-// Log it
-add_to_log($course->id, 'lesson', 'view grade', "essay.php?id=$cm->id", get_string('manualgrading', 'lesson'), $cm->id);
 
 $lessonoutput = $PAGE->get_renderer('mod_lesson');
 echo $lessonoutput->header($lesson, $cm, 'essay', false, null, get_string('manualgrading', 'lesson'));
@@ -348,11 +356,11 @@ switch ($mode) {
                     $attributes = array();
                     // Different colors for all the states of an essay (graded, if sent, not graded)
                     if (!$essayinfo->graded) {
-                        $attributes['class'] = "graded";
+                        $attributes['class'] = "essayungraded";
                     } elseif (!$essayinfo->sent) {
-                        $attributes['class'] = "sent";
+                        $attributes['class'] = "essaygraded";
                     } else {
-                        $attributes['class'] = "ungraded";
+                        $attributes['class'] = "essaysent";
                     }
                     $essaylinks[] = html_writer::link($url, userdate($essay->timeseen, get_string('strftimedatetime')).' '.format_string($pages[$essay->pageid]->title,true), $attributes);
                 }
@@ -373,6 +381,16 @@ switch ($mode) {
         echo html_writer::table($table);
         break;
     case 'grade':
+        // Trigger the essay grade viewed event.
+        $event = \mod_lesson\event\essay_attempt_viewed::create(array(
+            'objectid' => $attempt->id,
+            'relateduserid' => $attempt->userid,
+            'context' => $context,
+            'courseid' => $course->id,
+        ));
+        $event->add_record_snapshot('lesson_attempts', $attempt);
+        $event->trigger();
+
         // Grading form
         // Expects the following to be set: $attemptid, $answer, $user, $page, $attempt
         $essayinfo = unserialize($attempt->useranswer);

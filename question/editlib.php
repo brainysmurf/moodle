@@ -24,6 +24,8 @@
  */
 
 
+use core_question\bank\search\category_condition;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/questionlib.php');
@@ -439,16 +441,9 @@ class question_bank_checkbox_column extends question_bank_column_base {
         echo '<input title="' . $this->strselect . '" type="checkbox" name="q' .
                 $question->id . '" id="checkq' . $question->id . '" value="1"/>';
         if ($this->firstrow) {
-            $PAGE->requires->js('/question/qengine.js');
-            $module = array(
-                'name'      => 'qbank',
-                'fullpath'  => '/question/qbank.js',
-                'requires'  => array('yui2-dom', 'yui2-event', 'yui2-container'),
-                'strings'   => array(),
-                'async'     => false,
-            );
-            $PAGE->requires->js_init_call('question_bank.init_checkbox_column', array(get_string('selectall'),
-                    get_string('deselectall'), 'checkq' . $question->id), false, $module);
+            $PAGE->requires->strings_for_js(array('selectall', 'deselectall'), 'moodle');
+            $PAGE->requires->yui_module('moodle-question-qbankmanager', 'M.question.qbankmanager.init',
+                    array('checkq' . $question->id));
             $this->firstrow = false;
         }
     }
@@ -559,8 +554,7 @@ class question_bank_creator_name_column extends question_bank_column_base {
     protected function display_content($question, $rowclasses) {
         if (!empty($question->creatorfirstname) && !empty($question->creatorlastname)) {
             $u = new stdClass();
-            $u->firstname = $question->creatorfirstname;
-            $u->lastname = $question->creatorlastname;
+            $u = username_load_fields_from_object($u, $question, 'creator');
             echo fullname($u);
         }
     }
@@ -570,7 +564,12 @@ class question_bank_creator_name_column extends question_bank_column_base {
     }
 
     public function get_required_fields() {
-        return array('uc.firstname AS creatorfirstname', 'uc.lastname AS creatorlastname');
+        $allnames = get_all_user_name_fields();
+        $requiredfields = array();
+        foreach ($allnames as $allname) {
+            $requiredfields[] = 'uc.' . $allname . ' AS creator' . $allname;
+        }
+        return $requiredfields;
     }
 
     public function is_sortable() {
@@ -600,8 +599,7 @@ class question_bank_modifier_name_column extends question_bank_column_base {
     protected function display_content($question, $rowclasses) {
         if (!empty($question->modifierfirstname) && !empty($question->modifierlastname)) {
             $u = new stdClass();
-            $u->firstname = $question->modifierfirstname;
-            $u->lastname = $question->modifierlastname;
+            $u = username_load_fields_from_object($u, $question, 'modifier');
             echo fullname($u);
         }
     }
@@ -611,7 +609,12 @@ class question_bank_modifier_name_column extends question_bank_column_base {
     }
 
     public function get_required_fields() {
-        return array('um.firstname AS modifierfirstname', 'um.lastname AS modifierlastname');
+        $allnames = get_all_user_name_fields();
+        $requiredfields = array();
+        foreach ($allnames as $allname) {
+            $requiredfields[] = 'um.' . $allname . ' AS modifier' . $allname;
+        }
+        return $requiredfields;
     }
 
     public function is_sortable() {
@@ -681,6 +684,35 @@ class question_bank_edit_action_column extends question_bank_action_column_base 
     }
 }
 
+/**
+ * Question bank column for the duplicate action icon.
+ *
+ * @copyright  2013 The Open University
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class question_bank_copy_action_column extends question_bank_action_column_base {
+    /** @var string avoids repeated calls to get_string('duplicate'). */
+    protected $strcopy;
+
+    public function init() {
+        parent::init();
+        $this->strcopy = get_string('duplicate');
+    }
+
+    public function get_name() {
+        return 'copyaction';
+    }
+
+    protected function display_content($question, $rowclasses) {
+        // To copy a question, you need permission to add a question in the same
+        // category as the existing question, and ability to access the details of
+        // the question being copied.
+        if (question_has_capability_on($question, 'add') &&
+                (question_has_capability_on($question, 'edit') || question_has_capability_on($question, 'view'))) {
+            $this->print_icon('t/copy', $this->strcopy, $this->qbank->copy_question_url($question->id));
+        }
+    }
+}
 
 /**
  * Question bank columns for the preview action icon.
@@ -689,11 +721,8 @@ class question_bank_edit_action_column extends question_bank_action_column_base 
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_bank_preview_action_column extends question_bank_action_column_base {
-    protected $strpreview;
-
     public function init() {
         parent::init();
-        $this->strpreview = get_string('preview');
     }
 
     public function get_name() {
@@ -701,47 +730,15 @@ class question_bank_preview_action_column extends question_bank_action_column_ba
     }
 
     protected function display_content($question, $rowclasses) {
-        global $OUTPUT;
+        global $PAGE;
         if (question_has_capability_on($question, 'use')) {
-            // Build the icon.
-            $image = $OUTPUT->pix_icon('t/preview', $this->strpreview, '', array('class' => 'iconsmall'));
-
-            $link = $this->qbank->preview_question_url($question);
-            $action = new popup_action('click', $link, 'questionpreview',
-                    question_preview_popup_params());
-
-            echo $OUTPUT->action_link($link, $image, $action, array('title' => $this->strpreview));
+            echo $PAGE->get_renderer('core_question')->question_preview_link(
+                    $question->id, $this->qbank->get_most_specific_context(), false);
         }
     }
 
     public function get_required_fields() {
         return array('q.id');
-    }
-}
-
-
-/**
- * Question bank columns for the move action icon.
- *
- * @copyright  2009 Tim Hunt
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class question_bank_move_action_column extends question_bank_action_column_base {
-    protected $strmove;
-
-    public function init() {
-        parent::init();
-        $this->strmove = get_string('move');
-    }
-
-    public function get_name() {
-        return 'moveaction';
-    }
-
-    protected function display_content($question, $rowclasses) {
-        if (question_has_capability_on($question, 'move')) {
-            $this->print_icon('t/move', $this->strmove, $this->qbank->move_question_url($question->id));
-        }
     }
 }
 
@@ -832,8 +829,9 @@ class question_bank_question_text_row extends question_bank_row_base {
     }
 
     protected function display_content($question, $rowclasses) {
-        $text = question_rewrite_questiontext_preview_urls($question->questiontext,
-                $question->contextid, 'question', $question->id);
+        $text = question_rewrite_question_preview_urls($question->questiontext, $question->id,
+                $question->contextid, 'question', 'questiontext', $question->id,
+                $question->contextid, 'core_question');
         $text = format_text($text, $question->questiontextformat,
                 $this->formatoptions);
         if ($text == '') {
@@ -889,6 +887,8 @@ class question_bank_view {
     protected $countsql;
     protected $loadsql;
     protected $sqlparams;
+    /** @var array of \core_question\bank\search\condition objects. */
+    protected $searchconditions = array();
 
     /**
      * Constructor
@@ -926,12 +926,26 @@ class question_bank_view {
         $this->init_column_types();
         $this->init_columns($this->wanted_columns(), $this->heading_column());
         $this->init_sort();
+        $this->init_search_conditions($this->contexts, $this->course, $this->cm);
+    }
+
+    /**
+     * Initialize search conditions from plugins
+     * local_*_get_question_bank_search_conditions() must return an array of
+     * \core_question\bank\search\condition objects.
+     */
+    protected function init_search_conditions() {
+        $searchplugins = get_plugin_list_with_function('local', 'get_question_bank_search_conditions');
+        foreach ($searchplugins as $component => $function) {
+            foreach ($function($this) as $searchobject) {
+                $this->add_searchcondition($searchobject);
+            }
+        }
     }
 
     protected function wanted_columns() {
-        $columns = array('checkbox', 'qtype', 'questionname', 'editaction',
-                'previewaction', 'moveaction', 'deleteaction', 'creatorname',
-                'modifiername');
+        $columns = array('checkbox', 'qtype', 'questionname', 'editaction', 'copyaction',
+                        'previewaction', 'deleteaction', 'creatorname', 'modifiername');
         if (question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new moodle_url(''))) {
             $columns[] = 'questiontext';
         }
@@ -955,8 +969,8 @@ class question_bank_view {
             new question_bank_creator_name_column($this),
             new question_bank_modifier_name_column($this),
             new question_bank_edit_action_column($this),
+            new question_bank_copy_action_column($this),
             new question_bank_preview_action_column($this),
-            new question_bank_move_action_column($this),
             new question_bank_delete_action_column($this),
             new question_bank_question_text_row($this),
         );
@@ -1132,7 +1146,27 @@ class question_bank_view {
         return $this->baseurl->out(true, $this->sort_to_params($newsort));
     }
 
+    /**
+     * Create the SQL query to retrieve the indicated questions
+     * @param stdClass $category no longer used.
+     * @param bool $recurse no longer used.
+     * @param bool $showhidden no longer used.
+     * @deprecated since Moodle 2.7 MDL-40313.
+     * @see build_query()
+     * @see \core_question\bank\search\condition
+     * @todo MDL-41978 This will be deleted in Moodle 2.8
+     */
     protected function build_query_sql($category, $recurse, $showhidden) {
+        debugging('build_query_sql() is deprecated, please use question_bank_view::build_query() and ' .
+                '\core_question\bank\search\condition classes instead.', DEBUG_DEVELOPER);
+        self::build_query();
+    }
+
+    /**
+     * Create the SQL query to retrieve the indicated questions, based on
+     * \core_question\bank\search\condition filters.
+     */
+    protected function build_query() {
         global $DB;
 
     /// Get the required tables.
@@ -1166,26 +1200,20 @@ class question_bank_view {
 
     /// Build the where clause.
         $tests = array('q.parent = 0');
-
-        if (!$showhidden) {
-            $tests[] = 'q.hidden = 0';
+        $this->sqlparams = array();
+        foreach ($this->searchconditions as $searchcondition) {
+            if ($searchcondition->where()) {
+                $tests[] = '((' . $searchcondition->where() .'))';
+            }
+            if ($searchcondition->params()) {
+                $this->sqlparams = array_merge($this->sqlparams, $searchcondition->params());
+            }
         }
-
-        if ($recurse) {
-            $categoryids = question_categorylist($category->id);
-        } else {
-            $categoryids = array($category->id);
-        }
-        list($catidtest, $params) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED, 'cat');
-        $tests[] = 'q.category ' . $catidtest;
-        $this->sqlparams = $params;
-
     /// Build the SQL.
         $sql = ' FROM {question} q ' . implode(' ', $joins);
         $sql .= ' WHERE ' . implode(' AND ', $tests);
         $this->countsql = 'SELECT count(1)' . $sql;
         $this->loadsql = 'SELECT ' . implode(', ', $fields) . $sql . ' ORDER BY ' . implode(', ', $sorts);
-        $this->sqlparams = $params;
     }
 
     protected function get_question_count() {
@@ -1211,13 +1239,31 @@ class question_bank_view {
         return $this->editquestionurl->out(true, array('id' => $questionid));
     }
 
-    public function move_question_url($questionid) {
-        return $this->editquestionurl->out(true, array('id' => $questionid, 'movecontext' => 1));
+    /**
+     * Get the URL for duplicating a given question.
+     * @param int $questionid the question id.
+     * @return moodle_url the URL.
+     */
+    public function copy_question_url($questionid) {
+        return $this->editquestionurl->out(true, array('id' => $questionid, 'makecopy' => 1));
     }
 
-    public function preview_question_url($question) {
-        return question_preview_url($question->id, null, null, null, null,
-                $this->contexts->lowest());
+    /**
+     * Get the context we are displaying the question bank for.
+     * @return context context object.
+     */
+    public function get_most_specific_context() {
+        return $this->contexts->lowest();
+    }
+
+    /**
+     * Get the URL to preview a question.
+     * @param stdClass $questiondata the data defining the question.
+     * @return moodle_url the URL.
+     */
+    public function preview_question_url($questiondata) {
+        return question_preview_url($questiondata->id, null, null, null, null,
+                $this->get_most_specific_context());
     }
 
     /**
@@ -1239,23 +1285,18 @@ class question_bank_view {
         if ($this->process_actions_needing_ui()) {
             return;
         }
-
+        $editcontexts = $this->contexts->having_one_edit_tab_cap($tabname);
         // Category selection form
         echo $OUTPUT->heading(get_string('questionbank', 'question'), 2);
-
-        $this->display_category_form($this->contexts->having_one_edit_tab_cap($tabname),
-                $this->baseurl, $cat);
-        $this->display_options($recurse, $showhidden, $showquestiontext);
-
-        if (!$category = $this->get_current_category($cat)) {
-            return;
-        }
-        $this->print_category_info($category);
+        array_unshift($this->searchconditions, new \core_question\bank\search\hidden_condition(!$showhidden));
+        array_unshift($this->searchconditions, new \core_question\bank\search\category_condition(
+                $cat, $recurse, $editcontexts, $this->baseurl, $this->course));
+        $this->display_options_form($showquestiontext);
 
         // continues with list of questions
         $this->display_question_list($this->contexts->having_one_edit_tab_cap($tabname),
                 $this->baseurl, $cat, $this->cm,
-                $recurse, $page, $perpage, $showhidden, $showquestiontext,
+                null, $page, $perpage, $showhidden, $showquestiontext,
                 $this->contexts->having_cap('moodle/question:add'));
     }
 
@@ -1284,6 +1325,13 @@ class question_bank_view {
         return $category;
     }
 
+    /**
+     * prints category information
+     * @param stdClass $category the category row from the database.
+     * @deprecated since Moodle 2.7 MDL-40313.
+     * @see \core_question\bank\search\condition
+     * @todo MDL-41978 This will be deleted in Moodle 2.8
+     */
     protected function print_category_info($category) {
         $formatoptions = new stdClass();
         $formatoptions->noclean = true;
@@ -1294,11 +1342,16 @@ class question_bank_view {
     }
 
     /**
-     * prints a form to choose categories
+     * Prints a form to choose categories
+     * @deprecated since Moodle 2.7 MDL-40313.
+     * @see \core_question\bank\search\condition
+     * @todo MDL-41978 This will be deleted in Moodle 2.8
      */
     protected function display_category_form($contexts, $pageurl, $current) {
-        global $CFG, $OUTPUT;
+        global $OUTPUT;
 
+        debugging('display_category_form() is deprecated, please use ' .
+                '\core_question\bank\search\condition instead.', DEBUG_DEVELOPER);
     /// Get all the existing categories now
         echo '<div class="choosecategory">';
         $catmenu = question_category_options($contexts, false, 0, true);
@@ -1309,21 +1362,31 @@ class question_bank_view {
         echo "</div>\n";
     }
 
+    /**
+     * Display the options form.
+     * @param bool $recurse no longer used.
+     * @param bool $showhidden no longer used.
+     * @param bool $showquestiontext whether to show the question text.
+     * @deprecated since Moodle 2.7 MDL-40313.
+     * @see display_options_form
+     * @todo MDL-41978 This will be deleted in Moodle 2.8
+     * @see \core_question\bank\search\condition
+     */
     protected function display_options($recurse, $showhidden, $showquestiontext) {
-        echo '<form method="get" action="edit.php" id="displayoptions">';
-        echo "<fieldset class='invisiblefieldset'>";
-        echo html_writer::input_hidden_params($this->baseurl, array('recurse', 'showhidden', 'qbshowtext'));
-        $this->display_category_form_checkbox('recurse', $recurse, get_string('includesubcategories', 'question'));
-        $this->display_category_form_checkbox('showhidden', $showhidden, get_string('showhidden', 'question'));
-        $this->display_category_form_checkbox('qbshowtext', $showquestiontext, get_string('showquestiontext', 'question'));
-        echo '<noscript><div class="centerpara"><input type="submit" value="'. get_string('go') .'" />';
-        echo '</div></noscript></fieldset></form>';
+        debugging('display_options() is deprecated, please use display_options_form instead.', DEBUG_DEVELOPER);
+        return $this->display_options_form($showquestiontext);
     }
 
     /**
-     * Print a single option checkbox. Used by the preceeding.
+     * Print a single option checkbox.
+     * @deprecated since Moodle 2.7 MDL-40313.
+     * @see \core_question\bank\search\condition
+     * @see html_writer::checkbox
+     * @todo MDL-41978 This will be deleted in Moodle 2.8
      */
     protected function display_category_form_checkbox($name, $value, $label) {
+        debugging('display_category_form_checkbox() is deprecated, ' .
+                'please use \core_question\bank\search\condition instead.', DEBUG_DEVELOPER);
         echo '<div><input type="hidden" id="' . $name . '_off" name="' . $name . '" value="0" />';
         echo '<input type="checkbox" id="' . $name . '_on" name="' . $name . '" value="1"';
         if ($value) {
@@ -1331,6 +1394,60 @@ class question_bank_view {
         }
         echo ' onchange="getElementById(\'displayoptions\').submit(); return true;" />';
         echo '<label for="' . $name . '_on">' . $label . '</label>';
+        echo "</div>\n";
+    }
+
+    /**
+     * Display the form with options for which questions are displayed and how they are displayed.
+     * @param bool $showquestiontext Display the text of the question within the list.
+     * @param string $path path to the script displaying this page.
+     * @param bool $showtextoption whether to include the 'Show question text' checkbox.
+     */
+    protected function display_options_form($showquestiontext, $scriptpath = '/question/edit.php',
+            $showtextoption = true) {
+        global $PAGE;
+
+        echo html_writer::start_tag('form', array('method' => 'get',
+                'action' => new \moodle_url($scriptpath), 'id' => 'displayoptions'));
+        echo html_writer::start_div();
+        echo html_writer::input_hidden_params($this->baseurl, array('recurse', 'showhidden', 'qbshowtext'));
+
+        foreach ($this->searchconditions as $searchcondition) {
+            echo $searchcondition->display_options($this);
+        }
+        if ($showtextoption) {
+            $this->display_showtext_checkbox($showquestiontext);
+        }
+        $this->display_advanced_search_form();
+        $go = html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('go')));
+        echo html_writer::tag('noscript', html_writer::div($go), array('class' => 'inline'));
+        echo html_writer::end_div();
+        echo html_writer::end_tag('form');
+        $PAGE->requires->yui_module('moodle-question-searchform', 'M.question.searchform.init');
+    }
+
+    /**
+     * Print the "advanced" UI elements for the form to select which questions. Hidden by default.
+     */
+    protected function display_advanced_search_form() {
+        print_collapsible_region_start('', 'advancedsearch', get_string('advancedsearchoptions', 'question'),
+                                               'question_bank_advanced_search');
+        foreach ($this->searchconditions as $searchcondition) {
+            echo $searchcondition->display_options_adv($this);
+        }
+        print_collapsible_region_end();
+    }
+
+    /**
+     * Display the checkbox UI for toggling the display of the question text in the list.
+     * @param bool $showquestiontext the current or default value for whether to display the text.
+     */
+    protected function display_showtext_checkbox($showquestiontext) {
+        echo '<div>';
+        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'qbshowtext',
+                                               'value' => 0, 'id' => 'qbshowtext_off'));
+        echo html_writer::checkbox('qbshowtext', '1', $showquestiontext, get_string('showquestiontext', 'question'),
+                                       array('id' => 'qbshowtext_on', 'class' => 'searchoptions'));
         echo "</div>\n";
     }
 
@@ -1347,17 +1464,19 @@ class question_bank_view {
     }
 
     /**
-    * Prints the table of questions in a category with interactions
-    *
-    * @param object $course   The course object
-    * @param int $categoryid  The id of the question category to be displayed
-    * @param int $cm      The course module record if we are in the context of a particular module, 0 otherwise
-    * @param int $recurse     This is 1 if subcategories should be included, 0 otherwise
-    * @param int $page        The number of the page to be displayed
-    * @param int $perpage     Number of questions to show per page
-    * @param bool $showhidden   True if also hidden questions should be displayed
-    * @param bool $showquestiontext whether the text of each question should be shown in the list
-    */
+     * Prints the table of questions in a category with interactions
+     *
+     * @param array      $contexts    Not used!
+     * @param moodle_url $pageurl     The URL to reload this page.
+     * @param string     $categoryandcontext 'categoryID,contextID'.
+     * @param stdClass   $cm          Not used!
+     * @param bool       $recurse     Whether to include subcategories.
+     * @param int        $page        The number of the page to be displayed
+     * @param int        $perpage     Number of questions to show per page
+     * @param bool       $showhidden  whether deleted questions should be displayed.
+     * @param bool       $showquestiontext whether the text of each question should be shown in the list. Deprecated.
+     * @param array      $addcontexts contexts where the user is allowed to add new questions.
+     */
     protected function display_question_list($contexts, $pageurl, $categoryandcontext,
             $cm = null, $recurse=1, $page=0, $perpage=100, $showhidden=false,
             $showquestiontext = false, $addcontexts = array()) {
@@ -1382,12 +1501,11 @@ class question_bank_view {
 
         $this->create_new_question_form($category, $canadd);
 
-        $this->build_query_sql($category, $recurse, $showhidden);
+        $this->build_query();
         $totalnumber = $this->get_question_count();
         if ($totalnumber == 0) {
             return;
         }
-
         $questions = $this->load_page_questions($page, $perpage);
 
         echo '<div class="categorypagingbarcontainer">';
@@ -1401,7 +1519,7 @@ class question_bank_view {
         echo '<form method="post" action="edit.php">';
         echo '<fieldset class="invisiblefieldset" style="display: block;">';
         echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
-        echo html_writer::input_hidden_params($pageurl);
+        echo html_writer::input_hidden_params($this->baseurl);
 
         echo '<div class="categoryquestionscontainer">';
         $this->start_table();
@@ -1617,6 +1735,14 @@ class question_bank_view {
             return true;
         }
     }
+
+    /**
+     * Add another search control to this view.
+     * @param \core_question\bank\search\condition $searchcondition the condition to add.
+     */
+    public function add_searchcondition($searchcondition) {
+        $this->searchconditions[] = $searchcondition;
+    }
 }
 
 /**
@@ -1805,75 +1931,32 @@ function require_login_in_context($contextorid = null){
  * @param $allowedqtypes optional list of qtypes that are allowed. If given, only
  *      those qtypes will be shown. Example value array('description', 'multichoice').
  */
-function print_choose_qtype_to_add_form($hiddenparams, array $allowedqtypes = null) {
+function print_choose_qtype_to_add_form($hiddenparams, array $allowedqtypes = null, $enablejs = true) {
     global $CFG, $PAGE, $OUTPUT;
 
-    echo '<div id="chooseqtypehead" class="hd">' . "\n";
-    echo $OUTPUT->heading(get_string('chooseqtypetoadd', 'question'), 3);
-    echo "</div>\n";
-    echo '<div id="chooseqtype">' . "\n";
-    echo '<form action="' . $CFG->wwwroot . '/question/question.php" method="get"><div id="qtypeformdiv">' . "\n";
-    foreach ($hiddenparams as $name => $value) {
-        echo '<input type="hidden" name="' . s($name) . '" value="' . s($value) . '" />' . "\n";
+    if ($enablejs) {
+        // Add the chooser.
+        $PAGE->requires->yui_module('moodle-question-chooser',
+            'M.question.init_chooser',
+            array(array('courseid' => $PAGE->course->id))
+        );
     }
-    echo "</div>\n";
-    echo '<div class="qtypes">' . "\n";
-    echo '<div class="instruction">' . get_string('selectaqtypefordescription', 'question') . "</div>\n";
-    echo '<div class="alloptions">' . "\n";
-    echo '<div class="realqtypes">' . "\n";
+
+    $realqtypes = array();
     $fakeqtypes = array();
     foreach (question_bank::get_creatable_qtypes() as $qtypename => $qtype) {
         if ($allowedqtypes && !in_array($qtypename, $allowedqtypes)) {
             continue;
         }
         if ($qtype->is_real_question_type()) {
-            print_qtype_to_add_option($qtype);
+            $realqtypes[] = $qtype;
         } else {
             $fakeqtypes[] = $qtype;
         }
     }
-    echo "</div>\n";
-    echo '<div class="fakeqtypes">' . "\n";
-    foreach ($fakeqtypes as $qtype) {
-        print_qtype_to_add_option($qtype);
-    }
-    echo "</div>\n";
-    echo "</div>\n";
-    echo "</div>\n";
-    echo '<div class="submitbuttons">' . "\n";
-    echo '<input type="submit" value="' . get_string('next') . '" id="chooseqtype_submit" />' . "\n";
-    echo '<input type="submit" id="chooseqtypecancel" name="addcancel" value="' . get_string('cancel') . '" />' . "\n";
-    echo "</div></form>\n";
-    echo "</div>\n";
 
-    $PAGE->requires->js('/question/qengine.js');
-    $module = array(
-        'name'      => 'qbank',
-        'fullpath'  => '/question/qbank.js',
-        'requires'  => array('yui2-dom', 'yui2-event', 'yui2-container'),
-        'strings'   => array(),
-        'async'     => false,
-    );
-    $PAGE->requires->js_init_call('qtype_chooser.init', array('chooseqtype'), false, $module);
-}
-
-/**
- * Private function used by the preceding one.
- * @param question_type $qtype the question type.
- */
-function print_qtype_to_add_option($qtype) {
-    echo '<div class="qtypeoption">' . "\n";
-    echo '<label for="' . $qtype->plugin_name() . '">';
-    echo '<input type="radio" name="qtype" id="' . $qtype->plugin_name() .
-            '" value="' . $qtype->name() . '" />';
-    echo '<span class="qtypename">';
-    $fakequestion = new stdClass();
-    $fakequestion->qtype = $qtype->name();
-    echo print_question_icon($fakequestion);
-    echo $qtype->menu_name() . '</span><span class="qtypesummary">' .
-            get_string('pluginnamesummary', $qtype->plugin_name());
-    echo "</span></label>\n";
-    echo "</div>\n";
+    $renderer = $PAGE->get_renderer('question', 'bank');
+    echo $renderer->qbank_chooser($realqtypes, $fakeqtypes, $PAGE->course, $hiddenparams);
 }
 
 /**

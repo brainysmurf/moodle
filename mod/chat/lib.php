@@ -18,7 +18,7 @@
 /**
  * Library of functions and constants for module chat
  *
- * @package   mod-chat
+ * @package   mod_chat
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -204,39 +204,6 @@ function chat_delete_instance($id) {
 }
 
 /**
- * Return a small object with summary information about what a
- * user has done with a given particular instance of this module
- * Used for user activity reports.
- * <code>
- * $return->time = the time they did it
- * $return->info = a short text description
- * </code>
- *
- * @param object $course
- * @param object $user
- * @param object $mod
- * @param object $chat
- * @return void
- */
-function chat_user_outline($course, $user, $mod, $chat) {
-    return NULL;
-}
-
-/**
- * Print a detailed representation of what a  user has done with
- * a given particular instance of this module, for user activity reports.
- *
- * @param object $course
- * @param object $user
- * @param object $mod
- * @param object $chat
- * @return bool
- */
-function chat_user_complete($course, $user, $mod, $chat) {
-    return true;
-}
-
-/**
  * Given a course and a date, prints a summary of all chat rooms past and present
  * This function is called from block_recent_activity
  *
@@ -274,14 +241,13 @@ function chat_print_recent_activity($course, $viewfullnames, $timestart) {
             continue;
         }
         $cm = $modinfo->cms[$cmid];
-        $cm->lasttime = $mcm->lasttime;
         if (!$modinfo->cms[$cm->id]->uservisible) {
             continue;
         }
 
         if (groups_get_activity_groupmode($cm) != SEPARATEGROUPS
          or has_capability('moodle/site:accessallgroups', context_module::instance($cm->id))) {
-            if ($timeout > time() - $cm->lasttime) {
+            if ($timeout > time() - $mcm->lasttime) {
                 $current[] = $cm;
             } else {
                 $past[] = $cm;
@@ -290,19 +256,14 @@ function chat_print_recent_activity($course, $viewfullnames, $timestart) {
             continue;
         }
 
-        if (is_null($modinfo->groups)) {
-            $modinfo->groups = groups_get_user_groups($course->id); // load all my groups and cache it in modinfo
-        }
-
         // verify groups in separate mode
-        if (!$mygroupids = $modinfo->groups[$cm->groupingid]) {
+        if (!$mygroupids = $modinfo->get_groups($cm->groupingid)) {
             continue;
         }
 
         // ok, last post was not for my group - we have to query db to get last message from one of my groups
         // only minor problem is that the order will not be correct
         $mygroupids = implode(',', $mygroupids);
-        $cm->mygroupids = $mygroupids;
 
         if (!$mcm = $DB->get_record_sql("SELECT cm.id, MAX(chm.timestamp) AS lasttime
                                            FROM {course_modules} cm
@@ -314,8 +275,8 @@ function chat_print_recent_activity($course, $viewfullnames, $timestart) {
              continue;
         }
 
-        $cm->lasttime = $mcm->lasttime;
-        if ($timeout > time() - $cm->lasttime) {
+        $mcms[$cmid]->lasttime = $mcm->lasttime;
+        if ($timeout > time() - $mcm->lasttime) {
             $current[] = $cm;
         } else {
             $past[] = $cm;
@@ -329,18 +290,18 @@ function chat_print_recent_activity($course, $viewfullnames, $timestart) {
     $strftimerecent = get_string('strftimerecent');
 
     if ($past) {
-        echo $OUTPUT->heading(get_string("pastchats", 'chat').':');
+        echo $OUTPUT->heading(get_string("pastchats", 'chat').':', 3);
 
         foreach ($past as $cm) {
             $link = $CFG->wwwroot.'/mod/chat/view.php?id='.$cm->id;
-            $date = userdate($cm->lasttime, $strftimerecent);
+            $date = userdate($mcms[$cm->id]->lasttime, $strftimerecent);
             echo '<div class="head"><div class="date">'.$date.'</div></div>';
             echo '<div class="info"><a href="'.$link.'">'.format_string($cm->name,true).'</a></div>';
         }
     }
 
     if ($current) {
-        echo $OUTPUT->heading(get_string("currentchats", 'chat').':');
+        echo $OUTPUT->heading(get_string("currentchats", 'chat').':', 3);
 
         $oldest = floor((time()-$CFG->chat_old_ping)/10)*10;  // better db caching
 
@@ -351,27 +312,31 @@ function chat_print_recent_activity($course, $viewfullnames, $timestart) {
 
         $params = array('timeold'=>$timeold, 'timeoldext'=>$timeoldext, 'cmid'=>$cm->id);
 
-        $timeout = "AND (chu.version<>'basic' AND chu.lastping>:timeold) OR (chu.version='basic' AND chu.lastping>:timeoldext)";
+        $timeout = "AND ((chu.version<>'basic' AND chu.lastping>:timeold) OR (chu.version='basic' AND chu.lastping>:timeoldext))";
 
         foreach ($current as $cm) {
             //count users first
-            if (isset($cm->mygroupids)) {
-                $groupselect = "AND (chu.groupid IN ({$cm->mygroupids}) OR chu.groupid = 0)";
+            $mygroupids = $modinfo->groups[$cm->groupingid];
+            if (!empty($mygroupids)) {
+                list($subquery, $subparams) = $DB->get_in_or_equal($mygroupids, SQL_PARAMS_NAMED, 'gid');
+                $params += $subparams;
+                $groupselect = "AND (chu.groupid $subquery OR chu.groupid = 0)";
             } else {
                 $groupselect = "";
             }
 
-            if (!$users = $DB->get_records_sql("SELECT u.id, u.firstname, u.lastname, u.email, u.picture
+            $userfields = user_picture::fields('u');
+            if (!$users = $DB->get_records_sql("SELECT $userfields
                                                   FROM {course_modules} cm
                                                   JOIN {chat} ch        ON ch.id = cm.instance
                                                   JOIN {chat_users} chu ON chu.chatid = ch.id
                                                   JOIN {user} u         ON u.id = chu.userid
                                                  WHERE cm.id = :cmid $timeout $groupselect
-                                              GROUP BY u.id, u.firstname, u.lastname, u.email, u.picture", $params)) {
+                                              GROUP BY $userfields", $params)) {
             }
 
             $link = $CFG->wwwroot.'/mod/chat/view.php?id='.$cm->id;
-            $date = userdate($cm->lasttime, $strftimerecent);
+            $date = userdate($mcms[$cm->id]->lasttime, $strftimerecent);
 
             echo '<div class="head"><div class="date">'.$date.'</div></div>';
             echo '<div class="info"><a href="'.$link.'">'.format_string($cm->name,true).'</a></div>';
@@ -602,16 +567,7 @@ function chat_login_user($chatid, $version, $groupid, $course) {
         if ($version == 'sockets') {
             // do not send 'enter' message, chatd will do it
         } else {
-            $message = new stdClass();
-            $message->chatid    = $chatuser->chatid;
-            $message->userid    = $chatuser->userid;
-            $message->groupid   = $groupid;
-            $message->message   = 'enter';
-            $message->system    = 1;
-            $message->timestamp = time();
-
-            $DB->insert_record('chat_messages', $message);
-            $DB->insert_record('chat_messages_current', $message);
+            chat_send_chatmessage($chatuser, 'enter', true);
         }
     }
 
@@ -637,16 +593,7 @@ function chat_delete_old_users() {
     if ($oldusers = $DB->get_records_select('chat_users', $query, $params) ) {
         $DB->delete_records_select('chat_users', $query, $params);
         foreach ($oldusers as $olduser) {
-            $message = new stdClass();
-            $message->chatid    = $olduser->chatid;
-            $message->userid    = $olduser->userid;
-            $message->groupid   = $olduser->groupid;
-            $message->message   = 'exit';
-            $message->system    = 1;
-            $message->timestamp = time();
-
-            $DB->insert_record('chat_messages', $message);
-            $DB->insert_record('chat_messages_current', $message);
+            chat_send_chatmessage($olduser, 'exit', true);
         }
     }
 }
@@ -706,6 +653,51 @@ function chat_update_chat_times($chatid=0) {
             $calendarevent->update($event, false);
         }
     }
+}
+
+/**
+ * Send a message on the chat.
+ *
+ * @param object $chatuser The chat user record.
+ * @param string $messagetext The message to be sent.
+ * @param bool $system False for non-system messages, true for system messages.
+ * @param object $cm The course module object, pass it to save a database query when we trigger the event.
+ * @return int The message ID.
+ * @since Moodle 2.6
+ */
+function chat_send_chatmessage($chatuser, $messagetext, $system = false, $cm = null) {
+    global $DB;
+
+    $message = new stdClass();
+    $message->chatid    = $chatuser->chatid;
+    $message->userid    = $chatuser->userid;
+    $message->groupid   = $chatuser->groupid;
+    $message->message   = $messagetext;
+    $message->system    = $system ? 1 : 0;
+    $message->timestamp = time();
+
+    $messageid = $DB->insert_record('chat_messages', $message);
+    $DB->insert_record('chat_messages_current', $message);
+    $message->id = $messageid;
+
+    if (!$system) {
+
+        if (empty($cm)) {
+            $cm = get_coursemodule_from_instance('chat', $chatuser->chatid, $chatuser->course);
+        }
+
+        $params = array(
+            'context' => context_module::instance($cm->id),
+            'objectid' => $message->id,
+            // We set relateduserid, because when triggered from the chat daemon, the event userid is null.
+            'relateduserid' => $chatuser->userid
+        );
+        $event = \mod_chat\event\message_sent::create($params);
+        $event->add_record_snapshot('chat_messages', $message);
+        $event->trigger();
+    }
+
+    return $message->id;
 }
 
 /**
@@ -1078,6 +1070,13 @@ function chat_print_error($level, $msg) {
 }
 
 /**
+ * List the actions that correspond to a view of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = 'r' and edulevel = LEVEL_PARTICIPATING will
+ *       be considered as view action.
+ *
  * @return array
  */
 function chat_get_view_actions() {
@@ -1085,6 +1084,13 @@ function chat_get_view_actions() {
 }
 
 /**
+ * List the actions that correspond to a post of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = ('c' || 'u' || 'd') and edulevel = LEVEL_PARTICIPATING
+ *       will be considered as post action.
+ *
  * @return array
  */
 function chat_get_post_actions() {
@@ -1288,11 +1294,12 @@ function chat_extend_settings_navigation(settings_navigation $settings, navigati
 /**
  * user logout event handler
  *
- * @param object $user full $USER object
+ * @param \core\event\user_loggedout $event The event.
+ * @return void
  */
-function chat_user_logout($user) {
+function chat_user_logout(\core\event\user_loggedout $event) {
     global $DB;
-    $DB->delete_records('chat_users', array('userid'=>$user->id));
+    $DB->delete_records('chat_users', array('userid' => $event->objectid));
 }
 
 /**

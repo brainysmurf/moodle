@@ -24,6 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+<<<<<<< HEAD
 $plugin->version   = 2013050200; // The current plugin version (Date: YYYYMMDDXX)
 $plugin->requires  = 2013050100; // Requires this Moodle version
+=======
+$plugin->version   = 2014051200; // The current plugin version (Date: YYYYMMDDXX)
+$plugin->requires  = 2014050800; // Requires this Moodle version
+>>>>>>> moodle/MOODLE_27_STABLE
 $plugin->component = 'tool_profiling'; // Full name of the plugin (used for diagnostics)

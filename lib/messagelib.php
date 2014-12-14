@@ -57,17 +57,38 @@ function message_send($eventdata) {
     //new message ID to return
     $messageid = false;
 
+    // Fetch default (site) preferences
+    $defaultpreferences = get_message_output_default_preferences();
+    $preferencebase = $eventdata->component.'_'.$eventdata->name;
+    // If message provider is disabled then don't do any processing.
+    if (!empty($defaultpreferences->{$preferencebase.'_disable'})) {
+        return $messageid;
+    }
+
     //TODO: we need to solve problems with database transactions here somehow, for now we just prevent transactions - sorry
     $DB->transactions_forbidden();
 
+    // By default a message is a notification. Only personal/private messages aren't notifications.
+    if (!isset($eventdata->notification)) {
+        $eventdata->notification = 1;
+    }
+
     if (is_number($eventdata->userto)) {
-        $eventdata->userto = $DB->get_record('user', array('id' => $eventdata->userto));
+        $eventdata->userto = core_user::get_user($eventdata->userto);
     }
     if (is_int($eventdata->userfrom)) {
-        $eventdata->userfrom = $DB->get_record('user', array('id' => $eventdata->userfrom));
+        $eventdata->userfrom = core_user::get_user($eventdata->userfrom);
     }
+
+    $usertoisrealuser = (core_user::is_real_user($eventdata->userto->id) != false);
+    // If recipient is internal user (noreply user), and emailstop is set then don't send any msg.
+    if (!$usertoisrealuser && !empty($eventdata->userto->emailstop)) {
+        debugging('Attempt to send msg to internal (noreply) user', DEBUG_NORMAL);
+        return false;
+    }
+
     if (!isset($eventdata->userto->auth) or !isset($eventdata->userto->suspended) or !isset($eventdata->userto->deleted)) {
-        $eventdata->userto = $DB->get_record('user', array('id' => $eventdata->userto->id));
+        $eventdata->userto = core_user::get_user($eventdata->userto->id);
     }
 
     //after how long inactive should the user be considered logged off?
@@ -93,12 +114,7 @@ function message_send($eventdata) {
     $savemessage->fullmessageformat = $eventdata->fullmessageformat;
     $savemessage->fullmessagehtml   = $eventdata->fullmessagehtml;
     $savemessage->smallmessage      = $eventdata->smallmessage;
-
-    if (!empty($eventdata->notification)) {
-        $savemessage->notification = $eventdata->notification;
-    } else {
-        $savemessage->notification = 0;
-    }
+    $savemessage->notification      = $eventdata->notification;
 
     if (!empty($eventdata->contexturl)) {
         $savemessage->contexturl = $eventdata->contexturl;
@@ -116,7 +132,7 @@ function message_send($eventdata) {
 
     if (PHPUNIT_TEST and class_exists('phpunit_util')) {
         // Add some more tests to make sure the normal code can actually work.
-        $componentdir = get_component_directory($eventdata->component);
+        $componentdir = core_component::get_component_directory($eventdata->component);
         if (!$componentdir or !is_dir($componentdir)) {
             throw new coding_exception('Invalid component specified in message-send(): '.$eventdata->component);
         }
@@ -142,14 +158,16 @@ function message_send($eventdata) {
 
     // Fetch enabled processors
     $processors = get_message_processors(true);
-    // Fetch default (site) preferences
-    $defaultpreferences = get_message_output_default_preferences();
 
     // Preset variables
     $processorlist = array();
-    $preferencebase = $eventdata->component.'_'.$eventdata->name;
     // Fill in the array of processors to be used based on default and user preferences
     foreach ($processors as $processor) {
+        // Skip adding processors for internal user, if processor doesn't support sending message to internal user.
+        if (!$usertoisrealuser && !$processor->object->can_send_to_any_users()) {
+            continue;
+        }
+
         // First find out permissions
         $defaultpreference = $processor->name.'_provider_'.$preferencebase.'_permitted';
         if (isset($defaultpreferences->{$defaultpreference})) {
@@ -228,6 +246,27 @@ function message_send($eventdata) {
             }
         }
     }
+
+    // We may be sending a message from the 'noreply' address, which means we are not actually sending a
+    // message from a valid user. In this case, we will set the userid to 0.
+    // Check if the userid is valid.
+    if (core_user::is_real_user($eventdata->userfrom->id)) {
+        $userfromid = $eventdata->userfrom->id;
+    } else {
+        $userfromid = 0;
+    }
+
+    // Trigger event for sending a message.
+    $event = \core\event\message_sent::create(array(
+        'userid' => $userfromid,
+        'context'  => context_system::instance(),
+        'relateduserid' => $eventdata->userto->id,
+        'other' => array(
+            'messageid' => $messageid // Can't use this as the objectid as it can either be the id in the 'message_read'
+                                      // or 'message' table.
+        )
+    ));
+    $event->trigger();
 
     return $messageid;
 }
@@ -392,22 +431,6 @@ function message_set_default_message_preference($component, $messagename, $filep
 }
 
 /**
- * This function has been deprecated please use {@link message_get_providers_for_user()} instead.
- *
- * Returns the active providers for the current user, based on capability
- *
- * @see message_get_providers_for_user()
- * @deprecated since 2.1
- * @todo Remove in 2.5 (MDL-34454)
- * @return array An array of message providers
- */
-function message_get_my_providers() {
-    global $USER;
-    debugging('message_get_my_providers is deprecated please update your code', DEBUG_DEVELOPER);
-    return message_get_providers_for_user($USER->id);
-}
-
-/**
  * Returns the active providers for the user specified, based on capability
  *
  * @param int $userid id of user
@@ -430,7 +453,7 @@ function message_get_providers_for_user($userid) {
 
     // If the component is an enrolment plugin, check it is enabled
     foreach ($providers as $providerid => $provider) {
-        list($type, $name) = normalize_component($provider->component);
+        list($type, $name) = core_component::normalize_component($provider->component);
         if ($type == 'enrol' && !enrol_is_enabled($name)) {
             unset($providers[$providerid]);
         }
@@ -541,7 +564,7 @@ function message_get_providers_from_db($component) {
  * @return array An array of message providers or empty array if not exists
  */
 function message_get_providers_from_file($component) {
-    $defpath = get_component_directory($component).'/db/messages.php';
+    $defpath = core_component::get_component_directory($component).'/db/messages.php';
 
     $messageproviders = array();
 

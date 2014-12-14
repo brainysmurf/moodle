@@ -74,7 +74,8 @@ if ($id) {
 }
 
 // Set up the import form.
-$mform = new grade_import_form(null, array('includeseparator'=>true, 'verbosescales'=>true));
+$mform = new grade_import_form(null, array('includeseparator' => true, 'verbosescales' => true, 'acceptedtypes' =>
+        array('.csv', '.txt')));
 
 // If the csv file hasn't been imported yet then look for a form submission or
 // show the initial submission form.
@@ -85,7 +86,7 @@ if (!$iid) {
         // Large files are likely to take their time and memory. Let PHP know
         // that we'll take longer, and that the process should be recycled soon
         // to free up memory.
-        @set_time_limit(0);
+        core_php_time_limit::raise();
         raise_memory_limit(MEMORY_EXTRA);
 
         // Use current (non-conflicting) time stamp.
@@ -96,6 +97,11 @@ if (!$iid) {
         $csvimport = new csv_import_reader($iid, 'grade');
 
         $csvimport->load_csv_content($text, $formdata->encoding, $separator);
+        if ($error = $csvimport->get_error()) {
+            echo $OUTPUT->notification($error);
+            echo $OUTPUT->footer();
+            die();
+        }
 
         // --- get header (field names) ---
         $header = $csvimport->get_columns();
@@ -183,8 +189,27 @@ if ($formdata = $mform2->get_data()) {
     // Large files are likely to take their time and memory. Let PHP know
     // that we'll take longer, and that the process should be recycled soon
     // to free up memory.
-    @set_time_limit(0);
+    core_php_time_limit::raise();
     raise_memory_limit(MEMORY_EXTRA);
+
+    $userfields = array(
+        'userid' => array(
+            'field' => 'id',
+            'label' => 'id',
+        ),
+        'useridnumber' => array(
+            'field' => 'idnumber',
+            'label' => 'idnumber',
+        ),
+        'useremail' => array(
+            'field' => 'email',
+            'label' => 'email address',
+        ),
+        'username' => array(
+            'field' => 'username',
+            'label' => 'username',
+        ),
+    );
 
     $csvimport->init();
 
@@ -224,39 +249,23 @@ if ($formdata = $mform2->get_data()) {
             }
 
             switch ($t0) {
-                case 'userid': //
-                    if (!$user = $DB->get_record('user', array('id' => $value))) {
-                        // user not found, abort whole import
-                        import_cleanup($importcode);
-                        echo $OUTPUT->notification("user mapping error, could not find user with id \"$value\"");
-                        $status = false;
-                        break 3;
-                    }
-                    $studentid = $value;
-                break;
+                case 'userid':
                 case 'useridnumber':
-                    if (!$user = $DB->get_record('user', array('idnumber' => $value))) {
-                         // user not found, abort whole import
-                        import_cleanup($importcode);
-                        echo $OUTPUT->notification("user mapping error, could not find user with idnumber \"$value\"");
-                        $status = false;
-                        break 3;
-                    }
-                    $studentid = $user->id;
-                break;
                 case 'useremail':
-                    if (!$user = $DB->get_record('user', array('email' => $value))) {
-                        import_cleanup($importcode);
-                        echo $OUTPUT->notification("user mapping error, could not find user with email address \"$value\"");
-                        $status = false;
-                        break 3;
-                    }
-                    $studentid = $user->id;
-                break;
                 case 'username':
-                    if (!$user = $DB->get_record('user', array('username' => $value))) {
+                    // Skip invalid row with blank user field.
+                    if (empty($value)) {
+                        continue 3;
+                    }
+
+                    if (!$user = $DB->get_record('user', array($userfields[$t0]['field'] => $value))) {
+                         // User not found, abort whole import.
                         import_cleanup($importcode);
-                        echo $OUTPUT->notification("user mapping error, could not find user with username \"$value\"");
+                        $usermappingerrorobj = new stdClass();
+                        $usermappingerrorobj->field = $userfields[$t0]['label'];
+                        $usermappingerrorobj->value = $value;
+                        echo $OUTPUT->notification(get_string('usermappingerror', 'grades', $usermappingerrorobj));
+                        unset($usermappingerrorobj);
                         $status = false;
                         break 3;
                     }
@@ -295,7 +304,7 @@ if ($formdata = $mform2->get_data()) {
                             // had to pick mapping
                             $status = false;
                             import_cleanup($importcode);
-                            echo $OUTPUT->notification(get_string('importfailed', 'grades'));
+                            // Relying on the default import failed message below.
                             break 3;
                         }
 
@@ -316,7 +325,7 @@ if ($formdata = $mform2->get_data()) {
                             // had to pick mapping
                             $status = false;
                             import_cleanup($importcode);
-                            echo $OUTPUT->notification(get_string('importfailed', 'grades'));
+                            // Relying on the default import failed message below.
                             break 3;
                         }
 
@@ -382,7 +391,7 @@ if ($formdata = $mform2->get_data()) {
             // user not found, abort whole import
             $status = false;
             import_cleanup($importcode);
-            echo $OUTPUT->notification('user mapping error, could not find user!');
+            echo $OUTPUT->notification(get_string('usermappingerrorusernotfound', 'grades'));
             break;
         }
 
@@ -390,7 +399,7 @@ if ($formdata = $mform2->get_data()) {
             // not allowed to import into this group, abort
             $status = false;
             import_cleanup($importcode);
-            echo $OUTPUT->notification('user not member of current group, can not update!');
+            echo $OUTPUT->notification(get_string('usermappingerrorcurrentgroup', 'grades'));
             break;
         }
 
@@ -441,6 +450,8 @@ if ($formdata = $mform2->get_data()) {
     /// at this stage if things are all ok, we commit the changes from temp table
     if ($status) {
         grade_import_commit($course->id, $importcode);
+    } else {
+        echo $OUTPUT->notification(get_string('importfailed', 'grades'));
     }
 } else {
     // If data hasn't been submitted then display the data mapping form.

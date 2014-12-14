@@ -32,6 +32,9 @@ if ($ADMIN->fulltree) {
         get_string('display', 'scorm'), get_string('displaydesc', 'scorm'),
         array('value' => 0, 'adv' => false), scorm_get_popup_display_array()));
 
+    $settings->add(new admin_setting_configcheckbox('scorm/displayactivityname',
+        get_string('displayactivityname', 'scorm'), get_string('displayactivityname_help', 'scorm'), 1));
+
     $settings->add(new admin_setting_configtext_with_advanced('scorm/framewidth',
         get_string('width', 'scorm'), get_string('framewidth', 'scorm'),
         array('value' => '100', 'adv' => true)));
@@ -60,9 +63,21 @@ if ($ADMIN->fulltree) {
         get_string('hidetoc', 'scorm'), get_string('hidetocdesc', 'scorm'),
         array('value' => 0, 'adv' => true), scorm_get_hidetoc_array()));
 
-    $settings->add(new admin_setting_configselect_with_advanced('scorm/hidenav',
-        get_string('hidenav', 'scorm'), get_string('hidenavdesc', 'scorm'),
-        array('value' => 0, 'adv' => false), $yesno));
+    $settings->add(new admin_setting_configselect_with_advanced('scorm/nav',
+        get_string('nav', 'scorm'), get_string('navdesc', 'scorm'),
+        array('value' => SCORM_NAV_UNDER_CONTENT, 'adv' => true), scorm_get_navigation_display_array()));
+
+    $settings->add(new admin_setting_configtext_with_advanced('scorm/navpositionleft',
+        get_string('fromleft', 'scorm'), get_string('navpositionleft', 'scorm'),
+        array('value' => -100, 'adv' => true)));
+
+    $settings->add(new admin_setting_configtext_with_advanced('scorm/navpositiontop',
+        get_string('fromtop', 'scorm'), get_string('navpositiontop', 'scorm'),
+        array('value' => -100, 'adv' => true)));
+
+    $settings->add(new admin_setting_configtext_with_advanced('scorm/collapsetocwinsize',
+        get_string('collapsetocwinsize', 'scorm'), get_string('collapsetocwinsizedesc', 'scorm'),
+        array('value' => 767, 'adv' => true)));
 
     $settings->add(new admin_setting_configselect_with_advanced('scorm/displayattemptstatus',
         get_string('displayattemptstatus', 'scorm'), get_string('displayattemptstatusdesc', 'scorm'),
@@ -108,11 +123,11 @@ if ($ADMIN->fulltree) {
     //admin level settings.
     $settings->add(new admin_setting_heading('scorm/adminsettings', get_string('adminsettings', 'scorm'), ''));
 
+    $settings->add(new admin_setting_configcheckbox('scorm/scorm12standard', get_string('scorm12standard', 'scorm'), get_string('scorm12standarddesc', 'scorm'), 1));
+
     $settings->add(new admin_setting_configcheckbox('scorm/allowtypeexternal', get_string('allowtypeexternal', 'scorm'), '', 0));
 
     $settings->add(new admin_setting_configcheckbox('scorm/allowtypelocalsync', get_string('allowtypelocalsync', 'scorm'), '', 0));
-
-    $settings->add(new admin_setting_configcheckbox('scorm/allowtypeimsrepository', get_string('allowtypeimsrepository', 'scorm'), '', 0));
 
     $settings->add(new admin_setting_configcheckbox('scorm/allowtypeexternalaicc', get_string('allowtypeexternalaicc', 'scorm'), get_string('allowtypeexternalaicc_desc', 'scorm'), 0));
 

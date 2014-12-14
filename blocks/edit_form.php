@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -21,8 +20,7 @@
  * It works with the {@link block_edit_form} class, or rather the particular
  * subclass defined by this block, to do the editing.
  *
- * @package    core
- * @subpackage block
+ * @package    core_block
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -86,12 +84,18 @@ class block_edit_form extends moodleform {
         $weightoptions[$last] = get_string('bracketlast', 'block', $last);
 
         $regionoptions = $this->page->theme->get_all_block_regions();
+        foreach ($this->page->blocks->get_regions() as $region) {
+            // Make sure to add all custom regions of this particular page too.
+            if (!isset($regionoptions[$region])) {
+                $regionoptions[$region] = $region;
+            }
+        }
 
         $parentcontext = context::instance_by_id($this->block->instance->parentcontextid);
         $mform->addElement('hidden', 'bui_parentcontextid', $parentcontext->id);
         $mform->setType('bui_parentcontextid', PARAM_INT);
 
-        $mform->addElement('static', 'bui_homecontext', get_string('createdat', 'block'), print_context_name($parentcontext));
+        $mform->addElement('static', 'bui_homecontext', get_string('createdat', 'block'), $parentcontext->get_context_name());
         $mform->addHelpButton('bui_homecontext', 'createdat', 'block');
 
         // For pre-calculated (fixed) pagetype lists
@@ -142,7 +146,7 @@ class block_edit_form extends moodleform {
             // module context doesn't have child contexts, so display in current context only
             $mform->addElement('hidden', 'bui_contexts', BUI_CONTEXTS_CURRENT);
         } else {
-            $parentcontextname = print_context_name($parentcontext);
+            $parentcontextname = $parentcontext->get_context_name();
             $contextoptions[BUI_CONTEXTS_CURRENT]      = get_string('showoncontextonly', 'block', $parentcontextname);
             $contextoptions[BUI_CONTEXTS_CURRENT_SUBS] = get_string('showoncontextandsubs', 'block', $parentcontextname);
             $mform->addElement('select', 'bui_contexts', get_string('contexts', 'block'), $contextoptions);

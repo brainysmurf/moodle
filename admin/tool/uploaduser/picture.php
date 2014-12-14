@@ -38,7 +38,7 @@ admin_externalpage_setup('tooluploaduserpictures');
 
 require_login();
 
-require_capability('moodle/site:uploadusers', context_system::instance());
+require_capability('tool/uploaduser:uploaduserpictures', context_system::instance());
 
 $site = get_site();
 
@@ -72,7 +72,7 @@ if ($formdata = $mform->get_data()) {
         // Large files are likely to take their time and memory. Let PHP know
         // that we'll take longer, and that the process should be recycled soon
         // to free up memory.
-        @set_time_limit(0);
+        core_php_time_limit::raise();
         raise_memory_limit(MEMORY_EXTRA);
 
         // Create a unique temporary directory, to process the zip file

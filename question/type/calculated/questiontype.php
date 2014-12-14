@@ -37,6 +37,9 @@ require_once($CFG->dirroot . '/question/type/numerical/question.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_calculated extends question_type {
+    /** Regular expression that finds the formulas in content. */
+    const FORMULAS_IN_TEXT_REGEX = '~\{=([^{}]*(?:\{[^{}]+}[^{}]*)*)\}~';
+
     const MAX_DATASET_ITEMS = 100;
 
     public $wizardpagesnumber = 3;
@@ -128,11 +131,13 @@ class qtype_calculated extends question_type {
 
     public function save_question_options($question) {
         global $CFG, $DB;
+
+        // Make it impossible to save bad formulas anywhere.
+        $this->validate_question_data($question);
+
         // The code is used for calculated, calculatedsimple and calculatedmulti qtypes.
         $context = $question->context;
-        if (isset($question->answer) && !isset($question->answers)) {
-            $question->answers = $question->answer;
-        }
+
         // Calculated options.
         $update = true;
         $options = $DB->get_record('question_calculated_options',
@@ -182,14 +187,7 @@ class qtype_calculated extends question_type {
             $units = $result->units;
         }
 
-        // Insert all the new answers.
-        if (isset($question->answer) && !isset($question->answers)) {
-            $question->answers = $question->answer;
-        }
-        foreach ($question->answers as $key => $answerdata) {
-            if (is_array($answerdata)) {
-                $answerdata = $answerdata['text'];
-            }
+        foreach ($question->answer as $key => $answerdata) {
             if (trim($answerdata) == '') {
                 continue;
             }
@@ -343,49 +341,6 @@ class qtype_calculated extends question_type {
         $question->datasetloader = new qtype_calculated_dataset_loader($questiondata->id);
     }
 
-    public function validate_form($form) {
-        switch($form->wizardpage) {
-            case 'question':
-                $calculatedmessages = array();
-                if (empty($form->name)) {
-                    $calculatedmessages[] = get_string('missingname', 'qtype_calculated');
-                }
-                if (empty($form->questiontext)) {
-                    $calculatedmessages[] = get_string('missingquestiontext', 'qtype_calculated');
-                }
-                // Verify formulas.
-                foreach ($form->answers as $key => $answer) {
-                    if ('' === trim($answer)) {
-                        $calculatedmessages[] = get_string(
-                                'missingformula', 'qtype_calculated');
-                    }
-                    if ($formulaerrors = qtype_calculated_find_formula_errors($answer)) {
-                        $calculatedmessages[] = $formulaerrors;
-                    }
-                    if (! isset($form->tolerance[$key])) {
-                        $form->tolerance[$key] = 0.0;
-                    }
-                    if (! is_numeric($form->tolerance[$key])) {
-                        $calculatedmessages[] = get_string('xmustbenumeric', 'qtype_numerical',
-                                get_string('tolerance', 'qtype_calculated'));
-                    }
-                }
-
-                if (!empty($calculatedmessages)) {
-                    $errorstring = "The following errors were found:<br />";
-                    foreach ($calculatedmessages as $msg) {
-                        $errorstring .= $msg . '<br />';
-                    }
-                    print_error($errorstring);
-                }
-
-                break;
-            default:
-                return parent::validate_form($form);
-                break;
-        }
-        return true;
-    }
     public function finished_edit_wizard($form) {
         return isset($form->savechanges);
     }
@@ -482,6 +437,55 @@ class qtype_calculated extends question_type {
     }
 
     /**
+     * Verify that the equations in part of the question are OK.
+     * We throw an exception here because this should have already been validated
+     * by the form. This is just a last line of defence to prevent a question
+     * being stored in the database if it has bad formulas. This saves us from,
+     * for example, malicious imports.
+     * @param string $text containing equations.
+     */
+    protected function validate_text($text) {
+        $error = qtype_calculated_find_formula_errors_in_text($text);
+        if ($error) {
+            throw new coding_exception($error);
+        }
+    }
+
+    /**
+     * Verify that an answer is OK.
+     * We throw an exception here because this should have already been validated
+     * by the form. This is just a last line of defence to prevent a question
+     * being stored in the database if it has bad formulas. This saves us from,
+     * for example, malicious imports.
+     * @param string $text containing equations.
+     */
+    protected function validate_answer($answer) {
+        $error = qtype_calculated_find_formula_errors($answer);
+        if ($error) {
+            throw new coding_exception($error);
+        }
+    }
+
+    /**
+     * Validate data before save.
+     * @param stdClass $question data from the form / import file.
+     */
+    protected function validate_question_data($question) {
+        $this->validate_text($question->questiontext); // Yes, really no ['text'].
+
+        if (isset($question->generalfeedback['text'])) {
+            $this->validate_text($question->generalfeedback['text']);
+        } else if (isset($question->generalfeedback)) {
+            $this->validate_text($question->generalfeedback); // Because question import is weird.
+        }
+
+        foreach ($question->answer as $key => $answer) {
+            $this->validate_answer($answer);
+            $this->validate_text($question->feedback[$key]['text']);
+        }
+    }
+
+    /**
      * This method prepare the $datasets in a format similar to dadatesetdefinitions_form.php
      * so that they can be saved
      * using the function save_dataset_definitions($form)
@@ -493,12 +497,13 @@ class qtype_calculated extends question_type {
      * @param object $form
      * @param int $questionfromid default = '0'
      */
-    public function preparedatasets($form , $questionfromid = '0') {
+    public function preparedatasets($form, $questionfromid = '0') {
+
         // The dataset names present in the edit_question_form and edit_calculated_form
         // are retrieved.
         $possibledatasets = $this->find_dataset_names($form->questiontext);
         $mandatorydatasets = array();
-        foreach ($form->answers as $answer) {
+        foreach ($form->answer as $key => $answer) {
             $mandatorydatasets += $this->find_dataset_names($answer);
         }
         // If there are identical datasetdefs already saved in the original question
@@ -587,8 +592,9 @@ class qtype_calculated extends question_type {
      */
     public function save_question($question, $form) {
         global $DB;
+
         if ($this->wizardpagesnumber() == 1 || $question->qtype == 'calculatedsimple') {
-                $question = parent::save_question($question, $form);
+            $question = parent::save_question($question, $form);
             return $question;
         }
 
@@ -1032,11 +1038,8 @@ class qtype_calculated extends question_type {
         $answers = $question->options->answers;
 
         foreach ($answers as $key => $answer) {
-            if (is_string($answer)) {
-                $strheader .= $delimiter.$answer;
-            } else {
-                $strheader .= $delimiter.$answer->answer;
-            }
+            $ans = shorten_text($answer->answer, 17, true);
+            $strheader .= $delimiter.$ans;
             $delimiter = '<br/><br/><br/>';
         }
         return $strheader;
@@ -1058,10 +1061,14 @@ class qtype_calculated extends question_type {
         }
 
         $answers = fullclone($answers);
-        $errors = '';
         $delimiter = ': ';
         $virtualqtype =  $qtypeobj->get_virtual_qtype();
         foreach ($answers as $key => $answer) {
+            $error = qtype_calculated_find_formula_errors($answer->answer);
+            if ($error) {
+                $comment->stranswers[$key] = $error;
+                continue;
+            }
             $formula = $this->substitute_variables($answer->answer, $data);
             $formattedanswer = qtype_calculated_calculate_answer(
                 $answer->answer, $data, $answer->tolerance,
@@ -1083,10 +1090,11 @@ class qtype_calculated extends question_type {
                 $comment->stranswers[$key] = $formula . ' = ' .
                         get_string('anyvalue', 'qtype_calculated') . '<br/><br/><br/>';
             } else {
+                $formula = shorten_text($formula, 57, true);
                 $comment->stranswers[$key] = $formula . ' = ' . $formattedanswer->answer . '<br/>';
                 $correcttrue = new stdClass();
                 $correcttrue->correct = $formattedanswer->answer;
-                $correcttrue->true = $answer->answer;
+                $correcttrue->true = '';
                 if ($formattedanswer->answer < $answer->min ||
                         $formattedanswer->answer > $answer->max) {
                     $comment->outsidelimit = true;
@@ -1103,57 +1111,6 @@ class qtype_calculated extends question_type {
                 $comment->stranswers[$key] .= get_string('max', 'qtype_calculated') .
                         $delimiter . $answer->max;
             }
-        }
-        return fullclone($comment);
-    }
-    public function multichoice_comment_on_datasetitems($questionid, $questiontext,
-            $answers, $data, $number) {
-        global $DB;
-        $comment = new stdClass();
-        $comment->stranswers = array();
-        $comment->outsidelimit = false;
-        $comment->answers = array();
-        // Find a default unit.
-        if (!empty($questionid) && $unit = $DB->get_record('question_numerical_units',
-                array('question' => $questionid, 'multiplier' => 1.0))) {
-            $unit = $unit->unit;
-        } else {
-            $unit = '';
-        }
-
-        $answers = fullclone($answers);
-        $errors = '';
-        $delimiter = ': ';
-        foreach ($answers as $key => $answer) {
-            $answer->answer = $this->substitute_variables($answer->answer, $data);
-            // Evaluate the equations i.e {=5+4).
-            $qtext = '';
-            $qtextremaining = $answer->answer;
-            while (preg_match('~\{=([^[:space:]}]*)}~', $qtextremaining, $regs1)) {
-                $qtextsplits = explode($regs1[0], $qtextremaining, 2);
-                $qtext = $qtext.$qtextsplits[0];
-                $qtextremaining = $qtextsplits[1];
-                if (empty($regs1[1])) {
-                    $str = '';
-                } else {
-                    if ($formulaerrors = qtype_calculated_find_formula_errors($regs1[1])) {
-                        $str = $formulaerrors;
-                    } else {
-                        eval('$str = '.$regs1[1].';');
-
-                        $texteval= qtype_calculated_calculate_answer(
-                            $str, $data, $answer->tolerance,
-                            $answer->tolerancetype, $answer->correctanswerlength,
-                            $answer->correctanswerformat, '');
-                        $str = $texteval->answer;
-
-                    }
-                }
-                $qtext = $qtext.$str;
-            }
-            $answer->answer = $qtext.$qtextremaining;
-            $comment->stranswers[$key]= $answer->answer;
-
         }
         return fullclone($comment);
     }
@@ -1758,28 +1715,19 @@ class qtype_calculated extends question_type {
                     }
                     $line++;
                     $text .= "<td align=\"left\" style=\"white-space:nowrap;\">$qu->name</td>";
-                    $nbofquiz = 0;
-                    $nbofattempts= 0;
-                    $usedinquiz = false;
-                    if ($list = $DB->get_records('quiz_question_instances',
-                            array('question' => $qu->id))) {
-                        $usedinquiz = true;
-                        foreach ($list as $key => $li) {
-                            $nbofquiz ++;
-                            if ($att = $DB->get_records('quiz_attempts',
-                                    array('quiz' => $li->quiz, 'preview' => '0'))) {
-                                $nbofattempts+= count($att);
-                            }
-                        }
-                    }
-                    if ($usedinquiz) {
+                    // TODO MDL-43779 should not have quiz-specific code here.
+                    $nbofquiz = $DB->count_records('quiz_slots', array('questionid' => $qu->id));
+                    $nbofattempts = $DB->count_records_sql("
+                            SELECT count(1)
+                              FROM {quiz_slots} slot
+                              JOIN {quiz_attempts} quiza ON quiza.quiz = slot.quizid
+                             WHERE slot.questionid = ?
+                               AND quiza.preview = 0", array($qu->id));
+                    if ($nbofquiz > 0) {
                         $text .= "<td align=\"center\">$nbofquiz</td>";
-                    } else {
-                        $text .= "<td align=\"center\">0</td>";
-                    }
-                    if ($usedinquiz) {
                         $text .= "<td align=\"center\">$nbofattempts";
                     } else {
+                        $text .= "<td align=\"center\">0</td>";
                         $text .= "<td align=\"left\"><br/>";
                     }
 
@@ -1878,32 +1826,9 @@ function qtype_calculated_calculate_answer($formula, $individualdata,
         $calculated->answer = NAN;
         return $calculated;
     }
-    if ('1' == $answerformat) { /* Answer is to have $answerlength decimals */
-        /*** Adjust to the correct number of decimals ***/
-        if (stripos($answer, 'e')>0) {
-            $answerlengthadd = strlen($answer)-stripos($answer, 'e');
-        } else {
-            $answerlengthadd = 0;
-        }
-        $calculated->answer = round(floatval($answer), $answerlength+$answerlengthadd);
-
-        if ($answerlength) {
-            /* Try to include missing zeros at the end */
-
-            if (preg_match('~^(.*\\.)(.*)$~', $calculated->answer, $regs)) {
-                $calculated->answer = $regs[1] . substr(
-                    $regs[2] . '00000000000000000000000000000000000000000x',
-                    0, $answerlength)
-                    . $unit;
-            } else {
-                $calculated->answer .=
-                    substr('.00000000000000000000000000000000000000000x',
-                        0, $answerlength + 1) . $unit;
-            }
-        } else {
-            /* Attach unit */
-            $calculated->answer .= $unit;
-        }
+    if ('1' == $answerformat) { // Answer is to have $answerlength decimals.
+        // Decimal places.
+        $calculated->answer = sprintf('%.' . $answerlength . 'F', $answer);
 
     } else if ($answer) { // Significant figures does only apply if the result is non-zero.
 
@@ -1941,30 +1866,33 @@ function qtype_calculated_calculate_answer($formula, $individualdata,
             $exponent = 'e'.--$p10;
             $answer *= 10;
             if (1 == $answerlength) {
-                $calculated->answer = $sign.$answer.$exponent.$unit;
+                $calculated->answer = $sign.$answer.$exponent;
             } else {
                 // Attach additional zeros at the end of $answer.
                 $answer .= (1 == strlen($answer) ? '.' : '')
                     . '00000000000000000000000000000000000000000x';
                 $calculated->answer = $sign
-                    .substr($answer, 0, $answerlength +1).$exponent.$unit;
+                    .substr($answer, 0, $answerlength +1).$exponent;
             }
         } else {
             // Stick to plain numeric format.
             $answer *= "1e$p10";
             if (0.1 <= $answer / "1e$answerlength") {
-                $calculated->answer = $sign.$answer.$unit;
+                $calculated->answer = $sign.$answer;
             } else {
                 // Could be an idea to add some zeros here.
                 $answer .= (preg_match('~^[0-9]*$~', $answer) ? '.' : '')
                     . '00000000000000000000000000000000000000000x';
                 $oklen = $answerlength + ($p10 < 1 ? 2-$p10 : 1);
-                $calculated->answer = $sign.substr($answer, 0, $oklen).$unit;
+                $calculated->answer = $sign.substr($answer, 0, $oklen);
             }
         }
 
     } else {
         $calculated->answer = 0.0;
+    }
+    if ($unit != '') {
+            $calculated->answer = $calculated->answer . ' ' . $unit;
     }
 
     // Return the result.
@@ -1972,6 +1900,11 @@ function qtype_calculated_calculate_answer($formula, $individualdata,
 }
 
 
+/**
+ * Validate a forumula.
+ * @param string $formula the formula to validate.
+ * @return string|boolean false if there are no problems. Otherwise a string error message.
+ */
 function qtype_calculated_find_formula_errors($formula) {
     // Validates the formula submitted from the question edit page.
     // Returns false if everything is alright
@@ -2000,7 +1933,7 @@ function qtype_calculated_find_formula_errors($formula) {
 
                 // Zero argument functions.
             case 'pi':
-                if ($regs[3]) {
+                if (array_key_exists(3, $regs)) {
                     return get_string('functiontakesnoargs', 'qtype_calculated', $regs[2]);
                 }
                 break;
@@ -2060,4 +1993,27 @@ function qtype_calculated_find_formula_errors($formula) {
         // Formula just might be valid.
         return false;
     }
+}
+
+/**
+ * Validate all the forumulas in a bit of text.
+ * @param string $text the text in which to validate the formulas.
+ * @return string|boolean false if there are no problems. Otherwise a string error message.
+ */
+function qtype_calculated_find_formula_errors_in_text($text) {
+    preg_match_all(qtype_calculated::FORMULAS_IN_TEXT_REGEX, $text, $matches);
+
+    $errors = array();
+    foreach ($matches[1] as $match) {
+        $error = qtype_calculated_find_formula_errors($match);
+        if ($error) {
+            $errors[] = $error;
+        }
+    }
+
+    if ($errors) {
+        return implode(' ', $errors);
+    }
+
+    return false;
 }
