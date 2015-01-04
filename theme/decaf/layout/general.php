@@ -75,22 +75,6 @@ echo $OUTPUT->doctype() ?>
     <title><?php echo ltrim($PAGE->title,': ') ?></title>
     <link rel="shortcut icon" href="<?php echo $OUTPUT->pix_url('favicon', 'theme')?>" />
     <?php echo $OUTPUT->standard_head_html() ?>
-
-
-    <link rel="stylesheet" href="/theme/decaf/style/christmas.css?v=2"></link>
-    <?php if (empty($_COOKIE['nosnow'])) { ?>
-    <!-- Snow -->
-   	<link rel="stylesheet" href="/jquery-snowfall/styles.css"></link>
-    <script src="/jquery-snowfall/snowfall.min.jquery.js"></script>
-    <script>
-    	$(function(){
-    		$('#page-header').css('overflow','hidden');
-	    	$('#page-header').snowfall({flakeCount : 50, maxSpeed :1, maxSize : 4, round:true});
-	    });
-    </script>
-    <!-- end snow -->
-    <? } ?>
-
 </head>
 
 <body id="<?php p($PAGE->bodyid) ?>" class="<?php p($PAGE->bodyclasses.' '.join(' ', $bodyclasses)) ?>">
@@ -128,7 +112,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 <?php if ($hasheading || $hasnavbar) { ?>
 
    <?php
-	   	/*$headerPhotos = array(
+	   	$headerPhotos = array(
 	   		'header-0.jpg',
 	   		'header-1.jpg',
 	   		'header-2.jpg',
@@ -139,9 +123,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 	   	if ( isset($_GET['header']) ) { $headerPhoto = $_GET['header']; }
 	   	else if ( isset($SESSION) && isset($SESSION->headerPhoto) ) { $headerPhoto = $SESSION->headerPhoto; }
 	   	else { $headerPhoto = rand(0,4); }
-		$headerBg = '/theme/decaf/pix/'.$headerPhotos[$headerPhoto]; */
-
-		$headerBg = '/theme/decaf/pix/redchristmasheader.jpg';
+		$headerBg = '/theme/decaf/pix/'.$headerPhotos[$headerPhoto];
    ?>
 
     <div id="page-header" style="background-image:url(<?php echo $headerBg; ?>);">
@@ -149,7 +131,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 		<div id="page-header-wrapper">
 
 	        <?php if ($hasheading) { ?>
-		    	<h1 class="headermain"><?php echo str_replace('DragonNet','<img src="/theme/decaf/pix/dragonnet-hat.png" alt="DragonNet" style="height:40px; vertical-align:middle; margin-top:-5px;" />', $PAGE->heading); ?></h1>
+		    	<h1 class="headermain"><?php echo $PAGE->heading ?></h1>
     		    <div class="headermenu">
         			<?php
         			if (!empty($PAGE->theme->settings->showuserpicture)) {
@@ -168,35 +150,35 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 	        	echo $PAGE->headingmenu;
 
 				if ($PAGE->course->id != 1 && isloggedin()) {   # if not frontpage
-				
+
 					//Search URL
 					$searchURL = new moodle_url('/blocks/search/');
-				
+
 					//Begin form
 					echo html_writer::start_tag('form', array(
 						'id' => 'headerSearchForm',
 						'action' => $searchURL,
 						'method' => 'get'
 					));
-				
+
 						if (empty($PAGE->course->id) || $PAGE->course->id == 1395) {
-				
+
 							//Frontpage or "Frontpage" course
 							$placeholder = 'Search All of DragonNet';
-				
+
 						} else {
-				
+
 							//Search within a course
 							$placeholder = 'Search Within This Course';
-				
+
 							echo html_writer::empty_tag('input', array(
 								'type' => 'hidden',
 								'name' => 'courseID',
 								'value' => $PAGE->course->id
 							));
-				
+
 						}
-				
+
 						//Input box
 						echo html_writer::empty_tag('input', array(
 							'type' => 'text',
@@ -204,10 +186,10 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 							'name' => 'q',
 							'placeholder' => s($placeholder)
 						));
-				
+
 						//Search button
 						echo html_writer::tag('button', 'Search');
-				
+
 					//End form
 					echo html_writer::end_tag('form');
 				}
