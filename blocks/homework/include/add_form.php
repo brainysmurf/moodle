@@ -3,7 +3,7 @@
 	$mode = $hwblock->mode();
 
 	// Get all the user's classes
-	$groups = $hwblock->getUsersGroups($USER->id, true);
+	$groups = $hwblock->getUsersGroups($USER->id, ($mode == 'teacher' ? false : true));
 
 	$selectedCourseID = '';
 	$selectedGroupID = '';

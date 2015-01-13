@@ -252,7 +252,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
     <?php } ?>
     <?php if ($hasfooter) { ?>
     <div id="page-footer" class="clearfix">
-		<p><a href="/togglesnow.php"><i class="icon-cloud"></i> Click here to turn the snow <?=(empty($_COOKIE['nosnow'])?'off':'on')?></a></p>
+		<?php/*<p><a href="/togglesnow.php"><i class="icon-cloud"></i> Click here to turn the snow <?=(empty($_COOKIE['nosnow'])?'off':'on')?></a></p>*/ ?>
     	<p><a href="#"><i class="icon-arrow-up"></i> Go back to the top of the page</a></p>
 		<p class="footnote"><?php echo $footnote; ?></p>
 		<p><?php echo page_doc_link(get_string('moodledocslink')) ?></p>
