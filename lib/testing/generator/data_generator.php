@@ -614,11 +614,7 @@ EOD;
      * @param array|stdClass $record data to use to up set the instance.
      * @param array $options options
      * @return stdClass repository instance record
-<<<<<<< HEAD
-     * @since 2.5.1
-=======
      * @since Moodle 2.5.1
->>>>>>> MOODLE_28_STABLE
      */
     public function create_repository($type, $record=null, array $options = null) {
         $generator = $this->get_plugin_generator('repository_'.$type);
@@ -632,11 +628,7 @@ EOD;
      * @param array|stdClass $record data to use to up set the instance.
      * @param array $options options
      * @return repository_type object
-<<<<<<< HEAD
-     * @since 2.5.1
-=======
      * @since Moodle 2.5.1
->>>>>>> MOODLE_28_STABLE
      */
     public function create_repository_type($type, $record=null, array $options = null) {
         $generator = $this->get_plugin_generator('repository_'.$type);
@@ -889,38 +881,6 @@ EOD;
         $plugin->enrol_user($instance, $userid, $roleid, $timestart, $timeend, $status);
         return true;
     }
-<<<<<<< HEAD
-
-    /**
-     * Assigns the specified role to a user in the context.
-     *
-     * @param int $roleid
-     * @param int $userid
-     * @param int $contextid Defaults to the system context
-     * @return int new/existing id of the assignment
-     */
-    public function role_assign($roleid, $userid, $contextid = false) {
-
-        // Default to the system context.
-        if (!$contextid) {
-            $context = context_system::instance();
-            $contextid = $context->id;
-        }
-
-        if (empty($roleid)) {
-            throw new coding_exception('roleid must be present in testing_data_generator::role_assign() arguments');
-        }
-
-        if (empty($userid)) {
-            throw new coding_exception('userid must be present in testing_data_generator::role_assign() arguments');
-        }
-
-        return role_assign($roleid, $userid, $contextid);
-    }
-
-}
-=======
->>>>>>> MOODLE_28_STABLE
 
     /**
      * Assigns the specified role to a user in the context.

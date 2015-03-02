@@ -23,7 +23,9 @@ if (empty($PAGE->layout_options['noawesomebar'])) {
 	$awesome_settings = $topsettings->settings_tree($this->page->settingsnav);
 }
 
-$custommenu = $OUTPUT->render_awesomebar(); //comes from decaf/renderers.php render_custom_menu()
+if (method_exists($OUTPUT, 'render_awesomebar')) {
+    $custommenu = $OUTPUT->render_awesomebar(); //comes from decaf/renderers.php render_custom_menu()
+}
 
 $hascustommenu = (empty($PAGE->layout_options['nocustommenu']) && !empty($custommenu));
 

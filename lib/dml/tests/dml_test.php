@@ -3689,7 +3689,6 @@ class core_dml_testcase extends database_driver_testcase {
         $DB->insert_record($tablename, array('name'=>'abcdef', 'description'=>'bbcdef'));
         $DB->insert_record($tablename, array('name'=>'aaaa', 'description'=>'aaaacccccccccccccccccc'));
         $DB->insert_record($tablename, array('name'=>'xxxx',   'description'=>'123456789a123456789b123456789c123456789d'));
-<<<<<<< HEAD
 
         // Only some supported databases truncate TEXT fields for comparisons, currently MSSQL and Oracle.
         $dbtruncatestextfields = ($DB->get_dbfamily() == 'mssql' || $DB->get_dbfamily() == 'oracle');
@@ -3700,18 +3699,6 @@ class core_dml_testcase extends database_driver_testcase {
             $sql = "SELECT " . $DB->sql_compare_text('description') . " AS field FROM {{$tablename}} WHERE name = ?";
             $description = $DB->get_field_sql($sql, array('xxxx'));
 
-=======
-
-        // Only some supported databases truncate TEXT fields for comparisons, currently MSSQL and Oracle.
-        $dbtruncatestextfields = ($DB->get_dbfamily() == 'mssql' || $DB->get_dbfamily() == 'oracle');
-
-        if ($dbtruncatestextfields) {
-            // Ensure truncation behaves as expected.
-
-            $sql = "SELECT " . $DB->sql_compare_text('description') . " AS field FROM {{$tablename}} WHERE name = ?";
-            $description = $DB->get_field_sql($sql, array('xxxx'));
-
->>>>>>> MOODLE_28_STABLE
             // Should truncate to 32 chars (the default).
             $this->assertEquals('123456789a123456789b123456789c12', $description);
 

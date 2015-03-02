@@ -197,10 +197,7 @@ $string['configenabledevicedetection'] = 'Enables detection of mobiles, smartpho
 $string['configdisableuserimages'] = 'Disable the ability for users to change user profile images.';
 $string['configdisplayloginfailures'] = 'This will display information to users about previous failed logins.';
 $string['configdndallowtextandlinks'] = 'Enable or disable the dragging and dropping of text and links onto a course page, alongside the dragging and dropping of files. Note that the dragging of text into Firefox or between different browsers is unreliable and may result in no data being uploaded, or corrupted text being uploaded.';
-<<<<<<< HEAD
-=======
 $string['configdoclang'] = 'This language will be used in links for the documentation pages.';
->>>>>>> MOODLE_28_STABLE
 $string['configdocroot'] = 'Defines the path to the Moodle Docs for providing context-specific documentation via \'Moodle Docs for this page\' links in the footer of each page. If the field is left blank, links will not be displayed.';
 $string['configdoctonewwindow'] = 'If you enable this, then links to Moodle Docs will be shown in a new window.';
 $string['configeditordictionary'] = 'This value will be used if aspell doesn\'t have dictionary for users own language.';
@@ -233,13 +230,9 @@ $string['configfrontpage'] = 'The items selected above will be displayed on the 
 $string['configfrontpagecourselimit'] = 'Maximum number of courses';
 $string['configfrontpagecourselimithelp'] = 'Maximum number of courses to be displayed on the site\'s front page in course listings.';
 $string['configfrontpageloggedin'] = 'The items selected above will be displayed on the site\'s front page when a user is logged in.';
-<<<<<<< HEAD
-$string['configfullnamedisplay'] = 'This defines how names are shown when they are displayed in full. For most mono-lingual sites the most efficient setting is "First name + Surname", but you may choose to hide surnames altogether, or to leave it up to the current language pack to decide (some languages have different conventions).';
-=======
 $string['configfullnamedisplay'] = 'This defines how names are shown when they are displayed in full. The default value, "language", leaves it to the string "fullnamedisplay" in the current language pack to decide. Some languages have different name display conventions.
 
 For most mono-lingual sites the most efficient setting is "firstname lastname", but you may choose to hide surnames altogether. Placeholders that can be used are: firstname, lastname, firstnamephonetic, lastnamephonetic, middlename, and alternatename.';
->>>>>>> MOODLE_28_STABLE
 $string['configgeoipfile'] = 'Location of GeoIP City binary data file. This file is not part of Moodle distribution and must be obtained separately from <a href="http://www.maxmind.com/">MaxMind</a>. You can either buy a commercial version or use the free version. Simply download <a href="http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz" >http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz</a> and extract it into "{$a}" directory on your server.';
 $string['configgetremoteaddrconf'] = 'If your server is behind a reverse proxy, you can use this setting to specify which HTTP headers can be trusted to contain the remote IP address. The headers are read in order, using the first one that is available.';
 $string['configgradebookroles'] = 'This setting allows you to control who appears on the gradebook.  Users need to have at least one of these roles in a course to be shown in the gradebook for that course.';
@@ -532,11 +525,7 @@ $string['filtersettingsgeneral'] = 'General filter settings';
 $string['filteruploadedfiles'] = 'Filter uploaded files';
 $string['forcelogin'] = 'Force users to log in';
 $string['forceloginforprofileimage'] = 'Force users to log in to view user pictures';
-<<<<<<< HEAD
 $string['forceloginforprofileimage_help'] = 'If enabled, users must login in order to view user profile pictures and the default user picture will be used in all notification emails.';
-=======
-$string['forceloginforprofileimage_help'] = 'If enabled, users must log in in order to view user profile pictures and the default user picture will be used in all notification emails.';
->>>>>>> MOODLE_28_STABLE
 $string['forceloginforprofiles'] = 'Force users to log in for profiles';
 $string['forcetimezone'] = 'Force timezone';
 $string['formatuninstallwithcourses'] = 'There are {$a->count} courses using {$a->format}. Their format will be changed to {$a->defaultformat} (default format for this site). Some format-specific data may be lost. Are you sure you want to proceed?';
@@ -1016,8 +1005,6 @@ $string['tablesnosave'] = 'Changes in tables above are saved automatically.';
 $string['tabselectedtofront'] = 'On tables with tabs, should the row with the currently selected tab be placed at the front';
 $string['tabselectedtofronttext'] = 'Bring selected tab row to front';
 $string['testsiteupgradewarning'] = 'You are currently using the {$a} test site, to upgrade it properly use the command line interface tool';
-<<<<<<< HEAD
-=======
 $string['taskautomatedbackup'] = 'Automated backups';
 $string['taskbackupcleanup'] = 'Clean backup tables and logs';
 $string['taskbadgescron'] = 'Award badges';
@@ -1048,7 +1035,6 @@ $string['tasksessioncleanup'] = 'Cleanup old sessions';
 $string['taskstatscron'] = 'Background processing for statistics';
 $string['tasktagcron'] = 'Background processing for tags';
 $string['tasktempfilecleanup'] = 'Delete stale temp files';
->>>>>>> MOODLE_28_STABLE
 $string['themedesignermode'] = 'Theme designer mode';
 $string['themelist'] = 'Theme list';
 $string['themenoselected'] = 'No theme selected';

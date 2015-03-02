@@ -480,12 +480,9 @@ $string['deletechecktypename'] = 'Are you sure that you want to delete the {$a->
 $string['deletecheckfiles'] = 'Are you absolutely sure you want to delete these files?';
 $string['deletecheckfull'] = 'Are you absolutely sure you want to completely delete {$a} ?';
 $string['deletecheckwarning'] = 'You are about to delete these files';
-<<<<<<< HEAD
 $string['deletelogs'] = 'Delete logs';
 $string['deletesection'] = 'Delete section';
 $string['deletethissection'] = 'Delete this section';
-=======
->>>>>>> MOODLE_28_STABLE
 $string['deleteselected'] = 'Delete selected';
 $string['deleteselectedkey'] = 'Delete selected key';
 $string['deletingcourse'] = 'Deleting {$a}';
@@ -788,13 +785,9 @@ $string['filter'] = 'Filter';
 $string['findmorecourses'] = 'Find more courses...';
 $string['first'] = 'First';
 $string['firstaccess'] = 'First access';
-<<<<<<< HEAD
 $string['firstname'] = 'Given name';
-=======
-$string['firstname'] = 'First name';
 $string['firstnamephonetic'] = 'First name - phonetic';
 $string['firstsiteaccess'] = 'First access to site';
->>>>>>> MOODLE_28_STABLE
 $string['firsttime'] = 'Is this your first time here?';
 $string['folder'] = 'Folder';
 $string['folderclosed'] = 'Closed folder';
@@ -966,12 +959,8 @@ $string['chooselogs'] = 'Choose which logs you want to see';
 $string['choosereportfilter'] = 'Choose a filter for the report';
 $string['choosetheme'] = 'Choose theme';
 $string['chooseuser'] = 'Choose a user';
-<<<<<<< HEAD
 $string['icqnumber'] = 'Details';
-=======
 $string['eventcontentviewed'] = 'Content viewed';
-$string['icqnumber'] = 'ICQ number';
->>>>>>> MOODLE_28_STABLE
 $string['icon'] = 'Icon';
 $string['iconhelp_help'] = 'A list of all available icons can be found by <a href="/icons.php" target="_blank">clicking here</a>.';
 $string['idnumber'] = 'PowerSchool ID';
@@ -1057,13 +1046,8 @@ $string['locktimeout'] = 'The operation timed out while waiting for a lock.';
 $string['log_excel_date_format'] = 'yyyy mmmm d h:mm';
 $string['loggedinas'] = '{$a}';
 $string['loggedinasguest'] = 'You are currently using guest access';
-<<<<<<< HEAD
 $string['loggedinnot'] = 'Log in';
 $string['login'] = 'Login';
-=======
-$string['loggedinnot'] = 'You are not logged in.';
-$string['login'] = 'Log in';
->>>>>>> MOODLE_28_STABLE
 $string['loginalready'] = 'You are already logged in';
 $string['loginas'] = 'Log in as';
 $string['loginaspasswordexplain'] = '<p>You must enter the special "loginas password" to use this feature.<br />If you do not know it, ask your server administrator.</p>';
@@ -1092,16 +1076,10 @@ $string['loginstepsnone'] = '<p>Hi!</p>
 <p>For full access to courses you\'ll need to create yourself an account.</p>
 <p>All you need to do is make up a username and password and use it in the form on this page!</p>
 <p>If someone else has already chosen your username then you\'ll have to try again using a different username.</p>';
-<<<<<<< HEAD
 $string['loginto'] = 'Login to {$a}';
 $string['loginusing'] = 'Login here with your DragonNet username';
 $string['logout'] = 'Logout';
 $string['logoutconfirm'] = 'Do you really want to logout?';
-=======
-$string['loginto'] = 'Log in to {$a}';
-$string['logout'] = 'Log out';
-$string['logoutconfirm'] = 'Do you really want to log out?';
->>>>>>> MOODLE_28_STABLE
 $string['logs'] = 'Logs';
 $string['logtoomanycourses'] = '[ <a href="{$a->url}">more</a> ]';
 $string['logtoomanyusers'] = '[ <a href="{$a->url}">more</a> ]';
@@ -1393,10 +1371,7 @@ $string['optional'] = 'optional';
 $string['options'] = 'options';
 $string['order'] = 'Order';
 $string['originalpath'] = 'Original path';
-<<<<<<< HEAD
 $string['orphanedactivities'] = 'Orphaned activities';
-=======
->>>>>>> MOODLE_28_STABLE
 $string['orphanedactivitiesinsectionno'] = 'Orphaned activities (section {$a})';
 $string['other'] = 'Other';
 $string['outline'] = 'Outline';
@@ -1549,15 +1524,11 @@ $string['resetstartdate'] = 'Reset start date';
 $string['resetstatus'] = 'Status';
 $string['resettask'] = 'Task';
 $string['resettodefaults'] = 'Reset to defaults';
-<<<<<<< HEAD
 $string['resortcoursesbyname'] = 'Re-sort courses by name';
 $string['resource'] = 'Additional Modules';
-=======
 $string['resortsubcategoriesby'] = 'Sort subcategories by {$a} ascending';
 $string['resortsubcategoriesbyreverse'] = 'Sort subcategories by {$a} descending';
 $string['resortcourses'] = 'Sort courses';
-$string['resource'] = 'Resource';
->>>>>>> MOODLE_28_STABLE
 $string['resourcedisplayauto'] = 'Automatic';
 $string['resourcedisplaydownload'] = 'Force download';
 $string['resourcedisplayembed'] = 'Embed';
@@ -1822,11 +1793,8 @@ $string['studentnotallowed'] = 'Sorry, but you can not enter this course as \'{$
 $string['students'] = 'Students';
 $string['studentsandteachers'] = 'Students and teachers';
 $string['subcategories'] = 'Subcategories';
-<<<<<<< HEAD
-=======
 $string['subcategory'] = 'Subcategory';
 $string['subcategoryof'] = 'Subcategory of {$a}';
->>>>>>> MOODLE_28_STABLE
 $string['submit'] = 'Submit';
 $string['success'] = 'Success';
 $string['summary'] = 'Summary';

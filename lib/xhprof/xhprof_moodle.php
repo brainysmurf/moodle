@@ -324,11 +324,7 @@ function profiling_print_run($run, $prevreferences = null) {
             $row = array(userdate($reference->timecreated), '<a href="' . $url . '" title="">'.$reference->runid.'</a>', $reference->runcomment);
             $table->data[] = $row;
         }
-<<<<<<< HEAD
-        $output .= $OUTPUT->box(html_writer::table($table), 'profilingrunbox', 'profiling_diffs', true);
-=======
         $output .= $OUTPUT->box(html_writer::table($table), 'profilingrunbox', 'profiling_diffs');
->>>>>>> MOODLE_28_STABLE
 
     }
     // Add link to export this run.
