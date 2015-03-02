@@ -41,6 +41,30 @@ function xmldb_choice_upgrade($oldversion) {
     // Put any upgrade step following this.
 
 
+    // Moodle v2.6.0 release upgrade line.
+    // Put any upgrade step following this.
+
+    // Moodle v2.7.0 release upgrade line.
+    // Put any upgrade step following this.
+
+    if ($oldversion < 2014051201) {
+
+        // Define field allowmultiple to be added to choice.
+        $table = new xmldb_table('choice');
+        $field = new xmldb_field('allowmultiple', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'allowupdate');
+
+        // Conditionally launch add field allowmultiple.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Choice savepoint reached.
+        upgrade_mod_savepoint(true, 2014051201, 'choice');
+    }
+
+    // Moodle v2.8.0 release upgrade line.
+    // Put any upgrade step following this.
+
     return true;
 }
 

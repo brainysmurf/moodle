@@ -5,6 +5,11 @@ if (!empty($CFG->loginpasswordautocomplete)) {
 } else {
     $autocomplete = '';
 }
+if (empty($CFG->authloginviaemail)) {
+    $strusername = get_string('username');
+} else {
+    $strusername = get_string('usernameemail');
+}
 ?>
 <div id="page-content-wrapper">
   <div id="page-content">

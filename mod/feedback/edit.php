@@ -19,7 +19,7 @@
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package feedback
+ * @package mod_feedback
  */
 
 require_once('../../config.php');
@@ -110,7 +110,7 @@ if (isset($create_template_formdata->savetemplate) && $create_template_formdata-
         $savereturn = 'notsaved_name';
     } else {
         //If the feedback is located on the frontpage then templates can be public.
-        if (has_capability('mod/feedback:createpublictemplate', get_system_context())) {
+        if (has_capability('mod/feedback:createpublictemplate', context_system::instance())) {
             $create_template_formdata->ispublic = isset($create_template_formdata->ispublic) ? 1 : 0;
         } else {
             $create_template_formdata->ispublic = 0;
@@ -155,12 +155,12 @@ $strfeedbacks = get_string('modulenameplural', 'feedback');
 $strfeedback  = get_string('modulename', 'feedback');
 
 $PAGE->set_url('/mod/feedback/edit.php', array('id'=>$cm->id, 'do_show'=>$do_show));
-$PAGE->set_heading(format_string($course->fullname));
-$PAGE->set_title(format_string($feedback->name));
+$PAGE->set_heading($course->fullname);
+$PAGE->set_title($feedback->name);
 
 //Adding the javascript module for the items dragdrop.
 if (count($feedbackitems) > 1) {
-    if ($do_show == 'edit' and $CFG->enableajax) {
+    if ($do_show == 'edit') {
         $PAGE->requires->strings_for_js(array(
                'pluginname',
                'move_item',
@@ -172,6 +172,7 @@ if (count($feedbackitems) > 1) {
 }
 
 echo $OUTPUT->header();
+echo $OUTPUT->heading(format_string($feedback->name));
 
 /// print the tabs
 require('tabs.php');
@@ -245,7 +246,7 @@ if ($do_show == 'edit') {
 
         $helpbutton = $OUTPUT->help_icon('preview', 'feedback');
 
-        echo $OUTPUT->heading($helpbutton . get_string('preview', 'feedback'));
+        echo $OUTPUT->heading(get_string('preview', 'feedback').$helpbutton, 3);
         if (isset($SESSION->feedback->moving) AND $SESSION->feedback->moving->shouldmoving == 1) {
             $anker = '<a href="edit.php?id='.$id.'">';
             $anker .= get_string('cancel_moving', 'feedback');
@@ -257,9 +258,10 @@ if ($do_show == 'edit') {
         $params = array('feedback' => $feedback->id, 'required' => 1);
         $countreq = $DB->count_records('feedback_item', $params);
         if ($countreq > 0) {
-            echo '<span class="feedback_required_mark">(*)';
-            echo get_string('items_are_required', 'feedback');
-            echo '</span>';
+            echo '<div class="fdescription required">';
+            echo get_string('somefieldsrequired', 'form', '<img alt="'.get_string('requiredelement', 'form').
+                '" src="'.$OUTPUT->pix_url('req') .'" class="req" />');
+            echo '</div>';
         }
 
         //Use list instead a table

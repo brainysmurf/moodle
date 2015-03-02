@@ -1,4 +1,70 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Lists all the users within a given course.
+ *
+ * @copyright 1999 Martin Dougiamas  http://dougiamas.com
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package core_user
+ */
+
+require_once('../config.php');
+require_once($CFG->libdir.'/tablelib.php');
+require_once($CFG->libdir.'/filelib.php');
+
+define('USER_SMALL_CLASS', 20);   // Below this is considered small.
+define('USER_LARGE_CLASS', 200);  // Above this is considered large.
+define('DEFAULT_PAGE_SIZE', 20);
+define('SHOW_ALL_PAGE_SIZE', 5000);
+define('MODE_BRIEF', 0);
+define('MODE_USERDETAILS', 1);
+
+$page         = optional_param('page', 0, PARAM_INT); // Which page to show.
+$perpage      = optional_param('perpage', DEFAULT_PAGE_SIZE, PARAM_INT); // How many per page.
+$mode         = optional_param('mode', null, PARAM_INT); // Use the MODE_ constants.
+$accesssince  = optional_param('accesssince', 0, PARAM_INT); // Filter by last access. -1 = never.
+$search       = optional_param('search', '', PARAM_RAW); // Make sure it is processed with p() or s() when sending to output!
+$roleid       = optional_param('roleid', 0, PARAM_INT); // Optional roleid, 0 means all enrolled users (or all on the frontpage).
+$contextid    = optional_param('contextid', 0, PARAM_INT); // One of this or.
+$courseid     = optional_param('id', 0, PARAM_INT); // This are required.
+
+$PAGE->set_url('/user/index.php', array(
+        'page' => $page,
+        'perpage' => $perpage,
+        'mode' => $mode,
+        'accesssince' => $accesssince,
+        'search' => $search,
+        'roleid' => $roleid,
+        'contextid' => $contextid,
+        'id' => $courseid));
+
+if ($contextid) {
+    $context = context::instance_by_id($contextid, MUST_EXIST);
+    if ($context->contextlevel != CONTEXT_COURSE) {
+        print_error('invalidcontext');
+    }
+    $course = $DB->get_record('course', array('id' => $context->instanceid), '*', MUST_EXIST);
+} else {
+    $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+    $context = context_course::instance($course->id, MUST_EXIST);
+}
+// Not needed anymore.
+unset($contextid);
+unset($courseid);
 
 	/*
 	* SSIS Directory
@@ -39,9 +105,9 @@
 		'contextid' => $contextid,
 		'id' => $courseid
 	));
-	
-	
-	
+
+
+
 
 	if ($contextid) {
 		$context = context::instance_by_id($contextid, MUST_EXIST);
@@ -53,7 +119,7 @@
 		$course = $DB->get_record('course', array('id'=>$courseid), '*', MUST_EXIST);
 		$context = context_course::instance($course->id, MUST_EXIST);
 	}
-	
+
 	// There aren't needed below here
 	unset($contextid);
 	unset($courseid);
@@ -73,7 +139,7 @@
 	}
 
 
-	
+
 	// !Setup roles
 
 	//Where the user gets taken after changing the role they want to view
@@ -81,7 +147,7 @@
 
 	//Load all available roles in the current context
 	$rolenames = role_fix_names(get_profile_roles($context), $context, ROLENAME_ALIAS, true);
-	
+
 	//Change the name of the first role if we're on the moodle frontpage
 	if ($isfrontpage) {
 		$rolenames[0] = get_string('allsiteusers', 'role');
@@ -137,7 +203,7 @@
 	} else {
 		$mode = MODE_BRIEF;
 	}*/
-	
+
 	//Everybody uses userdetails now
 	$mode = MODE_USERDETAILS;
 
@@ -216,7 +282,7 @@
 
 
 	// !Settings and things in a table across the top
-	
+
 	$controlstable = new html_table();
 	$controlstable->attributes['class'] = 'controls';
 	$controlstable->cellspacing = 0;
@@ -228,22 +294,22 @@
 
 	//Get the IDs of all coures in the Teachng & Learning category
 	$teachinglearning = get_teaching_and_learning_ids();
-	
-	//Get the courses a user is enroled in 
+
+	//Get the courses a user is enroled in
 	$mycourses = enrol_get_my_courses();
-	
+
 	if ($mycourses) {
-		
+
 		$courselist = array();
-		
+
 		//Only show courses user is enrolled in from the Teaching & Learning menu
 		foreach ($mycourses as $mycourse) {
-		
+
 			if (!isset($teachinglearning[$mycourse->id])) {
 				//Not a T&L course
 				continue;
 			}
-			
+
 			//Add to the filter by courses dropdown
 			$coursecontext = context_course::instance($mycourse->id);
 			$courselist[$mycourse->id] = format_string($mycourse->fullname, true, array('context' => $coursecontext));
@@ -254,12 +320,12 @@
 			unset($courselist[SITEID]);
 			$courselist = array(SITEID => format_string($SITE->shortname, true, array('context' => $systemcontext))) + $courselist;
 		}
-		
+
 		//Create the <select>
 		$filter_by_course_url = new moodle_url('/user/index.php?roleid='.$roleid.'&sifirst=&silast=');
 		$select = new single_select($filter_by_course_url, 'id', $courselist, $course->id, array(''=>'choosedots'), 'courseform');
 		$select->set_label('Filter by courses: ');
-		
+
 		// Render the dropdown and add it to the settings table
 		$controlstable->data[0]->cells[] = $OUTPUT->render($select);
 	}
@@ -402,8 +468,8 @@
 			'id', 'username', 'firstname', 'lastname', 'email', 'city', 'country',
 			'picture', 'lang', 'timezone', 'maildisplay', 'imagealt', 'lastaccess'));
 
-	if ($isfrontpage) { 
-	
+	if ($isfrontpage) {
+
 		//Moodle frontpage
 		$select = "SELECT u.id, u.username, u.firstname, u.lastname,
 						  u.email, u.city, u.country, u.picture,
@@ -415,11 +481,11 @@
 		}
 
 	} else {
-	
+
 		//Course users
 		$select = "SELECT u.id, u.username, u.firstname, u.lastname,
 						  u.email, u.city, u.country, u.picture,
-						  u.lang, u.timezone, u.maildisplay, u.imagealt, u.idnumber, 
+						  u.lang, u.timezone, u.maildisplay, u.imagealt, u.idnumber,
 						  COALESCE(ul.timeaccess, 0) AS lastaccess$extrasql";
 		$joins[] = "JOIN ($esql) e ON e.id = u.id"; // course enrolled users only
 		$joins[] = "LEFT JOIN {user_lastaccess} ul ON (ul.userid = u.id AND ul.courseid = :courseid)"; // not everybody accessed course yet
@@ -455,19 +521,19 @@
 
 	// Perform a search.
 	if (!empty($search)) {
-	
-	
+
+
 		$fullname = $DB->sql_fullname('u.firstname','u.lastname');
-		
+
 		//What columns to search in...
 		switch ( $searchin )
 		{
-			case 'name':		
+			case 'name':
 				//Name is a special case because it's firstname and lastname together
 				$wheres[] = $DB->sql_like($fullname, ':search', false, false);
 				$params['search'] = "%$search%";
 			break;
-			
+
 			case 'email':
 			case 'department':
 				//Add 'where' to query
@@ -579,8 +645,8 @@
 	$searchBox = '
 		<form action="index.php" class="directorysearchform searchform" style="text-align:center;">
 			<input type="hidden" name="id" value="'.$course->id.'" />
-			<label for="search">Search for</label> 
-			<input type="text" id="search" name="search" value="'.s($search).'" /> in 
+			<label for="search">Search for</label>
+			<input type="text" id="search" name="search" value="'.s($search).'" /> in
 			<select name="searchin">
 				<option value="" '.(!$searchin?'selected':'').'>Name, Email, and/or Homeroom</option>
 				<option value="name" '.($searchin=='name'?'selected':'').'>Name only</option>
@@ -607,9 +673,9 @@
 		echo $OUTPUT->heading(get_string('nothingtodisplay'));
 	}
 	elseif ($mode === MODE_USERDETAILS) {
-	
+
 		// !User details view
-	
+
 			//Bars of letters
 			if ( $totalcount > $perpage) {
 
@@ -658,11 +724,11 @@
 			   $pagingbar = new paging_bar($matchcount, intval($table->get_page_start() / $perpage), $perpage, $baseurl);
 			   $pagingbar->pagevar = 'spage';
 			   echo $OUTPUT->render($pagingbar);
-			   
+
 			}
 			// End bars of letters and pagination
-			
-			
+
+
 			// If we're showing the users in a specific class, and the viewing user is a teacher, print out the class emails:
 			// (Any teacher. Not specifically a teacher of this class)
 			if ( $currentgroup && $SESSION->userIsTeacher )
@@ -671,7 +737,7 @@
 				echo '<br /><strong><i class="icon-user"></i> Bulk email for all students in this class:</strong><br />';
 				$emailaddr = $groupname.'@student.ssis-suzhou.net';
 				echo '<a href="mailto:'.$emailaddr.'">'.$emailaddr.'</a><br />';
-				
+
 				echo '<br /><strong><i class="icon-female"></i> Bulk email for all parents who have a child in this class:</strong><br />';
 				$emailaddr = $groupname.'PARENTS@student.ssis-suzhou.net';
 				echo '<a href="mailto:?bcc='.$emailaddr.'">'.$emailaddr.'</a><br /><br />';
@@ -679,29 +745,29 @@
 
 
 			//Begin displaying users (for real this time)
-			
+
 			if ($matchcount < 1) {
 				echo $OUTPUT->heading(get_string('nothingtodisplay'));
 			} else {
 
 				$usersprinted = array();
-				
+
 				foreach ($userlist as $user) {
-				
+
 					if (in_array($user->id, $usersprinted)) { /// Prevent duplicates by r.hidden - MDL-13935
 						continue;
 					}
 
 					$this_user_is_a_parent = substr($user->idnumber, -1) == 'P';
 					$this_user_is_a_student = strpos($user->email, '@student.ssis-suzhou') != 0;
-					
+
 					//Don't show parents to students or other parents
 			 		if ($this_user_is_a_parent && !$SESSION->userIsTeacher && ($SESSION->userIsStudent || $SESSION->userIsParent)) { continue; }
 
 					$usersprinted[] = $user->id; // Remember that we've shown this user
 
 					context_instance_preload($user);
-					
+
 					//we don't need to do this for every user
 					//$context = context_course::instance($course->id);
 					$usercontext = context_user::instance($user->id);
@@ -715,16 +781,16 @@
 					} else {
 						$hiddenfields = array_flip(explode(',', $CFG->hiddenuserfields));
 					}*/
-					
+
 					$table = new html_table(); //Each row for a user is actually it's own table
 					$table->attributes['class'] = 'userinfobox';
 
 					$row = new html_table_row();
-					
+
 					$row->cells[0] = new html_table_cell();
 					$row->cells[0]->attributes['class'] = 'left side';
 					$row->cells[0]->text = $OUTPUT->user_picture($user, array('size' => 100, 'courseid'=>$course->id));
-					
+
 					$row->cells[1] = new html_table_cell();
 					$row->cells[1]->attributes['class'] = 'content';
 					$row->cells[1]->text = $OUTPUT->container(fullname($user, has_capability('moodle/site:viewfullnames', $context)), 'username');
@@ -736,8 +802,8 @@
 
 					//Email address field
 					 if (
-					 	$user->maildisplay == 1 
-					 	or 
+					 	$user->maildisplay == 1
+					 	or
 					 	($user->maildisplay == 2 and ($course->id != SITEID) and !isguestuser())
 					 	or
 						has_capability('moodle/course:viewhiddenuserfields', $context)
@@ -759,16 +825,16 @@
 								// Don't show the PowerSchool ID if not an ssis teacher viewing the page
 								  continue;
 				  			}
-	
+
 							if ($field === 'email' or $field === 'lastaccess' ) {
 								continue;
 							}
-							
+
 							if ($user->{$field} === "") {
 								// don't print an empty row
 								continue;
 							}
-							
+
 							$row->cells[1]->text .= '<tr>
 								<td>'.get_user_field_name($field).'</td>
 								<td>'.s($user->{$field}).'</td>
@@ -795,7 +861,7 @@
 							<td>Parents Email</td>
 							<td><a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a></td>
 						</tr>';
-						
+
 						if ( (int)$user->department >= 6 ) {
 							//Show the address to bulk email all the student's teachers
 							$teachers_email_address = $user->username . "TEACHERS@student.ssis-suzhou.net";
@@ -812,13 +878,13 @@
 							</tr>';
 						}
 					}
-					
+
 					/*
 					This allows parents to see the parent emails of all students
 					elseif ($SESSION->userIsParent && !$this_user_is_a_parent) {
 					{
-						//User looking at the page is a parent, and this user isn't a parent	
-						$parent_email_address = $user->username . "PARENTS@student.ssis-suzhou.net";	
+						//User looking at the page is a parent, and this user isn't a parent
+						$parent_email_address = $user->username . "PARENTS@student.ssis-suzhou.net";
 						$row->cells[1]->text .= '<tr>
 							<td>Parents Email</td>
 							<td><a href="mailto:' . $parent_email_address . '">' . $parent_email_address . '</a></td>
@@ -850,12 +916,12 @@
 					if ($bulkoperations) {
 						$row->cells[2]->text .= '<br /><input type="checkbox" class="usercheckbox" name="user'.$user->id.'" /> ';
 					}
-					
+
 					$table->data = array($row);
-					
+
 					//Show this user's table (row) and we're done
 					echo html_writer::table($table);
-					
+
 				} //end of the foreach user loop
 
 			} //end of if matchcount > 0
@@ -863,9 +929,9 @@
 	}  //end of user details view
 	/*else
 	{
-	
+
 		// !Brief view
-	
+
 		$countrysort = (strpos($sort, 'country') !== false);
 		$timeformat = get_string('strftimedate');
 
@@ -873,18 +939,18 @@
 
 			$usersprinted = array();
 			foreach ($userlist as $user) {
-			
+
 				if (in_array($user->id, $usersprinted)) { /// Prevent duplicates by r.hidden - MDL-13935
 					continue;
 				}
-				
+
 				$this_user_is_a_parent = substr($user->idnumber, -1) == 'P';
 				$this_user_is_a_student = strpos($user->email, '@student.ssis-suzhou') != 0;
-				
+
 				//Don't show parents to students
 			 	if ($this_user_is_a_parent && $SESSION->userIsStudent) { continue; }
-				
-				$usersprinted[] = $user->id; /// Add new user to the array of users printed	
+
+				$usersprinted[] = $user->id; /// Add new user to the array of users printed
 
 				context_instance_preload($user);
 
@@ -1016,25 +1082,40 @@
 	}
 
 
-
-function get_course_lastaccess_sql($accesssince='') {
-	if (empty($accesssince)) {
-		return '';
-	}
-	if ($accesssince == -1) { // never
-		return 'ul.timeaccess = 0';
-	} else {
-		return 'ul.timeaccess != 0 AND ul.timeaccess < '.$accesssince;
-	}
+if ($userlist) {
+    $userlist->close();
 }
 
+/**
+ * Returns SQL that can be used to limit a query to a period where the user last accessed a course..
+ *
+ * @param string $accesssince
+ * @return string
+ */
+function get_course_lastaccess_sql($accesssince='') {
+    if (empty($accesssince)) {
+        return '';
+    }
+    if ($accesssince == -1) { // Never.
+        return 'ul.timeaccess = 0';
+    } else {
+        return 'ul.timeaccess != 0 AND ul.timeaccess < '.$accesssince;
+    }
+}
+
+/**
+ * Returns SQL that can be used to limit a query to a period where the user last accessed the system.
+ *
+ * @param string $accesssince
+ * @return string
+ */
 function get_user_lastaccess_sql($accesssince='') {
-	if (empty($accesssince)) {
-		return '';
-	}
-	if ($accesssince == -1) { // never
-		return 'u.lastaccess = 0';
-	} else {
-		return 'u.lastaccess != 0 AND u.lastaccess < '.$accesssince;
-	}
+    if (empty($accesssince)) {
+        return '';
+    }
+    if ($accesssince == -1) { // Never.
+        return 'u.lastaccess = 0';
+    } else {
+        return 'u.lastaccess != 0 AND u.lastaccess < '.$accesssince;
+    }
 }

@@ -17,8 +17,7 @@
 /**
  * Settings form for overrides in the quiz module.
  *
- * @package    mod
- * @subpackage quiz
+ * @package    mod_quiz
  * @copyright  2010 Matt Petro
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,6 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->dirroot . '/mod/quiz/mod_form.php');
 
 
 /**
@@ -136,20 +136,14 @@ class quiz_override_form extends moodleform {
                             'This is unexpected, and a problem because there is no way to pass these ' .
                             'parameters to get_users_by_capability. See MDL-34657.');
                 }
-                if (!empty($CFG->enablegroupmembersonly) && $cm->groupmembersonly) {
-                    // Only users from the grouping.
-                    $groups = groups_get_all_groups($cm->course, 0, $cm->groupingid);
-                    if (!empty($groups)) {
-                        $users = get_users_by_capability($this->context, 'mod/quiz:attempt',
-                                'u.id, u.firstname, u.lastname, u.email',
-                                $sort, '', '', array_keys($groups),
-                                '', false, true);
-                    }
-                } else {
-                    $users = get_users_by_capability($this->context, 'mod/quiz:attempt',
-                            'u.id, u.firstname, u.lastname, u.email' ,
-                            $sort, '', '', '', '', false, true);
-                }
+                $users = get_users_by_capability($this->context, 'mod/quiz:attempt',
+                        'u.id, u.email, ' . get_all_user_name_fields(true, 'u'),
+                        $sort, '', '', '', '', false, true);
+
+                // Filter users based on any fixed restrictions (groups, profile).
+                $info = new \core_availability\info_module($cm);
+                $users = $info->filter_user_list($users);
+
                 if (empty($users)) {
                     // Generate an error.
                     $link = new moodle_url('/mod/quiz/overrides.php', array('cmid'=>$cm->id));
@@ -157,10 +151,15 @@ class quiz_override_form extends moodleform {
                 }
 
                 $userchoices = array();
+                $canviewemail = in_array('email', get_extra_user_fields($this->context));
                 foreach ($users as $id => $user) {
                     if (empty($invalidusers[$id]) || (!empty($override) &&
                             $id == $override->userid)) {
-                        $userchoices[$id] = fullname($user) . ', ' . $user->email;
+                        if ($canviewemail) {
+                            $userchoices[$id] = fullname($user) . ', ' . $user->email;
+                        } else {
+                            $userchoices[$id] = fullname($user);
+                        }
                     }
                 }
                 unset($users);
@@ -184,11 +183,11 @@ class quiz_override_form extends moodleform {
 
         // Open and close dates.
         $mform->addElement('date_time_selector', 'timeopen',
-                get_string('quizopen', 'quiz'), array('optional' => true));
+                get_string('quizopen', 'quiz'), mod_quiz_mod_form::$datefieldoptions);
         $mform->setDefault('timeopen', $this->quiz->timeopen);
 
         $mform->addElement('date_time_selector', 'timeclose',
-                get_string('quizclose', 'quiz'), array('optional' => true));
+                get_string('quizclose', 'quiz'), mod_quiz_mod_form::$datefieldoptions);
         $mform->setDefault('timeclose', $this->quiz->timeclose);
 
         // Time limit.

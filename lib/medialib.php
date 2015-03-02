@@ -156,7 +156,7 @@ abstract class core_media {
      * @param moodle_url $url URL
      */
     public static function get_extension(moodle_url $url) {
-        // Note: Does not use textlib (. is UTF8-safe).
+        // Note: Does not use core_text (. is UTF8-safe).
         $filename = self::get_filename($url);
         $dot = strrpos($filename, '.');
         if ($dot === false) {
@@ -536,13 +536,67 @@ class core_media_player_youtube extends core_media_player_external {
 
         self::pick_video_size($width, $height);
 
+        $params = '';
+        $start = self::get_start_time($url);
+        if ($start > 0) {
+            $params .= "start=$start&";
+        }
+
+        $listid = $url->param('list');
+        // Check for non-empty but valid playlist ID.
+        if (!empty($listid) && !preg_match('/[^a-zA-Z0-9\-_]/', $listid)) {
+            // This video is part of a playlist, and we want to embed it as such.
+            $params .= "list=$listid&";
+        }
+
         return <<<OET
 <span class="mediaplugin mediaplugin_youtube">
 <iframe title="$info" width="$width" height="$height"
-  src="https://www.youtube.com/embed/$videoid?rel=0&wmode=transparent" frameborder="0" allowfullscreen="1"></iframe>
+  src="https://www.youtube.com/embed/$videoid?{$params}rel=0&wmode=transparent" frameborder="0" allowfullscreen="1"></iframe>
 </span>
 OET;
 
+    }
+
+    /**
+     * Check for start time parameter.  Note that it's in hours/mins/secs in the URL,
+     * but the embedded player takes only a number of seconds as the "start" parameter.
+     * @param moodle_url $url URL of video to be embedded.
+     * @return int Number of seconds video should start at.
+     */
+    protected static function get_start_time($url) {
+        $matches = array();
+        $seconds = 0;
+
+        $rawtime = $url->param('t');
+        if (empty($rawtime)) {
+            $rawtime = $url->param('start');
+        }
+
+        if (is_numeric($rawtime)) {
+            // Start time already specified as a number of seconds; ensure it's an integer.
+            $seconds = $rawtime;
+        } else if (preg_match('/(\d+?h)?(\d+?m)?(\d+?s)?/i', $rawtime, $matches)) {
+            // Convert into a raw number of seconds, as that's all embedded players accept.
+            for ($i = 1; $i < count($matches); $i++) {
+                if (empty($matches[$i])) {
+                    continue;
+                }
+                $part = str_split($matches[$i], strlen($matches[$i]) - 1);
+                switch ($part[1]) {
+                    case 'h':
+                        $seconds += 3600 * $part[0];
+                        break;
+                    case 'm':
+                        $seconds += 60 * $part[0];
+                        break;
+                    default:
+                        $seconds += $part[0];
+                }
+            }
+        }
+
+        return intval($seconds);
     }
 
     protected function get_regex() {
@@ -983,8 +1037,8 @@ class core_media_player_html5video extends core_media_player {
     public function embed($urls, $name, $width, $height, $options) {
         // Special handling to make videos play on Android devices pre 2.3.
         // Note: I tested and 2.3.3 (in emulator) works without, is 533.1 webkit.
-        $oldandroid = check_browser_version('WebKit Android') &&
-                !check_browser_version('WebKit Android', '533.1');
+        $oldandroid = core_useragent::is_webkit_android() &&
+                !core_useragent::check_webkit_android_version('533.1');
 
         // Build array of source tags.
         $sources = array();
@@ -1067,12 +1121,15 @@ OET;
                 // versions or manual plugins.
                 if ($ext === 'ogv' || $ext === 'webm') {
                     // Formats .ogv and .webm are not supported in IE or Safari.
-                    if (check_browser_version('MSIE') || check_browser_version('Safari')) {
+                    if (core_useragent::is_ie() || core_useragent::is_safari()) {
                         continue;
                     }
                 } else {
-                    // Formats .m4v and .mp4 are not supported in Firefox or Opera.
-                    if (check_browser_version('Firefox') || check_browser_version('Opera')) {
+                    // Formats .m4v and .mp4 are not supported in Opera, or in Firefox before 27.
+                    // https://developer.mozilla.org/en-US/docs/Web/HTML/Supported_media_formats
+                    // has the details.
+                    if (core_useragent::is_opera() || (core_useragent::is_firefox() &&
+                            !core_useragent::check_firefox_version(27))) {
                         continue;
                     }
                 }
@@ -1136,18 +1193,25 @@ OET;
             if (in_array($ext, $extensions)) {
                 if ($ext === 'ogg' || $ext === 'oga') {
                     // Formats .ogg and .oga are not supported in IE or Safari.
-                    if (check_browser_version('MSIE') || check_browser_version('Safari')) {
+                    if (core_useragent::is_ie() || core_useragent::is_safari()) {
                         continue;
                     }
                 } else {
-                    // Formats .aac, .mp3, and .m4a are not supported in Firefox or Opera.
-                    if (check_browser_version('Firefox') || check_browser_version('Opera')) {
+                    // Formats .aac, .mp3, and .m4a are not supported in Opera.
+                    if (core_useragent::is_opera()) {
+                        continue;
+                    }
+                    // Formats .mp3 and .m4a were not reliably supported in Firefox before 27.
+                    // https://developer.mozilla.org/en-US/docs/Web/HTML/Supported_media_formats
+                    // has the details. .aac is still not supported.
+                    if (core_useragent::is_firefox() && ($ext === 'aac' ||
+                            !core_useragent::check_firefox_version(27))) {
                         continue;
                     }
                 }
                 // Old Android versions (pre 2.3.3) 'support' audio tag but no codecs.
-                if (check_browser_version('WebKit Android') &&
-                        !check_browser_version('WebKit Android', '533.1')) {
+                if (core_useragent::is_webkit_android() &&
+                        !core_useragent::is_webkit_android('533.1')) {
                     continue;
                 }
 

@@ -1,10 +1,9 @@
-Description of TCPDF library import 5.9.209
+Description of TCPDF library import 6.0.093
 ===========================================
-* delete cache/ doc/ examples/ config/tcpdf_config_alt.php config/lang/ images/
-* remove all fonts but the core ones (courier.php, helveticabi.php,
-    helveticab.php, helveticai.php, helvetica.php, symbol.php, timesbi.php,
-    timesb.php, timesi.php, times.php, zapfdingbats.php) and FreeFont
-* remove font/utils/
+* delete examples/, tools/ and tcpdf_import.php
+* remove tcpdf_import.php from composer.json
+* remove all fonts that were not already present
+* visit http://127.0.0.1/lib/tests/other/pdflibtestpage.php and view the pdf
 
 2011/10/29
 ----------

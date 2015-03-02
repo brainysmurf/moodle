@@ -42,6 +42,9 @@ class qtype_calculatedmulti extends qtype_calculated {
         global $CFG, $DB;
         $context = $question->context;
 
+        // Make it impossible to save bad formulas anywhere.
+        $this->validate_question_data($question);
+
         // Calculated options.
         $update = true;
         $options = $DB->get_record('question_calculated_options',
@@ -72,10 +75,7 @@ class qtype_calculatedmulti extends qtype_calculated {
         }
 
         // Insert all the new answers.
-        if (isset($question->answer) && !isset($question->answers)) {
-            $question->answers = $question->answer;
-        }
-        foreach ($question->answers as $key => $answerdata) {
+        foreach ($question->answer as $key => $answerdata) {
             if (is_array($answerdata)) {
                 $answerdata = $answerdata['text'];
             }
@@ -156,6 +156,20 @@ class qtype_calculatedmulti extends qtype_calculated {
         return true;
     }
 
+    protected function validate_answer($answer) {
+        $error = qtype_calculated_find_formula_errors_in_text($answer);
+        if ($error) {
+            throw new coding_exception($error);
+        }
+    }
+
+    protected function validate_question_data($question) {
+        parent::validate_question_data($question);
+        $this->validate_text($question->correctfeedback['text']);
+        $this->validate_text($question->partiallycorrectfeedback['text']);
+        $this->validate_text($question->incorrectfeedback['text']);
+    }
+
     protected function make_question_instance($questiondata) {
         question_bank::load_question_definition_classes($this->name());
         if ($questiondata->options->single) {
@@ -197,12 +211,9 @@ class qtype_calculatedmulti extends qtype_calculated {
         $answers = $question->options->answers;
 
         foreach ($answers as $key => $answer) {
-            if (is_string($answer)) {
-                $strheader .= $delimiter.$answer;
-            } else {
-                $strheader .= $delimiter.$answer->answer;
-            }
-            $delimiter = '<br/>';
+            $ans = shorten_text($answer->answer, 17, true);
+            $strheader .= $delimiter.$ans;
+            $delimiter = '<br/><br/>';
         }
         return $strheader;
     }
@@ -219,14 +230,14 @@ class qtype_calculatedmulti extends qtype_calculated {
         $errors = '';
         $delimiter = ': ';
         foreach ($answers as $key => $answer) {
-            $answer->answer = $this->substitute_variables($answer->answer, $data);
+            $anssubstituted = $this->substitute_variables($answer->answer, $data);
             // Evaluate the equations i.e {=5+4).
-            $qtext = '';
-            $qtextremaining = $answer->answer;
-            while (preg_match('~\{=([^[:space:]}]*)}~', $qtextremaining, $regs1)) {
-                $qtextsplits = explode($regs1[0], $qtextremaining, 2);
-                $qtext =$qtext.$qtextsplits[0];
-                $qtextremaining = $qtextsplits[1];
+            $anstext = '';
+            $anstextremaining = $anssubstituted;
+            while (preg_match('~\{=([^[:space:]}]*)}~', $anstextremaining, $regs1)) {
+                $anstextsplits = explode($regs1[0], $anstextremaining, 2);
+                $anstext =$anstext.$anstextsplits[0];
+                $anstextremaining = $anstextsplits[1];
                 if (empty($regs1[1])) {
                     $str = '';
                 } else {
@@ -236,10 +247,10 @@ class qtype_calculatedmulti extends qtype_calculated {
                         eval('$str = '.$regs1[1].';');
                     }
                 }
-                $qtext = $qtext.$str;
+                $anstext = $anstext.$str;
             }
-            $answer->answer = $qtext.$qtextremaining;
-            $comment->stranswers[$key] = $answer->answer;
+            $anstext .= $anstextremaining;
+            $comment->stranswers[$key] = $anssubstituted.'<br/>'.$anstext;
         }
         return fullclone($comment);
     }

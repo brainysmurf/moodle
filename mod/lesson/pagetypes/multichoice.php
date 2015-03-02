@@ -18,8 +18,7 @@
 /**
  * Multichoice
  *
- * @package    mod
- * @subpackage lesson
+ * @package mod_lesson
  * @copyright  2009 Sam Hemelryk
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
@@ -78,6 +77,8 @@ class lesson_page_type_multichoice extends lesson_page {
         foreach ($answers as $key=>$answer) {
             if ($answer->answer === '') {
                 unset($answers[$key]);
+            } else {
+                $answers[$key] = parent::rewrite_answers_urls($answer);
             }
         }
         return $answers;
@@ -247,6 +248,7 @@ class lesson_page_type_multichoice extends lesson_page {
             if (!$answer = $DB->get_record("lesson_answers", array("id" => $result->answerid))) {
                 print_error("Continue: answer record not found");
             }
+            $answer = parent::rewrite_answers_urls($answer);
             if ($this->lesson->jumpto_is_correct($this->properties->id, $answer->jumpto)) {
                 $result->correctanswer = true;
             }
@@ -279,6 +281,7 @@ class lesson_page_type_multichoice extends lesson_page {
         $options->para = false;
         $i = 1;
         foreach ($answers as $answer) {
+            $answer = parent::rewrite_answers_urls($answer);
             $cells = array();
             if ($this->lesson->custom && $answer->score > 0) {
                 // if the score is > 0, then it is correct
@@ -350,6 +353,7 @@ class lesson_page_type_multichoice extends lesson_page {
         $answers = $this->get_used_answers();
         $formattextdefoptions = new stdClass;
         $formattextdefoptions->para = false;  //I'll use it widely in this page
+        $formattextdefoptions->context = $answerpage->context;
 
         foreach ($answers as $answer) {
             if ($this->properties->qoption) {
@@ -496,6 +500,7 @@ class lesson_display_answer_form_multichoice_singleanswer extends moodleform {
         $i = 0;
         foreach ($answers as $answer) {
             $mform->addElement('html', '<div class="answeroption">');
+            $answer->answer = preg_replace('#>$#', '> ', $answer->answer);
             $mform->addElement('radio','answerid',null,format_text($answer->answer, $answer->answerformat, $options),$answer->id, $disabled);
             $mform->setType('answer'.$i, PARAM_INT);
             if ($hasattempt && $answer->id == $USER->modattempts[$lessonid]->answerid) {
@@ -558,6 +563,7 @@ class lesson_display_answer_form_multichoice_multianswer extends moodleform {
                 $mform->setDefault('answer['.$answer->id.']', true);
             }
             // NOTE: our silly checkbox supports only value '1' - we can not use it like the radiobox above!!!!!!
+            $answer->answer = preg_replace('#>$#', '> ', $answer->answer);
             $mform->addElement('checkbox', $answerid, null, format_text($answer->answer, $answer->answerformat, $options), $disabled);
             $mform->setType($answerid, PARAM_INT);
 

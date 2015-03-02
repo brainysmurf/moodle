@@ -534,6 +534,16 @@ function portfolio_instances($visibleonly=true, $useronly=true) {
 }
 
 /**
+ * Return whether there are visible instances in portfolio.
+ *
+ * @return bool true when there are some visible instances.
+ */
+function portfolio_has_visible_instances() {
+    global $DB;
+    return $DB->record_exists('portfolio_instance', array('visible' => 1));
+}
+
+/**
  * Supported formats currently in use.
  * Canonical place for a list of all formats
  * that portfolio plugins and callers
@@ -815,7 +825,7 @@ function portfolio_plugin_sanity_check($plugins=null) {
     if (is_string($plugins)) {
         $plugins = array($plugins);
     } else if (empty($plugins)) {
-        $plugins = get_plugin_list('portfolio');
+        $plugins = core_component::get_plugin_list('portfolio');
         $plugins = array_keys($plugins);
     }
 
@@ -920,30 +930,9 @@ function portfolio_report_insane($insane, $instances=false, $return=false) {
     echo $output;
 }
 
-
-/**
- * Event handler for the portfolio_send event
- *
- * @param int $eventdata event id
- * @return bool
- */
-function portfolio_handle_event($eventdata) {
-    global $CFG;
-
-    require_once($CFG->libdir . '/portfolio/exporter.php');
-    $exporter = portfolio_exporter::rewaken_object($eventdata);
-    $exporter->process_stage_package();
-    $exporter->process_stage_send();
-    $exporter->save();
-    $exporter->process_stage_cleanup();
-    return true;
-}
-
 /**
  * Main portfolio cronjob.
  * Currently just cleans up expired transfer records.
- *
- * @todo - MDL-15997 - Add hooks in the plugins - either per instance or per plugin
  */
 function portfolio_cron() {
     global $DB, $CFG;
@@ -957,6 +946,20 @@ function portfolio_cron() {
             } catch (Exception $e) {
                 mtrace('Exception thrown in portfolio cron while cleaning up ' . $d->id . ': ' . $e->getMessage());
             }
+        }
+    }
+
+    $process = $DB->get_records('portfolio_tempdata', array('queued' => 1), 'id ASC', 'id');
+    foreach ($process as $d) {
+        try {
+            $exporter = portfolio_exporter::rewaken_object($d->id);
+            $exporter->process_stage_package();
+            $exporter->process_stage_send();
+            $exporter->save();
+            $exporter->process_stage_cleanup();
+        } catch (Exception $e) {
+            // This will get probably retried in the next cron until it is discarded by the code above.
+            mtrace('Exception thrown in portfolio cron while processing ' . $d->id . ': ' . $e->getMessage());
         }
     }
 }
@@ -1224,13 +1227,25 @@ function portfolio_format_text_options() {
  * @return object|array|string
  */
 function portfolio_rewrite_pluginfile_url_callback($contextid, $component, $filearea, $itemid, $format, $options, $matches) {
-    $matches = $matches[0]; // no internal matching
+    $matches = $matches[0]; // No internal matching.
+
+    // Loads the HTML.
     $dom = new DomDocument();
-    if (!$dom->loadXML($matches)) {
+    if (!$dom->loadHTML($matches)) {
         return $matches;
     }
+
+    // Navigates to the node.
+    $xpath = new DOMXPath($dom);
+    $nodes = $xpath->query('/html/body/child::*');
+    if (empty($nodes) || count($nodes) > 1) {
+        // Unexpected sequence, none or too many nodes.
+        return $matches;
+    }
+    $dom = $nodes->item(0);
+
     $attributes = array();
-    foreach ($dom->documentElement->attributes as $attr => $node) {
+    foreach ($dom->attributes as $attr => $node) {
         $attributes[$attr] = $node->value;
     }
     // now figure out the file
@@ -1281,11 +1296,13 @@ function portfolio_include_callback_file($component, $class = null) {
         // Get rid of the first slash (if it exists).
         $component = ltrim($component, '/');
         // Get a list of valid plugin types.
-        $plugintypes = get_plugin_types(false);
+        $plugintypes = core_component::get_plugin_types();
         // Assume it is not valid for now.
         $isvalid = false;
         // Go through the plugin types.
         foreach ($plugintypes as $type => $path) {
+            // Getting the path relative to the dirroot.
+            $path = preg_replace('|^' . preg_quote($CFG->dirroot, '|') . '/|', '', $path);
             if (strrpos($component, $path) === 0) {
                 // Found the plugin type.
                 $isvalid = true;
@@ -1313,7 +1330,7 @@ function portfolio_include_callback_file($component, $class = null) {
     }
 
     // Obtain the component's location.
-    if (!$componentloc = get_component_directory($component)) {
+    if (!$componentloc = core_component::get_component_directory($component)) {
         throw new portfolio_button_exception('nocallbackcomponent', 'portfolio', '', $component);
     }
 
@@ -1360,7 +1377,11 @@ function portfolio_include_callback_file($component, $class = null) {
  * @return mixed
  */
 function portfolio_rewrite_pluginfile_urls($text, $contextid, $component, $filearea, $itemid, $format, $options=null) {
-    $pattern = '/(<[^<]*?="@@PLUGINFILE@@\/[^>]*?(?:\/>|>.*?<\/[^>]*?>))/';
+    $patterns = array(
+        '(<(a|A)[^<]*?href="@@PLUGINFILE@@/[^>]*?>.*?</(a|A)>)',
+        '(<(img|IMG)\s[^<]*?src="@@PLUGINFILE@@/[^>]*?/?>)',
+    );
+    $pattern = '~' . implode('|', $patterns) . '~';
     $callback = partial('portfolio_rewrite_pluginfile_url_callback', $contextid, $component, $filearea, $itemid, $format, $options);
     return preg_replace_callback($pattern, $callback, $text);
 }

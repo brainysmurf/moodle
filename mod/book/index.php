@@ -47,7 +47,7 @@ $PAGE->set_heading($course->fullname);
 $PAGE->navbar->add($strbooks);
 echo $OUTPUT->header();
 
-add_to_log($course->id, 'book', 'view all', 'index.php?id='.$course->id, '');
+\mod_book\event\course_module_instance_list_viewed::create_from_course($course)->trigger();
 
 // Get all the appropriate data
 if (!$books = get_all_instances_in_course('book', $course)) {

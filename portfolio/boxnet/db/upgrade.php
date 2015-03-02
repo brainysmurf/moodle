@@ -35,7 +35,7 @@ function xmldb_portfolio_boxnet_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2013050102) {
+    if ($oldversion < 2013110602) {
         require_once($CFG->libdir . '/portfoliolib.php');
         require_once($CFG->dirroot . '/portfolio/boxnet/db/upgradelib.php');
 
@@ -55,8 +55,17 @@ function xmldb_portfolio_boxnet_upgrade($oldversion) {
             }
         }
 
-        upgrade_plugin_savepoint(true, 2013050102, 'portfolio', 'boxnet');
+        upgrade_plugin_savepoint(true, 2013110602, 'portfolio', 'boxnet');
     }
+
+    // Moodle v2.6.0 release upgrade line.
+    // Put any upgrade step following this.
+
+    // Moodle v2.7.0 release upgrade line.
+    // Put any upgrade step following this.
+
+    // Moodle v2.8.0 release upgrade line.
+    // Put any upgrade step following this.
 
     return true;
 }

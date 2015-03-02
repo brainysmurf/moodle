@@ -28,10 +28,16 @@
  */
 define('NO_DEBUG_DISPLAY', true);
 
-/**
- * NO_MOODLE_COOKIES - no cookies with web service
- */
-define('NO_MOODLE_COOKIES', true);
+define('WS_SERVER', true);
+
+// Make sure OPcache does not strip comments, we need them for Zend!
+if (ini_get('opcache.enable') and strtolower(ini_get('opcache.enable')) !== 'off') {
+    if (!ini_get('opcache.save_comments') or strtolower(ini_get('opcache.save_comments')) === 'off') {
+        ini_set('opcache.enable', 0);
+    } else {
+        ini_set('opcache.load_comments', 1);
+    }
+}
 
 require('../../config.php');
 require_once("$CFG->dirroot/webservice/amf/locallib.php");

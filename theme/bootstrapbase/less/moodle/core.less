@@ -9,42 +9,43 @@
     display:none;
 }
 
-.empty-region-side-pre #block-region-side-pre,
-.empty-region-side-post #block-region-side-post {
+.empty-region-side-pre #block-region-side-pre, // Pre region is empty.
+.empty-region-side-post #block-region-side-post, // Post region is empty.
+.jsenabled.docked-region-side-post #block-region-side-post, // All post blocks are docked.
+.jsenabled.docked-region-side-pre #block-region-side-pre { // All pre blocks are docked.
     display:none;
 }
 
-.empty-region-side-post #region-bs-main-and-pre.span9,
-.empty-region-side-pre #region-bs-main-and-post.span9,
-.empty-region-side-post #region-bs-main-and-post.span9 #region-main.span8 {
-    /** LTR with no post area.
-        RTL with no pre area.
-        RTL with no post area. **/
+.content-only #region-main.span9, // Two column layout with no block or all blocks docked.
+.empty-region-side-post #region-bs-main-and-pre.span9, // LTR with no post area.
+.empty-region-side-pre #region-bs-main-and-post.span9, // RTL with no pre area.
+.empty-region-side-post #region-bs-main-and-post.span9 #region-main.span8, // RTL with no post area.
+.jsenabled.docked-region-side-post #region-bs-main-and-pre.span9, // LTR with all post blocks docked.
+.jsenabled.docked-region-side-post #region-bs-main-and-post.span9 #region-main.span8,
+.jsenabled.docked-region-side-pre #region-bs-main-and-post.span9 { // RTL with all pre blocks docked.
     width: 100%;
 }
 
-.empty-region-side-pre #region-bs-main-and-pre.span9 #region-main {
-    /** LTR with no pre area. **/
+.empty-region-side-pre #region-bs-main-and-pre.span9 #region-main, // LTR with no pre area.
+.jsenabled.docked-region-side-pre #region-bs-main-and-pre.span9 #region-main { // LTR with all pre blocks docked.
     float:none;
     width:100%;
 }
 
-.fluid-span (@columns) {
-    width: (@fluidGridColumnWidth * @columns) + (@fluidGridGutterWidth * (@columns - 1));
-    *width: (@fluidGridColumnWidth * @columns) + (@fluidGridGutterWidth * (@columns - 1)) - (.5 / @gridRowWidth * 100 * 1%);
+.empty-region-side-post.used-region-side-pre, // Post region is empty and pre region is in use.
+.jsenabled.docked-region-side-post.used-region-side-pre { // All post blocks docked and pre region is in use.
+    #region-main.span8 {
+        /** Increase the span size by 1 **/
+        .fluid-span(9);
+    }
+    #block-region-side-pre.span4 {
+        /** Decrease the span size by 1 **/
+        .fluid-span(3);
+    }
 }
 
-.empty-region-side-post.used-region-side-pre #region-main.span8 {
-    /** increase the span size by 1 **/
-    .fluid-span(9);
-}
-.empty-region-side-post.used-region-side-pre #block-region-side-pre.span4 {
-    /** decrease the span size by 1 **/
-    .fluid-span(3);
-}
-
-.empty-region-side-pre #region-bs-main-and-post.span9 #region-main.span8 {
-    /** RTL with no pre area. **/
+.empty-region-side-pre #region-bs-main-and-post.span9 #region-main.span8, // RTL with no pre area.
+.jsenabled.docked-region-side-pre #region-bs-main-and-post.span9 #region-main.span8 { // RTL with all pre blocks docked.
     float: right;
 }
 
@@ -197,8 +198,7 @@ a.autolink.glossary:hover {
 .warning,
 .errorbox .title,
 .pagingbar .title,
-.pagingbar .thispage,
-.headingblock {
+.pagingbar .thispage {
     font-weight: bold;
 }
 img.resize {
@@ -232,6 +232,15 @@ img.iconhelp, .helplink img {
     padding-left: 3px;
     vertical-align: text-bottom;
     width: 16px;
+}
+h1 img.iconhelp, h1 img.icon,
+h2 img.iconhelp, h2 img.icon,
+h3 img.iconhelp, h3 img.icon,
+h4 img.iconhelp, h4 img.icon,
+h5 img.iconhelp, h5 img.icon,
+h6 img.iconhelp, h6 img.icon {
+  vertical-align: middle;
+  padding: 4px;
 }
 .dir-rtl img.iconhelp, .dir-rtl .helplink img {
     padding-right: 3px;
@@ -304,9 +313,6 @@ img.uihint {
     margin-left: auto;
     margin-right: auto;
 }
-.flexible th {
-    white-space: nowrap;
-}
 table.flexible .emptyrow {
     display: none;
 }
@@ -326,9 +332,7 @@ form.popupform div {
     vertical-align: text-bottom;
     margin: 0 0.3em;
 }
-.main img {
-    vertical-align: middle;
-}
+
 /** The 1-pixel padding is there to avoid phantom scroll bars on OS X (FF, Safari and Chrome)**/
 .no-overflow {
     overflow: auto;
@@ -442,8 +446,11 @@ a.skip:active {
 .groupselector {
     margin-top: 3px;
     margin-bottom: 3px;
+    display: inline-block;
 }
-
+.groupselector label {
+    display: inline-block;
+}
 // Login
 .loginbox {
     margin: 15px;
@@ -462,6 +469,7 @@ a.skip:active {
     margin: 0;
     padding: 0;
     margin-bottom: 5px;
+    margin-top:15px;
 }
 .loginbox .signuppanel .subcontent {
     text-align: left;
@@ -491,20 +499,12 @@ a.skip:active {
 .loginbox .loginform .form-label {
     float: left;
     text-align: right;
-    width: 44%;
-    direction: rtl;
-    white-space: nowrap;
-}
-.dir-rtl .loginbox .loginform .form-label {
-    float: left;
-    text-align: right;
-    width: 44%;
-    direction: ltr;
+    width: 49%;
     white-space: nowrap;
 }
 .loginbox .loginform .form-input {
     float: right;
-    width: 55%;
+    width: 50%;
 }
 .loginbox .loginform .form-input input {
     width: 6em;
@@ -590,6 +590,11 @@ table.mod_index {
 .comment-area textarea {
     width: 100%;
     overflow: auto;
+    &.fullwidth {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
 }
 .comment-area .fd {
     text-align: right;
@@ -653,16 +658,6 @@ table.mod_index {
     left: 0;
     right: auto;
     margin: .3em;
-}
-.comment-delete-confirm {
-    background: #eee;
-    padding: 2px;
-    width: 5em;
-    text-align: center;
-}
-.comment-container {
-    float: left;
-    margin: 4px;
 }
 .comment-report-selectall{
     display: none
@@ -827,8 +822,8 @@ table#tag-management-list th {
     position: absolute;
     width: 420px;
     left: 20%;
-    border: 1px solid #404040;
-    background: #fff;
+    border: 1px solid @dropdownBorder;
+    background: @dropdownBackground;
     overflow: hidden;
     z-index: 9050;
 }
@@ -857,7 +852,8 @@ table#tag-management-list th {
     white-space: nowrap;
 }
 #relatedtags-autocomplete li.yui-ac-highlight{
-    background: #FFFFCC;
+    background: @dropdownLinkBackgroundHover;
+    color: @dropdownLinkColorHover;
 }
 h2.tag-heading,
 div#tag-description,
@@ -1026,6 +1022,9 @@ body.tag .managelink {
     width: 100%;
     border-collapse: collapse;
 }
+.userenrolment tr {
+    vertical-align:top;
+}
 .userenrolment td {
     padding: 0;
     height: 41px;
@@ -1042,59 +1041,44 @@ body.tag .managelink {
 .userenrolment .col_role {
     width: 262px;
 }
-.userenrolment .col_role .roles {
-    margin-right: 30px;
-}
-.userenrolment .col_role .role {
-    float: left;
-    padding: 3px;
-    margin: 3px;
-}
-.dir-rtl .userenrolment .col_role .role {
-    float: right;
-}
-.userenrolment .col_role .role a {
-    margin-left: 3px;
-    cursor: pointer;
-}
-.userenrolment .col_role .addrole {
-    float: right;
-    width: 18px;
-    height: 18px;
-    margin: 3px;
-    text-align: center;
-    background-color: @successBackground;
-    border: 1px solid @successBorder;
-}
-.userenrolment .col_role .addrole img {
-    vertical-align: baseline;
-}
-.userenrolment .hasAllRoles .col_role .addrole {
-    display: none;
-}
+.userenrolment .col_role .roles,
 .userenrolment .col_group .groups {
     margin-right: 30px;
 }
+.userenrolment .col_role .role,
 .userenrolment .col_group .group {
     float: left;
     padding: 3px;
     margin: 3px;
     white-space: nowrap;
 }
+.userenrolment .col_role .role a,
 .userenrolment .col_group .group a {
     margin-left: 3px;
     cursor: pointer;
 }
+.userenrolment .col_role .addrole,
 .userenrolment .col_group .addgroup {
     float: right;
-    width: 18px;
+    padding: 3px;
     margin: 3px;
-    height: 18px;
-    text-align: center;
+    > *:hover {
+        border-bottom:1px solid #666;
+    }
 }
-.userenrolment .col_group .addgroup a img {
-    vertical-align: bottom;
+.userenrolment .col_role .addrole img,
+.userenrolment .col_group .addgroup img {
+    vertical-align: baseline;
 }
+
+.dir-rtl .userenrolment .col_role .role {
+    float: right;
+}
+
+.userenrolment .hasAllRoles .col_role .addrole {
+    display: none;
+}
+
 .userenrolment .col_enrol .enrolment {
     float: left;
     padding: 3px;
@@ -1152,9 +1136,12 @@ body.tag .managelink {
             margin-bottom: 0;
         }
     }
-    .user-enroller-panel .uep-search-results .user .details {
-       width: 237px;
-    }
+  .user-enroller-panel .uep-search-results .user .details {
+    width: 237px;
+  }
+  .user-enroller-panel .uep-search-results .cohort .details {
+    width: 237px;
+  }
 }
 .dir-rtl {
     &#page-enrol-users {
@@ -1201,6 +1188,7 @@ body.tag .managelink {
 }
 .dir-rtl .loginbox .loginform .form-input {
     text-align: right;
+    margin-right: 1%;
 }
 .dir-rtl .yui3-menu-hidden {
     left: 0;
@@ -1225,113 +1213,34 @@ body.tag .managelink {
     top: 50%;
     left: 50%;
 }
-.mod-indent-1 {
-    margin-left: 30px;
+
+.mod-indent-outer {
+    display: table;
 }
-.mod-indent-2 {
-    margin-left: 60px;
+.mod-indent {
+    display: table-cell;
 }
-.mod-indent-3 {
-    margin-left: 90px;
+.label .mod-indent {
+  float:left;
+  padding-top:20px
 }
-.mod-indent-4 {
-    margin-left: 120px;
+
+/* Creates a series of .mod-indent-# rule declarations based on indent size and number of indent levels. */
+@mod-indent-size: 30px;
+@mod-indent-levels: 16;
+.mod-indent-generate(@n, @i: 1) when (@i =< @n) {
+    .mod-indent-@{i} {
+        width: (@i * @mod-indent-size);
+    }
+    .mod-indent-generate(@n, (@i + 1));
 }
-.mod-indent-5 {
-    margin-left: 150px;
+.mod-indent-generate(@n, @i: 1) when (@i = @n) {
+    .mod-indent-huge {
+        width: (@i * @mod-indent-size);
+    }
 }
-.mod-indent-6 {
-    margin-left: 180px;
-}
-.mod-indent-7 {
-    margin-left: 210px;
-}
-.mod-indent-8 {
-    margin-left: 240px;
-}
-.mod-indent-9 {
-    margin-left: 270px;
-}
-.mod-indent-10 {
-    margin-left: 300px;
-}
-.mod-indent-11 {
-    margin-left: 330px;
-}
-.mod-indent-12 {
-    margin-left: 360px;
-}
-.mod-indent-13 {
-    margin-left: 390px;
-}
-.mod-indent-14 {
-    margin-left: 420px;
-}
-.mod-indent-15,
-.mod-indent-huge {
-    margin-left: 420px;
-}
-.dir-rtl .mod-indent-1 {
-    margin-right: 30px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-2 {
-    margin-right: 60px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-3 {
-    margin-right: 90px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-4 {
-    margin-right: 120px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-5 {
-    margin-right: 150px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-6 {
-    margin-right: 180px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-7 {
-    margin-right: 210px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-8 {
-    margin-right: 240px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-9 {
-    margin-right: 270px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-10 {
-    margin-right: 300px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-11 {
-    margin-right: 330px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-12 {
-    margin-right: 360px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-13 {
-    margin-right: 390px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-14 {
-    margin-right: 420px;
-    margin-left: 0;
-}
-.dir-rtl .mod-indent-15,
-.dir-rtl .mod-indent-huge {
-    margin-right: 420px;
-    margin-left: 0;
-}
+.mod-indent-generate(@mod-indent-levels);
+
 /* Audio player size in 'block' mode (can only change width, height is hardcoded in JS) */
 .resourcecontent .mediaplugin_mp3 object {
     height: 25px;
@@ -1476,8 +1385,11 @@ body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
     white-space: nowrap;
     text-align: center;
 }
-.initialbar a {
-    padding-right: 2px;
+.initialbar {
+    a, strong {
+        padding-left: 3px;
+        padding-right: 3px;
+    }
 }
 /* Moodle Dialogue Settings (moodle-core-dialogue)  */
 .moodle-dialogue-base .moodle-dialogue-lightbox {
@@ -1486,6 +1398,24 @@ body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
 .moodle-dialogue-base .hidden,
 .moodle-dialogue-base .moodle-dialogue-hidden {
     display: none;
+}
+.no-scrolling {
+    overflow: hidden;
+}
+.moodle-dialogue-base .moodle-dialogue-fullscreen {
+    left: 0px;
+    top: 0px;
+    right: 0px;
+    bottom: -50px;
+    position: fixed;
+}
+.moodle-dialogue-base .moodle-dialogue-fullscreen .moodle-dialogue-content {
+    overflow: auto;
+}
+.moodle-dialogue-base .moodle-dialogue-fullscreen .closebutton {
+    width: 28px;
+    height: 16px;
+    background-size: 100%;
 }
 .moodle-dialogue-base .moodle-dialogue {
     padding: 0;
@@ -1503,7 +1433,8 @@ body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
     .border-radius(10px);
     .box-shadow(5px 5px 20px 0 #666);
 }
-.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd {
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd.yui3-widget-hd {
     margin: 0;
     padding: 5px;
     font-size: 12px;
@@ -1516,7 +1447,7 @@ body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
     border-bottom: 1px solid #bbb;
     background: #ccc;
     #gradient > .vertical(#fff, #ccc);
-    filter: dropshadow(color=#FFFFFF, offx=1, offy=1);
+    filter: 0;
 }
 .moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd h1 {
     margin: 0;
@@ -1545,7 +1476,6 @@ body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
     right: auto;
 }
 .moodle-dialogue-base .moodle-dialogue .moodle-dialogue-bd {
-    overflow: auto;
     padding: 1em;
     line-height: 2em;
     color: #555;
@@ -1554,6 +1484,26 @@ body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
 .moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-content {
     padding: 0;
     background: #FFF;
+}
+
+.moodle-dialogue-base .moodle-dialogue-fullscreen .moodle-dialogue-hd {
+    padding: 10px;
+    font-size: 16px;
+}
+
+.moodle-dialogue-base .moodle-dialogue-fullscreen .moodle-dialogue-content {
+    overflow: auto;
+    position: absolute;
+    top: 0px;
+    bottom: 50px;
+    left: 0px;
+    right: 0px;
+    margin: 0px;
+    border: 0px;
+}
+.moodle-dialogue-base .moodle-dialogue-fullscreen .moodle-dialogue-hd,
+.moodle-dialogue-base .moodle-dialogue-fullscreen .moodle-dialogue-wrap {
+    border-radius: 0px;
 }
 .moodle-dialogue-confirm .confirmation-dialogue {
     text-align: center;
@@ -1652,6 +1602,10 @@ body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
 
 .moodle-dialogue-base .moodle-dialogue.moodle-dialogue-tooltip {
     z-index: 3001;
+
+    .moodle-dialogue-bd {
+        overflow: auto;
+    }
 }
 
 /* Question Bank - Question Chooser "Close" button */
@@ -1660,11 +1614,11 @@ body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
     left: 6px;
 }
 /**
-* Chooser Dialogues (moodle-core-chooserdialogue)
-*
-* This CSS belong to the chooser dialogue which should work both with, and
-* without javascript enabled
-*/
+ * Chooser Dialogues (moodle-core-chooserdialogue)
+ *
+ * This CSS belong to the chooser dialogue which should work both with, and
+ * without javascript enabled
+ */
 /* Hide the dialog and it's title */
 .chooserdialoguebody,
 .choosertitle {
@@ -1680,7 +1634,7 @@ body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
 }
 /* Center the submit buttons within the area */
 .choosercontainer #chooseform .submitbuttons {
-    margin: 0.7em 0;
+    padding: 0.7em 0;
     text-align: center;
 }
 /* Fixed for safari browser on iPhone4S with ios7.*/
@@ -1699,13 +1653,13 @@ body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
     border-bottom: 1px solid #BBBBBB;
 }
 /* Only set these options if we're showing the js container */
-.jsenabled .choosercontainer #chooseform .alloptions {
+.jschooser .choosercontainer #chooseform .alloptions {
     overflow-x: hidden;
     overflow-y: auto;
     max-width: 20.3em;
     .box-shadow(inset 0 0 30px 0px #ccc);
 }
-.dir-rtl.jsenabled .choosercontainer #chooseform .alloptions {
+.dir-rtl.jschooser .choosercontainer #chooseform .alloptions {
     max-width: 18.3em;
 }
 /* Settings for option rows and option subtypes */
@@ -1732,8 +1686,9 @@ body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
 .dir-rtl .choosercontainer #chooseform .nonoption span.modicon img.icon {
     padding: 0 0.5em 0 0;
 }
-.choosercontainer #chooseform .option span.modicon img.icon,
-.choosercontainer #chooseform .nonoption span.modicon img.icon {
+
+.chooserdialogue-course-modchooser .choosercontainer #chooseform .option span.modicon img.icon,
+.chooserdialogue-course-modchooser .choosercontainer #chooseform .nonoption span.modicon img.icon {
     height: 24px;
     width: 24px;
 }
@@ -1770,8 +1725,8 @@ body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
     margin: 0 0.2em 0 0;
 }
 /* The instruction/help area */
-.jsenabled .choosercontainer #chooseform .instruction,
-.jsenabled .choosercontainer #chooseform .typesummary {
+.jschooser .choosercontainer #chooseform .instruction,
+.jschooser .choosercontainer #chooseform .typesummary {
    display: none;
     position: absolute;
     top: 0;
@@ -1780,24 +1735,24 @@ body#page-lib-editor-tinymce-plugins-moodlemedia-preview {
     left: 20.3em;
     margin: 0;
     padding: 1.6em;
-    background-color: @bodyBackground;
+    background-color: #fff;
     overflow-x: hidden;
     overflow-y: auto;
     line-height: 2em;
 }
-.dir-rtl.jsenabled .choosercontainer #chooseform .instruction,
-.dir-rtl.jsenabled .choosercontainer #chooseform .typesummary {
+.dir-rtl.jschooser .choosercontainer #chooseform .instruction,
+.dir-rtl.jschooser .choosercontainer #chooseform .typesummary {
     left: 0;
     right: 18.5em;
     border-right: 1px solid grey;
 }
 /* Selected option settings */
-.jsenabled .choosercontainer #chooseform .instruction,
+.jschooser .choosercontainer #chooseform .instruction,
 .choosercontainer #chooseform .selected .typesummary {
     display: block;
 }
 .choosercontainer #chooseform .selected {
-    background-color: @bodyBackground;
+    background-color: #fff;
     .box-shadow(0px 0 10px 0 #ccc);
 }
 .section-modchooser-link img.smallicon {
@@ -1902,26 +1857,6 @@ a.criteria-action {
     padding: 0px 3px;
     float: right;
 }
-table.issuedbadgebox {
-    width: 750px;
-    background-color: #FFFFFF;
-}
-table.badgeissuedimage {
-    width: 150px;
-    text-align: center;
-}
-table.badgeissuedinfo {
-    width: 600px;
-}
-table.badgeissuedinfo .bvalue {
-    text-align: left;
-    vertical-align: middle;
-}
-table.badgeissuedinfo .bfield {
-    width: 125px;
-    text-align: left;
-    font-style: italic;
-}
 ul.badges {
     margin: 0;
     list-style: none;
@@ -1942,8 +1877,8 @@ ul.badges {
     position: absolute;
 }
 .badges li .badge-image {
-    width: 90px;
-    height: 90px;
+    width: 100px;
+    height: 100px;
     left: 10px;
     top: 0px;
     z-index: 1;
@@ -1951,24 +1886,78 @@ ul.badges {
 .badges li .badge-actions {
     position: relative;
 }
-div.badge {
-    position: relative;
-    display: block;
-}
-div.badge .expireimage {
+.badges li .expireimage {
     width: 100px;
     height: 100px;
-    left: 20px;
-    top: 0px;
-}
-.expireimage {
-    .opacity(85);
-    width: 90px; height: 90px;
-    left: 30px;
+    left: 25px;
     top: 0px;
     position: absolute;
-    z-index:10;
+    z-index: 10;
+    opacity: 0.85;
 }
+
+#badge-image {
+    background-color: transparent;
+    padding: 0;
+    position: relative;
+    min-width: 100px;
+    width: 20%;
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 17px;
+
+    .expireimage {
+        width: 100px;
+        height: 100px;
+        left: 0px;
+        top: 0px;
+        .opacity(85);
+        position: absolute;
+        z-index:10;
+    }
+
+    .singlebutton {
+        padding-top: 5px;
+
+        input {
+            margin-left: 0px;
+        }
+    }
+}
+.dir-rtl #badge-image {
+    float: right;
+
+    .expireimage {
+        left: 41px;
+    }
+}
+#badge-details {
+    display: inline-block;
+    width: 79%;
+}
+
+#badge-overview dl,
+#badge-details dl {
+    margin: 0;
+
+    dt,
+    dd {
+        vertical-align: top;
+        padding: 3px 0;
+    }
+    dt {
+        clear: both;
+        display: inline-block;
+        width: 20%;
+        min-width: 100px;
+    }
+    dd {
+        display: inline-block;
+        width: 79%;
+        margin-left: 1%;
+    }
+}
+
 .badge-profile {
     vertical-align: top;
 }
@@ -1994,8 +1983,8 @@ div.badge .expireimage {
     width: 42%;
 }
 
-.statustable {
-    margin-bottom: 0px;
+#issued-badge-table .activatebadge {
+    display: inline-block;
 }
 .statusbox.active {
     background-color: @successBackground;
@@ -2003,10 +1992,24 @@ div.badge .expireimage {
 .statusbox.inactive {
     background-color: @warningBackground;
 }
+.statusbox {
+    text-align: center;
+    margin-bottom: 5px;
+    padding: 5px;
+}
+.statusbox .activatebadge {
+    display: inline-block;
+}
+.statusbox .activatebadge input[type=submit]{
+    margin: 3px;
+}
 .activatebadge {
     margin: 0px;
     text-align: left;
     vertical-align: middle;
+}
+.dir-rtl .activatebadge {
+    text-align: right;
 }
 img#persona_signin {
     cursor: pointer;
@@ -2034,8 +2037,207 @@ img#persona_signin {
     margin: 0;
 }
 
-body.bodynoheader {
-  padding-top: 0;
+/** Action menu component styles **/
+.moodle-actionmenu,
+.moodle-actionmenu > ul,
+.moodle-actionmenu > ul > li {
+    display: inline-block;
+}
+
+.moodle-actionmenu ul {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+}
+
+.moodle-actionmenu .toggle-display,
+.moodle-actionmenu .menu-action-text {
+    display: none; /** Hidden by default, display none so that we don't take up space. **/
+}
+
+.jsenabled {
+    .moodle-actionmenu[data-enhance] {
+        display: block;
+        .menu {
+            display:none;
+        }
+        .toggle-display {
+            display: inline; /** JS is enabled, we'll be using it so return display to normal **/
+            .opacity(50);
+        }
+        .toggle-display.textmenu {
+            display: block;
+            margin-left: 4px;
+            padding-left: 4px;
+            padding-right: 4px;
+
+            .iconsmall,
+            .smallicon {
+                margin: 4px 4px 4px 0px;
+                padding: 8px 4px 0px 2px;
+                vertical-align: text-bottom;
+            }
+
+            .caret {
+                margin-top: 8px;
+                margin-left: 2px;
+                border-top-color: @navbarLinkColor;
+                &:hover,
+                &:active {
+                    border-top-color: @navbarLinkColorActive;
+                }
+            }
+        }
+    }
+    .moodle-actionmenu[data-enhanced] {
+        .toggle-display {
+            .opacity(100);
+        }
+        .menu-action-text  {
+            display:inline;
+        }
+    }
+
+    &.dir-rtl {
+        .moodle-actionmenu[data-enhance] {
+            .toggle-display.textmenu {
+                margin-left: initial;
+                margin-right: 4px;
+
+                .caret {
+                    margin-left: initial;
+                    margin-right: 2px;
+                }
+            }
+        }
+    }
+}
+
+.moodle-actionmenu[data-enhanced].show  {
+
+    position: relative;
+
+    .menu {
+
+        display:block;
+        position: absolute;
+        text-align: left;
+        background-color: @dropdownBackground;
+        border: 1px solid @dropdownBorder;
+        z-index:1000;
+        .border-radius(5px);
+        .box-shadow(5px 5px 20px 0 #666);
+
+        a {
+            display: block;
+            color: @dropdownLinkColor;
+            padding:2px 1em 2px 28px;
+            &:hover {
+                color: @dropdownLinkColorHover;
+                background-color: @dropdownLinkBackgroundHover;
+            }
+            &:first-child {
+                .border-top-radius(4px);
+            }
+            &:last-child {
+                .border-bottom-radius(4px);
+            }
+        }
+        a.hidden {
+            display:none;
+        }
+        img {
+            vertical-align: middle;
+        }
+        .iconsmall,
+        .smallicon {
+            margin: 4px 4px 4px -24px;
+            padding: 4px;
+        }
+        > li {
+            display:block;
+        }
+
+        /** bottom left of button **/
+        &.align-tl-bl {top: 100%;left:0;margin-top: 4px;}
+        &.align-tr-bl {top: 100%;right: 100%;}
+        &.align-bl-bl {bottom: 100%;left:0;}
+        &.align-br-bl {bottom: 100%;right: 100%;}
+        /** bottom right of button **/
+        &.align-tl-br {top: 100%;left:100%;}
+        &.align-tr-br {top: 100%;right: 0;margin-top: 4px;}
+        &.align-bl-br {bottom: 100%;left:100%;}
+        &.align-br-br {bottom: 100%;right: 0;}
+        /** top left of button **/
+        &.align-tl-tl {top: 0;left:0;}
+        &.align-tr-tl {top: 0;right: 100%;margin-right: 4px;}
+        &.align-bl-tl {bottom: 100%;left:0;margin-bottom: 4px;}
+        &.align-br-tl {bottom: 100%;right: 100%;}
+        /** top right of button **/
+        &.align-tl-tr {top: 0;left:100%;margin-left: 4px;}
+        &.align-tr-tr {top: 0;right: 0;}
+        &.align-bl-tr {bottom: 100%;left:100%;}
+        &.align-br-tr {bottom: 100%;right: 0;margin-bottom: 4px;}
+    }
+    /** no wrap is set - prevent menu items from wrapping **/
+    &.nowrap-items .menu > li {
+        white-space: nowrap;
+    }
+}
+
+.block .moodle-actionmenu {
+    text-align: right;
+}
+
+.dir-rtl {
+    .moodle-actionmenu[data-enhanced].show  {
+        .menu {
+            text-align: right;
+            left: 0;
+            right: auto;
+            a {
+                padding: 2px 28px 2px 1em;
+            }
+            .iconsmall,
+            .smallicon {
+                margin-right: -24px;
+                margin-left: 4px;
+            }
+
+            /** bottom left of button **/
+            &.align-tl-bl {left: auto; right: 0;}
+            &.align-tr-bl {right: auto; left: 100%;}
+            &.align-bl-bl {left: auto; right: 0;}
+            &.align-br-bl {right: auto; left: 100%;}
+            /** bottom right of button **/
+            &.align-tl-br {left: auto; right: 100%;}
+            &.align-tr-br {right: auto; left: 0;}
+            &.align-bl-br {left: auto; right: 100%;}
+            &.align-br-br {right: auto; left: 0;}
+            /** top left of button **/
+            &.align-tl-tl {left: auto; right: 0;}
+            &.align-tr-tl {right: auto; left: 100%;}
+            &.align-bl-tl {left: auto; right: 0;}
+            &.align-br-tl {right: auto; left: 100%;}
+            /** top right of button **/
+            &.align-tl-tr {left: auto; right: 100%;}
+            &.align-tr-tr {right: auto; left: 0;}
+            &.align-bl-tr {left: auto; right: 100%;}
+            &.align-br-tr {right: auto; left: 0;}
+        }
+    }
+    .block .moodle-actionmenu {
+        text-align: right;
+    }
+}
+
+ul.dragdrop-keyboard-drag li {
+    list-style-type: none;
+}
+
+.block-control-actions .moodle-core-dragdrop-draghandle img {
+    width: 12px;
+    height: 12px;
 }
 
 a.disabled:hover,
@@ -2044,4 +2246,36 @@ a.disabled {
     cursor: default;
     font-style: italic;
     color: #808080;
+}
+body.lockscroll {
+  height: 100%;
+  overflow: hidden;
+}
+
+.dir-rtl {
+    // Bootstrap sets right margin to 0. Fail.
+    // They set left margin to 25px so we will copy that.
+    ul, ol {
+        margin-left: 0;
+        margin-right: 25px;
+    }
+}
+
+.progressbar_container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* IE10 only fix for calendar titling */
+.ie10 .yui3-calendar-header-label {
+    display: inline-block;
+}
+
+dd:before,
+dd:after {
+  display: block;
+  content: " ";
+}
+dd:after {
+  clear: both;
 }

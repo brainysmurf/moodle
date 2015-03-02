@@ -109,6 +109,11 @@ abstract class format_base {
             return self::$classesforformat[$format];
         }
 
+        if (PHPUNIT_TEST && class_exists('format_' . $format)) {
+            // Allow unittests to use non-existing course formats.
+            return $format;
+        }
+
         // Else return default format
         $defaultformat = get_config('moodlecourse', 'format');
         if (!in_array($defaultformat, $plugins)) {
@@ -134,9 +139,9 @@ abstract class format_base {
         global $CFG;
         static $classnames = array('site' => 'format_site');
         if (!isset($classnames[$format])) {
-            $plugins = get_plugin_list('format');
+            $plugins = core_component::get_plugin_list('format');
             $usedformat = self::get_format_or_default($format);
-            if (file_exists($plugins[$usedformat].'/lib.php')) {
+            if (isset($plugins[$usedformat]) && file_exists($plugins[$usedformat].'/lib.php')) {
                 require_once($plugins[$usedformat].'/lib.php');
             }
             $classnames[$format] = 'format_'. $usedformat;
@@ -237,17 +242,42 @@ abstract class format_base {
         if ($this->course === false) {
             $this->course = get_course($this->courseid);
             $options = $this->get_format_options();
+            $dbcoursecolumns = null;
             foreach ($options as $optionname => $optionvalue) {
-                if (!isset($this->course->$optionname)) {
-                    $this->course->$optionname = $optionvalue;
-                } else {
-                    debugging('The option name '.$optionname.' in course format '.$this->format.
-                        ' is invalid because the field with the same name exists in {course} table',
-                        DEBUG_DEVELOPER);
+                if (isset($this->course->$optionname)) {
+                    // Course format options must not have the same names as existing columns in db table "course".
+                    if (!isset($dbcoursecolumns)) {
+                        $dbcoursecolumns = $DB->get_columns('course');
+                    }
+                    if (isset($dbcoursecolumns[$optionname])) {
+                        debugging('The option name '.$optionname.' in course format '.$this->format.
+                            ' is invalid because the field with the same name exists in {course} table',
+                            DEBUG_DEVELOPER);
+                        continue;
+                    }
                 }
+                $this->course->$optionname = $optionvalue;
             }
         }
         return $this->course;
+    }
+
+    /**
+     * Returns true if the course has a front page.
+     *
+     * This function is called to determine if the course has a view page, whether or not
+     * it contains a listing of activities. It can be useful to set this to false when the course
+     * format has only one activity and ignores the course page. Or if there are multiple
+     * activities but no page to see the centralised information.
+     *
+     * Initially this was created to know if forms should add a button to return to the course page.
+     * So if 'Return to course' does not make sense in your format your should probably return false.
+     *
+     * @return boolean
+     * @since Moodle 2.6
+     */
+    public function has_view_page() {
+        return true;
     }
 
     /**
@@ -328,7 +358,6 @@ abstract class format_base {
      *
      * The returned object's property (boolean)capable indicates that
      * the course format supports Moodle course ajax features.
-     * The property (array)testedbrowsers can be used as a parameter for {@link ajaxenabled()}.
      *
      * @return stdClass
      */
@@ -336,7 +365,6 @@ abstract class format_base {
         // no support by default
         $ajaxsupport = new stdClass();
         $ajaxsupport->capable = false;
-        $ajaxsupport->testedbrowsers = array();
         return $ajaxsupport;
     }
 
@@ -882,6 +910,29 @@ abstract class format_base {
             $sectionnum = $section;
         }
         return ($sectionnum && ($course = $this->get_course()) && $course->marker == $sectionnum);
+    }
+
+    /**
+     * Allows to specify for modinfo that section is not available even when it is visible and conditionally available.
+     *
+     * Note: affected user can be retrieved as: $section->modinfo->userid
+     *
+     * Course format plugins can override the method to change the properties $available and $availableinfo that were
+     * calculated by conditional availability.
+     * To make section unavailable set:
+     *     $available = false;
+     * To make unavailable section completely hidden set:
+     *     $availableinfo = '';
+     * To make unavailable section visible with availability message set:
+     *     $availableinfo = get_string('sectionhidden', 'format_xxx');
+     *
+     * @param section_info $section
+     * @param bool $available the 'available' propery of the section_info as it was evaluated by conditional availability.
+     *     Can be changed by the method but 'false' can not be overridden by 'true'.
+     * @param string $availableinfo the 'availableinfo' propery of the section_info as it was evaluated by conditional availability.
+     *     Can be changed by the method
+     */
+    public function section_get_available_hook(section_info $section, &$available, &$availableinfo) {
     }
 }
 

@@ -55,7 +55,6 @@ class qtype_calculatedsimple_attempt_upgrader_test extends question_attempt_upgr
             'questionsperpage' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '1',
-            'questions' => '16,0,17,0,18,0',
             'sumgrades' => '3.00000',
             'grade' => '10.00000',
             'timecreated' => '0',
@@ -89,7 +88,6 @@ class qtype_calculatedsimple_attempt_upgrader_test extends question_attempt_upgr
             'timemodified' => '1305830656',
             'layout' => '16,0,17,0,18,0',
             'preview' => '0',
-            'needsupgradetonewqe' => 1,
         );
         $question = (object) array(
             'id' => '16',
@@ -195,6 +193,7 @@ class qtype_calculatedsimple_attempt_upgrader_test extends question_attempt_upgr
             'variant' => 7,
             'maxmark' => 1.0000000,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'What is 3 + 6 ?',
             'rightanswer' => '9',
@@ -241,7 +240,6 @@ class qtype_calculatedsimple_attempt_upgrader_test extends question_attempt_upgr
             'questionsperpage' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '1',
-            'questions' => '16,0,17,0,18,0',
             'sumgrades' => '3.00000',
             'grade' => '10.00000',
             'timecreated' => '0',
@@ -275,7 +273,6 @@ class qtype_calculatedsimple_attempt_upgrader_test extends question_attempt_upgr
             'timemodified' => '1305830729',
             'layout' => '16,0,17,0,18,0',
             'preview' => '0',
-            'needsupgradetonewqe' => 1,
         );
         $question = (object) array(
             'id' => '16',
@@ -405,6 +402,7 @@ class qtype_calculatedsimple_attempt_upgrader_test extends question_attempt_upgr
             'variant' => 4,
             'maxmark' => 1.0000000,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'What is 6.4 + 9 ?',
             'rightanswer' => '15.4',
@@ -467,7 +465,6 @@ class qtype_calculatedsimple_attempt_upgrader_test extends question_attempt_upgr
             'questionsperpage' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '1',
-            'questions' => '16,0,17,0,18,0',
             'sumgrades' => '3.00000',
             'grade' => '10.00000',
             'timecreated' => '0',
@@ -501,7 +498,6 @@ class qtype_calculatedsimple_attempt_upgrader_test extends question_attempt_upgr
             'timemodified' => '1305830792',
             'layout' => '16,0,17,0,18,0',
             'preview' => '0',
-            'needsupgradetonewqe' => 1,
         );
         $question = (object) array(
             'id' => '16',
@@ -607,6 +603,7 @@ class qtype_calculatedsimple_attempt_upgrader_test extends question_attempt_upgr
             'variant' => 6,
             'maxmark' => 1.0000000,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'What is 6.1 + 7 ?',
             'rightanswer' => '13.1',

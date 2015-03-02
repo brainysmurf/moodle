@@ -24,9 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-global $CFG;
-require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/generator/classes/site_backend.php');
-
 /**
  * Silly class to access site_backend internal methods.
  *

@@ -79,28 +79,32 @@ abstract class assign_submission_plugin extends assign_plugin {
     /**
      * Copy the plugin specific submission data to a new submission record.
      *
+     * @param stdClass $oldsubmission - Old submission record
+     * @param stdClass $submission - New submission record
      * @return bool
      */
     public function copy_submission( stdClass $oldsubmission, stdClass $submission) {
         return true;
     }
 
-    /*
+    /**
      * Carry out any extra processing required when the work is locked.
      *
-     * @param stdClass $submission - assign_submission data
+     * @param stdClass|false $submission - assign_submission data if any
+     * @param stdClass $flags - User flags record
      * @return void
      */
-    public function lock(stdClass $submission) {
+    public function lock($submission, stdClass $flags) {
     }
 
     /**
      * Carry out any extra processing required when the work is unlocked.
      *
-     * @param stdClass $submission - assign_submission data
+     * @param stdClass|false $submission - assign_submission data if any
+     * @param stdClass $flags - User flags record
      * @return void
      */
-    public function unlock(stdClass $submission) {
+    public function unlock($submission, stdClass $flags) {
     }
 
     /**
@@ -110,6 +114,15 @@ abstract class assign_submission_plugin extends assign_plugin {
      * @return void
      */
     public function revert_to_draft(stdClass $submission) {
+    }
+
+    /**
+     * Carry out any extra processing required when a student is given a new attempt
+     * (i.e. when the submission is "reopened"
+     * @param stdClass $oldsubmission The previous attempt
+     * @param stdClass $newsubmission The new attempt
+     */
+    public function add_attempt(stdClass $oldsubmission, stdClass $newsubmission) {
     }
 
 }

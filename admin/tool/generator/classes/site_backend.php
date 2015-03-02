@@ -24,8 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/backend.php');
-
 /**
  * Backend code for the site generator.
  *
@@ -151,15 +149,15 @@ class tool_generator_site_backend extends tool_generator_backend {
             $options[] = '--quiet';
         }
 
+        if ($this->filesizelimit) {
+            $options[] = '--filesizelimit="' . $this->filesizelimit . '"';
+        }
+
         // Extend options.
         $optionstoextend = array(
             'fixeddataset' => 'fixeddataset',
             'bypasscheck' => 'bypasscheck',
         );
-
-        if ($this->filesizelimit) {
-            $options[] = '--filesizelimit="' . $this->filesizelimit . '"';
-        }
 
         // Getting an options string.
         foreach ($optionstoextend as $attribute => $option) {
@@ -196,7 +194,7 @@ class tool_generator_site_backend extends tool_generator_backend {
         }
         // SQL order by is not appropiate here as is ordering strings.
         $shortnames = array_keys($testcourses);
-        collatorlib::asort($shortnames, collatorlib::SORT_NATURAL);
+        core_collator::asort($shortnames, core_collator::SORT_NATURAL);
         $shortnames = array_reverse($shortnames);
 
         // They come ordered by shortname DESC, so non-numeric values will be the first ones.

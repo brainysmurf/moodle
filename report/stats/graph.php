@@ -57,12 +57,11 @@ if (!empty($userid)) {
     if (!report_stats_can_access_user_report($user, $course, true)) {
         require_capability('report/stats:view', $coursecontext);
     }
-
+} else if ($mode === STATS_MODE_DETAILED) {
+    print_error('invaliduser');
 } else {
     require_capability('report/stats:view', $coursecontext);
 }
-
-add_to_log($course->id, 'course', 'report stats', "report/stats/graph.php?userid=$userid&id=$course->id&mode=$mode&roleid=$roleid", $course->id);
 
 stats_check_uptodate($course->id);
 

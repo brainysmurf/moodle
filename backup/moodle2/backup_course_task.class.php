@@ -80,6 +80,9 @@ class backup_course_task extends backup_task {
             $this->add_step(new backup_enrolments_structure_step('course_enrolments', 'enrolments.xml'));
         }
 
+        // Annotate enrolment custom fields.
+        $this->add_step(new backup_enrolments_execution_step('annotate_enrol_custom_fields'));
+
         // Annotate all the groups and groupings belonging to the course
         $this->add_step(new backup_annotate_course_groups_and_groupings('annotate_course_groups'));
 
@@ -90,8 +93,10 @@ class backup_course_task extends backup_task {
         // course->defaultgroupingid
         $this->add_step(new backup_annotate_groups_from_groupings('annotate_groups_from_groupings'));
 
-        // Annotate the question_categories belonging to the course context
-        $this->add_step(new backup_calculate_question_categories('course_question_categories'));
+        // Annotate the question_categories belonging to the course context (conditionally).
+        if ($this->get_setting_value('questionbank')) {
+            $this->add_step(new backup_calculate_question_categories('course_question_categories'));
+        }
 
         // Generate the roles file (optionally role assignments and always role overrides)
         $this->add_step(new backup_roles_structure_step('course_roles', 'roles.xml'));

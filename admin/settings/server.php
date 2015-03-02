@@ -11,6 +11,7 @@ $temp = new admin_settingpage('systempaths', new lang_string('systempaths','admi
 $temp->add(new admin_setting_configexecutable('pathtodu', new lang_string('pathtodu', 'admin'), new lang_string('configpathtodu', 'admin'), ''));
 $temp->add(new admin_setting_configexecutable('aspellpath', new lang_string('aspellpath', 'admin'), new lang_string('edhelpaspellpath'), ''));
 $temp->add(new admin_setting_configexecutable('pathtodot', new lang_string('pathtodot', 'admin'), new lang_string('pathtodot_help', 'admin'), ''));
+$temp->add(new admin_setting_configexecutable('pathtogs', new lang_string('pathtogs', 'admin'), new lang_string('pathtogs_help', 'admin'), '/usr/bin/gs'));
 $ADMIN->add('server', $temp);
 
 
@@ -35,7 +36,9 @@ $ADMIN->add('server', $temp);
 
 // "sessionhandling" settingpage
 $temp = new admin_settingpage('sessionhandling', new lang_string('sessionhandling', 'admin'));
-$temp->add(new admin_setting_configcheckbox('dbsessions', new lang_string('dbsessions', 'admin'), new lang_string('configdbsessions', 'admin'), 1));
+if (empty($CFG->session_handler_class) and $DB->session_lock_supported()) {
+    $temp->add(new admin_setting_configcheckbox('dbsessions', new lang_string('dbsessions', 'admin'), new lang_string('configdbsessions', 'admin'), 0));
+}
 $temp->add(new admin_setting_configselect('sessiontimeout', new lang_string('sessiontimeout', 'admin'), new lang_string('configsessiontimeout', 'admin'), 7200, array(14400 => new lang_string('numhours', '', 4),
                                                                                                                                                       10800 => new lang_string('numhours', '', 3),
                                                                                                                                                       7200 => new lang_string('numhours', '', 2),
@@ -91,6 +94,7 @@ $options = array(
     GETREMOTEADDR_SKIP_HTTP_X_FORWARDED_FOR => 'HTTP_CLIENT, REMOTE_ADDR',
     GETREMOTEADDR_SKIP_HTTP_X_FORWARDED_FOR|GETREMOTEADDR_SKIP_HTTP_CLIENT_IP => 'REMOTE_ADDR');
 $temp->add(new admin_setting_configselect('getremoteaddrconf', new lang_string('getremoteaddrconf', 'admin'), new lang_string('configgetremoteaddrconf', 'admin'), 0, $options));
+
 $temp->add(new admin_setting_heading('webproxy', new lang_string('webproxy', 'admin'), new lang_string('webproxyinfo', 'admin')));
 $temp->add(new admin_setting_configtext('proxyhost', new lang_string('proxyhost', 'admin'), new lang_string('configproxyhost', 'admin'), '', PARAM_HOST));
 $temp->add(new admin_setting_configtext('proxyport', new lang_string('proxyport', 'admin'), new lang_string('configproxyport', 'admin'), 0, PARAM_INT));
@@ -134,21 +138,6 @@ $temp->add(new admin_setting_configselect('deleteincompleteusers', new lang_stri
                                                                                                                                                                     48 => new lang_string('numdays', '', 2),
                                                                                                                                                                     24 => new lang_string('numdays', '', 1))));
 
-$temp->add(new admin_setting_configcheckbox('logguests', new lang_string('logguests', 'admin'),
-                                            new lang_string('logguests_help', 'admin'), 1));
-$temp->add(new admin_setting_configselect('loglifetime', new lang_string('loglifetime', 'admin'), new lang_string('configloglifetime', 'admin'), 0, array(0 => new lang_string('neverdeletelogs'),
-                                                                                                                                                1000 => new lang_string('numdays', '', 1000),
-                                                                                                                                                365 => new lang_string('numdays', '', 365),
-                                                                                                                                                180 => new lang_string('numdays', '', 180),
-                                                                                                                                                150 => new lang_string('numdays', '', 150),
-                                                                                                                                                120 => new lang_string('numdays', '', 120),
-                                                                                                                                                90 => new lang_string('numdays', '', 90),
-                                                                                                                                                60 => new lang_string('numdays', '', 60),
-                                                                                                                                                35 => new lang_string('numdays', '', 35),
-                                                                                                                                                10 => new lang_string('numdays', '', 10),
-                                                                                                                                                5 => new lang_string('numdays', '', 5),
-                                                                                                                                                2 => new lang_string('numdays', '', 2))));
-
 
 $temp->add(new admin_setting_configcheckbox('disablegradehistory', new lang_string('disablegradehistory', 'grades'),
                                             new lang_string('disablegradehistory_help', 'grades'), 0));
@@ -175,15 +164,27 @@ $ADMIN->add('server', new admin_externalpage('phpinfo', new lang_string('phpinfo
 // "performance" settingpage
 $temp = new admin_settingpage('performance', new lang_string('performance', 'admin'));
 
+// Memory limit options for large administration tasks.
+$memoryoptions = array(
+    '64M' => '64M',
+    '128M' => '128M',
+    '256M' => '256M',
+    '512M' => '512M',
+    '1024M' => '1024M',
+    '2048M' => '2048M');
+
+// Allow larger memory usage for 64-bit sites only.
+if (PHP_INT_SIZE === 8) {
+    $memoryoptions['3072M'] = '3072M';
+    $memoryoptions['4096M'] = '4096M';
+}
+
 $temp->add(new admin_setting_configselect('extramemorylimit', new lang_string('extramemorylimit', 'admin'),
                                           new lang_string('configextramemorylimit', 'admin'), '512M',
-                                          // if this option is set to 0, default 128M will be used
-                                          array( '64M' => '64M',
-                                                 '128M' => '128M',
-                                                 '256M' => '256M',
-                                                 '512M' => '512M',
-                                                 '1024M' => '1024M'
-                                             )));
+                                          $memoryoptions));
+$temp->add(new admin_setting_configtext('maxtimelimit', new lang_string('maxtimelimit', 'admin'),
+        new lang_string('maxtimelimit_desc', 'admin'), 0, PARAM_INT));
+
 $temp->add(new admin_setting_configtext('curlcache', new lang_string('curlcache', 'admin'),
                                         new lang_string('configcurlcache', 'admin'), 120, PARAM_INT));
 

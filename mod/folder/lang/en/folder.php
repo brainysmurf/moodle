@@ -18,14 +18,14 @@
 /**
  * Strings for component 'folder', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package    mod
- * @subpackage folder
- * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_folder
+ * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['contentheader'] = 'Content';
 $string['dnduploadmakefolder'] = 'Unzip files and create folder';
+$string['eventfolderupdated'] = 'Folder updated';
 $string['folder:addinstance'] = 'Add a new folder';
 $string['folder:managefiles'] = 'Manage files in folder module';
 $string['folder:view'] = 'View folder content';
@@ -41,7 +41,6 @@ You can use drag\'n\'drop, you can remove and add more files later on.
 Students can be given permissions to upload to a folder too, ask if you do not know how.';
 $string['modulename_link'] = 'mod/folder/view';
 $string['modulenameplural'] = 'Folders';
-$string['neverseen'] = 'Never seen';
 $string['page-mod-folder-x'] = 'Any folder module page';
 $string['page-mod-folder-view'] = 'Folder module main page';
 $string['pluginadministration'] = 'Folder administration';

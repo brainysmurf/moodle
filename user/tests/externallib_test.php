@@ -30,8 +30,9 @@ global $CFG;
 
 require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 require_once($CFG->dirroot . '/user/externallib.php');
+require_once($CFG->dirroot . '/files/externallib.php');
 
-class core_user_external_testcase extends externallib_advanced_testcase {
+class core_user_externallib_testcase extends externallib_advanced_testcase {
 
     /**
      * Test get_users
@@ -258,8 +259,8 @@ class core_user_external_testcase extends externallib_advanced_testcase {
                         array($USER->{$fieldtosearch}, $user1->{$fieldtosearch}, $user2->{$fieldtosearch}));
 
             // Expected result differ following the searched field
-            // Admin user in the PHPunit framework doesn't have email or idnumber.
-            if ($fieldtosearch == 'email' or $fieldtosearch == 'idnumber') {
+            // Admin user in the PHPunit framework doesn't have an idnumber.
+            if ($fieldtosearch == 'idnumber') {
                 $expectedreturnedusers = 2;
             } else {
                 $expectedreturnedusers = 3;
@@ -339,6 +340,16 @@ class core_user_external_testcase extends externallib_advanced_testcase {
                     array($USER->username, $user1->username, $user2->username));
 
         // Only the own $USER username should be returned
+        $this->assertEquals(1, count($returnedusers));
+
+        // And finally test as one of the enrolled users.
+        $this->setUser($user1);
+
+        // Call the external function.
+        $returnedusers = core_user_external::get_users_by_field('username',
+            array($USER->username, $user1->username, $user2->username));
+
+        // Only the own $USER username should be returned still.
         $this->assertEquals(1, count($returnedusers));
     }
 
@@ -457,6 +468,10 @@ class core_user_external_testcase extends externallib_advanced_testcase {
             'idnumber' => 'idnumbertest1',
             'firstname' => 'First Name User Test 1',
             'lastname' => 'Last Name User Test 1',
+            'middlename' => 'Middle Name User Test 1',
+            'lastnamephonetic' => '最後のお名前のテスト一号',
+            'firstnamephonetic' => 'お名前のテスト一号',
+            'alternatename' => 'Alternate Name User Test 1',
             'email' => 'usertest1@email.com',
             'description' => 'This is a description for user 1',
             'city' => 'Perth',
@@ -632,6 +647,10 @@ class core_user_external_testcase extends externallib_advanced_testcase {
             'idnumber' => 'idnumbertest1',
             'firstname' => 'First Name User Test 1',
             'lastname' => 'Last Name User Test 1',
+            'middlename' => 'Middle Name User Test 1',
+            'lastnamephonetic' => '最後のお名前のテスト一号',
+            'firstnamephonetic' => 'お名前のテスト一号',
+            'alternatename' => 'Alternate Name User Test 1',
             'email' => 'usertest1@email.com',
             'description' => 'This is a description for user 1',
             'city' => 'Perth',
@@ -659,4 +678,77 @@ class core_user_external_testcase extends externallib_advanced_testcase {
         $this->setExpectedException('required_capability_exception');
         core_user_external::update_users(array($user1));
     }
+
+    /**
+     * Test add_user_private_files
+     */
+    public function test_add_user_private_files() {
+        global $USER, $CFG, $DB;
+
+        $this->resetAfterTest(true);
+
+        $context = context_system::instance();
+        $roleid = $this->assignUserCapability('moodle/user:manageownfiles', $context->id);
+
+        $context = context_user::instance($USER->id);
+        $contextid = $context->id;
+        $component = "user";
+        $filearea = "draft";
+        $itemid = 0;
+        $filepath = "/";
+        $filename = "Simple.txt";
+        $filecontent = base64_encode("Let us create a nice simple file");
+        $contextlevel = null;
+        $instanceid = null;
+        $browser = get_file_browser();
+
+        // Call the files api to create a file.
+        $draftfile = core_files_external::upload($contextid, $component, $filearea, $itemid, $filepath,
+                                                 $filename, $filecontent, $contextlevel, $instanceid);
+
+        $draftid = $draftfile['itemid'];
+        // Make sure the file was created.
+        $file = $browser->get_file_info($context, $component, $filearea, $draftid, $filepath, $filename);
+        $this->assertNotEmpty($file);
+
+        // Make sure the file does not exist in the user private files.
+        $file = $browser->get_file_info($context, $component, 'private', 0, $filepath, $filename);
+        $this->assertEmpty($file);
+
+        // Call the external function.
+        core_user_external::add_user_private_files($draftid);
+
+        // Make sure the file was added to the user private files.
+        $file = $browser->get_file_info($context, $component, 'private', 0, $filepath, $filename);
+        $this->assertNotEmpty($file);
+    }
+
+    /**
+     * Test add user device
+     */
+    public function test_add_user_device() {
+        global $USER, $CFG, $DB;
+
+        $this->resetAfterTest(true);
+
+        $device = array(
+                'appid' => 'com.moodle.moodlemobile',
+                'name' => 'occam',
+                'model' => 'Nexus 4',
+                'platform' => 'Android',
+                'version' => '4.2.2',
+                'pushid' => 'apushdkasdfj4835',
+                'uuid' => 'asdnfl348qlksfaasef859'
+                );
+
+        // Call the external function.
+        core_user_external::add_user_device($device['appid'], $device['name'], $device['model'], $device['platform'],
+                                            $device['version'], $device['pushid'], $device['uuid']);
+
+        $created = $DB->get_record('user_devices', array('pushid' => $device['pushid']));
+        $created = (array) $created;
+
+        $this->assertEquals($device, array_intersect_key((array)$created, $device));
+    }
+
 }

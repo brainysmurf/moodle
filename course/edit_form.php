@@ -6,12 +6,18 @@ require_once($CFG->libdir.'/formslib.php');
 require_once($CFG->libdir.'/completionlib.php');
 require_once($CFG->libdir. '/coursecatlib.php');
 
+/**
+ * The form for handling editing a course.
+ */
 class course_edit_form extends moodleform {
     protected $course;
     protected $context;
 
+    /**
+     * Form definition.
+     */
     function definition() {
-        global $USER, $CFG, $DB, $PAGE;
+        global $CFG, $PAGE;
 
         $mform    = $this->_form;
         $PAGE->requires->yui_module('moodle-course-formatchooser', 'M.course.init_formatchooser',
@@ -38,8 +44,7 @@ class course_edit_form extends moodleform {
         $this->course  = $course;
         $this->context = $context;
 
-/// form definition with new course defaults
-//--------------------------------------------------------------------------------
+        // Form definition with new course defaults.
         $mform->addElement('header','general', get_string('general', 'form'));
 
         $mform->addElement('hidden', 'returnto', null);
@@ -99,11 +104,14 @@ class course_edit_form extends moodleform {
         $mform->addElement('select', 'visible', get_string('visible'), $choices);
         $mform->addHelpButton('visible', 'visible');
         $mform->setDefault('visible', $courseconfig->visible);
-        if (!has_capability('moodle/course:visibility', $context)) {
-            $mform->hardFreeze('visible');
-            if (!empty($course->id)) {
+        if (!empty($course->id)) {
+            if (!has_capability('moodle/course:visibility', $coursecontext)) {
+                $mform->hardFreeze('visible');
                 $mform->setConstant('visible', $course->visible);
-            } else {
+            }
+        } else {
+            if (!guess_if_creator_will_have_course_capability('moodle/course:visibility', $categorycontext)) {
+                $mform->hardFreeze('visible');
                 $mform->setConstant('visible', $courseconfig->visible);
             }
         }
@@ -191,6 +199,16 @@ class course_edit_form extends moodleform {
         $mform->addElement('select', 'lang', get_string('forcelanguage'), $languages);
         $mform->setDefault('lang', $courseconfig->lang);
 
+        // Multi-Calendar Support - see MDL-18375.
+        $calendartypes = \core_calendar\type_factory::get_list_of_calendar_types();
+        // We do not want to show this option unless there is more than one calendar type to display.
+        if (count($calendartypes) > 1) {
+            $calendars = array();
+            $calendars[''] = get_string('forceno');
+            $calendars += $calendartypes;
+            $mform->addElement('select', 'calendartype', get_string('forcecalendartype', 'calendar'), $calendars);
+        }
+
         $options = range(0, 10);
         $mform->addElement('select', 'newsitems', get_string('newsitemsnumber'), $options);
         $mform->addHelpButton('newsitems', 'newsitemsnumber');
@@ -244,10 +262,8 @@ class course_edit_form extends moodleform {
             $mform->setDefault('enablecompletion', 0);
         }
 
-//--------------------------------------------------------------------------------
         enrol_course_edit_form($mform, $course, $context);
 
-//--------------------------------------------------------------------------------
         $mform->addElement('header','groups', get_string('groupsettingsheader', 'group'));
 
         $choices = array();
@@ -267,10 +283,7 @@ class course_edit_form extends moodleform {
         $options[0] = get_string('none');
         $mform->addElement('select', 'defaultgroupingid', get_string('defaultgrouping', 'group'), $options);
 
-//--------------------------------------------------------------------------------
-
-/// customizable role names in this course
-//--------------------------------------------------------------------------------
+        // Customizable role names in this course.
         $mform->addElement('header','rolerenaming', get_string('rolerenaming'));
         $mform->addHelpButton('rolerenaming', 'rolerenaming');
 
@@ -283,51 +296,49 @@ class course_edit_form extends moodleform {
             }
         }
 
-//SSIS Metadata
-//--------------------------------------------------------------------------------
+        // SSIS Metadata
 
-	//Load current fields
-	global $SSISMETADATA;
-	if ( !$SSISMETADATA )
-	{
-		require_once( $CFG->libdir.'/ssismetadata.php' );
-		$SSISMETADATA = new ssismetadata();
-	}
-    $course->ssismetadata = $SSISMETADATA->getCourseFields($course->id);
+    	// Load current fields
+    	global $SSISMETADATA;
+    	if (!$SSISMETADATA) {
+    		require_once( $CFG->libdir.'/ssismetadata.php' );
+    		$SSISMETADATA = new ssismetadata();
+    	}
+        $course->ssismetadata = $SSISMETADATA->getCourseFields($course->id);
 
-    	//Set form fields
-	$mform->addElement('header','ssismetadatasection', 'Extra');
+        	//Set form fields
+    	$mform->addElement('header','ssismetadatasection', 'Extra');
 
-	$mform->addElement('text', 'ssismetadata[icon]', 'Course Icon', 'maxlength="100" size="20"');
-	$mform->setType('ssismetadata[icon]', PARAM_TEXT);
-	$mform->addHelpButton('ssismetadata[icon]', 'iconhelp', 'moodle');
+    	$mform->addElement('text', 'ssismetadata[icon]', 'Course Icon', 'maxlength="100" size="20"');
+    	$mform->setType('ssismetadata[icon]', PARAM_TEXT);
+    	$mform->addHelpButton('ssismetadata[icon]', 'iconhelp', 'moodle');
 
-	$mform->addElement('text', 'ssismetadata[grade]', 'Grade', 'maxlength="100" size="20"');
-	$mform->setType('ssismetadata[grade]', PARAM_INT);
+    	$mform->addElement('text', 'ssismetadata[grade]', 'Grade', 'maxlength="100" size="20"');
+    	$mform->setType('ssismetadata[grade]', PARAM_INT);
 
-	$mform->addElement('text', 'ssismetadata[grade2]', 'Grade 2', 'maxlength="100" size="20"');
-	$mform->setType('ssismetadata[grade2]', PARAM_INT);
+    	$mform->addElement('text', 'ssismetadata[grade2]', 'Grade 2', 'maxlength="100" size="20"');
+    	$mform->setType('ssismetadata[grade2]', PARAM_INT);
 
-	$mform->addElement('text', 'ssismetadata[activityseason]', 'Activity Season', 'maxlength="100" size="20"');
-	$mform->setType('ssismetadata[activityseason]', PARAM_TEXT);
+    	$mform->addElement('text', 'ssismetadata[activityseason]', 'Activity Season', 'maxlength="100" size="20"');
+    	$mform->setType('ssismetadata[activityseason]', PARAM_TEXT);
 
-	$mform->addElement('text', 'ssismetadata[activitysupervisors]', 'Activity Supervisors Required', 'maxlength="100" size="20"');
-	$mform->setType('ssismetadata[activitysupervisors]', PARAM_INT);
+    	$mform->addElement('text', 'ssismetadata[activitysupervisors]', 'Activity Supervisors Required', 'maxlength="100" size="20"');
+    	$mform->setType('ssismetadata[activitysupervisors]', PARAM_INT);
 
-//--------------------------------------------------------------------------------
-//End SSIS Metadata
+        // End SSIS Metadata
 
-//--------------------------------------------------------------------------------
         $this->add_action_buttons();
-//--------------------------------------------------------------------------------
+
         $mform->addElement('hidden', 'id', null);
         $mform->setType('id', PARAM_INT);
 
-/// finally set the current form data
-//--------------------------------------------------------------------------------
+        // Finally set the current form data
         $this->set_data($course);
     }
 
+    /**
+     * Fill in the current page data for this course.
+     */
     function definition_after_data() {
         global $DB;
 
@@ -341,6 +352,7 @@ class course_edit_form extends moodleform {
                     $options[$grouping->id] = format_string($grouping->name);
                 }
             }
+            core_collator::asort($options);
             $gr_el =& $mform->getElement('defaultgroupingid');
             $gr_el->load($options);
         }
@@ -358,7 +370,13 @@ class course_edit_form extends moodleform {
         }
     }
 
-/// perform some extra moodle validation
+    /**
+     * Validation.
+     *
+     * @param array $data
+     * @param array $files
+     * @return array the errors that were found
+     */
     function validation($data, $files) {
         global $DB;
 
@@ -375,7 +393,7 @@ class course_edit_form extends moodleform {
         if (!empty($data['idnumber']) && (empty($data['id']) || $this->course->idnumber != $data['idnumber'])) {
             if ($course = $DB->get_record('course', array('idnumber' => $data['idnumber']), '*', IGNORE_MULTIPLE)) {
                 if (empty($data['id']) || $course->id != $data['id']) {
-                    $errors['idnumber'] = get_string('idnumbertaken', 'error');
+                    $errors['idnumber'] = get_string('courseidnumbertaken', 'error', $course->fullname);
                 }
             }
         }

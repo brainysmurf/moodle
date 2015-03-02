@@ -47,6 +47,11 @@ class mod_forum_generator extends testing_module_generator {
     protected $forumpostcount = 0;
 
     /**
+     * @var int keep track of how many forum subscriptions have been created.
+     */
+    protected $forumsubscriptionscount = 0;
+
+    /**
      * To be called from data reset code only,
      * do not use in tests.
      * @return void
@@ -54,38 +59,16 @@ class mod_forum_generator extends testing_module_generator {
     public function reset() {
         $this->forumdiscussioncount = 0;
         $this->forumpostcount = 0;
+        $this->forumsubscriptionscount = 0;
 
         parent::reset();
     }
 
-    /**
-     * Create new forum module instance
-     * @param array|stdClass $record
-     * @param array $options
-     * @return stdClass activity record with extra cmid field
-     */
     public function create_instance($record = null, array $options = null) {
         global $CFG;
-        require_once("$CFG->dirroot/mod/forum/locallib.php");
-
-        $this->instancecount++;
-        $i = $this->instancecount;
-
+        require_once($CFG->dirroot.'/mod/forum/lib.php');
         $record = (object)(array)$record;
-        $options = (array)$options;
 
-        if (empty($record->course)) {
-            throw new coding_exception('module generator requires $record->course');
-        }
-        if (!isset($record->name)) {
-            $record->name = get_string('pluginname', 'forum').' '.$i;
-        }
-        if (!isset($record->intro)) {
-            $record->intro = 'Test forum '.$i;
-        }
-        if (!isset($record->introformat)) {
-            $record->introformat = FORMAT_MOODLE;
-        }
         if (!isset($record->type)) {
             $record->type = 'general';
         }
@@ -98,15 +81,42 @@ class mod_forum_generator extends testing_module_generator {
         if (!isset($record->forcesubscribe)) {
             $record->forcesubscribe = FORUM_CHOOSESUBSCRIBE;
         }
-        if (isset($options['idnumber'])) {
-            $record->cmidnumber = $options['idnumber'];
-        } else {
-            $record->cmidnumber = '';
+
+        return parent::create_instance($record, (array)$options);
+    }
+
+    /**
+     * Function to create a dummy subscription.
+     *
+     * @param array|stdClass $record
+     * @return stdClass the subscription object
+     */
+    public function create_subscription($record = null) {
+        global $DB;
+
+        // Increment the forum subscription count.
+        $this->forumsubscriptionscount++;
+
+        $record = (array)$record;
+
+        if (!isset($record['course'])) {
+            throw new coding_exception('course must be present in phpunit_util::create_subscription() $record');
         }
 
-        $record->coursemodule = $this->precreate_course_module($record->course, $options);
-        $id = forum_add_instance($record, null);
-        return $this->post_add_instance($id, $record->coursemodule);
+        if (!isset($record['forum'])) {
+            throw new coding_exception('forum must be present in phpunit_util::create_subscription() $record');
+        }
+
+        if (!isset($record['userid'])) {
+            throw new coding_exception('userid must be present in phpunit_util::create_subscription() $record');
+        }
+
+        $record = (object)$record;
+
+        // Add the subscription.
+        $record->id = $DB->insert_record('forum_subscriptions', $record);
+
+        return $record;
     }
 
     /**
@@ -228,6 +238,30 @@ class mod_forum_generator extends testing_module_generator {
             $record['modified'] = $time;
         }
 
+        if (!isset($record['mailed'])) {
+            $record['mailed'] = 0;
+        }
+
+        if (!isset($record['messageformat'])) {
+            $record['messageformat'] = 0;
+        }
+
+        if (!isset($record['messagetrust'])) {
+            $record['messagetrust'] = 0;
+        }
+
+        if (!isset($record['attachment'])) {
+            $record['attachment'] = "";
+        }
+
+        if (!isset($record['totalscore'])) {
+            $record['totalscore'] = 0;
+        }
+
+        if (!isset($record['mailnow'])) {
+            $record['mailnow'] = 0;
+        }
+
         $record = (object) $record;
 
         // Add the post.
@@ -237,5 +271,28 @@ class mod_forum_generator extends testing_module_generator {
         forum_discussion_update_last_post($record->discussion);
 
         return $record;
+    }
+
+    public function create_content($instance, $record = array()) {
+        global $USER, $DB;
+        $record = (array)$record + array(
+            'forum' => $instance->id,
+            'userid' => $USER->id,
+            'course' => $instance->course
+        );
+        if (empty($record['discussion']) && empty($record['parent'])) {
+            // Create discussion.
+            $discussion = $this->create_discussion($record);
+            $post = $DB->get_record('forum_posts', array('id' => $discussion->firstpost));
+        } else {
+            // Create post.
+            if (empty($record['parent'])) {
+                $record['parent'] = $DB->get_field('forum_discussions', 'firstpost', array('id' => $record['discussion']), MUST_EXIST);
+            } else if (empty($record['discussion'])) {
+                $record['discussion'] = $DB->get_field('forum_posts', 'discussion', array('id' => $record['parent']), MUST_EXIST);
+            }
+            $post = $this->create_post($record);
+        }
+        return $post;
     }
 }

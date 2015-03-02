@@ -5,15 +5,15 @@ Feature: A teacher can choose whether to publish choice activity results anonymo
   I need to select whether I want other students to know who selected what option
 
   Background:
-    Given the following "users" exists:
+    Given the following "users" exist:
       | username | firstname | lastname | email |
       | teacher1 | Teacher | 1 | teacher1@asd.com |
       | student1 | Student | 1 | student1@asd.com |
       | student2 | Student | 2 | student2@asd.com |
-    And the following "courses" exists:
+    And the following "courses" exist:
       | fullname | shortname | category |
       | Course 1 | C1 | 0 |
-    And the following "course enrolments" exists:
+    And the following "course enrolments" exist:
       | user | course | role |
       | teacher1 | C1 | editingteacher |
       | student1 | C1 | student |
@@ -40,7 +40,7 @@ Feature: A teacher can choose whether to publish choice activity results anonymo
     And I follow "Course 1"
     And I follow "Choice 1"
     Then I should not see "Student 1"
-    And I should not see "User choose this option"
+    And I should not see "Users who chose this option"
     And I hover ".results .graph img" "css_element"
 
   @javascript
@@ -61,4 +61,4 @@ Feature: A teacher can choose whether to publish choice activity results anonymo
     And I follow "Course 1"
     And I follow "Choice 1"
     Then I should see "Student 1"
-    And I should see "User choose this option"
+    And I should see "Users who chose this option"

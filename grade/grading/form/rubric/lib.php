@@ -668,15 +668,15 @@ class gradingform_rubric_controller extends gradingform_controller {
         $rubric_criteria = new external_multiple_structure(
             new external_single_structure(
                 array(
-                   'id'   => new external_value(PARAM_INT, 'criterion id'),
-                   'sortorder' => new external_value(PARAM_INT, 'sortorder'),
+                   'id'   => new external_value(PARAM_INT, 'criterion id', VALUE_OPTIONAL),
+                   'sortorder' => new external_value(PARAM_INT, 'sortorder', VALUE_OPTIONAL),
                    'description' => new external_value(PARAM_RAW, 'description', VALUE_OPTIONAL),
                    'descriptionformat' => new external_format_value('description', VALUE_OPTIONAL),
                    'levels' => new external_multiple_structure(
                                    new external_single_structure(
                                        array(
-                                        'id' => new external_value(PARAM_INT, 'level id'),
-                                        'score' => new external_value(PARAM_FLOAT, 'score'),
+                                        'id' => new external_value(PARAM_INT, 'level id', VALUE_OPTIONAL),
+                                        'score' => new external_value(PARAM_FLOAT, 'score', VALUE_OPTIONAL),
                                         'definition' => new external_value(PARAM_RAW, 'definition', VALUE_OPTIONAL),
                                         'definitionformat' => new external_format_value('definition', VALUE_OPTIONAL)
                                        )
@@ -686,6 +686,29 @@ class gradingform_rubric_controller extends gradingform_controller {
               ), 'definition details', VALUE_OPTIONAL
         );
         return array('rubric_criteria' => $rubric_criteria);
+    }
+
+    /**
+     * Returns an array that defines the structure of the rubric's filling. This function is used by
+     * the web service function core_grading_external::get_gradingform_instances().
+     *
+     * @return An array containing a single key/value pair with the 'criteria' external_multiple_structure
+     * @see gradingform_controller::get_external_instance_filling_details()
+     * @since Moodle 2.6
+     */
+    public static function get_external_instance_filling_details() {
+        $criteria = new external_multiple_structure(
+            new external_single_structure(
+                array(
+                    'id' => new external_value(PARAM_INT, 'filling id'),
+                    'criterionid' => new external_value(PARAM_INT, 'criterion id'),
+                    'levelid' => new external_value(PARAM_INT, 'level id', VALUE_OPTIONAL),
+                    'remark' => new external_value(PARAM_RAW, 'remark', VALUE_OPTIONAL),
+                    'remarkformat' => new external_format_value('remark', VALUE_OPTIONAL)
+                )
+            ), 'filling', VALUE_OPTIONAL
+        );
+        return array ('criteria' => $criteria);
     }
 
 }

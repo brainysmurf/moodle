@@ -26,6 +26,7 @@
 
 require_once(dirname(dirname(__FILE__)) . '/config.php');
 require_once($CFG->libdir . '/badgeslib.php');
+require_once($CFG->libdir . '/filelib.php');
 
 $page        = optional_param('page', 0, PARAM_INT);
 $search      = optional_param('search', '', PARAM_CLEAN);
@@ -42,7 +43,14 @@ if (empty($CFG->enablebadges)) {
     print_error('badgesdisabled', 'badges');
 }
 
+$url = new moodle_url('/badges/mybadges.php');
+$PAGE->set_url($url);
+
 if (isguestuser()) {
+    $PAGE->set_context(context_system::instance());
+    echo $OUTPUT->header();
+    echo $OUTPUT->box(get_string('error:guestuseraccess', 'badges'), 'notifyproblem');
+    echo $OUTPUT->footer();
     die();
 }
 
@@ -56,33 +64,26 @@ if ($clearsearch) {
 
 if ($hide) {
     require_sesskey();
-    $DB->set_field('badge_issued', 'visible', 0, array('id' => $hide));
+    $DB->set_field('badge_issued', 'visible', 0, array('id' => $hide, 'userid' => $USER->id));
 } else if ($show) {
     require_sesskey();
-    $DB->set_field('badge_issued', 'visible', 1, array('id' => $show));
+    $DB->set_field('badge_issued', 'visible', 1, array('id' => $show, 'userid' => $USER->id));
 } else if ($download && $hash) {
     require_sesskey();
     $badge = new badge($download);
     $name = str_replace(' ', '_', $badge->name) . '.png';
-    ob_start();
-    $file = badges_bake($hash, $download);
-    header('Content-Type: image/png');
-    header('Content-Disposition: attachment; filename="'. $name .'"');
-    readfile($file);
-    ob_flush();
+    $filehash = badges_bake($hash, $download, $USER->id, true);
+    $fs = get_file_storage();
+    $file = $fs->get_file_by_hash($filehash);
+    send_stored_file($file, 0, 0, true, array('filename' => $name));
 } else if ($downloadall) {
     require_sesskey();
-    ob_start();
     badges_download($USER->id);
-    ob_flush();
 }
 
 $context = context_user::instance($USER->id);
 require_capability('moodle/badges:manageownbadges', $context);
 
-$url = new moodle_url('/badges/mybadges.php');
-
-$PAGE->set_url($url);
 $PAGE->set_context($context);
 
 $title = get_string('mybadges', 'badges');

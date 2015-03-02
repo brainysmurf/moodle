@@ -65,7 +65,7 @@ $PAGE->set_course($course);
 $PAGE->set_url('/course/completion.php', array('id' => $course->id));
 $PAGE->set_title($course->shortname);
 $PAGE->set_heading($course->fullname);
-$PAGE->set_pagelayout('standard');
+$PAGE->set_pagelayout('admin');
 
 // Create the settings form instance.
 $form = new course_completion_form('completion.php?id='.$id, array('course' => $course));
@@ -134,8 +134,14 @@ if ($form->is_cancelled()){
     $aggregation->setMethod($data->role_aggregation);
     $aggregation->save();
 
-    // Log changes.
-    add_to_log($course->id, 'course', 'completion updated', 'completion.php?id='.$course->id);
+    // Trigger an event for course module completion changed.
+    $event = \core\event\course_completion_updated::create(
+            array(
+                'courseid' => $course->id,
+                'context' => context_course::instance($course->id)
+                )
+            );
+    $event->trigger();
 
     // Redirect to the course main page.
     $url = new moodle_url('/course/view.php', array('id' => $course->id));

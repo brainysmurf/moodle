@@ -4,6 +4,7 @@
     require_once($CFG->libdir.'/adminlib.php');
     require_once($CFG->libdir.'/authlib.php');
     require_once($CFG->dirroot.'/user/filters/lib.php');
+    require_once($CFG->dirroot.'/user/lib.php');
 
     $delete       = optional_param('delete', 0, PARAM_INT);
     $confirm      = optional_param('confirm', '', PARAM_ALPHANUM);   //md5 confirmation hash
@@ -45,6 +46,8 @@
 
     $returnurl = new moodle_url('/admin/user.php', array('sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, 'page'=>$page));
 
+    // The $user variable is also used outside of these if statements.
+    $user = null;
     if ($confirmuser and confirm_sesskey()) {
         require_capability('moodle/user:update', $sitecontext);
         if (!$user = $DB->get_record('user', array('id'=>$confirmuser, 'mnethostid'=>$CFG->mnet_localhost_id))) {
@@ -81,10 +84,10 @@
             die;
         } else if (data_submitted() and !$user->deleted) {
             if (delete_user($user)) {
-                session_gc(); // remove stale sessions
+                \core\session\manager::gc(); // Remove stale sessions.
                 redirect($returnurl);
             } else {
-                session_gc(); // remove stale sessions
+                \core\session\manager::gc(); // Remove stale sessions.
                 echo $OUTPUT->header();
                 echo $OUTPUT->notification($returnurl, get_string('deletednot', '', fullname($user, true)));
             }
@@ -123,12 +126,9 @@
         if ($user = $DB->get_record('user', array('id'=>$suspend, 'mnethostid'=>$CFG->mnet_localhost_id, 'deleted'=>0))) {
             if (!is_siteadmin($user) and $USER->id != $user->id and $user->suspended != 1) {
                 $user->suspended = 1;
-                $user->timemodified = time();
-                $DB->set_field('user', 'suspended', $user->suspended, array('id'=>$user->id));
-                $DB->set_field('user', 'timemodified', $user->timemodified, array('id'=>$user->id));
-                // force logout
-                session_kill_user($user->id);
-                events_trigger('user_updated', $user);
+                // Force logout.
+                \core\session\manager::kill_user_sessions($user->id);
+                user_update_user($user, false);
             }
         }
         redirect($returnurl);
@@ -139,10 +139,7 @@
         if ($user = $DB->get_record('user', array('id'=>$unsuspend, 'mnethostid'=>$CFG->mnet_localhost_id, 'deleted'=>0))) {
             if ($user->suspended != 0) {
                 $user->suspended = 0;
-                $user->timemodified = time();
-                $DB->set_field('user', 'suspended', $user->suspended, array('id'=>$user->id));
-                $DB->set_field('user', 'timemodified', $user->timemodified, array('id'=>$user->id));
-                events_trigger('user_updated', $user);
+                user_update_user($user, false);
             }
         }
         redirect($returnurl);
@@ -163,10 +160,11 @@
     // Carry on with the user listing
     $context = context_system::instance();
     $extracolumns = get_extra_user_fields($context);
-    $columns = array_merge(array('firstname', 'lastname'), $extracolumns,
-			   //        array('city', 'country', 'lastaccess'));
-			   array('lastlogin'));
-			   
+    // Get all user name fields as an array.
+    $allusernamefields = get_all_user_name_fields(false, null, null, null, true);
+    //$columns = array_merge($allusernamefields, $extracolumns, array('city', 'country', 'lastaccess'));
+    $columns = array_merge($allusernamefields, $extracolumns, array('lastlogin'));
+
     foreach ($columns as $column) {
         $string[$column] = get_user_field_name($column);
         if ($sort != $column) {
@@ -189,22 +187,28 @@
         $$column = "<a href=\"user.php?sort=$column&amp;dir=$columndir\">".$string[$column]."</a>$columnicon";
     }
 
-    $override = new stdClass();
-    $override->firstname = 'firstname';
-    $override->lastname = 'lastname';
-    $fullnamelanguage = get_string('fullnamedisplay', '', $override);
-    if (($CFG->fullnamedisplay == 'firstname lastname') or
-        ($CFG->fullnamedisplay == 'firstname') or
-        ($CFG->fullnamedisplay == 'language' and $fullnamelanguage == 'firstname lastname' )) {
-        $fullnamedisplay = "$firstname / $lastname";
-        if ($sort == "name") { // If sort has already been set to something else then ignore.
-            $sort = "firstname";
-        }
-    } else { // ($CFG->fullnamedisplay == 'language' and $fullnamelanguage == 'lastname firstname').
-        $fullnamedisplay = "$lastname / $firstname";
-        if ($sort == "name") { // This should give the desired sorting based on fullnamedisplay.
-            $sort = "lastname";
-        }
+    // We need to check that alternativefullnameformat is not set to '' or language.
+    // We don't need to check the fullnamedisplay setting here as the fullname function call further down has
+    // the override parameter set to true.
+    $fullnamesetting = $CFG->alternativefullnameformat;
+    // If we are using language or it is empty, then retrieve all of the user's names.
+    if ($fullnamesetting == 'language' || empty($fullnamesetting)) {
+        $fullnamesetting = implode(' ', $allusernamefields);
+    }
+
+    // Order in string will ensure that the name columns are in the correct order.
+    $usernames = order_in_string($allusernamefields, $fullnamesetting);
+    $fullnamedisplay = array();
+    foreach ($usernames as $name) {
+        // Use the link from $$column for sorting on the user's name.
+        $fullnamedisplay[] = ${$name};
+    }
+    // All of the names are in one column. Put them into a string and separate them with a /.
+    $fullnamedisplay = implode(' / ', $fullnamedisplay);
+    // If $sort = name then it is the default for the setting and we should use the first name to sort by.
+    if ($sort == "name") {
+        // Use the first item in the array.
+        $sort = reset($usernames);
     }
 
     list($extrasql, $params) = $ufiltering->get_sql_filter();
@@ -262,19 +266,13 @@
         $table->colclasses = array();
         $table->head[] = $fullnamedisplay;
         $table->attributes['class'] = 'admintable generaltable';
-        $table->colclasses[] = 'leftalign';
         foreach ($extracolumns as $field) {
 	  if ($field == 'institution') { continue; }
             $table->head[] = ${$field};
-            $table->colclasses[] = 'leftalign';
         }
-	// Remove city and country
         //$table->head[] = $city;
-        //$table->align[] = 'left';
         //$table->head[] = $country;
-        //$table->align[] = 'left';
-        $table->head[] = $lastlogin;
-        $table->align[] = 'left';
+        $table->head[] = $lastaccess;
         $table->head[] = get_string('edit');
         $table->colclasses[] = 'centeralign';
         $table->head[] = "";
@@ -329,7 +327,7 @@
                     $buttons[] = html_writer::link(new moodle_url($securewwwroot.'/user/editadvanced.php', array('id'=>$user->id, 'course'=>$site->id)), html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/edit'), 'alt'=>$stredit, 'class'=>'iconsmall')), array('title'=>$stredit));
                 }
             }
-            
+
             // reset password button
             if (has_capability('moodle/user:update', $sitecontext)) {
 	            // prevent editing of admins by non-admins
@@ -390,20 +388,15 @@
     $ufiltering->display_add();
     $ufiltering->display_active();
 
-    if (has_capability('moodle/user:create', $sitecontext)) {
-        echo $OUTPUT->heading('<a href="'.$securewwwroot.'/user/editadvanced.php?id=-1">'.get_string('addnewuser').'</a>');
-    }
     if (!empty($table)) {
         echo html_writer::start_tag('div', array('class'=>'no-overflow'));
         echo html_writer::table($table);
         echo html_writer::end_tag('div');
         echo $OUTPUT->paging_bar($usercount, $page, $perpage, $baseurl);
-        if (has_capability('moodle/user:create', $sitecontext)) {
-            echo $OUTPUT->heading('<a href="'.$securewwwroot.'/user/editadvanced.php?id=-1">'.get_string('addnewuser').'</a>');
-        }
+    }
+    if (has_capability('moodle/user:create', $sitecontext)) {
+        $url = new moodle_url($securewwwroot . '/user/editadvanced.php', array('id' => -1));
+        echo $OUTPUT->single_button($url, get_string('addnewuser'), 'get');
     }
 
     echo $OUTPUT->footer();
-
-
-

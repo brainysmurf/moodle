@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/enrol/locallib.php');
+require_once($CFG->dirroot . '/cohort/lib.php');
 
 
 /**
@@ -36,10 +37,10 @@ require_once($CFG->dirroot . '/enrol/locallib.php');
 class enrol_cohort_handler {
     /**
      * Event processor - cohort member added.
-     * @param stdClass $ca
+     * @param \core\event\cohort_member_added $event
      * @return bool
      */
-    public static function member_added($ca) {
+    public static function member_added(\core\event\cohort_member_added $event) {
         global $DB, $CFG;
         require_once("$CFG->dirroot/group/lib.php");
 
@@ -53,7 +54,7 @@ class enrol_cohort_handler {
              LEFT JOIN {role} r ON (r.id = e.roleid)
                  WHERE e.customint1 = :cohortid AND e.enrol = 'cohort'
               ORDER BY e.id ASC";
-        if (!$instances = $DB->get_records_sql($sql, array('cohortid'=>$ca->cohortid))) {
+        if (!$instances = $DB->get_records_sql($sql, array('cohortid'=>$event->objectid))) {
             return true;
         }
 
@@ -68,13 +69,13 @@ class enrol_cohort_handler {
             }
             unset($instance->roleexists);
             // No problem if already enrolled.
-            $plugin->enrol_user($instance, $ca->userid, $instance->roleid, 0, 0, ENROL_USER_ACTIVE);
+            $plugin->enrol_user($instance, $event->relateduserid, $instance->roleid, 0, 0, ENROL_USER_ACTIVE);
 
             // Sync groups.
             if ($instance->customint2) {
-                if (!groups_is_member($instance->customint2, $ca->userid)) {
+                if (!groups_is_member($instance->customint2, $event->relateduserid)) {
                     if ($group = $DB->get_record('groups', array('id'=>$instance->customint2, 'courseid'=>$instance->courseid))) {
-                        groups_add_member($group->id, $ca->userid, 'enrol_cohort', $instance->id);
+                        groups_add_member($group->id, $event->relateduserid, 'enrol_cohort', $instance->id);
                     }
                 }
             }
@@ -85,14 +86,14 @@ class enrol_cohort_handler {
 
     /**
      * Event processor - cohort member removed.
-     * @param stdClass $ca
+     * @param \core\event\cohort_member_removed $event
      * @return bool
      */
-    public static function member_removed($ca) {
+    public static function member_removed(\core\event\cohort_member_removed $event) {
         global $DB;
 
         // Does anything want to sync with this cohort?
-        if (!$instances = $DB->get_records('enrol', array('customint1'=>$ca->cohortid, 'enrol'=>'cohort'), 'id ASC')) {
+        if (!$instances = $DB->get_records('enrol', array('customint1'=>$event->objectid, 'enrol'=>'cohort'), 'id ASC')) {
             return true;
         }
 
@@ -100,11 +101,11 @@ class enrol_cohort_handler {
         $unenrolaction = $plugin->get_config('unenrolaction', ENROL_EXT_REMOVED_UNENROL);
 
         foreach ($instances as $instance) {
-            if (!$ue = $DB->get_record('user_enrolments', array('enrolid'=>$instance->id, 'userid'=>$ca->userid))) {
+            if (!$ue = $DB->get_record('user_enrolments', array('enrolid'=>$instance->id, 'userid'=>$event->relateduserid))) {
                 continue;
             }
             if ($unenrolaction == ENROL_EXT_REMOVED_UNENROL) {
-                $plugin->unenrol_user($instance, $ca->userid);
+                $plugin->unenrol_user($instance, $event->relateduserid);
 
             } else {
                 if ($ue->status != ENROL_USER_SUSPENDED) {
@@ -120,14 +121,14 @@ class enrol_cohort_handler {
 
     /**
      * Event processor - cohort deleted.
-     * @param stdClass $cohort
+     * @param \core\event\cohort_deleted $event
      * @return bool
      */
-    public static function deleted($cohort) {
+    public static function deleted(\core\event\cohort_deleted $event) {
         global $DB;
 
         // Does anything want to sync with this cohort?
-        if (!$instances = $DB->get_records('enrol', array('customint1'=>$cohort->id, 'enrol'=>'cohort'), 'id ASC')) {
+        if (!$instances = $DB->get_records('enrol', array('customint1'=>$event->objectid, 'enrol'=>'cohort'), 'id ASC')) {
             return true;
         }
 
@@ -167,7 +168,7 @@ function enrol_cohort_sync(progress_trace $trace, $courseid = NULL) {
     }
 
     // Unfortunately this may take a long time, this script can be interrupted without problems.
-    @set_time_limit(0);
+    core_php_time_limit::raise();
     raise_memory_limit(MEMORY_HUGE);
 
     $trace->output('Starting user enrolment synchronisation...');
@@ -326,187 +327,4 @@ function enrol_cohort_sync(progress_trace $trace, $courseid = NULL) {
     $trace->output('...user enrolment synchronisation finished.');
 
     return 0;
-}
-
-/**
- * Enrols all of the users in a cohort through a manual plugin instance.
- *
- * In order for this to succeed the course must contain a valid manual
- * enrolment plugin instance that the user has permission to enrol users through.
- *
- * @global moodle_database $DB
- * @param course_enrolment_manager $manager
- * @param int $cohortid
- * @param int $roleid
- * @return int
- */
-function enrol_cohort_enrol_all_users(course_enrolment_manager $manager, $cohortid, $roleid) {
-    global $DB;
-    $context = $manager->get_context();
-    require_capability('moodle/course:enrolconfig', $context);
-
-    $instance = false;
-    $instances = $manager->get_enrolment_instances();
-    foreach ($instances as $i) {
-        if ($i->enrol == 'manual') {
-            $instance = $i;
-            break;
-        }
-    }
-    $plugin = enrol_get_plugin('manual');
-    if (!$instance || !$plugin || !$plugin->allow_enrol($instance) || !has_capability('enrol/'.$plugin->get_name().':enrol', $context)) {
-        return false;
-    }
-    $sql = "SELECT com.userid
-              FROM {cohort_members} com
-         LEFT JOIN (
-                SELECT *
-                  FROM {user_enrolments} ue
-                 WHERE ue.enrolid = :enrolid
-                 ) ue ON ue.userid=com.userid
-             WHERE com.cohortid = :cohortid AND ue.id IS NULL";
-    $params = array('cohortid' => $cohortid, 'enrolid' => $instance->id);
-    $rs = $DB->get_recordset_sql($sql, $params);
-    $count = 0;
-    foreach ($rs as $user) {
-        $count++;
-        $plugin->enrol_user($instance, $user->userid, $roleid);
-    }
-    $rs->close();
-    return $count;
-}
-
-/**
- * Gets all the cohorts the user is able to view.
- *
- * @global moodle_database $DB
- * @param course_enrolment_manager $manager
- * @return array
- */
-function enrol_cohort_get_cohorts(course_enrolment_manager $manager) {
-    global $DB;
-    $context = $manager->get_context();
-    $cohorts = array();
-    $instances = $manager->get_enrolment_instances();
-    $enrolled = array();
-    foreach ($instances as $instance) {
-        if ($instance->enrol == 'cohort') {
-            $enrolled[] = $instance->customint1;
-        }
-    }
-    list($sqlparents, $params) = $DB->get_in_or_equal(get_parent_contexts($context));
-    $sql = "SELECT id, name, idnumber, contextid
-              FROM {cohort}
-             WHERE contextid $sqlparents
-          ORDER BY name ASC, idnumber ASC";
-    $rs = $DB->get_recordset_sql($sql, $params);
-    foreach ($rs as $c) {
-        $context = context::instance_by_id($c->contextid);
-        if (!has_capability('moodle/cohort:view', $context)) {
-            continue;
-        }
-        $cohorts[$c->id] = array(
-            'cohortid'=>$c->id,
-            'name'=>format_string($c->name, true, array('context'=>context::instance_by_id($c->contextid))),
-            'users'=>$DB->count_records('cohort_members', array('cohortid'=>$c->id)),
-            'enrolled'=>in_array($c->id, $enrolled)
-        );
-    }
-    $rs->close();
-    return $cohorts;
-}
-
-/**
- * Check if cohort exists and user is allowed to enrol it.
- *
- * @global moodle_database $DB
- * @param int $cohortid Cohort ID
- * @return boolean
- */
-function enrol_cohort_can_view_cohort($cohortid) {
-    global $DB;
-    $cohort = $DB->get_record('cohort', array('id' => $cohortid), 'id, contextid');
-    if ($cohort) {
-        $context = context::instance_by_id($cohort->contextid);
-        if (has_capability('moodle/cohort:view', $context)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-/**
- * Gets cohorts the user is able to view.
- *
- * @global moodle_database $DB
- * @param course_enrolment_manager $manager
- * @param int $offset limit output from
- * @param int $limit items to output per load
- * @param string $search search string
- * @return array    Array(more => bool, offset => int, cohorts => array)
- */
-function enrol_cohort_search_cohorts(course_enrolment_manager $manager, $offset = 0, $limit = 25, $search = '') {
-    global $DB;
-    $context = $manager->get_context();
-    $cohorts = array();
-    $instances = $manager->get_enrolment_instances();
-    $enrolled = array();
-    foreach ($instances as $instance) {
-        if ($instance->enrol == 'cohort') {
-            $enrolled[] = $instance->customint1;
-        }
-    }
-
-    list($sqlparents, $params) = $DB->get_in_or_equal($context->get_parent_context_ids());
-
-    // Add some additional sensible conditions.
-    $tests = array('contextid ' . $sqlparents);
-
-    // Modify the query to perform the search if required.
-    if (!empty($search)) {
-        $conditions = array(
-            'name',
-            'idnumber',
-            'description'
-        );
-        $searchparam = '%' . $DB->sql_like_escape($search) . '%';
-        foreach ($conditions as $key=>$condition) {
-            $conditions[$key] = $DB->sql_like($condition, "?", false);
-            $params[] = $searchparam;
-        }
-        $tests[] = '(' . implode(' OR ', $conditions) . ')';
-    }
-    $wherecondition = implode(' AND ', $tests);
-
-    $sql = "SELECT id, name, idnumber, contextid, description
-              FROM {cohort}
-             WHERE $wherecondition
-          ORDER BY name ASC, idnumber ASC";
-    $rs = $DB->get_recordset_sql($sql, $params, $offset);
-
-    // Produce the output respecting parameters.
-    foreach ($rs as $c) {
-        // Track offset.
-        $offset++;
-        // Check capabilities.
-        $context = context::instance_by_id($c->contextid);
-        if (!has_capability('moodle/cohort:view', $context)) {
-            continue;
-        }
-        if ($limit === 0) {
-            // We have reached the required number of items and know that there are more, exit now.
-            $offset--;
-            break;
-        }
-        $cohorts[$c->id] = array(
-            'cohortid' => $c->id,
-            'name'     => shorten_text(format_string($c->name, true, array('context'=>context::instance_by_id($c->contextid))), 35),
-            'users'    => $DB->count_records('cohort_members', array('cohortid'=>$c->id)),
-            'enrolled' => in_array($c->id, $enrolled)
-        );
-        // Count items.
-        $limit--;
-    }
-    $rs->close();
-    return array('more' => !(bool)$limit, 'offset' => $offset, 'cohorts' => $cohorts);
 }

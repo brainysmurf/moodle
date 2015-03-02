@@ -49,7 +49,18 @@ abstract class moodleform_mod extends moodleform {
     /** a flag indicating whether outcomes are being used*/
     protected $_outcomesused;
 
+    /**
+     * @var bool A flag used to indicate that this module should lock settings
+     *           based on admin settings flags in definition_after_data.
+     */
+    protected $applyadminlockedflags = false;
+
+    /** @var object The course format of the current course. */
+    protected $courseformat;
+
     function moodleform_mod($current, $section, $cm, $course) {
+        global $CFG;
+
         $this->current   = $current;
         $this->_instance = $current->instance;
         $this->_section  = $section;
@@ -59,6 +70,10 @@ abstract class moodleform_mod extends moodleform {
         } else {
             $this->context = context_course::instance($course->id);
         }
+
+        // Set the course format.
+        require_once($CFG->dirroot . '/course/format/lib.php');
+        $this->courseformat = course_get_format($course);
 
         // Guess module name
         $matches = array();
@@ -77,7 +92,6 @@ abstract class moodleform_mod extends moodleform {
         $this->_features = new stdClass();
         $this->_features->groups            = plugin_supports('mod', $this->_modname, FEATURE_GROUPS, true);
         $this->_features->groupings         = plugin_supports('mod', $this->_modname, FEATURE_GROUPINGS, false);
-        $this->_features->groupmembersonly  = (!empty($CFG->enablegroupmembersonly) and plugin_supports('mod', $this->_modname, FEATURE_GROUPMEMBERSONLY, false));
         $this->_features->outcomes          = (!empty($CFG->enableoutcomes) and plugin_supports('mod', $this->_modname, FEATURE_GRADE_OUTCOMES, true));
         $this->_features->hasgrades         = plugin_supports('mod', $this->_modname, FEATURE_GRADE_HAS_GRADE, false);
         $this->_features->idnumber          = plugin_supports('mod', $this->_modname, FEATURE_IDNUMBER, true);
@@ -177,14 +191,11 @@ abstract class moodleform_mod extends moodleform {
         // otherwise you cannot turn it off at same time as turning off other
         // option (MDL-30764)
         if (empty($this->_cm) || !$this->_cm->groupingid) {
-            if ($mform->elementExists('groupmode') and !$mform->elementExists('groupmembersonly') and empty($COURSE->groupmodeforce)) {
+            if ($mform->elementExists('groupmode') && empty($COURSE->groupmodeforce)) {
                 $mform->disabledIf('groupingid', 'groupmode', 'eq', NOGROUPS);
 
-            } else if (!$mform->elementExists('groupmode') and $mform->elementExists('groupmembersonly')) {
-                $mform->disabledIf('groupingid', 'groupmembersonly', 'notchecked');
-
-            } else if (!$mform->elementExists('groupmode') and !$mform->elementExists('groupmembersonly')) {
-                // groupings have no use without groupmode or groupmembersonly
+            } else if (!$mform->elementExists('groupmode')) {
+                // Groupings have no use without groupmode.
                 if ($mform->elementExists('groupingid')) {
                     $mform->removeElement('groupingid');
                 }
@@ -209,8 +220,10 @@ abstract class moodleform_mod extends moodleform {
                 // is changed, maybe someone has completed it now)
                 $mform->getElement('completionunlocked')->setValue(1);
             } else {
-                // Has the element been unlocked?
-                if ($mform->exportValue('unlockcompletion')) {
+                // Has the element been unlocked, either by the button being pressed
+                // in this request, or the field already being set from a previous one?
+                if ($mform->exportValue('unlockcompletion') ||
+                        $mform->exportValue('completionunlocked')) {
                     // Yes, add in warning text and set the hidden variable
                     $mform->insertElementBefore(
                         $mform->createElement('static', 'completedunlocked',
@@ -243,46 +256,13 @@ abstract class moodleform_mod extends moodleform {
             }
         }
 
-        // Availability conditions
-        if (!empty($CFG->enableavailability) && $this->_cm) {
-            $ci = new condition_info($this->_cm);
-            $fullcm=$ci->get_full_course_module();
-
-            $num=0;
-            foreach($fullcm->conditionsgrade as $gradeitemid=>$minmax) {
-                $groupelements=$mform->getElement('conditiongradegroup['.$num.']')->getElements();
-                $groupelements[0]->setValue($gradeitemid);
-                $groupelements[2]->setValue(is_null($minmax->min) ? '' :
-                        format_float($minmax->min, 5, true, true));
-                $groupelements[4]->setValue(is_null($minmax->max) ? '' :
-                        format_float($minmax->max, 5, true, true));
-                $num++;
-            }
-
-            $num = 0;
-            foreach($fullcm->conditionsfield as $field => $details) {
-                $groupelements = $mform->getElement('conditionfieldgroup['.$num.']')->getElements();
-                $groupelements[0]->setValue($field);
-                $groupelements[1]->setValue(is_null($details->operator) ? '' : $details->operator);
-                $groupelements[2]->setValue(is_null($details->value) ? '' : $details->value);
-                $num++;
-            }
-
-            if ($completion->is_enabled()) {
-                $num=0;
-                foreach($fullcm->conditionscompletion as $othercmid=>$state) {
-                    $groupelements=$mform->getElement('conditioncompletiongroup['.$num.']')->getElements();
-                    $groupelements[0]->setValue($othercmid);
-                    $groupelements[1]->setValue($state);
-                    $num++;
-                }
-            }
-        }
+        // Freeze admin defaults if required (and not different from default)
+        $this->apply_admin_locked_flags();
     }
 
     // form verification
     function validation($data, $files) {
-        global $COURSE, $DB;
+        global $COURSE, $DB, $CFG;
         $errors = parent::validation($data, $files);
 
         $mform =& $this->_form;
@@ -311,6 +291,14 @@ abstract class moodleform_mod extends moodleform {
             }
         }
 
+        // Ratings: Don't let them select an aggregate type without selecting a scale.
+        // If the user has selected to use ratings but has not chosen a scale or set max points then the form is
+        // invalid. If ratings have been selected then the user must select either a scale or max points.
+        // This matches (horrible) logic in data_preprocessing.
+        if (isset($data['assessed']) && $data['assessed'] > 0 && empty($data['scale'])) {
+            $errors['assessed'] = get_string('scaleselectionrequired', 'rating');
+        }
+
         // Completion: Don't let them choose automatic completion without turning
         // on some conditions. Ignore this check when completion settings are
         // locked, as the options are then disabled.
@@ -323,61 +311,9 @@ abstract class moodleform_mod extends moodleform {
             }
         }
 
-        // Conditions: Don't let them set dates which make no sense
-        if (array_key_exists('availablefrom', $data) &&
-            $data['availablefrom'] && $data['availableuntil'] &&
-            $data['availablefrom'] >= $data['availableuntil']) {
-            $errors['availablefrom'] = get_string('badavailabledates', 'condition');
-        }
-
-        // Conditions: Verify that the grade conditions are numbers, and make sense.
-        if (array_key_exists('conditiongradegroup', $data)) {
-            foreach ($data['conditiongradegroup'] as $i => $gradedata) {
-                if ($gradedata['conditiongrademin'] !== '' &&
-                        !is_numeric(unformat_float($gradedata['conditiongrademin']))) {
-                    $errors["conditiongradegroup[{$i}]"] = get_string('gradesmustbenumeric', 'condition');
-                    continue;
-                }
-                if ($gradedata['conditiongrademax'] !== '' &&
-                        !is_numeric(unformat_float($gradedata['conditiongrademax']))) {
-                    $errors["conditiongradegroup[{$i}]"] = get_string('gradesmustbenumeric', 'condition');
-                    continue;
-                }
-                if ($gradedata['conditiongrademin'] !== '' && $gradedata['conditiongrademax'] !== '' &&
-                        unformat_float($gradedata['conditiongrademax']) <= unformat_float($gradedata['conditiongrademin'])) {
-                    $errors["conditiongradegroup[{$i}]"] = get_string('badgradelimits', 'condition');
-                    continue;
-                }
-                if ($gradedata['conditiongrademin'] === '' && $gradedata['conditiongrademax'] === '' &&
-                        $gradedata['conditiongradeitemid']) {
-                    $errors["conditiongradegroup[{$i}]"] = get_string('gradeitembutnolimits', 'condition');
-                    continue;
-                }
-                if (($gradedata['conditiongrademin'] !== '' || $gradedata['conditiongrademax'] !== '') &&
-                        !$gradedata['conditiongradeitemid']) {
-                    $errors["conditiongradegroup[{$i}]"] = get_string('gradelimitsbutnoitem', 'condition');
-                    continue;
-                }
-            }
-        }
-
-        // Conditions: Verify that the user profile field has not been declared more than once
-        if (array_key_exists('conditionfieldgroup', $data)) {
-            // Array to store the existing fields
-            $arrcurrentfields = array();
-            // Error message displayed if any condition is declared more than once. We use lang string because
-            // this way we don't actually generate the string unless there is an error.
-            $stralreadydeclaredwarning = new lang_string('fielddeclaredmultipletimes', 'condition');
-            foreach ($data['conditionfieldgroup'] as $i => $fielddata) {
-                if ($fielddata['conditionfield'] == 0) { // Don't need to bother if none is selected
-                    continue;
-                }
-                if (in_array($fielddata['conditionfield'], $arrcurrentfields)) {
-                    $errors["conditionfieldgroup[{$i}]"] = $stralreadydeclaredwarning->out();
-                }
-                // Add the field to the array
-                $arrcurrentfields[] = $fielddata['conditionfield'];
-            }
+        // Availability: Check availability field does not have errors.
+        if (!empty($CFG->enableavailability)) {
+            \core_availability\frontend::report_validation_errors($data, $errors);
         }
 
         return $errors;
@@ -443,6 +379,8 @@ abstract class moodleform_mod extends moodleform {
 
             $mform->addElement('modgrade', 'scale', get_string('scale'), false);
             $mform->disabledIf('scale', 'assessed', 'eq', 0);
+            $mform->addHelpButton('scale', 'modgrade', 'grades');
+            $mform->setDefault('scale', $CFG->gradepointdefault);
 
             $mform->addElement('checkbox', 'ratingtime', get_string('ratingtime', 'rating'));
             $mform->disabledIf('ratingtime', 'assessed', 'eq', 0);
@@ -483,148 +421,38 @@ abstract class moodleform_mod extends moodleform {
             $mform->addHelpButton('groupmode', 'groupmode', 'group');
         }
 
-        if ($this->_features->groupings or $this->_features->groupmembersonly) {
-            //groupings selector - used for normal grouping mode or also when restricting access with groupmembersonly
+        if ($this->_features->groupings) {
+            // Groupings selector - used to select grouping for groups in activity.
             $options = array();
-            $options[0] = get_string('none');
             if ($groupings = $DB->get_records('groupings', array('courseid'=>$COURSE->id))) {
                 foreach ($groupings as $grouping) {
                     $options[$grouping->id] = format_string($grouping->name);
                 }
             }
+            core_collator::asort($options);
+            $options = array(0 => get_string('none')) + $options;
             $mform->addElement('select', 'groupingid', get_string('grouping', 'group'), $options);
             $mform->addHelpButton('groupingid', 'grouping', 'group');
         }
 
-        if ($this->_features->groupmembersonly) {
-            $mform->addElement('checkbox', 'groupmembersonly', get_string('groupmembersonly', 'group'));
-            $mform->addHelpButton('groupmembersonly', 'groupmembersonly', 'group');
-        }
-
         if (!empty($CFG->enableavailability)) {
-            // String used by conditions
-            $strnone = get_string('none','condition');
-            // Conditional availability
-
-            // Available from/to defaults to midnight because then the display
-            // will be nicer where it tells users when they can access it (it
-            // shows only the date and not time).
-            $date = usergetdate(time());
-            $midnight = make_timestamp($date['year'], $date['mon'], $date['mday']);
-
-            // From/until controls
+            // Availability field. This is just a textarea; the user interface
+            // interaction is all implemented in JavaScript.
             $mform->addElement('header', 'availabilityconditionsheader',
-                    get_string('availabilityconditions', 'condition'));
-            $mform->addElement('date_time_selector', 'availablefrom',
-                    get_string('availablefrom', 'condition'),
-                    array('optional' => true, 'defaulttime' => $midnight));
-            $mform->addHelpButton('availablefrom', 'availablefrom', 'condition');
-            $mform->addElement('date_time_selector', 'availableuntil',
-                    get_string('availableuntil', 'condition'),
-                    array('optional' => true, 'defaulttime' => $midnight));
-
-            // Conditions based on grades
-            $gradeoptions = array();
-            $items = grade_item::fetch_all(array('courseid'=>$COURSE->id));
-            $items = $items ? $items : array();
-            foreach($items as $id=>$item) {
-                // Do not include grades for current item
-                if (!empty($this->_cm) && $this->_cm->instance == $item->iteminstance
-                    && $this->_cm->modname == $item->itemmodule
-                    && $item->itemtype == 'mod') {
-                    continue;
-                }
-                $gradeoptions[$id] = $item->get_name();
-            }
-            asort($gradeoptions);
-            $gradeoptions = array(0 => $strnone) + $gradeoptions;
-
-            $grouparray = array();
-            $grouparray[] =& $mform->createElement('select','conditiongradeitemid','',$gradeoptions);
-            $grouparray[] =& $mform->createElement('static', '', '',' '.get_string('grade_atleast','condition').' ');
-            $grouparray[] =& $mform->createElement('text', 'conditiongrademin','',array('size'=>3));
-            $grouparray[] =& $mform->createElement('static', '', '','% '.get_string('grade_upto','condition').' ');
-            $grouparray[] =& $mform->createElement('text', 'conditiongrademax','',array('size'=>3));
-            $grouparray[] =& $mform->createElement('static', '', '','%');
-            $group = $mform->createElement('group','conditiongradegroup',
-                get_string('gradecondition', 'condition'),$grouparray);
-
-            // Get version with condition info and store it so we don't ask
-            // twice
-            if(!empty($this->_cm)) {
-                $ci = new condition_info($this->_cm, CONDITION_MISSING_EXTRATABLE);
-                $this->_cm = $ci->get_full_course_module();
-                $count = count($this->_cm->conditionsgrade)+1;
-                $fieldcount = count($this->_cm->conditionsfield) + 1;
-            } else {
-                $count = 1;
-                $fieldcount = 1;
-            }
-
-            $this->repeat_elements(array($group), $count, array(
-                'conditiongradegroup[conditiongrademin]' => array('type' => PARAM_RAW),
-                'conditiongradegroup[conditiongrademax]' => array('type' => PARAM_RAW)
-                ), 'conditiongraderepeats', 'conditiongradeadds', 2, get_string('addgrades', 'condition'), true);
-            $mform->addHelpButton('conditiongradegroup[0]', 'gradecondition', 'condition');
-
-            // Conditions based on user fields
-            $operators = condition_info::get_condition_user_field_operators();
-            $useroptions = condition_info::get_condition_user_fields(
-                    array('context' => $this->context));
-            asort($useroptions);
-
-            $useroptions = array(0 => $strnone) + $useroptions;
-            $grouparray = array();
-            $grouparray[] =& $mform->createElement('select', 'conditionfield', '', $useroptions);
-            $grouparray[] =& $mform->createElement('select', 'conditionfieldoperator', '', $operators);
-            $grouparray[] =& $mform->createElement('text', 'conditionfieldvalue');
-            $group = $mform->createElement('group', 'conditionfieldgroup', get_string('userfield', 'condition'), $grouparray);
-
-            $this->repeat_elements(array($group), $fieldcount, array(
-                'conditionfieldgroup[conditionfieldvalue]' => array('type' => PARAM_RAW)),
-                'conditionfieldrepeats', 'conditionfieldadds', 2, get_string('adduserfields', 'condition'), true);
-            $mform->addHelpButton('conditionfieldgroup[0]', 'userfield', 'condition');
-
-            // Conditions based on completion
-            $completion = new completion_info($COURSE);
-            if ($completion->is_enabled()) {
-                $completionoptions = array();
+                    get_string('restrictaccess', 'availability'));
+            // Note: This field cannot be named 'availability' because that
+            // conflicts with fields in existing modules (such as assign).
+            // So it uses a long name that will not conflict.
+            $mform->addElement('textarea', 'availabilityconditionsjson',
+                    get_string('accessrestrictions', 'availability'));
+            // The _cm variable may not be a proper cm_info, so get one from modinfo.
+            if ($this->_cm) {
                 $modinfo = get_fast_modinfo($COURSE);
-                foreach($modinfo->cms as $id=>$cm) {
-                    // Add each course-module if it:
-                    // (a) has completion turned on
-                    // (b) is not the same as current course-module
-                    if ($cm->completion && (empty($this->_cm) || $this->_cm->id != $id)) {
-                        $completionoptions[$id]=$cm->name;
-                    }
-                }
-                asort($completionoptions);
-                $completionoptions = array(0 => $strnone) + $completionoptions;
-
-                $completionvalues=array(
-                    COMPLETION_COMPLETE=>get_string('completion_complete','condition'),
-                    COMPLETION_INCOMPLETE=>get_string('completion_incomplete','condition'),
-                    COMPLETION_COMPLETE_PASS=>get_string('completion_pass','condition'),
-                    COMPLETION_COMPLETE_FAIL=>get_string('completion_fail','condition'));
-
-                $grouparray = array();
-                $grouparray[] =& $mform->createElement('select','conditionsourcecmid','',$completionoptions);
-                $grouparray[] =& $mform->createElement('select','conditionrequiredcompletion','',$completionvalues);
-                $group = $mform->createElement('group','conditioncompletiongroup',
-                    get_string('completioncondition', 'condition'),$grouparray);
-
-                $count = empty($this->_cm) ? 1 : count($this->_cm->conditionscompletion)+1;
-                $this->repeat_elements(array($group),$count,array(),
-                    'conditioncompletionrepeats','conditioncompletionadds',2,
-                    get_string('addcompletions','condition'),true);
-                $mform->addHelpButton('conditioncompletiongroup[0]', 'completioncondition', 'condition');
+                $cm = $modinfo->get_cm($this->_cm->id);
+            } else {
+                $cm = null;
             }
-
-            // Do we display availability info to students?
-            $mform->addElement('select', 'showavailability', get_string('showavailability', 'condition'),
-                    array(CONDITION_STUDENTVIEW_SHOW=>get_string('showavailability_show', 'condition'),
-                    CONDITION_STUDENTVIEW_HIDE=>get_string('showavailability_hide', 'condition')));
-            $mform->setDefault('showavailability', CONDITION_STUDENTVIEW_SHOW);
+            \core_availability\frontend::include_all_javascript($COURSE, $cm);
         }
 
         // Conditional activities: completion tracking section
@@ -641,12 +469,16 @@ abstract class moodleform_mod extends moodleform {
             $mform->addElement('hidden', 'completionunlocked', 0);
             $mform->setType('completionunlocked', PARAM_INT);
 
+            $trackingdefault = COMPLETION_TRACKING_NONE;
+            // If system and activity default is on, set it.
+            if ($CFG->completiondefault && $this->_features->defaultcompletion) {
+                $trackingdefault = COMPLETION_TRACKING_MANUAL;
+            }
+
             $mform->addElement('select', 'completion', get_string('completion', 'completion'),
                 array(COMPLETION_TRACKING_NONE=>get_string('completion_none', 'completion'),
                 COMPLETION_TRACKING_MANUAL=>get_string('completion_manual', 'completion')));
-            $mform->setDefault('completion', $this->_features->defaultcompletion
-                ? COMPLETION_TRACKING_MANUAL
-                : COMPLETION_TRACKING_NONE);
+            $mform->setDefault('completion', $trackingdefault);
             $mform->addHelpButton('completion', 'completion', 'completion');
 
             // Automatic completion once you view it
@@ -665,6 +497,11 @@ abstract class moodleform_mod extends moodleform {
                 $mform->disabledIf('completionusegrade', 'completion', 'ne', COMPLETION_TRACKING_AUTOMATIC);
                 $mform->addHelpButton('completionusegrade', 'completionusegrade', 'completion');
                 $gotcompletionoptions = true;
+
+                // If using the rating system, there is no grade unless ratings are enabled.
+                if ($this->_features->rating) {
+                    $mform->disabledIf('completionusegrade', 'assessed', 'eq', 0);
+                }
             }
 
             // Automatic completion according to module-specific rules
@@ -763,7 +600,8 @@ abstract class moodleform_mod extends moodleform {
             //if supports grades and grades arent being handled via ratings
             if (!$this->_features->rating) {
                 $mform->addElement('modgrade', 'grade', get_string('grade'));
-                $mform->setDefault('grade', 100);
+                $mform->addHelpButton('grade', 'modgrade', 'grades');
+                $mform->setDefault('grade', $CFG->gradepointdefault);
             }
 
             if ($this->_features->advancedgrading
@@ -812,15 +650,15 @@ abstract class moodleform_mod extends moodleform {
         $label = is_null($customlabel) ? get_string('moduleintro') : $customlabel;
 
         $mform->addElement('editor', 'introeditor', $label, array('rows' => 10), array('maxfiles' => EDITOR_UNLIMITED_FILES,
-            'noclean' => true, 'context' => $this->context, 'collapsed' => true));
+            'noclean' => true, 'context' => $this->context, 'subdirs' => true));
         $mform->setType('introeditor', PARAM_RAW); // no XSS prevention here, users must be trusted
         if ($required) {
             $mform->addRule('introeditor', get_string('required'), 'required', null, 'client');
         }
 
-        // If the 'show description' feature is enabled, this checkbox appears
-        // below the intro.
-        if ($this->_features->showdescription) {
+        // If the 'show description' feature is enabled, this checkbox appears below the intro.
+        // We want to hide that when using the singleactivity course format because it is confusing.
+        if ($this->_features->showdescription  && $this->courseformat->has_view_page()) {
             $mform->addElement('checkbox', 'showdescription', get_string('showdescription'));
             $mform->addHelpButton('showdescription', 'showdescription');
         }
@@ -848,7 +686,9 @@ abstract class moodleform_mod extends moodleform {
         // elements in a row need a group
         $buttonarray = array();
 
-        if ($submit2label !== false) {
+        // Label for the submit button to return to the course.
+        // Ignore this button in single activity format because it is confusing.
+        if ($submit2label !== false && $this->courseformat->has_view_page()) {
             $buttonarray[] = &$mform->createElement('submit', 'submitbutton2', $submit2label);
         }
 
@@ -863,6 +703,99 @@ abstract class moodleform_mod extends moodleform {
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->setType('buttonar', PARAM_RAW);
         $mform->closeHeaderBefore('buttonar');
+    }
+
+    /**
+     * Get the list of admin settings for this module and apply any locked settings.
+     * This cannot happen in apply_admin_defaults because we do not the current values of the settings
+     * in that function because set_data has not been called yet.
+     *
+     * @return void
+     */
+    protected function apply_admin_locked_flags() {
+        global $OUTPUT;
+
+        if (!$this->applyadminlockedflags) {
+            return;
+        }
+
+        $settings = get_config($this->_modname);
+        $mform = $this->_form;
+        $lockedicon = html_writer::tag('span',
+                                       $OUTPUT->pix_icon('t/locked', get_string('locked', 'admin')),
+                                       array('class' => 'action-icon'));
+        $isupdate = !empty($this->_cm);
+
+        foreach ($settings as $name => $value) {
+            if (strpos('_', $name) !== false) {
+                continue;
+            }
+            if ($mform->elementExists($name)) {
+                $element = $mform->getElement($name);
+                $lockedsetting = $name . '_locked';
+                if (!empty($settings->$lockedsetting)) {
+                    // Always lock locked settings for new modules,
+                    // for updates, only lock them if the current value is the same as the default (or there is no current value).
+                    $value = $settings->$name;
+                    if ($isupdate && isset($this->current->$name)) {
+                        $value = $this->current->$name;
+                    }
+                    if ($value == $settings->$name) {
+                        $mform->setConstant($name, $settings->$name);
+                        $element->setLabel($element->getLabel() . $lockedicon);
+                        // Do not use hardfreeze because we need the hidden input to check dependencies.
+                        $element->freeze();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Get the list of admin settings for this module and apply any defaults/advanced/locked settings.
+     *
+     * @param $datetimeoffsets array - If passed, this is an array of fieldnames => times that the
+     *                         default date/time value should be relative to. If not passed, all
+     *                         date/time fields are set relative to the users current midnight.
+     * @return void
+     */
+    public function apply_admin_defaults($datetimeoffsets = array()) {
+        // This flag triggers the settings to be locked in apply_admin_locked_flags().
+        $this->applyadminlockedflags = true;
+
+        $settings = get_config($this->_modname);
+        $mform = $this->_form;
+        $usermidnight = usergetmidnight(time());
+        $isupdate = !empty($this->_cm);
+
+        foreach ($settings as $name => $value) {
+            if (strpos('_', $name) !== false) {
+                continue;
+            }
+            if ($mform->elementExists($name)) {
+                $element = $mform->getElement($name);
+                if (!$isupdate) {
+                    if ($element->getType() == 'date_time_selector') {
+                        $enabledsetting = $name . '_enabled';
+                        if (empty($settings->$enabledsetting)) {
+                            $mform->setDefault($name, 0);
+                        } else {
+                            $relativetime = $usermidnight;
+                            if (isset($datetimeoffsets[$name])) {
+                                $relativetime = $datetimeoffsets[$name];
+                            }
+                            $mform->setDefault($name, $relativetime + $settings->$name);
+                        }
+                    } else {
+                        $mform->setDefault($name, $settings->$name);
+                    }
+                }
+                $advancedsetting = $name . '_adv';
+                if (!empty($settings->$advancedsetting)) {
+                    $mform->setAdvanced($name);
+                }
+            }
+        }
     }
 }
 

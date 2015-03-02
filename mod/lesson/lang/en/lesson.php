@@ -18,8 +18,7 @@
 /**
  * Strings for component 'lesson', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package    mod
- * @subpackage lesson
+ * @package mod_lesson
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -134,11 +133,11 @@ $string['didnotreceivecredit'] = 'Did not receive credit';
 $string['displaydefaultfeedback'] = 'Use default feedback';
 $string['displaydefaultfeedback_help'] = 'If enabled, when a response is not found for a particular question, the default response of "That\'s the correct answer" or "That\'s the wrong answer" will be shown.';
 $string['displayhighscores'] = 'Display high scores';
-$string['displayinleftmenu'] = 'Display in left menu?';
+$string['displayinleftmenu'] = 'Display in menu?';
 $string['displayleftif'] = 'Minimum grade to display menu';
-$string['displayleftif_help'] = 'This setting determines whether a student must obtain a certain grade before viewing the left menu. This forces the student to go through the entire lesson on their first attempt, then after obtaining the required grade they can use the left menu for review.';
-$string['displayleftmenu'] = 'Display left menu';
-$string['displayleftmenu_help'] = 'If enabled, a list of pages is displayed.';
+$string['displayleftif_help'] = 'This setting determines whether a student must obtain a certain grade before viewing the lesson menu. This forces the student to go through the entire lesson on their first attempt, then after obtaining the required grade they can use the menu for review.';
+$string['displayleftmenu'] = 'Display menu';
+$string['displayleftmenu_help'] = 'If enabled, a menu allowing users to navigate through the list of pages is displayed.';
 $string['displayofgrade'] = 'Display of grade (for students only)';
 $string['displayreview'] = 'Provide option to try a question again';
 $string['displayreview_help'] = 'If enabled, when a question is answered incorrectly, the student is given the option to try it again for no point credit, or continue with the lesson.';
@@ -171,11 +170,20 @@ $string['essayemailmessage2'] = '<p>Essay prompt:<blockquote>{$a->question}</blo
 $string['essayemailsubject'] = 'Your grade for {$a} question';
 $string['essays'] = 'Essays';
 $string['essayscore'] = 'Essay score';
+$string['eventessayassessed'] = 'Essay assessed';
+$string['eventessayattemptviewed'] = 'Essay attempt viewed';
+$string['eventhighscoreadded'] = 'Highscore added';
+$string['eventhighscoresviewed'] = 'Highscores viewed';
+$string['eventlessonended'] = 'Lesson ended';
+$string['eventlessonstarted'] = 'Lesson started';
+$string['false'] = 'False';
 $string['fileformat'] = 'File format';
 $string['finish'] = 'Finish';
 $string['firstanswershould'] = 'First answer should jump to the "Correct" page';
-$string['firstwrong'] = 'Unfortunately you cannot earn this one point, because your response was not correct.  Would you like to keep guessing, just for the sheer joy of learning (but for no point credit)?';
+$string['firstwrong'] = 'You have answered incorrectly. Would you like to attempt the question again? (If you now answer the question correctly, it will not count towards your final score.)';
 $string['flowcontrol'] = 'Flow control';
+$string['fractionsaddwrong'] = 'The positive grades you have chosen do not add up to 100%<br />Instead, they add up to {$a}%<br />Do you want to go back and fix this question?';
+$string['fractionsnomax'] = 'One of the answers should be 100%, so that it is<br />possible to get a full grade for this question.<br />Do you want to go back and fix this question?';
 $string['full'] = 'Expanded';
 $string['general'] = 'General';
 $string['gotoendoflesson'] = 'Go to the end of the lesson';
@@ -212,6 +220,7 @@ $string['leftduringtimedsession'] = 'You have left during a timed lesson.';
 $string['leftduringtimed'] = 'You have left during a timed lesson.<br />Please click on Continue to restart the lesson.';
 $string['leftduringtimednoretake'] = 'You have left during a timed lesson and you are<br />not allowed to retake or continue the lesson.';
 $string['lesson:addinstance'] = 'Add a new lesson';
+$string['lesson:grade'] = 'Grade lesson essay questions';
 $string['lessonattempted'] = 'Lesson attempted';
 $string['lessonclosed'] = 'This lesson closed on {$a}.';
 $string['lessoncloses'] = 'Lesson closes';
@@ -302,6 +311,7 @@ $string['noretake'] = 'You are not allowed to retake this lesson.';
 $string['normal'] = 'Normal - follow lesson path';
 $string['notcompleted'] = 'Not completed';
 $string['notdefined'] = 'Not defined';
+$string['notenoughsubquestions'] = 'Not enough sub-questions have been defined!';
 $string['nothighscore'] = 'You did not make the top {$a} high scores list.';
 $string['notitle'] = 'No title';
 $string['numberofcorrectanswers'] = 'Number of correct answers: {$a}';
@@ -327,7 +337,9 @@ $string['page'] = 'Page: {$a}';
 $string['page-mod-lesson-x'] = 'Any lesson page';
 $string['page-mod-lesson-view'] = 'View or preview lesson page';
 $string['page-mod-lesson-edit'] = 'Edit lesson page';
+$string['pageanswers'] = 'Page answers';
 $string['pagecontents'] = 'Page contents';
+$string['pageresponses'] = 'Page responses';
 $string['pages'] = 'Pages';
 $string['pagetitle'] = 'Page title';
 $string['password'] = 'Password';
@@ -380,6 +392,7 @@ $string['savechanges'] = 'Save changes';
 $string['savechangesandeol'] = 'Save all changes and go to the end of the lesson.';
 $string['savepage'] = 'Save page';
 $string['score'] = 'Score';
+$string['score_help'] = 'Score is only used when custom scoring is enabled. Each answer can then be given a numerical point value (positive or negative).';
 $string['scores'] = 'Scores';
 $string['secondpluswrong'] = 'Not quite.  Would you like to try again?';
 $string['selectaqtype'] = 'Select a question type';
@@ -407,11 +420,13 @@ $string['thatsthecorrectanswer'] = 'That\'s the correct answer';
 $string['thatsthewronganswer'] = 'That\'s the wrong answer';
 $string['thefollowingpagesjumptothispage'] = 'The following pages jump to this page';
 $string['thispage'] = 'This page';
+$string['timeisup'] = 'Time is up';
 $string['timeremaining'] = 'Time remaining';
 $string['timespenterror'] = 'Spend at least {$a} minutes in the lesson';
 $string['timespentminutes'] = 'Time spent (minutes)';
 $string['timetaken'] = 'Time taken';
 $string['topscorestitle'] = 'Top {$a} high scores';
+$string['true'] = 'True';
 $string['truefalse'] = 'True/false';
 $string['unabledtosavefile'] = 'The file you uploaded could not be saved';
 $string['unknownqtypesnotimported'] = '{$a} questions with unsupported question types were not imported';

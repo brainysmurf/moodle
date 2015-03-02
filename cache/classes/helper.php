@@ -280,13 +280,6 @@ class cache_helper {
     /**
      * Purges the cache for a specific definition.
      *
-     * If you need to purge a definition that requires identifiers or an aggregate and you don't
-     * know the details of those please use cache_helper::purge_stores_used_by_definition instead.
-     * It is a more aggressive purge and will purge all data within the store, not just the data
-     * belonging to the given definition.
-     *
-     * @todo MDL-36660: Change the signature: $aggregate must be added.
-     *
      * @param string $component
      * @param string $area
      * @param array $identifiers
@@ -298,7 +291,6 @@ class cache_helper {
         // Initialise, in case of a store.
         if ($cache instanceof cache_store) {
             $factory = cache_factory::instance();
-            // TODO MDL-36660: Providing $aggregate is required for purging purposes: $definition->get_id()
             $definition = $factory->create_definition($component, $area, null);
             $definition->set_identifiers($identifiers);
             $cache->initialise($definition);
@@ -470,6 +462,7 @@ class cache_helper {
         // Found the store: is it ready?
         /* @var cache_store $instance */
         $instance = new $class($store['name'], $store['configuration']);
+        // We check are_requirements_met although we expect is_ready is going to check as well.
         if (!$instance::are_requirements_met() || !$instance->is_ready()) {
             unset($instance);
             return false;
@@ -718,7 +711,8 @@ class cache_helper {
             return $stores;
         } else {
             $stores = self::get_cache_stores($definition);
-            if (count($stores) === 0) {
+            // If mappingsonly is set, having 0 stores is ok.
+            if ((count($stores) === 0) && (!$definition->is_for_mappings_only())) {
                 // No suitable stores we found for the definition. We need to come up with a sensible default.
                 // If this has happened we can be sure that the user has mapped custom stores to either the
                 // mode of the definition. The first alternative to try is the system default for the mode.
@@ -733,5 +727,29 @@ class cache_helper {
             }
         }
         return $stores;
+    }
+
+    /**
+     * Returns an array of warnings from the cache API.
+     *
+     * The warning returned here are for things like conflicting store instance configurations etc.
+     * These get shown on the admin notifications page for example.
+     *
+     * @param array|null $stores An array of stores to get warnings for, or null for all.
+     * @return string[]
+     */
+    public static function warnings(array $stores = null) {
+        global $CFG;
+        if ($stores === null) {
+            require_once($CFG->dirroot.'/cache/locallib.php');
+            $stores = cache_administration_helper::get_store_instance_summaries();
+        }
+        $warnings = array();
+        foreach ($stores as $store) {
+            if (!empty($store['warnings'])) {
+                $warnings = array_merge($warnings, $store['warnings']);
+            }
+        }
+        return $warnings;
     }
 }

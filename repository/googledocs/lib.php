@@ -17,7 +17,7 @@
 /**
  * This plugin is used to access Google Drive.
  *
- * @since 2.0
+ * @since Moodle 2.0
  * @package    repository_googledocs
  * @copyright  2009 Dan Poltawski <talktodan@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,14 +26,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/repository/lib.php');
-require_once($CFG->libdir . '/textlib.class.php');
-require_once($CFG->libdir . '/google/Google_Client.php');
-require_once($CFG->libdir . '/google/contrib/Google_DriveService.php');
+require_once($CFG->libdir . '/google/lib.php');
+require_once($CFG->libdir . '/google/Google/Service/Drive.php');
 
 /**
  * Google Docs Plugin
  *
- * @since 2.0
+ * @since Moodle 2.0
  * @package    repository_googledocs
  * @copyright  2009 Dan Poltawski <talktodan@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -48,7 +47,7 @@ class repository_googledocs extends repository {
 
     /**
      * Google Drive Service.
-     * @var Google_DriveService
+     * @var Google_Drive_Service
      */
     private $service = null;
 
@@ -78,12 +77,12 @@ class repository_googledocs extends repository {
 
         $callbackurl = new moodle_url(self::CALLBACKURL);
 
-        $this->client = new Google_Client();
+        $this->client = get_google_client();
         $this->client->setClientId(get_config('googledocs', 'clientid'));
         $this->client->setClientSecret(get_config('googledocs', 'secret'));
-        $this->client->setScopes(array('https://www.googleapis.com/auth/drive.readonly'));
+        $this->client->setScopes(array(Google_Service_Drive::DRIVE_READONLY));
         $this->client->setRedirectUri($callbackurl->out(false));
-        $this->service = new Google_DriveService($this->client);
+        $this->service = new Google_Service_Drive($this->client);
 
         $this->check_login();
     }
@@ -312,7 +311,7 @@ class repository_googledocs extends repository {
         try {
             // Retrieving files and folders.
             $response = $this->service->files->listFiles($params);
-        } catch (Google_ServiceException $e) {
+        } catch (Google_Service_Exception $e) {
             if ($e->getCode() == 403 && strpos($e->getMessage(), 'Access Not Configured') !== false) {
                 // This is raised when the service Drive API has not been enabled on Google APIs control panel.
                 throw new repository_exception('servicenotenabled', 'repository_googledocs');
@@ -392,8 +391,8 @@ class repository_googledocs extends repository {
 
         // Filter and order the results.
         $files = array_filter($files, array($this, 'filter'));
-        collatorlib::ksort($files, collatorlib::SORT_NATURAL);
-        collatorlib::ksort($folders, collatorlib::SORT_NATURAL);
+        core_collator::ksort($files, core_collator::SORT_NATURAL);
+        core_collator::ksort($folders, core_collator::SORT_NATURAL);
         return array_merge(array_values($folders), array_values($files));
     }
 
@@ -415,12 +414,15 @@ class repository_googledocs extends repository {
      * @return string JSON encoded array of information about the file.
      */
     public function get_file($reference, $filename = '') {
-        $request = new Google_HttpRequest($reference);
-        $httpRequest = Google_Client::$io->authenticatedRequest($request);
-        if ($httpRequest->getResponseHttpCode() == 200) {
+        global $CFG;
+
+        $auth = $this->client->getAuth();
+        $request = $auth->authenticatedRequest(new Google_Http_Request($reference));
+        if ($request->getResponseHttpCode() == 200) {
             $path = $this->prepare_file($filename);
-            $content = $httpRequest->getResponseBody();
+            $content = $request->getResponseBody();
             if (file_put_contents($path, $content) !== false) {
+                @chmod($path, $CFG->filepermissions);
                 return array(
                     'path' => $path,
                     'url' => $reference

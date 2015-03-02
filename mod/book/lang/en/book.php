@@ -43,9 +43,13 @@ $string['customtitles_help'] = 'Normally the chapter title is displayed in the t
 
 If the custom titles checkbox is ticked, the chapter title is NOT displayed as a heading above the content. A different title (perhaps longer than the chapter title) may be entered as part of the content.';
 $string['chapters'] = 'Chapters';
-$string['editingchapter'] = 'Editing chapter';
 $string['chaptertitle'] = 'Chapter title';
 $string['content'] = 'Content';
+$string['editingchapter'] = 'Editing chapter';
+$string['eventchaptercreated'] = 'Chapter created';
+$string['eventchapterdeleted'] = 'Chapter deleted';
+$string['eventchapterupdated'] = 'Chapter updated';
+$string['eventchapterviewed'] = 'Chapter viewed';
 $string['subchapter'] = 'Subchapter';
 $string['nocontent'] = 'No content has been added to this book yet.';
 $string['numbering'] = 'Chapter formatting';

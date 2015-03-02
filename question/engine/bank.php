@@ -73,7 +73,7 @@ abstract class question_bank {
      * @return bool whether that question type is installed in this Moodle.
      */
     public static function is_qtype_installed($qtypename) {
-        $plugindir = get_plugin_directory('qtype', $qtypename);
+        $plugindir = core_component::get_plugin_directory('qtype', $qtypename);
         return $plugindir && is_readable($plugindir . '/questiontype.php');
     }
 
@@ -89,7 +89,7 @@ abstract class question_bank {
         if (isset(self::$questiontypes[$qtypename])) {
             return self::$questiontypes[$qtypename];
         }
-        $file = get_plugin_directory('qtype', $qtypename) . '/questiontype.php';
+        $file = core_component::get_plugin_directory('qtype', $qtypename) . '/questiontype.php';
         if (!is_readable($file)) {
             if ($mustexist || $qtypename == 'missingtype') {
                 throw new coding_exception('Unknown question type ' . $qtypename);
@@ -100,7 +100,7 @@ abstract class question_bank {
         include_once($file);
         $class = 'qtype_' . $qtypename;
         if (!class_exists($class)) {
-            throw new coding_exception("Class $class must be defined in $file");
+            throw new coding_exception("Class {$class} must be defined in {$file}.");
         }
         self::$questiontypes[$qtypename] = new $class();
         return self::$questiontypes[$qtypename];
@@ -133,7 +133,7 @@ abstract class question_bank {
      * @return bool whether this question type exists.
      */
     public static function qtype_exists($qtypename) {
-        return array_key_exists($qtypename, get_plugin_list('qtype'));
+        return array_key_exists($qtypename, core_component::get_plugin_list('qtype'));
     }
 
     /**
@@ -149,7 +149,7 @@ abstract class question_bank {
      */
     public static function get_all_qtypes() {
         $qtypes = array();
-        foreach (get_plugin_list('qtype') as $plugin => $notused) {
+        foreach (core_component::get_plugin_list('qtype') as $plugin => $notused) {
             try {
                 $qtypes[$plugin] = self::get_qtype($plugin);
             } catch (coding_exception $e) {
@@ -183,7 +183,7 @@ abstract class question_bank {
         }
 
         ksort($sortorder);
-        collatorlib::asort($otherqtypes);
+        core_collator::asort($otherqtypes);
 
         $sortedqtypes = array();
         foreach ($sortorder as $name) {
@@ -381,8 +381,8 @@ abstract class question_bank {
         // The the positive grades in descending order.
         foreach ($rawfractions as $fraction) {
             $percentage = format_float(100 * $fraction, 5, true, true) . '%';
-            self::$fractionoptions["$fraction"] = $percentage;
-            self::$fractionoptionsfull["$fraction"] = $percentage;
+            self::$fractionoptions["{$fraction}"] = $percentage;
+            self::$fractionoptionsfull["{$fraction}"] = $percentage;
         }
 
         // The the negative grades in descending order.
@@ -421,6 +421,10 @@ abstract class question_bank {
         // Delete any old question preview that got left in the database.
         require_once($CFG->dirroot . '/question/previewlib.php');
         question_preview_cron();
+
+        // Clear older calculated stats from cache.
+        require_once($CFG->dirroot . '/question/engine/statisticslib.php');
+        question_usage_statistics_cron();
     }
 }
 
@@ -495,10 +499,10 @@ class question_finder implements cache_data_source {
         }
 
         return $DB->get_records_select_menu('question',
-                "category $qcsql
+                "category {$qcsql}
                  AND parent = 0
                  AND hidden = 0
-                 $extraconditions", $qcparams + $extraparams, '', 'id,id AS id2');
+                 {$extraconditions}", $qcparams + $extraparams, '', 'id,id AS id2');
     }
 
     /* See cache_data_source::load_for_cache. */

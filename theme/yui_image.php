@@ -40,18 +40,15 @@ if ($slashargument = min_get_slash_argument()) {
 $etag = sha1($path);
 $parts = explode('/', $path);
 $version = array_shift($parts);
+if ($version === 'm') {
+    $version = 'moodle';
+}
 if ($version == 'moodle' && count($parts) >= 3) {
-    if (!defined('ABORT_AFTER_CONFIG_CANCEL')) {
-        define('ABORT_AFTER_CONFIG_CANCEL', true);
-        define('NO_UPGRADE_CHECK', true);
-        define('NO_MOODLE_COOKIES', true);
-        require($CFG->libdir.'/setup.php');
-    }
     $frankenstyle = array_shift($parts);
     $module = array_shift($parts);
     $image = array_pop($parts);
     $subdir = join('/', $parts);
-    $dir = get_component_directory($frankenstyle);
+    $dir = core_component::get_component_directory($frankenstyle);
 
     // For shifted YUI modules, we need the YUI module name in frankenstyle format.
     $frankenstylemodulename = join('-', array($version, $frankenstyle, $module));
@@ -63,18 +60,24 @@ if ($version == 'moodle' && count($parts) >= 3) {
     if (!file_exists($imagepath) or !is_file($imagepath)) {
         $imagepath = $dir . '/yui/' . $module . '/assets/skins/sam/' . $image;
     }
-} else if ($version == 'gallery' && count($parts)==3) {
-    list($module, $version, $image) = $parts;
-    $imagepath = "$CFG->dirroot/lib/yui/gallery/$module/$version/assets/skins/sam/$image";
-} else if (count($parts) == 1 && ($version == $CFG->yui3version || $version == $CFG->yui2version)) {
-    list($image) = $parts;
-    if ($version == $CFG->yui3version) {
-        $imagepath = "$CFG->dirroot/lib/yuilib/$CFG->yui3version/build/assets/skins/sam/$image";
-    } else  {
-        $imagepath = "$CFG->dirroot/lib/yuilib/2in3/$CFG->yui2version/build/assets/skins/sam/$image";
-    }
+} else if ($version == 'gallery' && count($parts) >= 3) {
+    list($revision, $module, , , , $image) = $parts;
+    $imagepath = "$CFG->dirroot/lib/yuilib/gallery/$module/assets/skins/sam/$image";
 } else {
-    yui_image_not_found();
+    // Allow support for revisions on YUI between official releases.
+    // We can just discard the subrevision since it is only used to invalidate the browser cache.
+    $yuipatchedversion = explode('_', $version);
+    $yuiversion = $yuipatchedversion[0];
+    if (count($parts) == 1 && ($yuiversion == $CFG->yui3version || $yuiversion == $CFG->yui2version)) {
+        list($image) = $parts;
+        if ($yuiversion == $CFG->yui3version) {
+            $imagepath = "$CFG->dirroot/lib/yuilib/$CFG->yui3version/assets/skins/sam/$image";
+        } else  {
+            $imagepath = "$CFG->dirroot/lib/yuilib/2in3/$CFG->yui2version/build/assets/skins/sam/$image";
+        }
+    } else {
+        yui_image_not_found();
+    }
 }
 
 if (!file_exists($imagepath)) {

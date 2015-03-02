@@ -19,7 +19,7 @@
  * Library of functions and constants for module glossary
  * (replace glossary with the name of your module and delete this line)
  *
- * @package   mod-glossary
+ * @package   mod_glossary
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -201,7 +201,12 @@ function glossary_delete_instance($id) {
 
     glossary_grade_item_delete($glossary);
 
-    return $DB->delete_records('glossary', array('id'=>$id));
+    $DB->delete_records('glossary', array('id'=>$id));
+
+    // Reset caches.
+    \mod_glossary\local\concept_cache::reset_glossary($glossary);
+
+    return true;
 }
 
 /**
@@ -335,13 +340,16 @@ function glossary_get_recent_mod_activity(&$activities, &$index, $timestart, $co
     $cm = $modinfo->cms[$cmid];
     $context = context_module::instance($cm->id);
 
-    if (!has_capability('mod/glossary:view', $context)) {
+    if (!$cm->uservisible) {
         return;
     }
 
     $viewfullnames = has_capability('moodle/site:viewfullnames', $context);
+    // Groups are not yet supported for glossary. See MDL-10728 .
+    /*
     $accessallgroups = has_capability('moodle/site:accessallgroups', $context);
     $groupmode = groups_get_activity_groupmode($cm, $course);
+     */
 
     $params['timestart'] = $timestart;
 
@@ -361,17 +369,24 @@ function glossary_get_recent_mod_activity(&$activities, &$index, $timestart, $co
         $groupjoin   = '';
     }
 
+    $approvedselect = "";
+    if (!has_capability('mod/glossary:approve', $context)) {
+        $approvedselect = " AND ge.approved = 1 ";
+    }
+
     $params['timestart'] = $timestart;
     $params['glossaryid'] = $cm->instance;
 
-    $ufields = user_picture::fields('u', array('lastaccess', 'firstname', 'lastname', 'email', 'picture', 'imagealt'));
+    $ufields = user_picture::fields('u', null, 'userid');
     $entries = $DB->get_records_sql("
-              SELECT ge.id AS entryid, ge.*, $ufields
+              SELECT ge.id AS entryid, ge.glossaryid, ge.concept, ge.definition, ge.approved,
+                     ge.timemodified, $ufields
                 FROM {glossary_entries} ge
                 JOIN {user} u ON u.id = ge.userid
                      $groupjoin
                WHERE ge.timemodified > :timestart
                  AND ge.glossaryid = :glossaryid
+                     $approvedselect
                      $userselect
                      $groupselect
             ORDER BY ge.timemodified ASC", $params);
@@ -381,6 +396,8 @@ function glossary_get_recent_mod_activity(&$activities, &$index, $timestart, $co
     }
 
     foreach ($entries as $entry) {
+        // Groups are not yet supported for glossary. See MDL-10728 .
+        /*
         $usersgroups = null;
         if ($entry->userid != $USER->id) {
             if ($groupmode == SEPARATEGROUPS and !$accessallgroups) {
@@ -392,13 +409,16 @@ function glossary_get_recent_mod_activity(&$activities, &$index, $timestart, $co
                         $usersgroups = array();
                     }
                 }
-                if (!array_intersect($usersgroups, $modinfo->get_groups($cm->id))) {
+                if (!array_intersect($usersgroups, $modinfo->get_groups($cm->groupingid))) {
                     continue;
                 }
             }
         }
+         */
 
         $tmpactivity                       = new stdClass();
+        $tmpactivity->user                 = user_picture::unalias($entry, null, 'userid');
+        $tmpactivity->user->fullname       = fullname($tmpactivity->user, $viewfullnames);
         $tmpactivity->type                 = 'glossary';
         $tmpactivity->cmid                 = $cm->id;
         $tmpactivity->glossaryid           = $entry->glossaryid;
@@ -409,14 +429,7 @@ function glossary_get_recent_mod_activity(&$activities, &$index, $timestart, $co
         $tmpactivity->content->entryid     = $entry->entryid;
         $tmpactivity->content->concept     = $entry->concept;
         $tmpactivity->content->definition  = $entry->definition;
-        $tmpactivity->user                 = new stdClass();
-        $tmpactivity->user->id             = $entry->userid;
-        $tmpactivity->user->firstname      = $entry->firstname;
-        $tmpactivity->user->lastname       = $entry->lastname;
-        $tmpactivity->user->fullname       = fullname($entry, $viewfullnames);
-        $tmpactivity->user->picture        = $entry->picture;
-        $tmpactivity->user->imagealt       = $entry->imagealt;
-        $tmpactivity->user->email          = $entry->email;
+        $tmpactivity->content->approved    = $entry->approved;
 
         $activities[$index++] = $tmpactivity;
     }
@@ -446,14 +459,20 @@ function glossary_print_recent_mod_activity($activity, $courseid, $detail, $modn
     echo html_writer::start_tag('div', array('class'=>'glossary-activity-content'));
     echo html_writer::start_tag('div', array('class'=>'glossary-activity-entry'));
 
-    $urlparams = array('g' => $activity->glossaryid, 'mode' => 'entry', 'hook' => $activity->content->entryid);
-    echo html_writer::tag('a', strip_tags($activity->content->concept),
-        array('href' => new moodle_url('/mod/glossary/view.php', $urlparams)));
+    if (isset($activity->content->approved) && !$activity->content->approved) {
+        $urlparams = array('g' => $activity->glossaryid, 'mode' => 'approval', 'hook' => $activity->content->concept);
+        $class = array('class' => 'dimmed_text');
+    } else {
+        $urlparams = array('g' => $activity->glossaryid, 'mode' => 'entry', 'hook' => $activity->content->entryid);
+        $class = array();
+    }
+    echo html_writer::link(new moodle_url('/mod/glossary/view.php', $urlparams),
+            strip_tags($activity->content->concept), $class);
     echo html_writer::end_tag('div');
 
     $url = new moodle_url('/user/view.php', array('course'=>$courseid, 'id'=>$activity->user->id));
     $name = $activity->user->fullname;
-    $link = html_writer::link($url, $name);
+    $link = html_writer::link($url, $name, $class);
 
     echo html_writer::start_tag('div', array('class'=>'user'));
     echo $link .' - '. userdate($activity->timestamp);
@@ -770,36 +789,6 @@ function glossary_update_grades($glossary=null, $userid=0, $nullifnone=true) {
 }
 
 /**
- * Update all grades in gradebook.
- *
- * @global object
- */
-function glossary_upgrade_grades() {
-    global $DB;
-
-    $sql = "SELECT COUNT('x')
-              FROM {glossary} g, {course_modules} cm, {modules} m
-             WHERE m.name='glossary' AND m.id=cm.module AND cm.instance=g.id";
-    $count = $DB->count_records_sql($sql);
-
-    $sql = "SELECT g.*, cm.idnumber AS cmidnumber, g.course AS courseid
-              FROM {glossary} g, {course_modules} cm, {modules} m
-             WHERE m.name='glossary' AND m.id=cm.module AND cm.instance=g.id";
-    $rs = $DB->get_recordset_sql($sql);
-    if ($rs->valid()) {
-        $pbar = new progress_bar('glossaryupgradegrades', 500, true);
-        $i=0;
-        foreach ($rs as $glossary) {
-            $i++;
-            upgrade_set_timeout(60*5); // set up timeout, may also abort execution
-            glossary_update_grades($glossary, 0, false);
-            $pbar->update($i, $count, "Updating Glossary grades ($i/$count).");
-        }
-    }
-    $rs->close();
-}
-
-/**
  * Create/update grade item for given glossary
  *
  * @category grade
@@ -1011,7 +1000,7 @@ function glossary_get_entries_search($concept, $courseid) {
         $bypassteacher = 0; //This means YES
     }
 
-    $conceptlower = textlib::strtolower(trim($concept));
+    $conceptlower = core_text::strtolower(trim($concept));
 
     $params = array('courseid1'=>$courseid, 'courseid2'=>$courseid, 'conceptlower'=>$conceptlower, 'concept'=>$concept);
 
@@ -1085,7 +1074,7 @@ function glossary_print_entry_default ($entry, $glossary, $cm) {
 
     require_once($CFG->libdir . '/filelib.php');
 
-    echo '<h3>'. strip_tags($entry->concept) . ': </h3>';
+    echo $OUTPUT->heading(strip_tags($entry->concept), 4);
 
     $definition = $entry->definition;
 
@@ -1105,13 +1094,13 @@ function glossary_print_entry_default ($entry, $glossary, $cm) {
 }
 
 /**
- * Print glossary concept/term as a heading &lt;h3>
+ * Print glossary concept/term as a heading &lt;h4>
  * @param object $entry
  */
 function  glossary_print_entry_concept($entry, $return=false) {
     global $OUTPUT;
 
-    $text = html_writer::tag('h3', format_string($entry->concept));
+    $text = $OUTPUT->heading(format_string($entry->concept), 4);
     if (!empty($entry->highlight)) {
         $text = highlight($entry->highlight, $text);
     }
@@ -1131,19 +1120,12 @@ function  glossary_print_entry_concept($entry, $return=false) {
  * @param object $cm
  */
 function glossary_print_entry_definition($entry, $glossary, $cm) {
-    global $DB, $GLOSSARY_EXCLUDECONCEPTS;
+    global $GLOSSARY_EXCLUDEENTRY;
 
     $definition = $entry->definition;
 
-    //Calculate all the strings to be no-linked
-    //First, the concept
-    $GLOSSARY_EXCLUDECONCEPTS = array($entry->concept);
-    //Now the aliases
-    if ( $aliases = $DB->get_records('glossary_alias', array('entryid'=>$entry->id))) {
-        foreach ($aliases as $alias) {
-            $GLOSSARY_EXCLUDECONCEPTS[]=trim($alias->alias);
-        }
-    }
+    // Do not link self.
+    $GLOSSARY_EXCLUDEENTRY = $entry->id;
 
     $context = context_module::instance($cm->id);
     $definition = file_rewrite_pluginfile_urls($definition, 'pluginfile.php', $context->id, 'mod_glossary', 'entry', $entry->id);
@@ -1157,7 +1139,7 @@ function glossary_print_entry_definition($entry, $glossary, $cm) {
     $text = format_text($definition, $entry->definitionformat, $options);
 
     // Stop excluding concepts from autolinking
-    unset($GLOSSARY_EXCLUDECONCEPTS);
+    unset($GLOSSARY_EXCLUDEENTRY);
 
     if (!empty($entry->highlight)) {
         $text = highlight($entry->highlight, $text);
@@ -1236,6 +1218,15 @@ function glossary_print_entry_icons($course, $cm, $glossary, $entry, $mode='',$h
         $output = true;
         $return .= html_writer::tag('span', get_string('entryishidden','glossary'),
             array('class' => 'glossary-hidden-note'));
+    }
+
+    if (has_capability('mod/glossary:approve', $context) && !$glossary->defaultapproval && $entry->approved) {
+        $output = true;
+        $return .= '<a class="action-icon" title="' . get_string('disapprove', 'glossary').
+                   '" href="approve.php?newstate=0&amp;eid='.$entry->id.'&amp;mode='.$mode.
+                   '&amp;hook='.urlencode($hook).'&amp;sesskey='.sesskey().
+                   '"><img src="'.$OUTPUT->pix_url('t/block').'" class="smallicon" alt="'.
+                   get_string('disapprove','glossary').$altsuffix.'" /></a>';
     }
 
     $iscurrentuser = ($entry->userid == $USER->id);
@@ -1361,20 +1352,27 @@ function  glossary_print_entry_lower_section($course, $cm, $glossary, $entry, $m
 }
 
 /**
- * @todo Document this function
+ * Print the list of attachments for this glossary entry
+ *
+ * @param object $entry
+ * @param object $cm The coursemodule
+ * @param string $format The format for this view (html, or text)
+ * @param string $unused1 This parameter is no longer used
+ * @param string $unused2 This parameter is no longer used
  */
-function glossary_print_entry_attachment($entry, $cm, $format=NULL, $align="right", $insidetable=true) {
-///   valid format values: html  : Return the HTML link for the attachment as an icon
-///                        text  : Return the HTML link for tha attachment as text
-///                        blank : Print the output to the screen
+function glossary_print_entry_attachment($entry, $cm, $format = null, $unused1 = null, $unused2 = null) {
+    // Valid format values: html: The HTML link for the attachment is an icon; and
+    //                      text: The HTML link for the attachment is text.
     if ($entry->attachment) {
-          if ($insidetable) {
-              echo "<table border=\"0\" width=\"100%\" align=\"$align\"><tr><td align=\"$align\" nowrap=\"nowrap\">\n";
-          }
-          echo glossary_print_attachments($entry, $cm, $format, $align);
-          if ($insidetable) {
-              echo "</td></tr></table>\n";
-          }
+        echo '<div class="attachments">';
+        echo glossary_print_attachments($entry, $cm, $format);
+        echo '</div>';
+    }
+    if ($unused1) {
+        debugging('The align parameter is deprecated, please use appropriate CSS instead', DEBUG_DEVELOPER);
+    }
+    if ($unused2 !== null) {
+        debugging('The insidetable parameter is deprecated, please use appropriate CSS instead', DEBUG_DEVELOPER);
     }
 }
 
@@ -1530,10 +1528,10 @@ function glossary_search_entries($searchterms, $glossary, $extended) {
  * @param object $entry
  * @param object $cm
  * @param string $type html, txt, empty
- * @param string $align left or right
+ * @param string $unused This parameter is no longer used
  * @return string image string or nothing depending on $type param
  */
-function glossary_print_attachments($entry, $cm, $type=NULL, $align="left") {
+function glossary_print_attachments($entry, $cm, $type=NULL, $unused = null) {
     global $CFG, $DB, $OUTPUT;
 
     if (!$context = context_module::instance($cm->id, IGNORE_MISSING)) {
@@ -2114,9 +2112,9 @@ function glossary_print_sorting_links($cm, $mode, $sortkey = '',$sortorder = '')
  */
 function glossary_sort_entries ( $entry0, $entry1 ) {
 
-    if ( textlib::strtolower(ltrim($entry0->concept)) < textlib::strtolower(ltrim($entry1->concept)) ) {
+    if ( core_text::strtolower(ltrim($entry0->concept)) < core_text::strtolower(ltrim($entry1->concept)) ) {
         return -1;
-    } elseif ( textlib::strtolower(ltrim($entry0->concept)) > textlib::strtolower(ltrim($entry1->concept)) ) {
+    } elseif ( core_text::strtolower(ltrim($entry0->concept)) > core_text::strtolower(ltrim($entry1->concept)) ) {
         return 1;
     } else {
         return 0;
@@ -2623,13 +2621,29 @@ function glossary_get_paging_bar($totalcount, $page, $perpage, $baseurl, $maxpag
 
     return $code;
 }
+
 /**
+ * List the actions that correspond to a view of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = 'r' and edulevel = LEVEL_PARTICIPATING will
+ *       be considered as view action.
+ *
  * @return array
  */
 function glossary_get_view_actions() {
     return array('view','view all','view entry');
 }
+
 /**
+ * List the actions that correspond to a post of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = ('c' || 'u' || 'd') and edulevel = LEVEL_PARTICIPATING
+ *       will be considered as post action.
+ *
  * @return array
  */
 function glossary_get_post_actions() {
@@ -2911,7 +2925,6 @@ function glossary_supports($feature) {
     switch($feature) {
         case FEATURE_GROUPS:                  return false;
         case FEATURE_GROUPINGS:               return false;
-        case FEATURE_GROUPMEMBERSONLY:        return true;
         case FEATURE_MOD_INTRO:               return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS: return true;
         case FEATURE_COMPLETION_HAS_RULES:    return true;

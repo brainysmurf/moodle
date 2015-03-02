@@ -26,6 +26,7 @@ require('../config.php');
 require_once($CFG->dirroot.'/cohort/locallib.php');
 
 $id = required_param('id', PARAM_INT);
+$returnurl = optional_param('returnurl', '', PARAM_LOCALURL);
 
 require_login();
 
@@ -36,8 +37,13 @@ require_capability('moodle/cohort:assign', $context);
 
 $PAGE->set_context($context);
 $PAGE->set_url('/cohort/assign.php', array('id'=>$id));
+$PAGE->set_pagelayout('admin');
 
-$returnurl = new moodle_url('/cohort/index.php', array('contextid'=>$cohort->contextid));
+if ($returnurl) {
+    $returnurl = new moodle_url($returnurl);
+} else {
+    $returnurl = new moodle_url('/cohort/index.php', array('contextid' => $cohort->contextid));
+}
 
 if (!empty($cohort->component)) {
     // We can not manually edit cohorts that were created by external systems, sorry.
@@ -51,15 +57,12 @@ if (optional_param('cancel', false, PARAM_BOOL)) {
 if ($context->contextlevel == CONTEXT_COURSECAT) {
     $category = $DB->get_record('course_categories', array('id'=>$context->instanceid), '*', MUST_EXIST);
     navigation_node::override_active_url(new moodle_url('/cohort/index.php', array('contextid'=>$cohort->contextid)));
-    $PAGE->set_pagelayout('report');
-
 } else {
     navigation_node::override_active_url(new moodle_url('/cohort/index.php', array()));
-    $PAGE->set_pagelayout('admin');
 }
 $PAGE->navbar->add(get_string('assign', 'cohort'));
 
-$PAGE->set_title(get_string('cohort:assign', 'cohort'));
+$PAGE->set_title(get_string('assigncohorts', 'cohort'));
 $PAGE->set_heading($COURSE->fullname);
 
 echo $OUTPUT->header();
@@ -102,6 +105,7 @@ if (optional_param('remove', false, PARAM_BOOL) && confirm_sesskey()) {
 ?>
 <form id="assignform" method="post" action="<?php echo $PAGE->url ?>"><div>
   <input type="hidden" name="sesskey" value="<?php echo sesskey() ?>" />
+  <input type="hidden" name="returnurl" value="<?php echo $returnurl->out_as_local_url() ?>" />
 
   <table summary="" class="generaltable generalbox boxaligncenter" cellspacing="0">
     <tr>

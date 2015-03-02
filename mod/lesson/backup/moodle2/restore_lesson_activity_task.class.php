@@ -16,7 +16,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package moodlecore
+ * @package mod_lesson
  * @subpackage backup-moodle2
  * @copyright 2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -55,6 +55,7 @@ class restore_lesson_activity_task extends restore_activity_task {
         $contents = array();
 
         $contents[] = new restore_decode_content('lesson_pages', array('contents'), 'lesson_page');
+        $contents[] = new restore_decode_content('lesson_answers', array('answer', 'response'), 'lesson_answer');
 
         return $contents;
     }

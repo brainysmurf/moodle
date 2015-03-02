@@ -202,6 +202,7 @@ class enrol_manual_plugin extends enrol_plugin {
      */
     public function get_manual_enrol_button(course_enrolment_manager $manager) {
         global $CFG;
+        require_once($CFG->dirroot.'/cohort/lib.php');
 
         $instance = null;
         $instances = array();
@@ -245,7 +246,8 @@ class enrol_manual_plugin extends enrol_plugin {
             'defaultRole'         => $instance->roleid,
             'defaultDuration'     => $defaultduration,
             'disableGradeHistory' => $CFG->disablegradehistory,
-            'recoverGradesDefault'=> ''
+            'recoverGradesDefault'=> '',
+            'cohortsAvailable'    => cohort_get_available_cohorts($manager->get_context(), COHORT_WITH_NOTENROLLED_MEMBERS_ONLY, 0, 1) ? true : false
         );
 
         if ($CFG->recovergradesdefault) {
@@ -261,8 +263,10 @@ class enrol_manual_plugin extends enrol_plugin {
             'enrol',
             'enrolmentoptions',
             'enrolusers',
+            'enrolxusers',
             'errajaxfailedenrol',
             'errajaxsearch',
+            'foundxcohorts',
             'none',
             'usersearch',
             'unlimitedduration',
@@ -271,6 +275,7 @@ class enrol_manual_plugin extends enrol_plugin {
             'enrolperiod',
             'finishenrollingusers',
             'recovergrades'), 'enrol');
+        $button->strings_for_js(array('browseusers', 'browsecohorts'), 'enrol_manual');
         $button->strings_for_js('assignroles', 'role');
         $button->strings_for_js('startingfrom', 'moodle');
 
@@ -303,7 +308,7 @@ class enrol_manual_plugin extends enrol_plugin {
         }
 
         // Unfortunately this may take a long time, execution can be interrupted safely here.
-        @set_time_limit(0);
+        core_php_time_limit::raise();
         raise_memory_limit(MEMORY_HUGE);
 
         $trace->output('Verifying manual enrolment expiration...');
@@ -340,7 +345,7 @@ class enrol_manual_plugin extends enrol_plugin {
             $rs->close();
             unset($instances);
 
-        } else if ($action == ENROL_EXT_REMOVED_SUSPENDNOROLES) {
+        } else if ($action == ENROL_EXT_REMOVED_SUSPENDNOROLES or $action == ENROL_EXT_REMOVED_SUSPEND) {
             $instances = array();
             $sql = "SELECT ue.*, e.courseid, c.id AS contextid
                       FROM {user_enrolments} ue
@@ -355,10 +360,15 @@ class enrol_manual_plugin extends enrol_plugin {
                     $instances[$ue->enrolid] = $DB->get_record('enrol', array('id'=>$ue->enrolid));
                 }
                 $instance = $instances[$ue->enrolid];
-                // Always remove all manually assigned roles here, this may break enrol_self roles but we do not want hardcoded hacks here.
-                role_unassign_all(array('userid'=>$ue->userid, 'contextid'=>$ue->contextid, 'component'=>'', 'itemid'=>0), true);
-                $this->update_user_enrol($instance, $ue->userid, ENROL_USER_SUSPENDED);
-                $trace->output("suspending expired user $ue->userid in course $instance->courseid", 1);
+                if ($action == ENROL_EXT_REMOVED_SUSPENDNOROLES) {
+                    // Remove all manually assigned roles here, this may break enrol_self roles but we do not want hardcoded hacks here.
+                    role_unassign_all(array('userid'=>$ue->userid, 'contextid'=>$ue->contextid, 'component'=>'', 'itemid'=>0), true);
+                    $this->update_user_enrol($instance, $ue->userid, ENROL_USER_SUSPENDED);
+                    $trace->output("suspending expired user $ue->userid in course $instance->courseid, roles unassigned", 1);
+                } else {
+                    $this->update_user_enrol($instance, $ue->userid, ENROL_USER_SUSPENDED);
+                    $trace->output("suspending expired user $ue->userid in course $instance->courseid, roles kept", 1);
+                }
             }
             $rs->close();
             unset($instances);
@@ -547,5 +557,51 @@ class enrol_manual_plugin extends enrol_plugin {
         // This might be called when forcing restore as manual enrolments.
 
         groups_add_member($groupid, $userid);
+    }
+
+    /**
+     * Is it possible to delete enrol instance via standard UI?
+     *
+     * @param object $instance
+     * @return bool
+     */
+    public function can_delete_instance($instance) {
+        $context = context_course::instance($instance->courseid);
+        return has_capability('enrol/manual:config', $context);
+    }
+
+    /**
+     * Is it possible to hide/show enrol instance via standard UI?
+     *
+     * @param stdClass $instance
+     * @return bool
+     */
+    public function can_hide_show_instance($instance) {
+        $context = context_course::instance($instance->courseid);
+        return has_capability('enrol/manual:config', $context);
+    }
+
+    /**
+     * Enrol all not enrolled cohort members into course via enrol instance.
+     *
+     * @param stdClass $instance
+     * @param int $cohortid
+     * @param int $roleid optional role id
+     * @param int $timestart 0 means unknown
+     * @param int $timeend 0 means forever
+     * @param int $status default to ENROL_USER_ACTIVE for new enrolments, no change by default in updates
+     * @param bool $recovergrades restore grade history
+     */
+    public function enrol_cohort(stdClass $instance, $cohortid, $roleid = null, $timestart = 0, $timeend = 0, $status = null, $recovergrades = null) {
+        global $DB;
+        $context = context_course::instance($instance->courseid);
+        list($esql, $params) = get_enrolled_sql($context);
+        $sql = "SELECT cm.userid FROM {cohort_members} cm LEFT JOIN ($esql) u ON u.id = cm.userid ".
+            "WHERE cm.cohortid = :cohortid AND u.id IS NULL";
+        $params['cohortid'] = $cohortid;
+        $members = $DB->get_fieldset_sql($sql, $params);
+        foreach ($members as $userid) {
+            $this->enrol_user($instance, $userid, $roleid, $timestart, $timeend, $status, $recovergrades);
+        }
     }
 }

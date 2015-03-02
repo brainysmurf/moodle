@@ -477,9 +477,12 @@ class completion_info {
     /**
      * Get incomplete course completion criteria
      *
+     * @deprecated since Moodle 2.8 MDL-46290.
+     * @todo MDL-46294 This will be deleted in Moodle 3.0.
      * @return array
      */
     public function get_incomplete_criteria() {
+        debugging('completion_info->get_incomplete_criteria() is deprecated.', DEBUG_DEVELOPER);
         $incomplete = array();
 
         foreach ($this->get_criteria() as $criteria) {
@@ -1036,7 +1039,20 @@ class completion_info {
         }
         $transaction->allow_commit();
 
-        events_trigger('activity_completion_changed', $data);
+        $cmcontext = context_module::instance($data->coursemoduleid, MUST_EXIST);
+        $coursecontext = $cmcontext->get_parent_context();
+
+        // Trigger an event for course module completion changed.
+        $event = \core\event\course_module_completion_updated::create(array(
+            'objectid' => $data->id,
+            'context' => $cmcontext,
+            'relateduserid' => $data->userid,
+            'other' => array(
+                'relateduserid' => $data->userid
+            )
+        ));
+        $event->add_record_snapshot('course_modules_completion', $data);
+        $event->trigger();
 
         if ($data->userid == $USER->id) {
             $SESSION->completioncache[$cm->course][$cm->id] = $data;
@@ -1064,7 +1080,7 @@ class completion_info {
      * Obtains a list of activities for which completion is enabled on the
      * course. The list is ordered by the section order of those activities.
      *
-     * @return array Array from $cmid => $cm of all activities with completion enabled,
+     * @return cm_info[] Array from $cmid => $cm of all activities with completion enabled,
      *   empty array if none
      */
     public function get_activities() {
@@ -1137,7 +1153,8 @@ class completion_info {
                 context_course::instance($this->course->id),
                 'moodle/course:isincompletionreports', $groupid, true);
 
-        $sql = 'SELECT u.id, u.firstname, u.lastname, u.idnumber';
+        $allusernames = get_all_user_name_fields(true, 'u');
+        $sql = 'SELECT u.id, u.idnumber, ' . $allusernames;
         if ($extracontext) {
             $sql .= get_extra_user_fields_sql($extracontext, 'u', '', array('idnumber'));
         }

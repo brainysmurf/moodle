@@ -35,9 +35,9 @@
 abstract class testing_util {
 
     /**
-     * @var int last value of db writes counter, used for db resetting
+     * @var string dataroot (likely to be $CFG->dataroot).
      */
-    public static $lastdbwrites = null;
+    private static $dataroot = null;
 
     /**
      * @var testing_data_generator
@@ -63,6 +63,57 @@ abstract class testing_util {
      * @var array original structure of all database tables
      */
     protected static $sequencenames = null;
+
+    /**
+     * @var string name of the json file where we store the list of dataroot files to not reset during reset_dataroot.
+     */
+    private static $originaldatafilesjson = 'originaldatafiles.json';
+
+    /**
+     * @var boolean set to true once $originaldatafilesjson file is created.
+     */
+    private static $originaldatafilesjsonadded = false;
+
+    /**
+     * @var int next sequence value for a single test cycle.
+     */
+    protected static $sequencenextstartingid = null;
+    /**
+     * Return the name of the JSON file containing the init filenames.
+     *
+     * @static
+     * @return string
+     */
+    public static function get_originaldatafilesjson() {
+        return self::$originaldatafilesjson;
+    }
+
+    /**
+     * Return the dataroot. It's useful when mocking the dataroot when unit testing this class itself.
+     *
+     * @static
+     * @return string the dataroot.
+     */
+    public static function get_dataroot() {
+        global $CFG;
+
+        //  By default it's the test framework dataroot.
+        if (empty(self::$dataroot)) {
+            self::$dataroot = $CFG->dataroot;
+        }
+
+        return self::$dataroot;
+    }
+
+    /**
+     * Set the dataroot. It's useful when mocking the dataroot when unit testing this class itself.
+     *
+     * @param string $dataroot the dataroot of the test framework.
+     * @static
+     */
+    public static function set_dataroot($dataroot) {
+        self::$dataroot = $dataroot;
+    }
 
     /**
      * Returns the testing framework name
@@ -99,7 +150,7 @@ abstract class testing_util {
 
         $framework = self::get_framework();
 
-        if (!file_exists($CFG->dataroot . '/' . $framework . 'testdir.txt')) {
+        if (!file_exists(self::get_dataroot() . '/' . $framework . 'testdir.txt')) {
             // this is already tested in bootstrap script,
             // but anyway presence of this file means the dataroot is for testing
             return false;
@@ -128,7 +179,7 @@ abstract class testing_util {
 
         $framework = self::get_framework();
 
-        $datarootpath = $CFG->dataroot . '/' . $framework;
+        $datarootpath = self::get_dataroot() . '/' . $framework;
         if (!file_exists($datarootpath . '/tabledata.ser') or !file_exists($datarootpath . '/tablestructure.ser')) {
             return false;
         }
@@ -137,7 +188,7 @@ abstract class testing_util {
             return false;
         }
 
-        $hash = self::get_version_hash();
+        $hash = core_component::get_all_versions_hash();
         $oldhash = file_get_contents($datarootpath . '/versionshash.txt');
 
         if ($hash !== $oldhash) {
@@ -178,12 +229,12 @@ abstract class testing_util {
             }
         }
         $data = serialize($data);
-        $datafile = $CFG->dataroot . '/' . $framework . '/tabledata.ser';
+        $datafile = self::get_dataroot() . '/' . $framework . '/tabledata.ser';
         file_put_contents($datafile, $data);
         testing_fix_file_permissions($datafile);
 
         $structure = serialize($structure);
-        $structurefile = $CFG->dataroot . '/' . $framework . '/tablestructure.ser';
+        $structurefile = self::get_dataroot() . '/' . $framework . '/tablestructure.ser';
         file_put_contents($structurefile, $structure);
         testing_fix_file_permissions($structurefile);
     }
@@ -195,13 +246,13 @@ abstract class testing_util {
         global $CFG;
 
         $framework = self::get_framework();
-        $hash = self::get_version_hash();
+        $hash = core_component::get_all_versions_hash();
 
         // add test db flag
         set_config($framework . 'test', $hash);
 
         // hash all plugin versions - helps with very fast detection of db structure changes
-        $hashfile = $CFG->dataroot . '/' . $framework . '/versionshash.txt';
+        $hashfile = self::get_dataroot() . '/' . $framework . '/versionshash.txt';
         file_put_contents($hashfile, $hash);
         testing_fix_file_permissions($hashfile);
     }
@@ -216,7 +267,7 @@ abstract class testing_util {
 
         $framework = self::get_framework();
 
-        $datafile = $CFG->dataroot . '/' . $framework . '/tabledata.ser';
+        $datafile = self::get_dataroot() . '/' . $framework . '/tabledata.ser';
         if (!file_exists($datafile)) {
             // Not initialised yet.
             return array();
@@ -244,7 +295,7 @@ abstract class testing_util {
 
         $framework = self::get_framework();
 
-        $structurefile = $CFG->dataroot . '/' . $framework . '/tablestructure.ser';
+        $structurefile = self::get_dataroot() . '/' . $framework . '/tablestructure.ser';
         if (!file_exists($structurefile)) {
             // Not initialised yet.
             return array();
@@ -363,6 +414,27 @@ abstract class testing_util {
     }
 
     /**
+     * Determine the next unique starting id sequences.
+     *
+     * @static
+     * @param array $records The records to use to determine the starting value for the table.
+     * @return int The value the sequence should be set to.
+     */
+    private static function get_next_sequence_starting_value($records) {
+        $id = self::$sequencenextstartingid;
+
+        // If there are records, calculate the minimum id we can use.
+        // It must be bigger than the last record's id.
+        if (!empty($records)) {
+            $lastrecord = end($records);
+            $id = max($id, $lastrecord->id + 1);
+        }
+
+        self::$sequencenextstartingid = $id + 1000;
+        return $id;
+    }
+
+    /**
      * Reset all database sequences to initial values.
      *
      * @static
@@ -381,18 +453,24 @@ abstract class testing_util {
             return;
         }
 
+        // If all starting Id's are the same, it's difficult to detect coding and testing
+        // errors that use the incorrect id in tests.  The classic case is cmid vs instance id.
+        // To reduce the chance of the coding error, we start sequences at different values where possible.
+        // In a attempt to avoid tables with existing id's we start at a high number.
+        // Reset the value each time all database sequences are reset.
+        if (defined('PHPUNIT_SEQUENCE_START') and PHPUNIT_SEQUENCE_START) {
+            self::$sequencenextstartingid = PHPUNIT_SEQUENCE_START;
+        } else {
+            self::$sequencenextstartingid = 100000;
+        }
+
         $dbfamily = $DB->get_dbfamily();
         if ($dbfamily === 'postgres') {
             $queries = array();
             $prefix = $DB->get_prefix();
             foreach ($data as $table => $records) {
                 if (isset($structure[$table]['id']) and $structure[$table]['id']->auto_increment) {
-                    if (empty($records)) {
-                        $nextid = 1;
-                    } else {
-                        $lastrecord = end($records);
-                        $nextid = $lastrecord->id + 1;
-                    }
+                    $nextid = self::get_next_sequence_starting_value($records);
                     $queries[] = "ALTER SEQUENCE {$prefix}{$table}_id_seq RESTART WITH $nextid";
                 }
             }
@@ -420,12 +498,7 @@ abstract class testing_util {
             foreach ($data as $table => $records) {
                 if (isset($structure[$table]['id']) and $structure[$table]['id']->auto_increment) {
                     if (isset($sequences[$table])) {
-                        if (empty($records)) {
-                            $nextid = 1;
-                        } else {
-                            $lastrecord = end($records);
-                            $nextid = $lastrecord->id + 1;
-                        }
+                        $nextid = self::get_next_sequence_starting_value($records);
                         if ($sequences[$table] != $nextid) {
                             $DB->change_database_structure("ALTER TABLE {$prefix}{$table} AUTO_INCREMENT = $nextid");
                         }
@@ -475,6 +548,7 @@ abstract class testing_util {
 
         } else {
             // note: does mssql support any kind of faster reset?
+            // This also implies mssql will not use unique sequence values.
             if (is_null($empties)) {
                 $empties = self::guess_unmodified_empty_tables();
             }
@@ -497,10 +571,6 @@ abstract class testing_util {
     public static function reset_database() {
         global $DB;
 
-        if (!is_null(self::$lastdbwrites) and self::$lastdbwrites == $DB->perf_get_writes()) {
-            return false;
-        }
-
         $tables = $DB->get_tables(false);
         if (!$tables or empty($tables['config'])) {
             // not installed yet
@@ -518,7 +588,67 @@ abstract class testing_util {
 
         $empties = self::guess_unmodified_empty_tables();
 
+        $borkedmysql = false;
+        if ($DB->get_dbfamily() === 'mysql') {
+            $version = $DB->get_server_info();
+            if (version_compare($version['version'], '5.6.0') == 1 and version_compare($version['version'], '5.6.16') == -1) {
+                // Everything that comes from Oracle is evil!
+                //
+                // See http://dev.mysql.com/doc/refman/5.6/en/alter-table.html
+                // You cannot reset the counter to a value less than or equal to to the value that is currently in use.
+                //
+                // From 5.6.16 release notes:
+                //   InnoDB: The ALTER TABLE INPLACE algorithm would fail to decrease the auto-increment value.
+                //           (Bug #17250787, Bug #69882)
+                $borkedmysql = true;
+
+            } else if (version_compare($version['version'], '10.0.0') == 1) {
+                // And MariaDB is no better!
+                // Let's hope they pick the patch sometime later...
+                $borkedmysql = true;
+            }
+        }
+
+        if ($borkedmysql) {
+            $mysqlsequences = array();
+            $prefix = $DB->get_prefix();
+            $rs = $DB->get_recordset_sql("SHOW TABLE STATUS LIKE ?", array($prefix.'%'));
+            foreach ($rs as $info) {
+                $table = strtolower($info->name);
+                if (strpos($table, $prefix) !== 0) {
+                    // Incorrect table match caused by _ char.
+                    continue;
+                }
+                if (!is_null($info->auto_increment)) {
+                    $table = preg_replace('/^'.preg_quote($prefix, '/').'/', '', $table);
+                    $mysqlsequences[$table] = $info->auto_increment;
+                }
+            }
+        }
+
         foreach ($data as $table => $records) {
+            if ($borkedmysql) {
+                if (empty($records) and isset($empties[$table])) {
+                    continue;
+                }
+
+                if (isset($structure[$table]['id']) and $structure[$table]['id']->auto_increment) {
+                    $current = $DB->get_records($table, array(), 'id ASC');
+                    if ($current == $records) {
+                        if (isset($mysqlsequences[$table]) and $mysqlsequences[$table] == $structure[$table]['id']->auto_increment) {
+                            continue;
+                        }
+                    }
+                }
+
+                // Use TRUNCATE as a workaround and reinsert everything.
+                $DB->delete_records($table, null);
+                foreach ($records as $record) {
+                    $DB->import_record($table, $record, false, true);
+                }
+                continue;
+            }
+
             if (empty($records)) {
                 if (isset($empties[$table])) {
                     // table was not modified and is empty
@@ -569,8 +699,6 @@ abstract class testing_util {
             }
         }
 
-        self::$lastdbwrites = $DB->perf_get_writes();
-
         return true;
     }
 
@@ -584,21 +712,45 @@ abstract class testing_util {
 
         $childclassname = self::get_framework() . '_util';
 
-        $handle = opendir($CFG->dataroot);
+        // Do not delete automatically installed files.
+        self::skip_original_data_files($childclassname);
+
+        // Clear file status cache, before checking file_exists.
+        clearstatcache();
+
+        // Clean up the dataroot folder.
+        $handle = opendir(self::get_dataroot());
         while (false !== ($item = readdir($handle))) {
             if (in_array($item, $childclassname::$datarootskiponreset)) {
                 continue;
             }
-            if (is_dir("$CFG->dataroot/$item")) {
-                remove_dir("$CFG->dataroot/$item", false);
+            if (is_dir(self::get_dataroot()."/$item")) {
+                remove_dir(self::get_dataroot()."/$item", false);
             } else {
-                unlink("$CFG->dataroot/$item");
+                unlink(self::get_dataroot()."/$item");
             }
         }
         closedir($handle);
+
+        // Clean up the dataroot/filedir folder.
+        if (file_exists(self::get_dataroot() . '/filedir')) {
+            $handle = opendir(self::get_dataroot() . '/filedir');
+            while (false !== ($item = readdir($handle))) {
+                if (in_array('filedir/' . $item, $childclassname::$datarootskiponreset)) {
+                    continue;
+                }
+                if (is_dir(self::get_dataroot()."/filedir/$item")) {
+                    remove_dir(self::get_dataroot()."/filedir/$item", false);
+                } else {
+                    unlink(self::get_dataroot()."/filedir/$item");
+                }
+            }
+            closedir($handle);
+        }
+
         make_temp_directory('');
         make_cache_directory('');
-        make_cache_directory('htmlpurifier');
+        make_localcache_directory('');
         // Reset the cache API so that it recreates it's required directories as well.
         cache_factory::reset();
         // Purge all data from the caches. This is required for consistency.
@@ -730,67 +882,84 @@ abstract class testing_util {
         $framework = self::get_framework();
         $childclassname = $framework . '_util';
 
-        $files = scandir($CFG->dataroot . '/' . $framework);
+        $files = scandir(self::get_dataroot() . '/'  . $framework);
         foreach ($files as $file) {
             if (in_array($file, $childclassname::$datarootskipondrop)) {
                 continue;
             }
-            $path = $CFG->dataroot . '/' . $framework . '/' . $file;
+            $path = self::get_dataroot() . '/' . $framework . '/' . $file;
             if (is_dir($path)) {
                 remove_dir($path, false);
             } else {
                 unlink($path);
             }
         }
+
+        $jsonfilepath = self::get_dataroot() . '/' . self::$originaldatafilesjson;
+        if (file_exists($jsonfilepath)) {
+            // Delete the json file.
+            unlink($jsonfilepath);
+            // Delete the dataroot filedir.
+            remove_dir(self::get_dataroot() . '/filedir', false);
+        }
     }
 
     /**
-     * Calculate unique version hash for all plugins and core.
+     * Skip the original dataroot files to not been reset.
+     *
      * @static
-     * @return string sha1 hash
+     * @param string $utilclassname the util class name..
      */
-    public static function get_version_hash() {
-        global $CFG;
+    protected static function skip_original_data_files($utilclassname) {
+        $jsonfilepath = self::get_dataroot() . '/' . self::$originaldatafilesjson;
+        if (file_exists($jsonfilepath)) {
 
-        if (self::$versionhash) {
-            return self::$versionhash;
-        }
+            $listfiles = file_get_contents($jsonfilepath);
 
-        $versions = array();
-
-        // main version first
-        $version = null;
-        include($CFG->dirroot.'/version.php');
-        $versions['core'] = $version;
-
-        // modules
-        $mods = get_plugin_list('mod');
-        ksort($mods);
-        foreach ($mods as $mod => $fullmod) {
-            $module = new stdClass();
-            $module->version = null;
-            include($fullmod.'/version.php');
-            $versions[$mod] = $module->version;
-        }
-
-        // now the rest of plugins
-        $plugintypes = get_plugin_types();
-        unset($plugintypes['mod']);
-        ksort($plugintypes);
-        foreach ($plugintypes as $type => $unused) {
-            $plugs = get_plugin_list($type);
-            ksort($plugs);
-            foreach ($plugs as $plug => $fullplug) {
-                $plugin = new stdClass();
-                $plugin->version = null;
-                @include($fullplug.'/version.php');
-                $versions[$plug] = $plugin->version;
+            // Mark each files as to not be reset.
+            if (!empty($listfiles) && !self::$originaldatafilesjsonadded) {
+                $originaldatarootfiles = json_decode($listfiles);
+                // Keep the json file. Only drop_dataroot() should delete it.
+                $originaldatarootfiles[] = self::$originaldatafilesjson;
+                $utilclassname::$datarootskiponreset = array_merge($utilclassname::$datarootskiponreset,
+                    $originaldatarootfiles);
+                self::$originaldatafilesjsonadded = true;
             }
         }
-
-        self::$versionhash = sha1(serialize($versions));
-
-        return self::$versionhash;
     }
 
+    /**
+     * Save the list of the original dataroot files into a json file.
+     */
+    protected static function save_original_data_files() {
+        global $CFG;
+
+        $jsonfilepath = self::get_dataroot() . '/' . self::$originaldatafilesjson;
+
+        // Save the original dataroot files if not done (only executed the first time).
+        if (!file_exists($jsonfilepath)) {
+
+            $listfiles = array();
+            $listfiles['filedir/.'] = 'filedir/.';
+            $listfiles['filedir/..'] = 'filedir/..';
+
+            $filedir = self::get_dataroot() . '/filedir';
+            if (file_exists($filedir)) {
+                $directory = new RecursiveDirectoryIterator($filedir);
+                foreach (new RecursiveIteratorIterator($directory) as $file) {
+                    if ($file->isDir()) {
+                        $key = substr($file->getPath(), strlen(self::get_dataroot() . '/'));
+                    } else {
+                        $key = substr($file->getPathName(), strlen(self::get_dataroot() . '/'));
+                    }
+                    $listfiles[$key] = $key;
+                }
+            }
+
+            // Save the file list in a JSON file.
+            $fp = fopen($jsonfilepath, 'w');
+            fwrite($fp, json_encode(array_values($listfiles)));
+            fclose($fp);
+        }
+    }
 }

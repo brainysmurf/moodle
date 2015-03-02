@@ -65,7 +65,6 @@ class quiz {
     protected $cm;
     protected $quiz;
     protected $context;
-    protected $questionids;
 
     // Fields set later if that data is needed.
     protected $questions = null;
@@ -89,12 +88,6 @@ class quiz {
         if ($getcontext && !empty($cm->id)) {
             $this->context = context_module::instance($cm->id);
         }
-        $questionids = quiz_questions_in_quiz($this->quiz->questions);
-        if ($questionids) {
-            $this->questionids = explode(',', quiz_questions_in_quiz($this->quiz->questions));
-        } else {
-            $this->questionids = array(); // Which idiot made explode(',', '') = array('')?
-        }
     }
 
     /**
@@ -104,7 +97,7 @@ class quiz {
      * @param int $userid the the userid.
      * @return quiz the new quiz object
      */
-    public static function create($quizid, $userid) {
+    public static function create($quizid, $userid = null) {
         global $DB;
 
         $quiz = quiz_access_manager::load_quiz_and_settings($quizid);
@@ -112,7 +105,9 @@ class quiz {
         $cm = get_coursemodule_from_instance('quiz', $quiz->id, $course->id, false, MUST_EXIST);
 
         // Update quiz with override information.
-        $quiz = quiz_update_effective_access($quiz, $userid);
+        if ($userid) {
+            $quiz = quiz_update_effective_access($quiz, $userid);
+        }
 
         return new quiz($quiz, $cm, $course);
     }
@@ -132,13 +127,10 @@ class quiz {
      * Load just basic information about all the questions in this quiz.
      */
     public function preload_questions() {
-        if (empty($this->questionids)) {
-            throw new moodle_quiz_exception($this, 'noquestions', $this->edit_url());
-        }
-        $this->questions = question_preload_questions($this->questionids,
-                'qqi.grade AS maxmark, qqi.id AS instance',
-                '{quiz_question_instances} qqi ON qqi.quiz = :quizid AND q.id = qqi.question',
-                array('quizid' => $this->quiz->id));
+        $this->questions = question_preload_questions(null,
+                'slot.maxmark, slot.id AS slotid, slot.slot, slot.page',
+                '{quiz_slots} slot ON slot.quizid = :quizid AND q.id = slot.questionid',
+                array('quizid' => $this->quiz->id), 'slot.slot');
     }
 
     /**
@@ -148,8 +140,11 @@ class quiz {
      * @param array $questionids question ids of the questions to load. null for all.
      */
     public function load_questions($questionids = null) {
+        if ($this->questions === null) {
+            throw new coding_exception('You must call preload_questions before calling load_questions.');
+        }
         if (is_null($questionids)) {
-            $questionids = $this->questionids;
+            $questionids = array_keys($this->questions);
         }
         $questionstoprocess = array();
         foreach ($questionids as $id) {
@@ -158,6 +153,14 @@ class quiz {
             }
         }
         get_question_options($questionstoprocess);
+    }
+
+    /**
+     * Get an instance of the {@link \mod_quiz\structure} class for this quiz.
+     * @return \mod_quiz\structure describes the questions in the quiz.
+     */
+    public function get_structure() {
+        return \mod_quiz\structure::create_for_quiz($this);
     }
 
     // Simple getters ==========================================================
@@ -226,7 +229,10 @@ class quiz {
      * @return whether any questions have been added to this quiz.
      */
     public function has_questions() {
-        return !empty($this->questionids);
+        if ($this->questions === null) {
+            $this->preload_questions();
+        }
+        return !empty($this->questions);
     }
 
     /**
@@ -242,7 +248,7 @@ class quiz {
      */
     public function get_questions($questionids = null) {
         if (is_null($questionids)) {
-            $questionids = $this->questionids;
+            $questionids = array_keys($this->questions);
         }
         $questions = array();
         foreach ($questionids as $id) {
@@ -437,6 +443,9 @@ class quiz_attempt {
     /** @var string to identify the abandoned state. */
     const ABANDONED   = 'abandoned';
 
+    /** @var int maximum number of slots in the quiz for the review page to default to show all. */
+    const MAX_SLOTS_FOR_DEFAULT_REVIEW_SHOW_ALL = 50;
+
     // Basic data.
     protected $quizobj;
     protected $attempt;
@@ -526,11 +535,14 @@ class quiz_attempt {
         return quiz_attempt_state_name($state);
     }
 
-    private function determine_layout() {
+    /**
+     * Parse attempt->layout to populate the other arrays the represent the layout.
+     */
+    protected function determine_layout() {
         $this->pagelayout = array();
 
         // Break up the layout string into pages.
-        $pagelayouts = explode(',0', quiz_clean_layout($this->attempt->layout, true));
+        $pagelayouts = explode(',0', $this->attempt->layout);
 
         // Strip off any empty last page (normally there is one).
         if (end($pagelayouts) == '') {
@@ -548,15 +560,16 @@ class quiz_attempt {
         }
     }
 
-    // Number the questions.
-    private function number_questions() {
+    /**
+     * Work out the number to display for each question/slot.
+     */
+    protected function number_questions() {
         $number = 1;
         foreach ($this->pagelayout as $page => $slots) {
             foreach ($slots as $slot) {
-                $question = $this->quba->get_question($slot);
-                if ($question->length > 0) {
+                if ($length = $this->is_real_question($slot)) {
                     $this->questionnumbers[$slot] = $number;
-                    $number += $question->length;
+                    $number += $length;
                 } else {
                     $this->questionnumbers[$slot] = get_string('infoshort', 'quiz');
                 }
@@ -746,6 +759,45 @@ class quiz_attempt {
     }
 
     /**
+     * Has the student, in this attempt, engaged with the quiz in a non-trivial way?
+     * That is, is there any question worth a non-zero number of marks, where
+     * the student has made some response that we have saved?
+     * @return bool true if we have saved a response for at least one graded question.
+     */
+    public function has_response_to_at_least_one_graded_question() {
+        foreach ($this->quba->get_attempt_iterator() as $qa) {
+            if ($qa->get_max_mark() == 0) {
+                continue;
+            }
+            if ($qa->get_num_steps() > 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get extra summary information about this attempt.
+     *
+     * Some behaviours may be able to provide interesting summary information
+     * about the attempt as a whole, and this method provides access to that data.
+     * To see how this works, try setting a quiz to one of the CBM behaviours,
+     * and then look at the extra information displayed at the top of the quiz
+     * review page once you have sumitted an attempt.
+     *
+     * In the return value, the array keys are identifiers of the form
+     * qbehaviour_behaviourname_meaningfullkey. For qbehaviour_deferredcbm_highsummary.
+     * The values are arrays with two items, title and content. Each of these
+     * will be either a string, or a renderable.
+     *
+     * @param question_display_options $options the display options for this quiz attempt at this time.
+     * @return array as described above.
+     */
+    public function get_additional_summary_data(question_display_options $options) {
+        return $this->quba->get_summary_information($options);
+    }
+
+    /**
      * Get the overall feedback corresponding to a particular mark.
      * @param $grade a particular grade.
      */
@@ -773,13 +825,31 @@ class quiz_attempt {
      * If not, prints an error.
      */
     public function check_review_capability() {
-        if (!$this->has_capability('mod/quiz:viewreports')) {
-            if ($this->get_attempt_state() == mod_quiz_display_options::IMMEDIATELY_AFTER) {
-                $this->require_capability('mod/quiz:attempt');
-            } else {
-                $this->require_capability('mod/quiz:reviewmyattempts');
-            }
+        if ($this->get_attempt_state() == mod_quiz_display_options::IMMEDIATELY_AFTER) {
+            $capability = 'mod/quiz:attempt';
+        } else {
+            $capability = 'mod/quiz:reviewmyattempts';
         }
+
+        // These next tests are in a slighly funny order. The point is that the
+        // common and most performance-critical case is students attempting a quiz
+        // so we want to check that permisison first.
+
+        if ($this->has_capability($capability)) {
+            // User has the permission that lets you do the quiz as a student. Fine.
+            return;
+        }
+
+        if ($this->has_capability('mod/quiz:viewreports') ||
+                $this->has_capability('mod/quiz:preview')) {
+            // User has the permission that lets teachers review. Fine.
+            return;
+        }
+
+        // They should not be here. Trigger the standard no-permission error
+        // but using the name of the student capability.
+        // We know this will fail. We just want the stadard exception thown.
+        $this->require_capability($capability);
     }
 
     /**
@@ -900,10 +970,11 @@ class quiz_attempt {
     /**
      * Is a particular question in this attempt a real question, or something like a description.
      * @param int $slot the number used to identify this question within this attempt.
-     * @return bool whether that question is a real question.
+     * @return int whether that question is a real question. Actually returns the
+     *     question length, which could theoretically be greater than one.
      */
     public function is_real_question($slot) {
-        return $this->quba->get_question($slot)->length != 0;
+        return $this->quba->get_question($slot)->length;
     }
 
     /**
@@ -1101,14 +1172,23 @@ class quiz_attempt {
      * @param int $slot indicates which question to link to.
      * @param int $page if specified, the URL of this particular page of the attempt, otherwise
      * the URL will go to the first page.  If -1, deduce $page from $slot.
-     * @param bool $showall if true, the URL will be to review the entire attempt on one page,
-     * and $page will be ignored.
+     * @param bool|null $showall if true, the URL will be to review the entire attempt on one page,
+     * and $page will be ignored. If null, a sensible default will be chosen.
      * @param int $thispage if not -1, the current page. Will cause links to other things on
      * this page to be output as only a fragment.
      * @return string the URL to review this attempt.
      */
-    public function review_url($slot = null, $page = -1, $showall = false, $thispage = -1) {
+    public function review_url($slot = null, $page = -1, $showall = null, $thispage = -1) {
         return $this->page_and_question_url('review', $slot, $page, $showall, $thispage);
+    }
+
+    /**
+     * By default, should this script show all questions on one page for this attempt?
+     * @param string $script the script name, e.g. 'attempt', 'summary', 'review'.
+     * @return whether show all on one page should be on by default.
+     */
+    public function get_default_show_all($script) {
+        return $script == 'review' && count($this->questionpages) < self::MAX_SLOTS_FOR_DEFAULT_REVIEW_SHOW_ALL;
     }
 
     // Bits of content =========================================================
@@ -1330,15 +1410,26 @@ class quiz_attempt {
     /**
      * Process all the actions that were submitted as part of the current request.
      *
-     * @param int $timestamp the timestamp that should be stored as the modifed
-     * time in the database for these actions. If null, will use the current time.
+     * @param int  $timestamp  the timestamp that should be stored as the modifed
+     *                         time in the database for these actions. If null, will use the current time.
+     * @param bool $becomingoverdue
+     * @param array|null $simulatedresponses If not null, then we are testing, and this is an array of simulated data, keys are slot
+     *                                          nos and values are arrays representing student responses which will be passed to
+     *                                          question_definition::prepare_simulated_post_data method and then have the
+     *                                          appropriate prefix added.
      */
-    public function process_submitted_actions($timestamp, $becomingoverdue = false) {
+    public function process_submitted_actions($timestamp, $becomingoverdue = false, $simulatedresponses = null) {
         global $DB;
 
         $transaction = $DB->start_delegated_transaction();
 
-        $this->quba->process_all_actions($timestamp);
+        if ($simulatedresponses !== null) {
+            $simulatedpostdata = $this->quba->prepare_simulated_post_data($simulatedresponses);
+        } else {
+            $simulatedpostdata = null;
+        }
+
+        $this->quba->process_all_actions($timestamp, $simulatedpostdata);
         question_engine::save_questions_usage_by_activity($this->quba);
 
         $this->attempt->timemodified = $timestamp;
@@ -1411,7 +1502,7 @@ class quiz_attempt {
             quiz_save_best_grade($this->get_quiz(), $this->attempt->userid);
 
             // Trigger event.
-            $this->fire_state_transition_event('quiz_attempt_submitted', $timestamp);
+            $this->fire_state_transition_event('\mod_quiz\event\attempt_submitted', $timestamp);
 
             // Tell any access rules that care that the attempt is over.
             $this->get_access_manager($timestamp)->current_attempt_finished();
@@ -1448,9 +1539,11 @@ class quiz_attempt {
         $this->attempt->timecheckstate = $timestamp;
         $DB->update_record('quiz_attempts', $this->attempt);
 
-        $this->fire_state_transition_event('quiz_attempt_overdue', $timestamp);
+        $this->fire_state_transition_event('\mod_quiz\event\attempt_becameoverdue', $timestamp);
 
         $transaction->allow_commit();
+
+        quiz_send_overdue_message($this);
     }
 
     /**
@@ -1467,45 +1560,36 @@ class quiz_attempt {
         $this->attempt->timecheckstate = null;
         $DB->update_record('quiz_attempts', $this->attempt);
 
-        $this->fire_state_transition_event('quiz_attempt_abandoned', $timestamp);
+        $this->fire_state_transition_event('\mod_quiz\event\attempt_abandoned', $timestamp);
 
         $transaction->allow_commit();
     }
 
     /**
      * Fire a state transition event.
-     * @param string $event the type of event. Should be listed in db/events.php.
+     * the same event information.
+     * @param string $eventclass the event class name.
      * @param int $timestamp the timestamp to include in the event.
+     * @return void
      */
-    protected function fire_state_transition_event($event, $timestamp) {
+    protected function fire_state_transition_event($eventclass, $timestamp) {
         global $USER;
+        $quizrecord = $this->get_quiz();
+        $params = array(
+            'context' => $this->get_quizobj()->get_context(),
+            'courseid' => $this->get_courseid(),
+            'objectid' => $this->attempt->id,
+            'relateduserid' => $this->attempt->userid,
+            'other' => array(
+                'submitterid' => CLI_SCRIPT ? null : $USER->id,
+                'quizid' => $quizrecord->id
+            )
+        );
 
-        // Trigger event.
-        $eventdata = new stdClass();
-        $eventdata->component   = 'mod_quiz';
-        $eventdata->attemptid   = $this->attempt->id;
-        $eventdata->timestamp   = $timestamp;
-        $eventdata->userid      = $this->attempt->userid;
-        $eventdata->quizid      = $this->get_quizid();
-        $eventdata->cmid        = $this->get_cmid();
-        $eventdata->courseid    = $this->get_courseid();
-
-        // I don't think if (CLI_SCRIPT) is really the right logic here. The
-        // question is really 'is $USER currently set to a real user', but I cannot
-        // see standard Moodle function to answer that question. For example,
-        // cron fakes $USER.
-        if (CLI_SCRIPT) {
-            $eventdata->submitterid = null;
-        } else {
-            $eventdata->submitterid = $USER->id;
-        }
-
-        if ($event == 'quiz_attempt_submitted') {
-            // Backwards compatibility for this event type. $eventdata->timestamp is now preferred.
-            $eventdata->timefinish = $timestamp;
-        }
-
-        events_trigger($event, $eventdata);
+        $event = $eventclass::create($params);
+        $event->add_record_snapshot('quiz', $this->get_quiz());
+        $event->add_record_snapshot('quiz_attempts', $this->get_attempt());
+        $event->trigger();
     }
 
     /**
@@ -1536,15 +1620,22 @@ class quiz_attempt {
      *      0 to just use the $page parameter.
      * @param int $page -1 to look up the page number from the slot, otherwise
      *      the page number to go to.
-     * @param bool $showall if true, return a URL with showall=1, and not page number
+     * @param bool|null $showall if true, return a URL with showall=1, and not page number.
+     *      if null, then an intelligent default will be chosen.
      * @param int $thispage the page we are currently on. Links to questions on this
      *      page will just be a fragment #q123. -1 to disable this.
      * @return The requested URL.
      */
     protected function page_and_question_url($script, $slot, $page, $showall, $thispage) {
+
+        $defaultshowall = $this->get_default_show_all($script);
+        if ($showall === null && ($page == 0 || $page == -1)) {
+            $showall = $defaultshowall;
+        }
+
         // Fix up $page.
         if ($page == -1) {
-            if (!is_null($slot) && !$showall) {
+            if ($slot !== null && !$showall) {
                 $page = $this->get_question_page($slot);
             } else {
                 $page = 0;
@@ -1557,7 +1648,7 @@ class quiz_attempt {
 
         // Add a fragment to scroll down to the question.
         $fragment = '';
-        if (!is_null($slot)) {
+        if ($slot !== null) {
             if ($slot == reset($this->pagelayout[$page])) {
                 // First question on page, go to top.
                 $fragment = '#';
@@ -1573,8 +1664,8 @@ class quiz_attempt {
         } else {
             $url = new moodle_url('/mod/quiz/' . $script . '.php' . $fragment,
                     array('attempt' => $this->attempt->id));
-            if ($showall) {
-                $url->param('showall', 1);
+            if ($page == 0 && $showall != $defaultshowall) {
+                $url->param('showall', (int) $showall);
             } else if ($page > 0) {
                 $url->param('page', $page);
             }
@@ -1592,12 +1683,21 @@ class quiz_attempt {
  * @since      Moodle 2.1
  */
 class quiz_nav_question_button implements renderable {
+    /** @var string id="..." to add to the HTML for this button. */
     public $id;
+    /** @var string number to display in this button. Either the question number of 'i'. */
     public $number;
+    /** @var string class to add to the class="" attribute to represnt the question state. */
     public $stateclass;
+    /** @var string Textual description of the question state, e.g. to use as a tool tip. */
     public $statestring;
+    /** @var int the page number this question is on. */
+    public $page;
+    /** @var bool true if this question is on the current page. */
     public $currentpage;
+    /** @var bool true if this question has been flagged. */
     public $flagged;
+    /** @var moodle_url the link this button goes to, or null if there should not be a link. */
     public $url;
 }
 
@@ -1643,7 +1743,8 @@ abstract class quiz_nav_panel_base {
                 $button->stateclass = 'complete';
             }
             $button->statestring = $this->get_state_string($qa, $showcorrectness);
-            $button->currentpage = $this->showall || $this->attemptobj->get_question_page($slot) == $this->page;
+            $button->page        = $this->attemptobj->get_question_page($slot);
+            $button->currentpage = $this->showall || $button->page == $this->page;
             $button->flagged     = $qa->is_flagged();
             $button->url         = $this->get_question_url($slot);
             $buttons[] = $button;
@@ -1683,14 +1784,15 @@ abstract class quiz_nav_panel_base {
 
     public function user_picture() {
         global $DB;
-
-        if (!$this->attemptobj->get_quiz()->showuserpicture) {
+        if ($this->attemptobj->get_quiz()->showuserpicture == QUIZ_SHOWIMAGE_NONE) {
             return null;
         }
-
         $user = $DB->get_record('user', array('id' => $this->attemptobj->get_userid()));
         $userpicture = new user_picture($user);
         $userpicture->courseid = $this->attemptobj->get_courseid();
+        if ($this->attemptobj->get_quiz()->showuserpicture == QUIZ_SHOWIMAGE_LARGE) {
+            $userpicture->size = true;
+        }
         return $userpicture;
     }
 

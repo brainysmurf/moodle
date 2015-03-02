@@ -18,10 +18,9 @@
  * This page allows the teacher to enter a manual grade for a particular question.
  * This page is expected to only be used in a popup window.
  *
- * @package    mod
- * @subpackage quiz
- * @copyright  gustav delius 2006
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_quiz
+ * @copyright gustav delius 2006
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once('../../config.php');
@@ -43,27 +42,56 @@ if (!$attemptobj->is_finished()) {
 require_login($attemptobj->get_course(), false, $attemptobj->get_cm());
 $attemptobj->require_capability('mod/quiz:grade');
 
-// Log this action.
-add_to_log($attemptobj->get_courseid(), 'quiz', 'manualgrade', 'comment.php?attempt=' .
-        $attemptobj->get_attemptid() . '&slot=' . $slot,
-        $attemptobj->get_quizid(), $attemptobj->get_cmid());
-
 // Print the page header.
 $PAGE->set_pagelayout('popup');
-echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($attemptobj->get_question_name($slot)));
+$PAGE->set_heading($attemptobj->get_course()->fullname);
+$output = $PAGE->get_renderer('mod_quiz');
+echo $output->header();
+
+// Prepare summary information about this question attempt.
+$summarydata = array();
+
+// Quiz name.
+$summarydata['quizname'] = array(
+    'title'   => get_string('modulename', 'quiz'),
+    'content' => format_string($attemptobj->get_quiz_name()),
+);
+
+// Question name.
+$summarydata['questionname'] = array(
+    'title'   => get_string('question', 'quiz'),
+    'content' => $attemptobj->get_question_name($slot),
+);
 
 // Process any data that was submitted.
 if (data_submitted() && confirm_sesskey()) {
-    if (optional_param('submit', false, PARAM_BOOL) && question_behaviour::is_manual_grade_in_range($attemptobj->get_uniqueid(), $slot)) {
+    if (optional_param('submit', false, PARAM_BOOL) && question_engine::is_manual_grade_in_range($attemptobj->get_uniqueid(), $slot)) {
         $transaction = $DB->start_delegated_transaction();
         $attemptobj->process_submitted_actions(time());
         $transaction->allow_commit();
-        echo $OUTPUT->notification(get_string('changessaved'), 'notifysuccess');
+
+        // Log this action.
+        $params = array(
+            'objectid' => $attemptobj->get_question_attempt($slot)->get_question()->id,
+            'courseid' => $attemptobj->get_courseid(),
+            'context' => context_module::instance($attemptobj->get_cmid()),
+            'other' => array(
+                'quizid' => $attemptobj->get_quizid(),
+                'attemptid' => $attemptobj->get_attemptid(),
+                'slot' => $slot
+            )
+        );
+        $event = \mod_quiz\event\question_manually_graded::create($params);
+        $event->trigger();
+
+        echo $output->notification(get_string('changessaved'), 'notifysuccess');
         close_window(2, true);
         die;
     }
 }
+
+// Print quiz information.
+echo $output->review_summary_table($summarydata, 0);
 
 // Print the comment form.
 echo '<form method="post" class="mform" id="manualgradingform" action="' .
@@ -91,4 +119,4 @@ echo '</form>';
 $PAGE->requires->js_init_call('M.mod_quiz.init_comment_popup', null, false, quiz_get_js_module());
 
 // End of the page.
-echo $OUTPUT->footer();
+echo $output->footer();

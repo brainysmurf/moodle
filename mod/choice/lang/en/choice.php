@@ -18,18 +18,22 @@
 /**
  * Strings for component 'choice', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package   choice
+ * @package   mod_choice
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['addmorechoices'] = 'Add more choices';
 $string['allowupdate'] = 'Allow choice to be updated';
+$string['allowmultiple'] = 'Allow more than one choice to be selected';
 $string['answered'] = 'Answered';
 $string['completionsubmit'] = 'Show as complete when user makes a choice';
 $string['displayhorizontal'] = 'Display horizontally';
 $string['displaymode'] = 'Display mode for the options';
 $string['displayvertical'] = 'Display vertically';
+$string['eventanswercreated'] = 'Choice made';
+$string['eventanswerupdated'] = 'Choice updated';
+$string['eventreportviewed'] = 'Choice report viewed';
 $string['expired'] = 'Sorry, this activity closed on {$a} and is no longer available';
 $string['atleastoneoption'] = 'You need to provide at least one possible answer.';
 $string['full'] = '(Full)';
@@ -54,6 +58,7 @@ $string['choice:readresponses'] = 'Read responses';
 $string['choicesaved'] = 'Your choice has been saved';
 $string['choicetext'] = 'Choice text';
 $string['chooseaction'] = 'Choose an action ...';
+$string['description'] = 'Description';
 $string['limit'] = 'Limit';
 $string['limitno'] = 'Limit {no}';
 $string['limitanswers'] = 'Limit the number of responses allowed';
@@ -70,6 +75,7 @@ A choice activity may be used
 $string['modulename_link'] = 'mod/choice/view';
 $string['modulenameplural'] = 'Choices';
 $string['moveselectedusersto'] = 'Move selected users to...';
+$string['multiplenotallowederror'] = 'Multiple answers are not allowed in this choice';
 $string['mustchooseone'] = 'You must choose an answer before saving.  Nothing was saved.';
 $string['noguestchoose'] = 'Sorry, guests are not allowed to make choices.';
 $string['noresultsviewable'] = 'The results are not currently viewable.';
@@ -106,6 +112,6 @@ $string['taken'] = 'Taken';
 $string['timerestrict'] = 'Restrict answering to this time period';
 $string['viewallresponses'] = 'View {$a} responses';
 $string['withselected'] = 'With selected';
-$string['userchoosethisoption'] = 'User choose this option';
+$string['userchoosethisoption'] = 'Users who chose this option';
 $string['yourselection'] = 'Your selection';
 $string['skipresultgraph'] = 'Skip result graph';

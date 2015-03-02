@@ -360,7 +360,11 @@ function grade_get_grades($courseid, $itemtype, $itemmodule, $iteminstance, $use
             if (empty($grade_item->outcomeid)) {
                 // prepare information about grade item
                 $item = new stdClass();
+                $item->id = $grade_item->id;
                 $item->itemnumber = $grade_item->itemnumber;
+                $item->itemtype  = $grade_item->itemtype;
+                $item->itemmodule = $grade_item->itemmodule;
+                $item->iteminstance = $grade_item->iteminstance;
                 $item->scaleid    = $grade_item->scaleid;
                 $item->name       = $grade_item->get_name();
                 $item->grademin   = $grade_item->grademin;
@@ -459,7 +463,11 @@ function grade_get_grades($courseid, $itemtype, $itemmodule, $iteminstance, $use
 
                 // outcome info
                 $outcome = new stdClass();
+                $outcome->id = $grade_item->id;
                 $outcome->itemnumber = $grade_item->itemnumber;
+                $outcome->itemtype   = $grade_item->itemtype;
+                $outcome->itemmodule = $grade_item->itemmodule;
+                $outcome->iteminstance = $grade_item->iteminstance;
                 $outcome->scaleid    = $grade_outcome->scaleid;
                 $outcome->name       = $grade_outcome->get_name();
                 $outcome->locked     = $grade_item->is_locked();
@@ -808,7 +816,7 @@ function grade_get_categories_menu($courseid, $includenew=false) {
     foreach ($categories as $category) {
         $cats[$category->id] = $category->get_name();
     }
-    collatorlib::asort($cats);
+    core_collator::asort($cats);
 
     return ($result+$cats);
 }
@@ -839,7 +847,7 @@ function grade_get_letters($context=null) {
 
     $letters = array();
 
-    $contexts = get_parent_contexts($context);
+    $contexts = $context->get_parent_context_ids();
     array_unshift($contexts, $context->id);
 
     foreach ($contexts as $ctxid) {
@@ -1026,6 +1034,25 @@ function grade_regrade_final_grades($courseid, $userid=null, $updated_item=null)
         }
     }
 
+    // Categories might have to run some processing before we fetch the grade items.
+    // This gives them a final opportunity to update and mark their children to be updated.
+    // We need to work on the children categories up to the parent ones, so that, for instance,
+    // if a category total is updated it will be reflected in the parent category.
+    $cats = grade_category::fetch_all(array('courseid' => $courseid));
+    $flatcattree = array();
+    foreach ($cats as $cat) {
+        if (!isset($flatcattree[$cat->depth])) {
+            $flatcattree[$cat->depth] = array();
+        }
+        $flatcattree[$cat->depth][] = $cat;
+    }
+    krsort($flatcattree);
+    foreach ($flatcattree as $depth => $cats) {
+        foreach ($cats as $cat) {
+            $cat->pre_regrade_final_grades();
+        }
+    }
+
     $grade_items = grade_item::fetch_all(array('courseid'=>$courseid));
     $depends_on = array();
 
@@ -1138,7 +1165,7 @@ function grade_grab_course_grades($courseid, $modname=null, $userid=0) {
         return;
     }
 
-    if (!$mods = get_plugin_list('mod') ) {
+    if (!$mods = core_component::get_plugin_list('mod') ) {
         print_error('nomodules', 'debug');
     }
 
@@ -1437,7 +1464,7 @@ function grade_floats_different($f1, $f2) {
  * Do not use rounding for 10,5 at the database level as the results may be
  * different from php round() function.
  *
- * @since 2.0
+ * @since Moodle 2.0
  * @param float $f1 Float one to compare
  * @param float $f2 Float two to compare
  * @return bool True if the values should be considered as the same grades

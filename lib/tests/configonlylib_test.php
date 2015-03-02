@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// Global CFG not used here intentionally to make sure it is not required inside the lib.
+// Global $CFG not used here intentionally to make sure it is not required inside the lib.
 require_once(__DIR__ . '/../configonlylib.php');
 
 
@@ -89,43 +89,43 @@ class core_configonlylib_testcase extends advanced_testcase {
     /**
      * Test fail-safe minimalistic slashargument processing.
      */
-    public function min_get_slash_argument() {
+    public function test_min_get_slash_argument() {
         global $CFG;
 
         $this->resetAfterTest();
-        $this->assertEquals('http://www.example.com/moode', $CFG->wwwroot);
+        $this->assertEquals('http://www.example.com/moodle', $CFG->wwwroot);
 
         $_SERVER = array();
         $_SERVER['SERVER_SOFTWARE'] = 'Apache/2.2.22 (Unix)';
         $_SERVER['QUERY_STRING'] = 'theme=standard&component=core&rev=5&image=u/f1';
-        $_SEREVR['REQUEST_URI'] = '/moodle/theme/image.php?theme=standard&component=core&rev=5&image=u/f1';
+        $_SERVER['REQUEST_URI'] = '/moodle/theme/image.php?theme=standard&component=core&rev=5&image=u/f1';
         $_SERVER['SCRIPT_NAME'] = '/moodle/theme/image.php';
         $this->assertSame('', min_get_slash_argument());
 
         $_SERVER = array();
         $_SERVER['SERVER_SOFTWARE'] = 'Apache/2.2.22 (Unix)';
         $_SERVER['QUERY_STRING'] = '';
-        $_SEREVR['REQUEST_URI'] = '/moodle/theme/image.php/standard/core/5/u/f1';
+        $_SERVER['REQUEST_URI'] = '/moodle/theme/image.php/standard/core/5/u/f1';
         $_SERVER['PATH_INFO'] = '/standard/core/5/u/f1';
         $_SERVER['SCRIPT_NAME'] = '/moodle/theme/image.php';
         $_GET = array();
         $this->assertSame('/standard/core/5/u/f1', min_get_slash_argument());
 
-        // IIS no url rewriting
+        // IIS no url rewriting.
         $_SERVER = array();
         $_SERVER['SERVER_SOFTWARE'] = 'Microsoft-IIS/7.0';
         $_SERVER['QUERY_STRING'] = '';
-        $_SEREVR['REQUEST_URI'] = '/moodle/theme/image.php/standard/core/5/u/f1';
+        $_SERVER['REQUEST_URI'] = '/moodle/theme/image.php/standard/core/5/u/f1';
         $_SERVER['PATH_INFO'] = '/standard/core/5/u/f1';
         $_SERVER['SCRIPT_NAME'] = '/moodle/theme/image.php';
         $_GET = array();
         $this->assertSame('/standard/core/5/u/f1', min_get_slash_argument());
 
-        // IIS with url rewriting
+        // IIS with url rewriting.
         $_SERVER = array();
         $_SERVER['SERVER_SOFTWARE'] = 'Microsoft-IIS/7.0';
         $_SERVER['QUERY_STRING'] = 'file=/standard/core/5/u/f1';
-        $_SEREVR['REQUEST_URI'] = '/moodle/theme/image.php/standard/core/5/u/f1';
+        $_SERVER['REQUEST_URI'] = '/moodle/theme/image.php/standard/core/5/u/f1';
         $_SERVER['PATH_INFO'] = '/';
         $_SERVER['SCRIPT_NAME'] = '/moodle/theme/image.php';
         $_GET = array();
@@ -135,10 +135,20 @@ class core_configonlylib_testcase extends advanced_testcase {
         $_SERVER = array();
         $_SERVER['SERVER_SOFTWARE'] = 'Weird server';
         $_SERVER['QUERY_STRING'] = '';
-        $_SEREVR['REQUEST_URI'] = '/moodle/theme/image.php/standard/core/5/u/f1';
+        $_SERVER['REQUEST_URI'] = '/moodle/theme/image.php/standard/core/5/u/f1';
         $_SERVER['PATH_INFO'] = '/moodle/theme/image.php/standard/core/5/u/f1';
         $_SERVER['SCRIPT_NAME'] = '/moodle/theme/image.php';
         $_GET = array();
         $this->assertSame('/standard/core/5/u/f1', min_get_slash_argument());
+
+        $_SERVER = array();
+        $_SERVER['SERVER_SOFTWARE'] = 'Hacker server';
+        $_SERVER['QUERY_STRING'] = '';
+        $_SERVER['REQUEST_URI'] = '/moodle/theme/image.php/standard/core/5/u/f1';
+        $_SERVER['PATH_INFO'] = '/moodle/theme/image.php/standard\\core/..\\../5/u/f1';
+        $_SERVER['SCRIPT_NAME'] = '/moodle/theme/image.php';
+        $_GET = array();
+        // Windows dir separators are removed, multiple ... gets collapsed to one .
+        $this->assertSame('/standardcore/./5/u/f1', min_get_slash_argument());
     }
 }

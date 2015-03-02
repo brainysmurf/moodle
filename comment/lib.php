@@ -71,6 +71,12 @@ class comment {
     /** @var int The number of comments associated with this comments params */
     protected $totalcommentcount = null;
 
+    /**
+     * Set to true to remove the col attribute from the textarea making it full width.
+     * @var bool
+     */
+    protected $fullwidth = false;
+
     /** @var bool Use non-javascript UI */
     private static $nonjs = false;
     /** @var int comment itemid used in non-javascript UI */
@@ -240,10 +246,15 @@ class comment {
         self::$comment_page    = optional_param('comment_page',    '', PARAM_INT);
         self::$comment_area    = optional_param('comment_area',    '', PARAM_AREA);
 
-        $page->requires->string_for_js('addcomment', 'moodle');
-        $page->requires->string_for_js('deletecomment', 'moodle');
-        $page->requires->string_for_js('comments', 'moodle');
-        $page->requires->string_for_js('commentsrequirelogin', 'moodle');
+        $page->requires->strings_for_js(array(
+                'addcomment',
+                'comments',
+                'commentscount',
+                'commentsrequirelogin',
+                'deletecomment',
+            ),
+            'moodle'
+        );
     }
 
     /**
@@ -260,7 +271,7 @@ class comment {
             throw new coding_exception('You cannot change the component of a comment once it has been set');
         }
         $this->component = $component;
-        list($this->plugintype, $this->pluginname) = normalize_component($component);
+        list($this->plugintype, $this->pluginname) = core_component::normalize_component($component);
     }
 
     /**
@@ -459,9 +470,20 @@ class comment {
 
             if ($this->can_post()) {
                 // print posting textarea
+                $textareaattrs = array(
+                    'name' => 'content',
+                    'rows' => 2,
+                    'id' => 'dlg-content-'.$this->cid
+                );
+                if (!$this->fullwidth) {
+                    $textareaattrs['cols'] = '20';
+                } else {
+                    $textareaattrs['class'] = 'fullwidth';
+                }
+
                 $html .= html_writer::start_tag('div', array('class' => 'comment-area'));
                 $html .= html_writer::start_tag('div', array('class' => 'db'));
-                $html .= html_writer::tag('textarea', '', array('name' => 'content', 'rows' => 2, 'cols' => 20, 'id' => 'dlg-content-'.$this->cid));
+                $html .= html_writer::tag('textarea', '', $textareaattrs);
                 $html .= html_writer::end_tag('div'); // .db
 
                 $html .= html_writer::start_tag('div', array('class' => 'fd', 'id' => 'comment-action-'.$this->cid));
@@ -526,9 +548,9 @@ class comment {
             $c->content     = $u->ccontent;
             $c->format      = $u->cformat;
             $c->timecreated = $u->ctimecreated;
-            $c->strftimeformat = get_string('strftimerecent', 'langconfig');
+            $c->strftimeformat = get_string('strftimerecentfull', 'langconfig');
             $url = new moodle_url('/user/view.php', array('id'=>$u->id, 'course'=>$this->courseid));
-            $c->profileurl = $url->out(true);
+            $c->profileurl = $url->out(false); // URL should not be escaped just yet.
             $c->fullname = fullname($u);
             $c->time = userdate($c->timecreated, $c->strftimeformat);
             $c->content = format_text($c->content, $c->format, $formatoptions);
@@ -651,6 +673,24 @@ class comment {
             }
             $newcmt->time = userdate($newcmt->timecreated, $newcmt->strftimeformat);
 
+            // Trigger comment created event.
+            if (core_component::is_core_subsystem($this->component)) {
+                $eventclassname = '\\core\\event\\' . $this->component . '_comment_created';
+            } else {
+                $eventclassname = '\\' . $this->component . '\\event\comment_created';
+            }
+            if (class_exists($eventclassname)) {
+                $event = $eventclassname::create(
+                        array(
+                            'context' => $this->context,
+                            'objectid' => $newcmt->id,
+                            'other' => array(
+                                'itemid' => $this->itemid
+                                )
+                            ));
+                $event->trigger();
+            }
+
             return $newcmt;
         } else {
             throw new comment_exception('dbupdatefailed');
@@ -685,7 +725,7 @@ class comment {
         global $DB;
         $contexts = array();
         $contexts[] = $context->id;
-        $children = get_child_contexts($context);
+        $children = $context->get_child_contexts();
         foreach ($children as $c) {
             $contexts[] = $c->id;
         }
@@ -709,6 +749,24 @@ class comment {
             throw new comment_exception('nopermissiontocomment');
         }
         $DB->delete_records('comments', array('id'=>$commentid));
+        // Trigger comment delete event.
+        if (core_component::is_core_subsystem($this->component)) {
+            $eventclassname = '\\core\\event\\' . $this->component . '_comment_deleted';
+        } else {
+            $eventclassname = '\\' . $this->component . '\\event\comment_deleted';
+        }
+        if (class_exists($eventclassname)) {
+            $event = $eventclassname::create(
+                    array(
+                        'context' => $this->context,
+                        'objectid' => $commentid,
+                        'other' => array(
+                            'itemid' => $this->itemid
+                            )
+                        ));
+            $event->add_record_snapshot('comments', $comment);
+            $event->trigger();
+        }
         return true;
     }
 
@@ -908,6 +966,16 @@ class comment {
      */
     public function get_commentarea() {
         return $this->commentarea;
+    }
+
+    /**
+     * Make the comments textarea fullwidth.
+     *
+     * @since 2.8.1 + 2.7.4
+     * @param bool $fullwidth
+     */
+    public function set_fullwidth($fullwidth = true) {
+        $this->fullwidth = (bool)$fullwidth;
     }
 }
 

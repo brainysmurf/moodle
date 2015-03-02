@@ -24,8 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/backend.php');
-
 /**
  * Backend code for the 'make large course' tool.
  *
@@ -38,6 +36,10 @@ class tool_generator_course_backend extends tool_generator_backend {
      * @var array Number of sections in course
      */
     private static $paramsections = array(1, 10, 100, 500, 1000, 2000);
+    /**
+     * @var array Number of assignments in course
+     */
+    private static $paramassignments = array(1, 10, 100, 500, 1000, 2000);
     /**
      * @var array Number of Page activities in course
      */
@@ -181,6 +183,7 @@ class tool_generator_course_backend extends tool_generator_backend {
         // Make course.
         $this->course = $this->create_course();
         $this->create_users();
+        $this->create_assignments();
         $this->create_pages();
         $this->create_small_files();
         $this->create_big_files();
@@ -305,8 +308,7 @@ class tool_generator_course_backend extends tool_generator_backend {
             $username = 'tool_generator_' . $textnumber;
 
             // Create user account.
-            $record = array('firstname' => get_string('firstname', 'tool_generator'),
-                    'lastname' => $number, 'username' => $username);
+            $record = array('username' => $username, 'idnumber' => $number);
 
             // We add a user password if it has been specified.
             if (!empty($CFG->tool_generator_users_password)) {
@@ -321,6 +323,26 @@ class tool_generator_course_backend extends tool_generator_backend {
     }
 
     /**
+     * Creates a number of Assignment activities.
+     */
+    private function create_assignments() {
+        // Set up generator.
+        $assigngenerator = $this->generator->get_plugin_generator('mod_assign');
+
+        // Create assignments.
+        $number = self::$paramassignments[$this->size];
+        $this->log('createassignments', $number, true);
+        for ($i = 0; $i < $number; $i++) {
+            $record = array('course' => $this->course);
+            $options = array('section' => $this->get_target_section());
+            $assigngenerator->create_instance($record, $options);
+            $this->dot($i, $number);
+        }
+
+        $this->end_log();
+    }
+
+    /**
      * Creates a number of Page activities.
      */
     private function create_pages() {
@@ -331,7 +353,7 @@ class tool_generator_course_backend extends tool_generator_backend {
         $number = self::$parampages[$this->size];
         $this->log('createpages', $number, true);
         for ($i = 0; $i < $number; $i++) {
-            $record = array('course' => $this->course->id);
+            $record = array('course' => $this->course);
             $options = array('section' => $this->get_target_section());
             $pagegenerator->create_instance($record, $options);
             $this->dot($i, $number);
@@ -349,7 +371,7 @@ class tool_generator_course_backend extends tool_generator_backend {
 
         // Create resource with default textfile only.
         $resourcegenerator = $this->generator->get_plugin_generator('mod_resource');
-        $record = array('course' => $this->course->id,
+        $record = array('course' => $this->course,
                 'name' => get_string('smallfiles', 'tool_generator'));
         $options = array('section' => 0);
         $resource = $resourcegenerator->create_instance($record, $options);
@@ -417,7 +439,7 @@ class tool_generator_course_backend extends tool_generator_backend {
         $resourcegenerator = $this->generator->get_plugin_generator('mod_resource');
         for ($i = 0; $i < $count; $i++) {
             // Create resource.
-            $record = array('course' => $this->course->id,
+            $record = array('course' => $this->course,
                     'name' => get_string('bigfile', 'tool_generator', $i));
             $options = array('section' => $this->get_target_section());
             $resource = $resourcegenerator->create_instance($record, $options);
@@ -460,7 +482,7 @@ class tool_generator_course_backend extends tool_generator_backend {
 
         // Create empty forum.
         $forumgenerator = $this->generator->get_plugin_generator('mod_forum');
-        $record = array('course' => $this->course->id,
+        $record = array('course' => $this->course,
                 'name' => get_string('pluginname', 'forum'));
         $options = array('section' => 0);
         $forum = $forumgenerator->create_instance($record, $options);

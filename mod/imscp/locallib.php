@@ -18,8 +18,7 @@
 /**
  * Private imscp module utility functions
  *
- * @package    mod
- * @subpackage imscp
+ * @package mod_imscp
  * @copyright  2009 Petr Skoda  {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -61,15 +60,19 @@ function imscp_print_content($imscp, $cm, $course) {
 function imscp_htmllize_item($item, $imscp, $cm) {
     global $CFG;
 
-    if (preg_match('|^https?://|', $item['href'])) {
-        $url = $item['href'];
+    if ($item['href']) {
+        if (preg_match('|^https?://|', $item['href'])) {
+            $url = $item['href'];
+        } else {
+            $context = context_module::instance($cm->id);
+            $urlbase = "$CFG->wwwroot/pluginfile.php";
+            $path = '/'.$context->id.'/mod_imscp/content/'.$imscp->revision.'/'.$item['href'];
+            $url = file_encode_url($urlbase, $path, false);
+        }
+        $result = "<li><a href=\"$url\">".$item['title'].'</a>';
     } else {
-        $context = context_module::instance($cm->id);
-        $urlbase = "$CFG->wwwroot/pluginfile.php";
-        $path = '/'.$context->id.'/mod_imscp/content/'.$imscp->revision.'/'.$item['href'];
-        $url = file_encode_url($urlbase, $path, false);
+        $result = '<li>'.$item['title'];
     }
-    $result = "<li><a href=\"$url\">".$item['title'].'</a>';
     if ($item['subitems']) {
         $result .= '<ul>';
         foreach ($item['subitems'] as $subitem) {
@@ -105,9 +108,11 @@ function imscp_parse_structure($imscp, $context) {
  */
 function imscp_parse_manifestfile($manifestfilecontents, $imscp, $context) {
     $doc = new DOMDocument();
+    $oldentities = libxml_disable_entity_loader(true);
     if (!$doc->loadXML($manifestfilecontents, LIBXML_NONET)) {
         return null;
     }
+    libxml_disable_entity_loader($oldentities);
 
     // we put this fake URL as base in order to detect path changes caused by xml:base attributes
     $doc->documentURI = 'http://grrr/';
@@ -205,10 +210,14 @@ function imscp_recursive_href($manifestfilename, $imscp, $context) {
     if (!$manifestfile = $fs->get_file($context->id, 'mod_imscp', 'content', $imscp->revision, $dirname, $filename)) {
         return null;
     }
+
     $doc = new DOMDocument();
+    $oldentities = libxml_disable_entity_loader(true);
     if (!$doc->loadXML($manifestfile->get_content(), LIBXML_NONET)) {
         return null;
     }
+    libxml_disable_entity_loader($oldentities);
+
     $xmlresources = $doc->getElementsByTagName('resource');
     foreach ($xmlresources as $res) {
         if (!$href = $res->attributes->getNamedItem('href')) {

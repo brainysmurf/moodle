@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -28,10 +27,11 @@
 
 require('../config.php');
 require_once($CFG->libdir.'/authlib.php');
+require_once(__DIR__ . '/lib.php');
 require_once('forgot_password_form.php');
+require_once('set_password_form.php');
 
-$p_secret   = optional_param('p', false, PARAM_RAW);
-$p_username = optional_param('s', false, PARAM_RAW);
+$token = optional_param('token', false, PARAM_ALPHANUM);
 
 //HTTPS is required in this page when $CFG->loginhttps enabled
 $PAGE->https_required();
@@ -59,61 +59,14 @@ if (isloggedin() and !isguestuser()) {
     redirect($CFG->wwwroot.'/index.php', get_string('loginalready'), 5);
 }
 
-if ($p_secret !== false) {
-///=====================
-/// user clicked on link in email message
-///=====================
-
-    $user = $DB->get_record('user', array('username'=>$p_username, 'mnethostid'=>$CFG->mnet_localhost_id, 'deleted'=>0, 'suspended'=>0));
-
-    if ($user and ($user->auth === 'nologin' or !is_enabled_auth($user->auth))) {
-        // bad luck - user is not able to login, do not let them reset password
-        $user = false;
-    }
-
-    if (!empty($user) and $user->secret === '') {
-        echo $OUTPUT->header();
-        print_error('secretalreadyused');
-    } else if (!empty($user) and $user->secret == $p_secret) {
-        // make sure that url relates to a valid user
-
-        // check this isn't guest user
-        if (isguestuser($user)) {
-            print_error('cannotresetguestpwd');
-        }
-
-        // Reset login lockout even of the password reset fails.
-        login_unlock_account($user);
-
-        // make sure user is allowed to change password
-        require_capability('moodle/user:changeownpassword', $systemcontext, $user->id);
-
-        if (!reset_password_and_mail($user)) {
-            print_error('cannotresetmail');
-        }
-
-        // Clear secret so that it can not be used again
-        $user->secret = '';
-        $DB->set_field('user', 'secret', $user->secret, array('id'=>$user->id));
-
-        $changepasswordurl = "{$CFG->httpswwwroot}/login/change_password.php";
-        $a = new stdClass();
-        $a->email = $user->email;
-        $a->link = $changepasswordurl;
-
-        echo $OUTPUT->header();
-        notice(get_string('emailpasswordsent', '', $a), $changepasswordurl);
-
-    } else {
-        if (!empty($user) and strlen($p_secret) === 15) {
-            // somebody probably tries to hack in by guessing secret - stop them!
-            $DB->set_field('user', 'secret', '', array('id'=>$user->id));
-        }
-        echo $OUTPUT->header();
-        print_error('forgotteninvalidurl');
-    }
-
-    die; //never reached
+if (empty($token)) {
+    // This is a new password reset request.
+    // Process the request; identify the user & send confirmation email.
+    core_login_process_password_reset_request();
+} else {
+    // User clicked on confirmation link in email message
+    // validate the token & set new password
+    core_login_process_password_set($token);
 }
 
 $mform = new login_forgot_password_form();

@@ -89,11 +89,11 @@ class restore_logs_processor {
             }
             // Arrived here log is empty, no rule was able to perform the conversion, log the problem
             if (empty($newlog)) {
-                self::$task->log('Log module-action "' . $keyname . ' process problem. Not restored', backup::LOG_DEBUG);
+                self::$task->log('Log module-action "' . $keyname . '" process problem. Not restored', backup::LOG_DEBUG);
             }
 
         } else { // Action not found log the problem
-            self::$task->log('Log module-action "' . $keyname . ' unknown. Not restored', backup::LOG_DEBUG);
+            self::$task->log('Log module-action "' . $keyname . '" unknown. Not restored', backup::LOG_DEBUG);
             $newlog = false;
 
         }
@@ -110,7 +110,7 @@ class restore_logs_processor {
         $rules = array(); // To accumulate rules for course
 
         // Add the module tasks
-        $mods = get_plugin_list('mod');
+        $mods = core_component::get_plugin_list('mod');
         foreach ($mods as $mod => $moddir) {
             if (class_exists('restore_' . $mod . '_activity_task')) {
                 $tasks[$mod] = 'restore_' . $mod . '_activity_task';

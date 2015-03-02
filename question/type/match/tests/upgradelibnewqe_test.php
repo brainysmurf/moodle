@@ -59,7 +59,6 @@ class qtype_match_attempt_upgrader_test extends question_attempt_upgrader_test_b
             'questionsperpage' => '2',
             'shufflequestions' => '0',
             'shuffleanswers' => '0',
-            'questions' => '689,690,0,691,692,0,693,694,0,695,696,0,697,698,0',
             'sumgrades' => '48',
             'grade' => '48',
             'timecreated' => '0',
@@ -83,7 +82,6 @@ class qtype_match_attempt_upgrader_test extends question_attempt_upgrader_test_b
             'timemodified' => '1168015476',
             'layout' => '689,690,0,691,692,0,693,694,0,695,696,0,697,698,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '695',
@@ -224,6 +222,7 @@ class qtype_match_attempt_upgrader_test extends question_attempt_upgrader_test_b
             'variant' => 1,
             'maxmark' => 3,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'Associate the appropriate definition with each term. ' .
                     '{Active adjacent system; Autonomous adjacent system; ' .
@@ -317,7 +316,6 @@ class qtype_match_attempt_upgrader_test extends question_attempt_upgrader_test_b
             'questionsperpage' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '0',
-            'questions' => '509,0,510,0,511,0,738,0,514,0',
             'sumgrades' => '5',
             'grade' => '10',
             'timecreated' => '0',
@@ -341,7 +339,6 @@ class qtype_match_attempt_upgrader_test extends question_attempt_upgrader_test_b
             'timemodified' => '1168267508',
             'layout' => '509,510,511,738,514,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '738',
@@ -455,6 +452,7 @@ class qtype_match_attempt_upgrader_test extends question_attempt_upgrader_test_b
             'variant' => 1,
             'maxmark' => 1,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'Which of the following statements about subject ' .
                     'gateways are true, and which are false? {Subject gateways ' .
@@ -527,7 +525,6 @@ class qtype_match_attempt_upgrader_test extends question_attempt_upgrader_test_b
             'questionsperpage' => '1',
             'shufflequestions' => '0',
             'shuffleanswers' => '1',
-            'questions' => '11163,0,11164,0,11165,0,11135,0,11166,0',
             'sumgrades' => '5',
             'grade' => '10',
             'timecreated' => '0',
@@ -551,7 +548,6 @@ class qtype_match_attempt_upgrader_test extends question_attempt_upgrader_test_b
             'timemodified' => '1200506959',
             'layout' => '11163,0,11164,0,11165,0,11135,0,11166,0',
             'preview' => '0',
-            'needsupgradetonewqe' => '1',
         );
         $question = (object) array(
             'id' => '11135',
@@ -731,6 +727,7 @@ class qtype_match_attempt_upgrader_test extends question_attempt_upgrader_test_b
             'variant' => 1,
             'maxmark' => 1,
             'minfraction' => 0,
+            'maxfraction' => 1,
             'flagged' => 0,
             'questionsummary' => 'Which of the following statements about subject gateways are true, and which are false? ' .
                     '{Subject gateways provide links to sites that have been quality checked; ' .

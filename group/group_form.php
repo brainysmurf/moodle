@@ -55,7 +55,6 @@ class group_form extends moodleform {
         $mform->addElement('text','idnumber', get_string('idnumbergroup'), 'maxlength="100" size="10"');
         $mform->addHelpButton('idnumber', 'idnumbergroup');
         $mform->setType('idnumber', PARAM_RAW);
-        $mform->setAdvanced('idnumber');
         if (!has_capability('moodle/course:changeidnumber', $coursecontext)) {
             $mform->hardFreeze('idnumber');
         }
@@ -101,7 +100,7 @@ class group_form extends moodleform {
             $idnumber = '';
         }
         if ($data['id'] and $group = $DB->get_record('groups', array('id'=>$data['id']))) {
-            if (textlib::strtolower($group->name) != textlib::strtolower($name)) {
+            if (core_text::strtolower($group->name) != core_text::strtolower($name)) {
                 if (groups_get_group_by_name($COURSE->id,  $name)) {
                     $errors['name'] = get_string('groupnameexists', 'group', $name);
                 }
@@ -112,11 +111,19 @@ class group_form extends moodleform {
                 }
             }
 
-            if (!empty($CFG->groupenrolmentkeypolicy) and $data['enrolmentkey'] != '' and $group->enrolmentkey !== $data['enrolmentkey']) {
-                // enforce password policy only if changing password
+            if ($data['enrolmentkey'] != '') {
                 $errmsg = '';
-                if (!check_password_policy($data['enrolmentkey'], $errmsg)) {
+                if (!empty($CFG->groupenrolmentkeypolicy) && $group->enrolmentkey !== $data['enrolmentkey']
+                        && !check_password_policy($data['enrolmentkey'], $errmsg)) {
+                    // Enforce password policy when the password is changed.
                     $errors['enrolmentkey'] = $errmsg;
+                } else {
+                    // Prevent twice the same enrolment key in course groups.
+                    $sql = "SELECT id FROM {groups} WHERE id <> :groupid AND courseid = :courseid AND enrolmentkey = :key";
+                    $params = array('groupid' => $data['id'], 'courseid' => $COURSE->id, 'key' => $data['enrolmentkey']);
+                    if ($DB->record_exists_sql($sql, $params)) {
+                        $errors['enrolmentkey'] = get_string('enrolmentkeyalreadyinuse', 'group');
+                    }
                 }
             }
 
@@ -124,6 +131,15 @@ class group_form extends moodleform {
             $errors['name'] = get_string('groupnameexists', 'group', $name);
         } else if (!empty($idnumber) && groups_get_group_by_idnumber($COURSE->id, $idnumber)) {
             $errors['idnumber']= get_string('idnumbertaken');
+        } else if ($data['enrolmentkey'] != '') {
+            $errmsg = '';
+            if (!empty($CFG->groupenrolmentkeypolicy) && !check_password_policy($data['enrolmentkey'], $errmsg)) {
+                // Enforce password policy.
+                $errors['enrolmentkey'] = $errmsg;
+            } else if ($DB->record_exists('groups', array('courseid' => $COURSE->id, 'enrolmentkey' => $data['enrolmentkey']))) {
+                // Prevent the same enrolment key from being used multiple times in course groups.
+                $errors['enrolmentkey'] = get_string('enrolmentkeyalreadyinuse', 'group');
+            }
         }
 
         return $errors;

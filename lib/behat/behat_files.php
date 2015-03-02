@@ -32,7 +32,7 @@
 require_once(__DIR__ . '/behat_base.php');
 
 use Behat\Mink\Exception\ExpectationException as ExpectationException,
-    Behat\Mink\Exception\ElementNotFoundException as ElementNotFoundException;
+    Behat\Mink\Element\NodeElement as NodeElement;
 
 /**
  * Files-related actions.
@@ -49,9 +49,9 @@ use Behat\Mink\Exception\ExpectationException as ExpectationException,
 class behat_files extends behat_base {
 
     /**
-     * Gets the filepicker NodeElement.
+     * Gets the NodeElement for filepicker of filemanager moodleform element.
      *
-     * The filepicker field label is pointing to a hidden input which is
+     * The filepicker/filemanager element label is pointing to a hidden input which is
      * not recognized as a named selector, as it is hidden...
      *
      * @throws ExpectationException Thrown by behat_base::find
@@ -63,21 +63,30 @@ class behat_files extends behat_base {
         // More info about the problem (in case there is a problem).
         $exception = new ExpectationException('"' . $filepickerelement . '" filepicker can not be found', $this->getSession());
 
-        // Gets the ffilemanager node specified by the locator which contains the filepicker container.
-        $filepickerelement = $this->getSession()->getSelectorsHandler()->xpathLiteral($filepickerelement);
-        $filepickercontainer = $this->find(
-            'xpath',
-            "//input[./@id = //label[normalize-space(.)=$filepickerelement]/@for]" .
-                "//ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' ffilemanager ') or " .
-                "contains(concat(' ', normalize-space(@class), ' '), ' ffilepicker ')]",
-            $exception
-        );
+        // If no file picker label is mentioned take the first file picker from the page.
+        if (empty($filepickerelement)) {
+            $filepickercontainer = $this->find(
+                'xpath',
+                "//*[@class=\"form-filemanager\"]",
+                $exception
+            );
+        } else {
+            // Gets the ffilemanager node specified by the locator which contains the filepicker container.
+            $filepickerelement = $this->getSession()->getSelectorsHandler()->xpathLiteral($filepickerelement);
+            $filepickercontainer = $this->find(
+                'xpath',
+                "//input[./@id = //label[normalize-space(.)=$filepickerelement]/@for]" .
+                    "//ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' ffilemanager ') or " .
+                    "contains(concat(' ', normalize-space(@class), ' '), ' ffilepicker ')]",
+                $exception
+            );
+        }
 
         return $filepickercontainer;
     }
 
     /**
-     * Performs $action on a filepicker container element (file or folder).
+     * Performs $action on a filemanager container element (file or folder).
      *
      * It works together with open_element_contextual_menu
      * as this method needs the contextual menu to be opened.
@@ -91,30 +100,34 @@ class behat_files extends behat_base {
 
         // Finds the button inside the DOM, is a modal window, so should be unique.
         $classname = 'fp-file-' . $action;
-        $button = $this->find('css', '.yui3-panel-focused button.' . $classname, $exception);
+        $button = $this->find('css', '.moodle-dialogue-focused button.' . $classname, $exception);
 
+        $this->ensure_node_is_visible($button);
         $button->click();
     }
 
     /**
      * Opens the contextual menu of a folder or a file.
      *
-     * Works both in filepicker elements and when dealing with repository
-     * elements inside modal windows.
+     * Works both in filemanager elements and when dealing with repository
+     * elements inside filepicker modal window.
      *
      * @throws ExpectationException Thrown by behat_base::find
      * @param string $name The name of the folder/file
-     * @param string $filepickerelement The filepicker locator, the whole DOM if false
+     * @param string $filemanagerelement The filemanager form element locator, the repository items are in filepicker modal window if false
      * @return void
      */
-    protected function open_element_contextual_menu($name, $filepickerelement = false) {
+    protected function open_element_contextual_menu($name, $filemanagerelement = false) {
 
-        // If a filepicker is specified we restrict the search to the filepicker descendants.
+        // If a filemanager is specified we restrict the search to the descendants of this particular filemanager form element.
         $containernode = false;
         $exceptionmsg = '"'.$name.'" element can not be found';
-        if ($filepickerelement) {
-            $containernode = $this->get_filepicker_node($filepickerelement);
-            $exceptionmsg = 'The "'.$filepickerelement.'" filepicker ' . $exceptionmsg;
+        if ($filemanagerelement) {
+            $containernode = $this->get_filepicker_node($filemanagerelement);
+            $exceptionmsg = 'The "'.$filemanagerelement.'" filemanager ' . $exceptionmsg;
+            $locatorprefix = "//div[@class='fp-content']";
+        } else {
+            $locatorprefix = "//div[contains(concat(' ', normalize-space(@class), ' '), ' fp-repo-items ')]//descendant::div[@class='fp-content']";
         }
 
         $exception = new ExpectationException($exceptionmsg, $this->getSession());
@@ -122,13 +135,13 @@ class behat_files extends behat_base {
         // Avoid quote-related problems.
         $name = $this->getSession()->getSelectorsHandler()->xpathLiteral($name);
 
-        // Get a filepicker element (folder or file).
+        // Get a filepicker/filemanager element (folder or file).
         try {
 
             // First we look at the folder as we need to click on the contextual menu otherwise it would be opened.
             $node = $this->find(
                 'xpath',
-                "//div[@class='fp-content']" .
+                $locatorprefix .
                     "//descendant::*[self::div | self::a][contains(concat(' ', normalize-space(@class), ' '), ' fp-file ')]" .
                     "[contains(concat(' ', normalize-space(@class), ' '), ' fp-folder ')]" .
                     "[normalize-space(.)=$name]" .
@@ -142,40 +155,42 @@ class behat_files extends behat_base {
             // Here the contextual menu is hidden, we click on the thumbnail.
             $node = $this->find(
                 'xpath',
-                "//div[@class='fp-content']" .
+                $locatorprefix .
                 "//descendant::*[self::div | self::a][contains(concat(' ', normalize-space(@class), ' '), ' fp-file ')]" .
                 "[normalize-space(.)=$name]" .
-                "//descendant::div[contains(concat(' ', normalize-space(@class), ' '), ' fp-thumbnail ')]",
+                "//descendant::div[contains(concat(' ', normalize-space(@class), ' '), ' fp-filename-field ')]",
                 false,
                 $containernode
             );
         }
 
         // Click opens the contextual menu when clicking on files.
+        $this->ensure_node_is_visible($node);
         $node->click();
     }
 
     /**
-     * Opens the 'add file' modal window and selects the repository.
+     * Opens the filepicker modal window and selects the repository.
      *
      * @throws ExpectationException Thrown by behat_base::find
-     * @param NodeElement $filepickernode The filepicker DOM node.
+     * @param NodeElement $filemanagernode The filemanager or filepicker form element DOM node.
      * @param mixed $repositoryname The repo name.
      * @return void
      */
-    protected function open_add_file_window($filepickernode, $repositoryname) {
+    protected function open_add_file_window($filemanagernode, $repositoryname) {
 
-        $exception = new ExpectationException('No files can be added to the specified filepicker', $this->getSession());
+        $exception = new ExpectationException('No files can be added to the specified filemanager', $this->getSession());
 
-        // We should deal with single-file and multiple-file filepickers,
+        // We should deal with single-file and multiple-file filemanagers,
         // catching the exception thrown by behat_base::find() in case is not multiple
         try {
-            // Looking for the add button inside the specified filepicker.
-            $add = $this->find('css', 'div.fp-btn-add a', $exception, $filepickernode);
+            // Looking for the add button inside the specified filemanager.
+            $add = $this->find('css', 'div.fp-btn-add a', $exception, $filemanagernode);
         } catch (Exception $e) {
-            // Otherwise should be a single-file filepicker.
-            $add = $this->find('css', 'input.fp-btn-choose', $exception, $filepickernode);
+            // Otherwise should be a single-file filepicker form element.
+            $add = $this->find('css', 'input.fp-btn-choose', $exception, $filemanagernode);
         }
+        $this->ensure_node_is_visible($add);
         $add->click();
 
         // Getting the repository link and opening it.
@@ -184,7 +199,7 @@ class behat_files extends behat_base {
         // Avoid problems with both double and single quotes in the same string.
         $repositoryname = $this->getSession()->getSelectorsHandler()->xpathLiteral($repositoryname);
 
-        // Here we don't need to look inside the selected filepicker because there can only be one modal window.
+        // Here we don't need to look inside the selected element because there can only be one modal window.
         $repositorylink = $this->find(
             'xpath',
             "//div[contains(concat(' ', normalize-space(@class), ' '), ' fp-repo-area ')]" .
@@ -194,11 +209,15 @@ class behat_files extends behat_base {
         );
 
         // Selecting the repo.
+        $this->ensure_node_is_visible($repositorylink);
         $repositorylink->click();
     }
 
     /**
      * Waits until the file manager modal windows are closed.
+     *
+     * This method is not used by any of our step definitions,
+     * keeping it here for users already using it.
      *
      * @throws ExpectationException
      * @return void
@@ -207,17 +226,18 @@ class behat_files extends behat_base {
 
         $exception = new ExpectationException('The file manager is taking too much time to finish the current action', $this->getSession());
 
-        $this->find(
-            'xpath',
-            "//div[@id='filesskin']" .
-                "/descendant::div[contains(concat(' ', @class, ' '), ' yui3-widget-mask ')]" .
-                "[contains(concat(' ', @style, ' '), ' display: none; ')]",
-            $exception
-        );
+         $this->find(
+             'xpath',
+             "//div[contains(concat(' ', @class, ' '), ' moodle-dialogue-lightbox ')][contains(@style, 'display: none;')]",
+             $exception
+         );
     }
 
     /**
      * Checks that the file manager contents are not being updated.
+     *
+     * This method is not used by any of our step definitions,
+     * keeping it here for users already using it.
      *
      * @throws ExpectationException
      * @param NodeElement $filepickernode The file manager DOM node
@@ -242,9 +262,6 @@ class behat_files extends behat_base {
             $exception,
             $filepickernode
         );
-
-        // After removing the class FileManagerHelper.view_files() performs other actions.
-        $this->getSession()->wait(4 * 1000, false);
     }
 
 }

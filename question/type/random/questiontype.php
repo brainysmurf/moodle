@@ -86,7 +86,7 @@ class qtype_random extends question_type {
         list($qcsql, $qcparams) = $DB->get_in_or_equal($categorylist);
         // TODO use in_or_equal for $otherquestionsinuse and $this->manualqtypes.
         return $DB->record_exists_select('question',
-                "category $qcsql
+                "category {$qcsql}
                      AND parent = 0
                      AND hidden = 0
                      AND id NOT IN ($otherquestionsinuse)
@@ -113,13 +113,6 @@ class qtype_random extends question_type {
         }
         $this->excludedqtypes = implode(',', $excludedqtypes);
         $this->manualqtypes = implode(',', $manualqtypes);
-    }
-
-    public function display_question_editing_page($mform, $question, $wizardnow) {
-        global $OUTPUT;
-        $heading = $this->get_heading(empty($question->id));
-        echo $OUTPUT->heading_with_help($heading, 'pluginname', $this->plugin_name());
-        $mform->display();
     }
 
     public function get_question_options($question) {
@@ -151,7 +144,13 @@ class qtype_random extends question_type {
 
     public function save_question($question, $form) {
         $form->name = '';
-        $form->questiontextformat = FORMAT_MOODLE;
+
+        // In case someone set the question text to true/false in the old style, set it properly.
+        if ($form->questiontext['text']) {
+            $form->questiontext['text'] = '1';
+        } else {
+            $form->questiontext['text'] = '0';
+        }
         $form->tags = array();
 
         // Name is not a required field for random questions, but
@@ -174,6 +173,15 @@ class qtype_random extends question_type {
                 array('id' => $question->category), '*', MUST_EXIST);
         $updateobject->name = $this->question_name($category, !empty($question->questiontext));
         return $DB->update_record('question', $updateobject);
+    }
+
+    /**
+     * During unit tests we need to be able to reset all caches so that each new test starts in a known state.
+     * Intended for use only for testing. This is a stop gap until we start using the MUC caching api here.
+     * You need to call this before every test that loads one or more random questions.
+     */
+    public function clear_caches_before_testing() {
+        $this->availablequestionsbycategory = array();
     }
 
     /**
@@ -209,18 +217,28 @@ class qtype_random extends question_type {
 
     /**
      * Load the definition of another question picked randomly by this question.
-     * @param object $questiondata the data defining a random question.
-     * @param array $excludedquestions of question ids. We will no pick any
-     *      question whose id is in this list.
-     * @param bool $allowshuffle if false, then any shuffle option on the
-     *      selected quetsion is disabled.
+     * @param object       $questiondata the data defining a random question.
+     * @param array        $excludedquestions of question ids. We will no pick any question whose id is in this list.
+     * @param bool         $allowshuffle      if false, then any shuffle option on the selected quetsion is disabled.
+     * @param null|integer $forcequestionid   if not null then force the picking of question with id $forcequestionid.
+     * @throws coding_exception
      * @return question_definition|null the definition of the question that was
      *      selected, or null if no suitable question could be found.
      */
-    public function choose_other_question($questiondata, $excludedquestions, $allowshuffle = true) {
+    public function choose_other_question($questiondata, $excludedquestions, $allowshuffle = true, $forcequestionid = null) {
         $available = $this->get_available_questions_from_category($questiondata->category,
                 !empty($questiondata->questiontext));
         shuffle($available);
+
+        if ($forcequestionid !== null) {
+            $forcedquestionkey = array_search($forcequestionid, $available);
+            if ($forcedquestionkey !== false) {
+                unset($available[$forcedquestionkey]);
+                array_unshift($available, $forcequestionid);
+            } else {
+                throw new coding_exception('thisquestionidisnotavailable', $forcequestionid);
+            }
+        }
 
         foreach ($available as $questionid) {
             if (in_array($questionid, $excludedquestions)) {

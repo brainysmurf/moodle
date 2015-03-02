@@ -101,11 +101,17 @@ abstract class restore_structure_step extends restore_step {
             $xmlprocessor->add_path($element->get_path(), $element->is_grouped());
         }
 
+        // Set up progress tracking.
+        $progress = $this->get_task()->get_progress();
+        $progress->start_progress($this->get_name(), \core\progress\base::INDETERMINATE);
+        $xmlparser->set_progress($progress);
+
         // And process it, dispatch to target methods in step will start automatically
         $xmlparser->process();
 
         // Have finished, launch the after_execute method of all the processing objects
         $this->launch_after_execute_methods();
+        $progress->end_progress();
     }
 
     /**
@@ -217,62 +223,26 @@ abstract class restore_structure_step extends restore_step {
      * Add all the existing file, given their component and filearea and one backup_ids itemname to match with
      */
     public function add_related_files($component, $filearea, $mappingitemname, $filesctxid = null, $olditemid = null) {
+        // If the current progress object is set up and ready to receive
+        // indeterminate progress, then use it, otherwise don't. (This check is
+        // just in case this function is ever called from somewhere not within
+        // the execute() method here, which does set up progress like this.)
+        $progress = $this->get_task()->get_progress();
+        if (!$progress->is_in_progress_section() ||
+                $progress->get_current_max() !== \core\progress\base::INDETERMINATE) {
+            $progress = null;
+        }
+
         $filesctxid = is_null($filesctxid) ? $this->task->get_old_contextid() : $filesctxid;
         $results = restore_dbops::send_files_to_pool($this->get_basepath(), $this->get_restoreid(), $component,
-                $filearea, $filesctxid, $this->task->get_userid(), $mappingitemname, $olditemid);
+                $filearea, $filesctxid, $this->task->get_userid(), $mappingitemname, $olditemid, null, false,
+                $progress);
         $resultstoadd = array();
         foreach ($results as $result) {
             $this->log($result->message, $result->level);
             $resultstoadd[$result->code] = true;
         }
         $this->task->add_result($resultstoadd);
-    }
-
-    /**
-     * Apply course startdate offset based in original course startdate and course_offset_startdate setting
-     * Note we are using one static cache here, but *by restoreid*, so it's ok for concurrence/multiple
-     * executions in the same request
-     */
-    public function apply_date_offset($value) {
-
-        // empties don't offset - zeros (int and string), false and nulls return original value
-        if (empty($value)) {
-            return $value;
-        }
-
-        static $cache = array();
-        // Lookup cache
-        if (isset($cache[$this->get_restoreid()])) {
-            return $value + $cache[$this->get_restoreid()];
-        }
-        // No cache, let's calculate the offset
-        $original = $this->task->get_info()->original_course_startdate;
-        $setting = 0;
-        if ($this->setting_exists('course_startdate')) { // Seting may not exist (MDL-25019)
-            $setting  = $this->get_setting_value('course_startdate');
-        }
-
-        // Original course has not startdate or setting doesn't exist, offset = 0
-        if (empty($original) || empty($setting)) {
-            $cache[$this->get_restoreid()] = 0;
-
-        // Less than 24h of difference, offset = 0 (this avoids some problems with timezones)
-        } else if (abs($setting - $original) < 24 * 60 * 60) {
-            $cache[$this->get_restoreid()] = 0;
-
-        // Re-enforce 'moodle/restore:rolldates' capability for the user in the course, just in case
-        } else if (!has_capability('moodle/restore:rolldates',
-                                   context_course::instance($this->get_courseid()),
-                                   $this->task->get_userid())) {
-            $cache[$this->get_restoreid()] = 0;
-
-        // Arrived here, let's calculate the real offset
-        } else {
-            $cache[$this->get_restoreid()] = $setting - $original;
-        }
-
-        // Return the passed value with cached offset applied
-        return $value + $cache[$this->get_restoreid()];
     }
 
     /**
@@ -289,7 +259,7 @@ abstract class restore_structure_step extends restore_step {
     /**
      * Add plugin structure to any element in the structure restore tree
      *
-     * @param string $plugintype type of plugin as defined by get_plugin_types()
+     * @param string $plugintype type of plugin as defined by core_component::get_plugin_types()
      * @param restore_path_element $element element in the structure restore tree that
      *                                       we are going to add plugin information to
      */
@@ -298,12 +268,12 @@ abstract class restore_structure_step extends restore_step {
         global $CFG;
 
         // Check the requested plugintype is a valid one
-        if (!array_key_exists($plugintype, get_plugin_types($plugintype))) {
+        if (!array_key_exists($plugintype, core_component::get_plugin_types($plugintype))) {
              throw new restore_step_exception('incorrect_plugin_type', $plugintype);
         }
 
         // Get all the restore path elements, looking across all the plugin dirs
-        $pluginsdirs = get_plugin_list($plugintype);
+        $pluginsdirs = core_component::get_plugin_list($plugintype);
         foreach ($pluginsdirs as $name => $pluginsdir) {
             // We need to add also backup plugin classes on restore, they may contain
             // some stuff used both in backup & restore

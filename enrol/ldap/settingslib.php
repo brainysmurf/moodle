@@ -63,7 +63,7 @@ class admin_setting_configtext_trim_lower extends admin_setting_configtext {
             return $validated;
         }
         if ($this->lowercase) {
-            $data = textlib::strtolower($data);
+            $data = core_text::strtolower($data);
         }
         if (!$this->enabled) {
             return '';
@@ -134,7 +134,7 @@ class admin_setting_ldap_rolemapping extends admin_setting {
             if (!$this->config_write('contexts_role'.$roleid, trim($data['contexts']))) {
                 $return = get_string('errorsetting', 'admin');
             }
-            if (!$this->config_write('memberattribute_role'.$roleid, textlib::strtolower(trim($data['memberattribute'])))) {
+            if (!$this->config_write('memberattribute_role'.$roleid, core_text::strtolower(trim($data['memberattribute'])))) {
                 $return = get_string('errorsetting', 'admin');
             }
         }
@@ -191,5 +191,26 @@ class admin_setting_ldap_rolemapping extends admin_setting {
 
         return format_admin_setting($this, $this->visiblename, $return,
                                     $this->description, true, '', '', $query);
+    }
+}
+
+/**
+ * Class implements new specialized setting for course categories that are loaded
+ * only when required
+ * @author Darko Miletic
+ *
+ */
+class enrol_ldap_admin_setting_category extends admin_setting_configselect {
+    public function __construct($name, $visiblename, $description) {
+        parent::__construct($name, $visiblename, $description, 1, null);
+    }
+
+    public function load_choices() {
+        if (is_array($this->choices)) {
+            return true;
+        }
+
+        $this->choices = make_categories_options();
+        return true;
     }
 }

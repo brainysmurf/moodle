@@ -87,19 +87,21 @@ class auth_plugin_email extends auth_plugin_base {
     function user_signup($user, $notify=true) {
         global $CFG, $DB;
         require_once($CFG->dirroot.'/user/profile/lib.php');
+        require_once($CFG->dirroot.'/user/lib.php');
 
 		$plainPassword = $user->password;
         $user->password = hash_internal_user_password($user->password);
+        if (empty($user->calendartype)) {
+            $user->calendartype = $CFG->calendartype;
+        }
 
-        $user->id = $DB->insert_record('user', $user);
-
+        $user->id = user_create_user($user, false, false);
         SSIS::update_user_password2($user->id, $plainPassword);
-
-        /// Save any custom profile field information
+        // Save any custom profile field information.
         profile_save_data($user);
 
-        $user = $DB->get_record('user', array('id'=>$user->id));
-        events_trigger('user_created', $user);
+        // Trigger event.
+        \core\event\user_created::create_from_userid($user->id)->trigger();
 
         if (! send_confirmation_email($user)) {
             print_error('auth_emailnoemail','auth_email');
@@ -195,6 +197,15 @@ class auth_plugin_email extends auth_plugin_base {
      * @return bool
      */
     function can_reset_password() {
+        return true;
+    }
+
+    /**
+     * Returns true if plugin can be manually set.
+     *
+     * @return bool
+     */
+    function can_be_manually_set() {
         return true;
     }
 

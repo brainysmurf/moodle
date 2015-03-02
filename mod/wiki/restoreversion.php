@@ -18,9 +18,9 @@
 /**
  * This file renders the restoring wikipage HTML
  *
- * @package mod-wiki-2.0
- * @copyrigth 2009 Marc Alier, Jordi Piguillem marc.alier@upc.edu
- * @copyrigth 2009 Universitat Politecnica de Catalunya http://www.upc.edu
+ * @package mod_wiki
+ * @copyright 2009 Marc Alier, Jordi Piguillem marc.alier@upc.edu
+ * @copyright 2009 Universitat Politecnica de Catalunya http://www.upc.edu
  *
  * @author Jordi Piguillem
  * @author Marc Alier
@@ -60,6 +60,10 @@ $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST)
 
 require_login($course, true, $cm);
 
+if (!wiki_user_can_view($subwiki)) {
+    print_error('cannotviewpage', 'wiki');
+}
+
 if ($confirm) {
     if (!confirm_sesskey()) {
         print_error(get_string('invalidsesskey', 'wiki'));
@@ -75,7 +79,6 @@ if ($confirm) {
     $wikipage->set_versionid($versionid);
 
 }
-add_to_log($course->id, "wiki", "restore", "view.php?pageid=".$pageid, $pageid, $cm->id);
 
 $wikipage->print_header();
 $wikipage->print_content();

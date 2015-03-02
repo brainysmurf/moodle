@@ -29,12 +29,21 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->libdir . '/badgeslib.php');
 
-class badges_testcase extends advanced_testcase {
+class core_badges_badgeslib_testcase extends advanced_testcase {
     protected $badgeid;
+    protected $course;
+    protected $user;
+    protected $module;
+    protected $coursebadge;
+    protected $assertion;
 
     protected function setUp() {
-        global $DB;
+        global $DB, $CFG;
         $this->resetAfterTest(true);
+
+        unset_config('noemailever');
+
+        $CFG->enablecompletion = true;
 
         $user = $this->getDataGenerator()->create_user();
 
@@ -46,9 +55,9 @@ class badges_testcase extends advanced_testcase {
         $fordb->timemodified = time();
         $fordb->usercreated = $user->id;
         $fordb->usermodified = $user->id;
-        $fordb->image = 0;
         $fordb->issuername = "Test issuer";
         $fordb->issuerurl = "http://issuer-url.domain.co.nz";
+        $fordb->issuercontact = "issuer@example.com";
         $fordb->expiredate = null;
         $fordb->expireperiod = null;
         $fordb->type = BADGE_TYPE_SITE;
@@ -60,6 +69,33 @@ class badges_testcase extends advanced_testcase {
         $fordb->status = BADGE_STATUS_INACTIVE;
 
         $this->badgeid = $DB->insert_record('badge', $fordb, true);
+
+        // Create a course with activity and auto completion tracking.
+        $this->course = $this->getDataGenerator()->create_course(array('enablecompletion' => true));
+        $this->user = $this->getDataGenerator()->create_user();
+        $studentrole = $DB->get_record('role', array('shortname' => 'student'));
+        $this->assertNotEmpty($studentrole);
+
+        // Get manual enrolment plugin and enrol user.
+        require_once($CFG->dirroot.'/enrol/manual/locallib.php');
+        $manplugin = enrol_get_plugin('manual');
+        $maninstance = $DB->get_record('enrol', array('courseid' => $this->course->id, 'enrol' => 'manual'), '*', MUST_EXIST);
+        $manplugin->enrol_user($maninstance, $this->user->id, $studentrole->id);
+        $this->assertEquals(1, $DB->count_records('user_enrolments'));
+
+        $completionauto = array('completion' => COMPLETION_TRACKING_AUTOMATIC);
+        $this->module = $this->getDataGenerator()->create_module('forum', array('course' => $this->course->id), $completionauto);
+
+        // Build badge and criteria.
+        $fordb->type = BADGE_TYPE_COURSE;
+        $fordb->courseid = $this->course->id;
+        $fordb->status = BADGE_STATUS_ACTIVE;
+
+        $this->coursebadge = $DB->insert_record('badge', $fordb, true);
+        $this->assertion = new stdClass();
+        $this->assertion->badge = '{"uid":"%s","recipient":{"identity":"%s","type":"email","hashed":true,"salt":"%s"},"badge":"%s","verify":{"type":"hosted","url":"%s"},"issuedOn":"%d","evidence":"%s"}';
+        $this->assertion->class = '{"name":"%s","description":"%s","image":"%s","criteria":"%s","issuer":"%s"}';
+        $this->assertion->issuer = '{"name":"%s","url":"%s","email":"%s"}';
     }
 
     public function test_create_badge() {
@@ -74,10 +110,10 @@ class badges_testcase extends advanced_testcase {
         $newid = $badge->make_clone();
         $cloned_badge = new badge($newid);
 
-        $this->assertEquals($badge->image, $cloned_badge->image);
         $this->assertEquals($badge->description, $cloned_badge->description);
         $this->assertEquals($badge->issuercontact, $cloned_badge->issuercontact);
         $this->assertEquals($badge->issuername, $cloned_badge->issuername);
+        $this->assertEquals($badge->issuercontact, $cloned_badge->issuercontact);
         $this->assertEquals($badge->issuerurl, $cloned_badge->issuerurl);
         $this->assertEquals($badge->expiredate, $cloned_badge->expiredate);
         $this->assertEquals($badge->expireperiod, $cloned_badge->expireperiod);
@@ -130,6 +166,7 @@ class badges_testcase extends advanced_testcase {
     }
 
     public function test_badge_awards() {
+        $this->preventResetByRollback(); // Messaging is not compatible with transactions.
         $badge = new badge($this->badgeid);
         $user1 = $this->getDataGenerator()->create_user();
 
@@ -141,6 +178,95 @@ class badges_testcase extends advanced_testcase {
         $this->assertTrue($badge->is_issued($user2->id));
 
         $this->assertCount(2, $badge->get_awards());
+    }
+
+    /**
+     * Test the {@link badges_get_user_badges()} function in lib/badgeslib.php
+     */
+    public function test_badges_get_user_badges() {
+        global $DB;
+
+        // Messaging is not compatible with transactions.
+        $this->preventResetByRollback();
+
+        $badges = array();
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+
+        // Record the current time, we need to be precise about a couple of things.
+        $now = time();
+        // Create 11 badges with which to test.
+        for ($i = 1; $i <= 11; $i++) {
+            // Mock up a badge.
+            $badge = new stdClass();
+            $badge->id = null;
+            $badge->name = "Test badge $i";
+            $badge->description = "Testing badges $i";
+            $badge->timecreated = $now - 12;
+            $badge->timemodified = $now - 12;
+            $badge->usercreated = $user1->id;
+            $badge->usermodified = $user1->id;
+            $badge->issuername = "Test issuer";
+            $badge->issuerurl = "http://issuer-url.domain.co.nz";
+            $badge->issuercontact = "issuer@example.com";
+            $badge->expiredate = null;
+            $badge->expireperiod = null;
+            $badge->type = BADGE_TYPE_SITE;
+            $badge->courseid = null;
+            $badge->messagesubject = "Test message subject for badge $i";
+            $badge->message = "Test message body for badge $i";
+            $badge->attachment = 1;
+            $badge->notification = 0;
+            $badge->status = BADGE_STATUS_INACTIVE;
+
+            $badgeid = $DB->insert_record('badge', $badge, true);
+            $badges[$badgeid] = new badge($badgeid);
+            $badges[$badgeid]->issue($user2->id, true);
+            // Check it all actually worked.
+            $this->assertCount(1, $badges[$badgeid]->get_awards());
+
+            // Hack the database to adjust the time each badge was issued.
+            // The alternative to this is sleep which is a no-no in unit tests.
+            $DB->set_field('badge_issued', 'dateissued', $now - 11 + $i, array('userid' => $user2->id, 'badgeid' => $badgeid));
+        }
+
+        // Make sure the first user has no badges.
+        $result = badges_get_user_badges($user1->id);
+        $this->assertInternalType('array', $result);
+        $this->assertCount(0, $result);
+
+        // Check that the second user has the expected 11 badges.
+        $result = badges_get_user_badges($user2->id);
+        $this->assertCount(11, $result);
+
+        // Test pagination.
+        // Ordering is by time issued desc, so things will come out with the last awarded badge first.
+        $result = badges_get_user_badges($user2->id, 0, 0, 4);
+        $this->assertCount(4, $result);
+        $lastbadgeissued = reset($result);
+        $this->assertSame('Test badge 11', $lastbadgeissued->name);
+        // Page 2. Expecting 4 results again.
+        $result = badges_get_user_badges($user2->id, 0, 1, 4);
+        $this->assertCount(4, $result);
+        $lastbadgeissued = reset($result);
+        $this->assertSame('Test badge 7', $lastbadgeissued->name);
+        // Page 3. Expecting just three results here.
+        $result = badges_get_user_badges($user2->id, 0, 2, 4);
+        $this->assertCount(3, $result);
+        $lastbadgeissued = reset($result);
+        $this->assertSame('Test badge 3', $lastbadgeissued->name);
+        // Page 4.... there is no page 4.
+        $result = badges_get_user_badges($user2->id, 0, 3, 4);
+        $this->assertCount(0, $result);
+
+        // Test search.
+        $result = badges_get_user_badges($user2->id, 0, 0, 0, 'badge 1');
+        $this->assertCount(3, $result);
+        $lastbadgeissued = reset($result);
+        $this->assertSame('Test badge 11', $lastbadgeissued->name);
+        // The term Totara doesn't appear anywhere in the badges.
+        $result = badges_get_user_badges($user2->id, 0, 0, 0, 'Totara');
+        $this->assertCount(0, $result);
     }
 
     public function data_for_message_from_template() {
@@ -185,4 +311,120 @@ class badges_testcase extends advanced_testcase {
         $this->assertEquals(badge_message_from_template($message, $params), $result);
     }
 
+    /**
+     * Test badges observer when course module completion event id fired.
+     */
+    public function test_badges_observer_course_module_criteria_review() {
+        $this->preventResetByRollback(); // Messaging is not compatible with transactions.
+        $badge = new badge($this->coursebadge);
+        $this->assertFalse($badge->is_issued($this->user->id));
+
+        $criteria_overall = award_criteria::build(array('criteriatype' => BADGE_CRITERIA_TYPE_OVERALL, 'badgeid' => $badge->id));
+        $criteria_overall->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ANY));
+        $criteria_overall = award_criteria::build(array('criteriatype' => BADGE_CRITERIA_TYPE_ACTIVITY, 'badgeid' => $badge->id));
+        $criteria_overall->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ANY, 'module_'.$this->module->cmid => $this->module->cmid));
+
+        // Set completion for forum activity.
+        $c = new completion_info($this->course);
+        $activities = $c->get_activities();
+        $this->assertEquals(1, count($activities));
+        $this->assertTrue(isset($activities[$this->module->cmid]));
+        $this->assertEquals($activities[$this->module->cmid]->name, $this->module->name);
+
+        $current = $c->get_data($activities[$this->module->cmid], false, $this->user->id);
+        $current->completionstate = COMPLETION_COMPLETE;
+        $current->timemodified = time();
+        $sink = $this->redirectEmails();
+        $c->internal_set_data($activities[$this->module->cmid], $current);
+        $this->assertCount(1, $sink->get_messages());
+        $sink->close();
+
+        // Check if badge is awarded.
+        $this->assertDebuggingCalled('Error baking badge image!');
+        $this->assertTrue($badge->is_issued($this->user->id));
+    }
+
+    /**
+     * Test badges observer when course_completed event is fired.
+     */
+    public function test_badges_observer_course_criteria_review() {
+        $this->preventResetByRollback(); // Messaging is not compatible with transactions.
+        $badge = new badge($this->coursebadge);
+        $this->assertFalse($badge->is_issued($this->user->id));
+
+        $criteria_overall = award_criteria::build(array('criteriatype' => BADGE_CRITERIA_TYPE_OVERALL, 'badgeid' => $badge->id));
+        $criteria_overall->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ANY));
+        $criteria_overall1 = award_criteria::build(array('criteriatype' => BADGE_CRITERIA_TYPE_COURSE, 'badgeid' => $badge->id));
+        $criteria_overall1->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ANY, 'course_'.$this->course->id => $this->course->id));
+
+        $ccompletion = new completion_completion(array('course' => $this->course->id, 'userid' => $this->user->id));
+
+        // Mark course as complete.
+        $sink = $this->redirectEmails();
+        $ccompletion->mark_complete();
+        $this->assertCount(1, $sink->get_messages());
+        $sink->close();
+
+        // Check if badge is awarded.
+        $this->assertDebuggingCalled('Error baking badge image!');
+        $this->assertTrue($badge->is_issued($this->user->id));
+    }
+
+    /**
+     * Test badges observer when user_updated event is fired.
+     */
+    public function test_badges_observer_profile_criteria_review() {
+        $this->preventResetByRollback(); // Messaging is not compatible with transactions.
+        $badge = new badge($this->coursebadge);
+        $this->assertFalse($badge->is_issued($this->user->id));
+
+        $criteria_overall = award_criteria::build(array('criteriatype' => BADGE_CRITERIA_TYPE_OVERALL, 'badgeid' => $badge->id));
+        $criteria_overall->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ANY));
+        $criteria_overall1 = award_criteria::build(array('criteriatype' => BADGE_CRITERIA_TYPE_PROFILE, 'badgeid' => $badge->id));
+        $criteria_overall1->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ALL, 'field_address' => 'address', 'field_aim' => 'aim'));
+
+        $this->user->address = 'Test address';
+        $this->user->aim = '999999999';
+        $sink = $this->redirectEmails();
+        user_update_user($this->user, false);
+        $this->assertCount(1, $sink->get_messages());
+        $sink->close();
+        // Check if badge is awarded.
+        $this->assertDebuggingCalled('Error baking badge image!');
+        $this->assertTrue($badge->is_issued($this->user->id));
+    }
+
+    /**
+     * Test badges assertion generated when a badge is issued.
+     */
+    public function test_badges_assertion() {
+        $this->preventResetByRollback(); // Messaging is not compatible with transactions.
+        $badge = new badge($this->coursebadge);
+        $this->assertFalse($badge->is_issued($this->user->id));
+
+        $criteria_overall = award_criteria::build(array('criteriatype' => BADGE_CRITERIA_TYPE_OVERALL, 'badgeid' => $badge->id));
+        $criteria_overall->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ANY));
+        $criteria_overall1 = award_criteria::build(array('criteriatype' => BADGE_CRITERIA_TYPE_PROFILE, 'badgeid' => $badge->id));
+        $criteria_overall1->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ALL, 'field_address' => 'address'));
+
+        $this->user->address = 'Test address';
+        $sink = $this->redirectEmails();
+        user_update_user($this->user, false);
+        $this->assertCount(1, $sink->get_messages());
+        $sink->close();
+        // Check if badge is awarded.
+        $this->assertDebuggingCalled('Error baking badge image!');
+        $awards = $badge->get_awards();
+        $this->assertCount(1, $awards);
+
+        // Get assertion.
+        $award = reset($awards);
+        $assertion = new core_badges_assertion($award->uniquehash);
+        $testassertion = $this->assertion;
+
+        // Make sure JSON strings have the same structure.
+        $this->assertStringMatchesFormat($testassertion->badge, json_encode($assertion->get_badge_assertion()));
+        $this->assertStringMatchesFormat($testassertion->class, json_encode($assertion->get_badge_class()));
+        $this->assertStringMatchesFormat($testassertion->issuer, json_encode($assertion->get_issuer()));
+    }
 }

@@ -24,8 +24,6 @@
 
 require(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
-require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/generator/classes/testplan_backend.php');
-require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/generator/classes/make_testplan_form.php');
 
 // Initialise page and check permissions.
 admin_externalpage_setup('toolgeneratortestplan');
@@ -41,7 +39,7 @@ echo $OUTPUT->box(format_text(get_string('testplanexplanation', 'tool_generator'
         FORMAT_MARKDOWN, array('context' => $context)));
 
 // Check debugging is set to DEVELOPER.
-if (!debugging('', DEBUG_DEVELOPER)) {
+if (!$CFG->debugdeveloper) {
     echo $OUTPUT->notification(get_string('error_notdebugging', 'tool_generator'));
     echo $OUTPUT->footer();
     exit;

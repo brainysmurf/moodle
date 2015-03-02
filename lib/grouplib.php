@@ -375,7 +375,7 @@ function groups_is_member($groupid, $userid=null) {
  *
  * @category group
  * @staticvar array $cache
- * @param cm_info $cm course module object
+ * @param stdClass|cm_info $cm course module object
  * @param int $userid id of user, null means $USER->id
  * @return bool true if user member of at least one group used in activity
  */
@@ -469,23 +469,22 @@ function groups_get_course_groupmode($course) {
  * Returns effective groupmode used in activity, course setting
  * overrides activity setting if groupmodeforce enabled.
  *
+ * If $cm is an instance of cm_info it is easier to use $cm->effectivegroupmode
+ *
  * @category group
- * @param cm_info $cm the course module object. Only the ->course and ->groupmode need to be set.
+ * @param cm_info|stdClass $cm the course module object. Only the ->course and ->groupmode need to be set.
  * @param stdClass $course object optional course object to improve perf
  * @return int group mode
  */
 function groups_get_activity_groupmode($cm, $course=null) {
-    global $COURSE, $DB;
-
-    // get course object (reuse COURSE if possible)
+    if ($cm instanceof cm_info) {
+        return $cm->effectivegroupmode;
+    }
     if (isset($course->id) and $course->id == $cm->course) {
         //ok
-    } else if ($cm->course == $COURSE->id) {
-        $course = $COURSE;
     } else {
-        if (!$course = $DB->get_record('course', array('id'=>$cm->course))) {
-            print_error('invalidcourseid');
-        }
+        // Get course object (reuse $COURSE if possible).
+        $course = get_course($cm->course, false);
     }
 
     return empty($course->groupmodeforce) ? $cm->groupmode : $course->groupmode;
@@ -565,10 +564,69 @@ function groups_print_course_menu($course, $urlroot, $return=false) {
 }
 
 /**
+ * Generates html to print menu selector for course level, listing all groups.
+ * Note: This api does not do any group mode check use groups_print_course_menu() instead if you want proper checks.
+ *
+ * @param stdclass          $course  course object.
+ * @param string|moodle_url $urlroot return address. Accepts either a string or a moodle_url.
+ * @param bool              $update  set this to true to update current active group based on the group param.
+ * @param int               $activegroup Change group active to this group if $update set to true.
+ *
+ * @return string html or void
+ */
+function groups_allgroups_course_menu($course, $urlroot, $update = false, $activegroup = 0) {
+    global $SESSION, $OUTPUT, $USER;
+
+    $groupmode = groups_get_course_groupmode($course);
+    $context = context_course::instance($course->id);
+    $groupsmenu = array();
+
+    if (has_capability('moodle/site:accessallgroups', $context)) {
+        $groupsmenu[0] = get_string('allparticipants');
+        $allowedgroups = groups_get_all_groups($course->id, 0, $course->defaultgroupingid);
+    } else {
+        $allowedgroups = groups_get_all_groups($course->id, $USER->id, $course->defaultgroupingid);
+    }
+
+    foreach ($allowedgroups as $group) {
+        $groupsmenu[$group->id] = format_string($group->name);
+    }
+
+    if ($update) {
+        // Init activegroup array if necessary.
+        if (!isset($SESSION->activegroup)) {
+            $SESSION->activegroup = array();
+        }
+        if (!isset($SESSION->activegroup[$course->id])) {
+            $SESSION->activegroup[$course->id] = array(SEPARATEGROUPS => array(), VISIBLEGROUPS => array(), 'aag' => array());
+        }
+        if (empty($groupsmenu[$activegroup])) {
+            $activegroup = key($groupsmenu); // Force set to one of accessible groups.
+        }
+        $SESSION->activegroup[$course->id][$groupmode][$course->defaultgroupingid] = $activegroup;
+    }
+
+    $grouplabel = get_string('groups');
+    if (count($groupsmenu) == 0) {
+        return '';
+    } else if (count($groupsmenu) == 1) {
+        $groupname = reset($groupsmenu);
+        $output = $grouplabel.': '.$groupname;
+    } else {
+        $select = new single_select(new moodle_url($urlroot), 'group', $groupsmenu, $activegroup, null, 'selectgroup');
+        $select->label = $grouplabel;
+        $output = $OUTPUT->render($select);
+    }
+
+    return $output;
+
+}
+
+/**
  * Print group menu selector for activity.
  *
  * @category group
- * @param stdClass $cm course module object
+ * @param stdClass|cm_info $cm course module object
  * @param string|moodle_url $urlroot return address that users get to if they choose an option;
  *   should include any parameters needed, e.g. "$CFG->wwwroot/mod/forum/view.php?id=34"
  * @param bool $return return as string instead of printing
@@ -713,7 +771,7 @@ function groups_get_course_group($course, $update=false, $allowedgroups=null) {
  * Returns group active in activity, changes the group by default if 'group' page param present
  *
  * @category group
- * @param stdClass $cm course module object
+ * @param stdClass|cm_info $cm course module object
  * @param bool $update change active group if group param submitted
  * @param array $allowedgroups list of groups user may access (INTERNAL, to be used only from groups_print_activity_menu())
  * @return mixed false if groups not used, int if groups used, 0 means all groups (access must be verified in SEPARATE mode)
@@ -766,7 +824,7 @@ function groups_get_activity_group($cm, $update=false, $allowedgroups=null) {
  * specified activity.
  *
  * @category group
- * @param stdClass $cm Course-module
+ * @param stdClass|cm_info $cm Course-module
  * @param int $userid User ID (defaults to current user)
  * @return array An array of group objects, or false if none
  */
@@ -783,7 +841,7 @@ function groups_get_activity_allowed_groups($cm,$userid=0) {
     // If visible groups mode, or user has the accessallgroups capability,
     // then they can access all groups for the activity...
     $context = context_module::instance($cm->id);
-    if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $context)) {
+    if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $context, $userid)) {
         return groups_get_all_groups($cm->course, 0, $cm->groupingid);
     } else {
         // ...otherwise they can only access groups they belong to
@@ -792,29 +850,39 @@ function groups_get_activity_allowed_groups($cm,$userid=0) {
 }
 
 /**
- * Determine if a course module is currently visible to a user
+ * Determine if a given group is visible to user or not in a given context.
  *
- * $USER If $userid is null, use the global object.
- *
- * @category group
- * @param stdClass $cm The course module
- * @param int $userid The user to check against the group.
- * @return bool True if the user can view the course module, false otherwise.
+ * @since Moodle 2.6
+ * @param int      $groupid Group id to test. 0 for all groups.
+ * @param stdClass $course  Course object.
+ * @param stdClass $cm      Course module object.
+ * @param int      $userid  user id to test against. Defaults to $USER.
+ * @return boolean true if visible, false otherwise
  */
-function groups_course_module_visible($cm, $userid=null) {
-    global $CFG, $USER;
+function groups_group_visible($groupid, $course, $cm = null, $userid = null) {
+    global $USER;
 
     if (empty($userid)) {
         $userid = $USER->id;
     }
-    if (empty($CFG->enablegroupmembersonly)) {
+
+    $groupmode = empty($cm) ? groups_get_course_groupmode($course) : groups_get_activity_groupmode($cm, $course);
+    if ($groupmode == NOGROUPS || $groupmode == VISIBLEGROUPS) {
+        // Groups are not used, or everything is visible, no need to go any further.
         return true;
     }
-    if (empty($cm->groupmembersonly)) {
+
+    $context = empty($cm) ? context_course::instance($course->id) : context_module::instance($cm->id);
+    if (has_capability('moodle/site:accessallgroups', $context, $userid)) {
+        // User can see everything. Groupid = 0 is handled here as well.
         return true;
-    }
-    if (has_capability('moodle/site:accessallgroups', context_module::instance($cm->id), $userid) or groups_has_membership($cm, $userid)) {
-        return true;
+    } else if ($groupid != 0) {
+        // Group mode is separate, and user doesn't have access all groups capability. Check if user can see requested group.
+        $groups = empty($cm) ? groups_get_all_groups($course->id, $userid) : groups_get_activity_allowed_groups($cm, $userid);
+        if (array_key_exists($groupid, $groups)) {
+            // User can see the group.
+            return true;
+        }
     }
     return false;
 }

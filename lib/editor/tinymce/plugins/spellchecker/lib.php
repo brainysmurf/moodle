@@ -48,8 +48,10 @@ class tinymce_spellchecker extends editor_tinymce_plugin {
             // Prevent the built-in spell checker in Firefox, Safari and other sane browsers.
             unset($params['gecko_spellcheck']);
 
-            // Add button after code button in advancedbuttons3.
-            $added = $this->add_button_after($params, 3, 'spellchecker', 'code', false);
+            if ($row = $this->find_button($params, 'code')) {
+                // Add button after 'code'.
+                $this->add_button_after($params, $row, 'spellchecker', 'code');
+            }
 
             // Add JS file, which uses default name.
             $this->add_js_plugin($params);
@@ -61,7 +63,7 @@ class tinymce_spellchecker extends editor_tinymce_plugin {
 
     protected function is_legacy_browser() {
         // IE8 and IE9 are the only supported browsers that do not have spellchecker.
-        if (check_browser_version('MSIE', 5) and !check_browser_version('MSIE', 10)) {
+        if (core_useragent::is_ie() and !core_useragent::check_ie_version(10)) {
             return true;
         }
         // The rest of browsers supports spellchecking or is horribly outdated and we do not care...

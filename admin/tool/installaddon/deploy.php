@@ -25,8 +25,6 @@
 
 require(dirname(__FILE__) . '/../../../config.php');
 require_once($CFG->libdir.'/filelib.php');
-require_once(dirname(__FILE__).'/classes/installer.php');
-require_once(dirname(__FILE__).'/classes/validator.php');
 
 require_login();
 require_capability('moodle/site:config', context_system::instance());
@@ -71,6 +69,10 @@ if (file_exists($plugintypepath.'/'.$pluginname)) {
         get_string('invaliddata', 'core_error'));
 }
 
-$installer->move_directory($zipcontentpath.'/'.$pluginname, $plugintypepath.'/'.$pluginname);
+// Copy permissions form the plugin type directory.
+$dirpermissions = fileperms($plugintypepath);
+$filepermissions = ($dirpermissions & 0666); // Strip execute flags.
+
+$installer->move_directory($zipcontentpath.'/'.$pluginname, $plugintypepath.'/'.$pluginname, $dirpermissions, $filepermissions);
 fulldelete($CFG->tempdir.'/tool_installaddon/'.$jobid);
 redirect(new moodle_url('/admin'));

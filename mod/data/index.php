@@ -20,7 +20,7 @@
  *
  * @copyright 1990 Martin Dougiamas  http://dougiamas.com
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @package mod-data
+ * @package mod_data
  */
 
 require_once("../../config.php");
@@ -39,7 +39,12 @@ $PAGE->set_pagelayout('incourse');
 
 $context = context_course::instance($course->id);
 
-add_to_log($course->id, "data", "view all", "index.php?id=$course->id", "");
+$params = array(
+    'context' => context_course::instance($course->id)
+);
+$event = \mod_data\event\course_module_instance_list_viewed::create($params);
+$event->add_record_snapshot('course', $course);
+$event->trigger();
 
 $strname = get_string('name');
 $strdata = get_string('modulename','data');
@@ -49,6 +54,7 @@ $PAGE->navbar->add($strdata, new moodle_url('/mod/data/index.php', array('id'=>$
 $PAGE->set_title($strdata);
 $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
+echo $OUTPUT->heading($strdataplural, 2);
 
 if (! $datas = get_all_instances_in_course("data", $course)) {
     notice(get_string('thereareno', 'moodle',$strdataplural) , "$CFG->wwwroot/course/view.php?id=$course->id");

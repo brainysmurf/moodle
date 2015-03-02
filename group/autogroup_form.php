@@ -46,7 +46,30 @@ class autogroup_form extends moodleform {
 
         $mform =& $this->_form;
 
-        $mform->addElement('header', 'autogroup', get_string('autocreategroups', 'group'));
+        $mform->addElement('header', 'autogroup', get_string('general'));
+
+        $mform->addElement('text', 'namingscheme', get_string('namingscheme', 'group'));
+        $mform->addHelpButton('namingscheme', 'namingscheme', 'group');
+        $mform->addRule('namingscheme', get_string('required'), 'required', null, 'client');
+        $mform->setType('namingscheme', PARAM_TEXT);
+        // There must not be duplicate group names in course.
+        $template = get_string('grouptemplate', 'group');
+        $gname = groups_parse_name($template, 0);
+        if (!groups_get_group_by_name($COURSE->id, $gname)) {
+            $mform->setDefault('namingscheme', $template);
+        }
+
+        $options = array('groups' => get_string('numgroups', 'group'),
+                         'members' => get_string('nummembers', 'group'));
+        $mform->addElement('select', 'groupby', get_string('groupby', 'group'), $options);
+
+        $mform->addElement('text', 'number', get_string('number', 'group'),'maxlength="4" size="4"');
+        $mform->setType('number', PARAM_INT);
+        $mform->addRule('number', null, 'numeric', null, 'client');
+        $mform->addRule('number', get_string('required'), 'required', null, 'client');
+
+        $mform->addElement('header', 'groupmembershdr', get_string('groupmembers', 'group'));
+        $mform->setExpanded('groupmembershdr', true);
 
         $options = array(0=>get_string('all'));
         $options += $this->_customdata['roles'];
@@ -59,36 +82,48 @@ class autogroup_form extends moodleform {
             $mform->setDefault('roleid', $student->id);
         }
 
-        $context = context_course::instance($COURSE->id);
-        if (has_capability('moodle/cohort:view', $context)) {
-            $options = cohort_get_visible_list($COURSE);
-            if ($options) {
-                $options = array(0=>get_string('anycohort', 'cohort')) + $options;
-                $mform->addElement('select', 'cohortid', get_string('selectfromcohort', 'cohort'), $options);
-                $mform->setDefault('cohortid', '0');
-            } else {
-                $mform->addElement('hidden','cohortid');
-                $mform->setType('cohortid', PARAM_INT);
-                $mform->setConstant('cohortid', '0');
+        if ($cohorts = cohort_get_available_cohorts(context_course::instance($COURSE->id), COHORT_WITH_ENROLLED_MEMBERS_ONLY, 0, 0)) {
+            $options = array(0 => get_string('anycohort', 'cohort'));
+            foreach ($cohorts as $c) {
+                $options[$c->id] = format_string($c->name, true, context::instance_by_id($c->contextid));
             }
+            $mform->addElement('select', 'cohortid', get_string('selectfromcohort', 'cohort'), $options);
+            $mform->setDefault('cohortid', '0');
         } else {
             $mform->addElement('hidden','cohortid');
             $mform->setType('cohortid', PARAM_INT);
             $mform->setConstant('cohortid', '0');
         }
 
-        $options = array('groups' => get_string('numgroups', 'group'),
-                         'members' => get_string('nummembers', 'group'));
-        $mform->addElement('select', 'groupby', get_string('groupby', 'group'), $options);
+        if ($groupings = groups_get_all_groupings($COURSE->id)) {
+            $options = array();
+            $options[0] = get_string('none');
+            foreach ($groupings as $grouping) {
+                $options[$grouping->id] = format_string($grouping->name);
+            }
+            $mform->addElement('select', 'groupingid', get_string('selectfromgrouping', 'group'), $options);
+            $mform->setDefault('groupingid', 0);
+            $mform->disabledIf('groupingid', 'notingroup', 'checked');
+        } else {
+            $mform->addElement('hidden', 'groupingid');
+            $mform->setType('groupingid', PARAM_INT);
+            $mform->setConstant('groupingid', 0);
+        }
 
-        $mform->addElement('text', 'number', get_string('number', 'group'),'maxlength="4" size="4"');
-        $mform->setType('number', PARAM_INT);
-        $mform->addRule('number', null, 'numeric', null, 'client');
-        $mform->addRule('number', get_string('required'), 'required', null, 'client');
-
-        $mform->addElement('checkbox', 'nosmallgroups', get_string('nosmallgroups', 'group'));
-        $mform->disabledIf('nosmallgroups', 'groupby', 'noteq', 'members');
-        $mform->setAdvanced('nosmallgroups');
+        if ($groups = groups_get_all_groups($COURSE->id)) {
+            $options = array();
+            $options[0] = get_string('none');
+            foreach ($groups as $group) {
+                $options[$group->id] = format_string($group->name);
+            }
+            $mform->addElement('select', 'groupid', get_string('selectfromgroup', 'group'), $options);
+            $mform->setDefault('groupid', 0);
+            $mform->disabledIf('groupid', 'notingroup', 'checked');
+        } else {
+            $mform->addElement('hidden', 'groupid');
+            $mform->setType('groupid', PARAM_INT);
+            $mform->setConstant('groupid', 0);
+        }
 
         $options = array('no'        => get_string('noallocation', 'group'),
                          'random'    => get_string('random', 'group'),
@@ -97,20 +132,17 @@ class autogroup_form extends moodleform {
                          'idnumber'  => get_string('byidnumber', 'group'));
         $mform->addElement('select', 'allocateby', get_string('allocateby', 'group'), $options);
         $mform->setDefault('allocateby', 'random');
-        $mform->setAdvanced('allocateby');
 
-        $mform->addElement('text', 'namingscheme', get_string('namingscheme', 'group'));
-        $mform->addHelpButton('namingscheme', 'namingscheme', 'group');
-        $mform->addRule('namingscheme', get_string('required'), 'required', null, 'client');
-        $mform->setType('namingscheme', PARAM_TEXT);
-        // there must not be duplicate group names in course
-        $template = get_string('grouptemplate', 'group');
-        $gname = groups_parse_name($template, 0);
-        if (!groups_get_group_by_name($COURSE->id, $gname)) {
-            $mform->setDefault('namingscheme', $template);
-        }
+        $mform->addElement('checkbox', 'nosmallgroups', get_string('nosmallgroups', 'group'));
+        $mform->disabledIf('nosmallgroups', 'groupby', 'noteq', 'members');
 
-        $options = array('0' => get_string('no'),
+        $mform->addElement('checkbox', 'notingroup', get_string('notingroup', 'group'));
+        $mform->disabledIf('notingroup', 'groupingid', 'neq', 0);
+        $mform->disabledIf('notingroup', 'groupid', 'neq', 0);
+
+        $mform->addElement('header', 'groupinghdr', get_string('grouping', 'group'));
+
+        $options = array('0' => get_string('nogrouping', 'group'),
                          '-1'=> get_string('newgrouping', 'group'));
         if ($groupings = groups_get_all_groupings($COURSE->id)) {
             foreach ($groupings as $grouping) {
@@ -133,7 +165,7 @@ class autogroup_form extends moodleform {
         $mform->setType('seed', PARAM_INT);
 
         $buttonarray = array();
-        $buttonarray[] = &$mform->createElement('submit', 'preview', get_string('preview'), 'xx');
+        $buttonarray[] = &$mform->createElement('submit', 'preview', get_string('preview'));
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('submit'));
         $buttonarray[] = &$mform->createElement('cancel');
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
@@ -152,7 +184,17 @@ class autogroup_form extends moodleform {
         $errors = parent::validation($data, $files);
 
         if ($data['allocateby'] != 'no') {
-            if (!$users = groups_get_potential_members($data['courseid'], $data['roleid'], $data['cohortid'])) {
+            $source = array();
+            if ($data['cohortid']) {
+                $source['cohortid'] = $data['cohortid'];
+            }
+            if ($data['groupingid']) {
+                $source['groupingid'] = $data['groupingid'];
+            }
+            if ($data['groupid']) {
+                $source['groupid'] = $data['groupid'];
+            }
+            if (!$users = groups_get_potential_members($data['courseid'], $data['roleid'], $source)) {
                 $errors['roleid'] = get_string('nousersinrole', 'group');
             }
 

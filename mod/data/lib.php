@@ -16,7 +16,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package   mod-data
+ * @package   mod_data
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -42,7 +42,7 @@ define('DATA_PRESET_CONTEXT', SYSCONTEXTID);
 // In Moodle >= 2, new roles may be introduced and used instead.
 
 /**
- * @package   mod-data
+ * @package   mod_data
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -188,6 +188,18 @@ class data_field_base {     // Base class for Database Field Types (see field/*/
         }
 
         $this->field->id = $DB->insert_record('data_fields',$this->field);
+
+        // Trigger an event for creating this field.
+        $event = \mod_data\event\field_created::create(array(
+            'objectid' => $this->field->id,
+            'context' => $this->context,
+            'other' => array(
+                'fieldname' => $this->field->name,
+                'dataid' => $this->data->id
+            )
+        ));
+        $event->trigger();
+
         return true;
     }
 
@@ -202,6 +214,18 @@ class data_field_base {     // Base class for Database Field Types (see field/*/
         global $DB;
 
         $DB->update_record('data_fields', $this->field);
+
+        // Trigger an event for updating this field.
+        $event = \mod_data\event\field_updated::create(array(
+            'objectid' => $this->field->id,
+            'context' => $this->context,
+            'other' => array(
+                'fieldname' => $this->field->name,
+                'dataid' => $this->data->id
+            )
+        ));
+        $event->trigger();
+
         return true;
     }
 
@@ -215,9 +239,25 @@ class data_field_base {     // Base class for Database Field Types (see field/*/
         global $DB;
 
         if (!empty($this->field->id)) {
+            // Get the field before we delete it.
+            $field = $DB->get_record('data_fields', array('id' => $this->field->id));
+
             $this->delete_content();
             $DB->delete_records('data_fields', array('id'=>$this->field->id));
+
+            // Trigger an event for deleting this field.
+            $event = \mod_data\event\field_deleted::create(array(
+                'objectid' => $this->field->id,
+                'context' => $this->context,
+                'other' => array(
+                    'fieldname' => $this->field->name,
+                    'dataid' => $this->data->id
+                 )
+            ));
+            $event->add_record_snapshot('data_fields', $field);
+            $event->trigger();
         }
+
         return true;
     }
 
@@ -279,7 +319,7 @@ class data_field_base {     // Base class for Database Field Types (see field/*/
         echo '<input type="hidden" name="type" value="'.$this->type.'" />'."\n";
         echo '<input name="sesskey" value="'.sesskey().'" type="hidden" />'."\n";
 
-        echo $OUTPUT->heading($this->name());
+        echo $OUTPUT->heading($this->name(), 3);
 
         require_once($CFG->dirroot.'/mod/data/field/'.$this->type.'/mod.html');
 
@@ -518,12 +558,12 @@ function data_generate_default_template(&$data, $template, $recordid=0, $form=fa
             );
         }
         if ($template == 'listtemplate') {
-            $cell = new html_table_cell('##edit##  ##more##  ##delete##  ##approve##  ##export##');
+            $cell = new html_table_cell('##edit##  ##more##  ##delete##  ##approve##  ##disapprove##  ##export##');
             $cell->colspan = 2;
             $cell->attributes['class'] = 'controls';
             $table->data[] = new html_table_row(array($cell));
         } else if ($template == 'singletemplate') {
-            $cell = new html_table_cell('##edit##  ##delete##  ##approve##  ##export##');
+            $cell = new html_table_cell('##edit##  ##delete##  ##approve##  ##disapprove##  ##export##');
             $cell->colspan = 2;
             $cell->attributes['class'] = 'controls';
             $table->data[] = new html_table_row(array($cell));
@@ -536,7 +576,13 @@ function data_generate_default_template(&$data, $template, $recordid=0, $form=fa
             $table->data[] = $row;
         }
 
-        $str  = html_writer::start_tag('div', array('class' => 'defaulttemplate'));
+        $str = '';
+        if ($template == 'listtemplate'){
+            $str .= '##delcheck##';
+            $str .= html_writer::empty_tag('br');
+        }
+
+        $str .= html_writer::start_tag('div', array('class' => 'defaulttemplate'));
         $str .= html_writer::table($table);
         $str .= html_writer::end_tag('div');
         if ($template == 'listtemplate'){
@@ -796,7 +842,19 @@ function data_add_record($data, $groupid=0){
     } else {
         $record->approved = 0;
     }
-    return $DB->insert_record('data_records', $record);
+    $record->id = $DB->insert_record('data_records', $record);
+
+    // Trigger an event for creating this record.
+    $event = \mod_data\event\record_created::create(array(
+        'objectid' => $record->id,
+        'context' => $context,
+        'other' => array(
+            'dataid' => $data->id
+        )
+    ));
+    $event->trigger();
+
+    return $record->id;
 }
 
 /**
@@ -1064,37 +1122,6 @@ function data_update_grades($data, $userid=0, $nullifnone=true) {
 }
 
 /**
- * Update all grades in gradebook.
- *
- * @global object
- */
-function data_upgrade_grades() {
-    global $DB;
-
-    $sql = "SELECT COUNT('x')
-              FROM {data} d, {course_modules} cm, {modules} m
-             WHERE m.name='data' AND m.id=cm.module AND cm.instance=d.id";
-    $count = $DB->count_records_sql($sql);
-
-    $sql = "SELECT d.*, cm.idnumber AS cmidnumber, d.course AS courseid
-              FROM {data} d, {course_modules} cm, {modules} m
-             WHERE m.name='data' AND m.id=cm.module AND cm.instance=d.id";
-    $rs = $DB->get_recordset_sql($sql);
-    if ($rs->valid()) {
-        // too much debug output
-        $pbar = new progress_bar('dataupgradegrades', 500, true);
-        $i=0;
-        foreach ($rs as $data) {
-            $i++;
-            upgrade_set_timeout(60*5); // set up timeout, may also abort execution
-            data_update_grades($data, 0, false);
-            $pbar->update($i, $count, "Updating Database grades ($i/$count).");
-        }
-    }
-    $rs->close();
-}
-
-/**
  * Update/create grade item for given data
  *
  * @category grade
@@ -1156,10 +1183,12 @@ function data_grade_item_delete($data) {
  * @param string $search
  * @param int $page
  * @param bool $return
+ * @param object $jumpurl a moodle_url by which to jump back to the record list (can be null)
  * @return mixed
  */
-function data_print_template($template, $records, $data, $search='', $page=0, $return=false) {
+function data_print_template($template, $records, $data, $search='', $page=0, $return=false, moodle_url $jumpurl=null) {
     global $CFG, $DB, $OUTPUT;
+
     $cm = get_coursemodule_from_instance('data', $data->id);
     $context = context_module::instance($cm->id);
 
@@ -1185,6 +1214,11 @@ function data_print_template($template, $records, $data, $search='', $page=0, $r
         return;
     }
 
+    if (!$jumpurl) {
+        $jumpurl = new moodle_url('/mod/data/view.php', array('d' => $data->id));
+    }
+    $jumpurl = new moodle_url($jumpurl, array('page' => $page, 'sesskey' => sesskey()));
+
     // Check whether this activity is read-only at present
     $readonly = data_in_readonly_period($data);
 
@@ -1200,10 +1234,12 @@ function data_print_template($template, $records, $data, $search='', $page=0, $r
             $replacement[] = highlight($search, $field->display_browse_field($record->id, $template));
         }
 
+        $canmanageentries = has_capability('mod/data:manageentries', $context);
+
     // Replacing special tags (##Edit##, ##Delete##, ##More##)
         $patterns[]='##edit##';
         $patterns[]='##delete##';
-        if (has_capability('mod/data:manageentries', $context) || (!$readonly && data_isowner($record->id))) {
+        if ($canmanageentries || (!$readonly && data_isowner($record->id))) {
             $replacement[] = '<a href="'.$CFG->wwwroot.'/mod/data/edit.php?d='
                              .$data->id.'&amp;rid='.$record->id.'&amp;sesskey='.sesskey().'"><img src="'.$OUTPUT->pix_url('t/edit') . '" class="iconsmall" alt="'.get_string('edit').'" title="'.get_string('edit').'" /></a>';
             $replacement[] = '<a href="'.$CFG->wwwroot.'/mod/data/view.php?d='
@@ -1224,6 +1260,13 @@ function data_print_template($template, $records, $data, $search='', $page=0, $r
 
         $patterns[]='##moreurl##';
         $replacement[] = $moreurl;
+
+        $patterns[]='##delcheck##';
+        if ($canmanageentries) {
+            $replacement[] = html_writer::checkbox('delcheck[]', $record->id, false, '', array('class' => 'recordcheckbox'));
+        } else {
+            $replacement[] = '';
+        }
 
         $patterns[]='##user##';
         $replacement[] = '<a href="'.$CFG->wwwroot.'/user/view.php?id='.$record->userid.
@@ -1252,11 +1295,20 @@ function data_print_template($template, $records, $data, $search='', $page=0, $r
 
         $patterns[]='##approve##';
         if (has_capability('mod/data:approve', $context) && ($data->approval) && (!$record->approved)) {
-            $approveurl = new moodle_url('/mod/data/view.php',
-                    array('d' => $data->id, 'approve' => $record->id, 'sesskey' => sesskey()));
-            $approveicon = new pix_icon('t/approve', get_string('approve'), '', array('class' => 'iconsmall'));
+            $approveurl = new moodle_url($jumpurl, array('approve' => $record->id));
+            $approveicon = new pix_icon('t/approve', get_string('approve', 'data'), '', array('class' => 'iconsmall'));
             $replacement[] = html_writer::tag('span', $OUTPUT->action_icon($approveurl, $approveicon),
                     array('class' => 'approve'));
+        } else {
+            $replacement[] = '';
+        }
+
+        $patterns[]='##disapprove##';
+        if (has_capability('mod/data:approve', $context) && ($data->approval) && ($record->approved)) {
+            $disapproveurl = new moodle_url($jumpurl, array('disapprove' => $record->id));
+            $disapproveicon = new pix_icon('t/block', get_string('disapprove', 'data'), '', array('class' => 'iconsmall'));
+            $replacement[] = html_writer::tag('span', $OUTPUT->action_icon($disapproveurl, $disapproveicon),
+                    array('class' => 'disapprove'));
         } else {
             $replacement[] = '';
         }
@@ -1643,7 +1695,12 @@ function data_print_ratings($data, $record) {
 }
 
 /**
- * For Participantion Reports
+ * List the actions that correspond to a view of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = 'r' and edulevel = LEVEL_PARTICIPATING will
+ *       be considered as view action.
  *
  * @return array
  */
@@ -1652,6 +1709,13 @@ function data_get_view_actions() {
 }
 
 /**
+ * List the actions that correspond to a post of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = ('c' || 'u' || 'd') and edulevel = LEVEL_PARTICIPATING
+ *       will be considered as post action.
+ *
  * @return array
  */
 function data_get_post_actions() {
@@ -1877,7 +1941,7 @@ function data_get_available_presets($context) {
     $presets = array();
 
     // First load the ratings sub plugins that exist within the modules preset dir
-    if ($dirs = get_plugin_list('datapreset')) {
+    if ($dirs = core_component::get_plugin_list('datapreset')) {
         foreach ($dirs as $dir=>$fulldir) {
             if (is_directory_a_preset($fulldir)) {
                 $preset = new stdClass();
@@ -1970,9 +2034,10 @@ function data_print_header($course, $cm, $data, $currenttab='') {
 
     $PAGE->set_title($data->name);
     echo $OUTPUT->header();
-    echo $OUTPUT->heading(format_string($data->name));
+    echo $OUTPUT->heading(format_string($data->name), 2);
+    echo $OUTPUT->box(format_module_intro('data', $data, $cm->id), 'generalbox', 'intro');
 
-// Groups needed for Add entry tab
+    // Groups needed for Add entry tab
     $currentgroup = groups_get_activity_group($cm);
     $groupmode = groups_get_activity_groupmode($cm);
 
@@ -2502,6 +2567,9 @@ function data_reset_userdata($data) {
     $ratingdeloptions->component = 'mod_data';
     $ratingdeloptions->ratingarea = 'entry';
 
+    // Set the file storage - may need it to remove files later.
+    $fs = get_file_storage();
+
     // delete entries if requested
     if (!empty($data->reset_data)) {
         $DB->delete_records_select('comments', "itemid IN ($allrecordssql) AND commentarea='database_entry'", array($data->courseid));
@@ -2510,12 +2578,13 @@ function data_reset_userdata($data) {
 
         if ($datas = $DB->get_records_sql($alldatassql, array($data->courseid))) {
             foreach ($datas as $dataid=>$unused) {
-                fulldelete("$CFG->dataroot/$data->courseid/moddata/data/$dataid");
-
                 if (!$cm = get_coursemodule_from_instance('data', $dataid)) {
                     continue;
                 }
                 $datacontext = context_module::instance($cm->id);
+
+                // Delete any files that may exist.
+                $fs->delete_area_files($datacontext->id, 'mod_data', 'content');
 
                 $ratingdeloptions->contextid = $datacontext->id;
                 $rm->delete_ratings($ratingdeloptions);
@@ -2553,21 +2622,17 @@ function data_reset_userdata($data) {
                 $ratingdeloptions->itemid = $record->id;
                 $rm->delete_ratings($ratingdeloptions);
 
-                $DB->delete_records('comments', array('itemid'=>$record->id, 'commentarea'=>'database_entry'));
-                $DB->delete_records('data_content', array('recordid'=>$record->id));
-                $DB->delete_records('data_records', array('id'=>$record->id));
-                // HACK: this is ugly - the recordid should be before the fieldid!
-                if (!array_key_exists($record->dataid, $fields)) {
-                    if ($fs = $DB->get_records('data_fields', array('dataid'=>$record->dataid))) {
-                        $fields[$record->dataid] = array_keys($fs);
-                    } else {
-                        $fields[$record->dataid] = array();
+                // Delete any files that may exist.
+                if ($contents = $DB->get_records('data_content', array('recordid' => $record->id), '', 'id')) {
+                    foreach ($contents as $content) {
+                        $fs->delete_area_files($datacontext->id, 'mod_data', 'content', $content->id);
                     }
                 }
-                foreach($fields[$record->dataid] as $fieldid) {
-                    fulldelete("$CFG->dataroot/$data->courseid/moddata/data/$record->dataid/$fieldid/$record->id");
-                }
                 $notenrolled[$record->userid] = true;
+
+                $DB->delete_records('comments', array('itemid' => $record->id, 'commentarea' => 'database_entry'));
+                $DB->delete_records('data_content', array('recordid' => $record->id));
+                $DB->delete_records('data_records', array('id' => $record->id));
             }
         }
         $rs->close();
@@ -2628,7 +2693,6 @@ function data_supports($feature) {
     switch($feature) {
         case FEATURE_GROUPS:                  return true;
         case FEATURE_GROUPINGS:               return true;
-        case FEATURE_GROUPMEMBERSONLY:        return true;
         case FEATURE_MOD_INTRO:               return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS: return true;
         case FEATURE_GRADE_HAS_GRADE:         return true;
@@ -3546,12 +3610,14 @@ function data_get_recordids($alias, $searcharray, $dataid, $recordids) {
  */
 function data_get_advanced_search_sql($sort, $data, $recordids, $selectdata, $sortorder) {
     global $DB;
+
+    $namefields = get_all_user_name_fields(true, 'u');
     if ($sort == 0) {
-        $nestselectsql = 'SELECT r.id, r.approved, r.timecreated, r.timemodified, r.userid, u.firstname, u.lastname
+        $nestselectsql = 'SELECT r.id, r.approved, r.timecreated, r.timemodified, r.userid, ' . $namefields . '
                         FROM {data_content} c,
                              {data_records} r,
                              {user} u ';
-        $groupsql = ' GROUP BY r.id, r.approved, r.timecreated, r.timemodified, r.userid, u.firstname, u.lastname ';
+        $groupsql = ' GROUP BY r.id, r.approved, r.timecreated, r.timemodified, r.userid, u.firstname, u.lastname, ' . $namefields;
     } else {
         // Sorting through 'Other' criteria
         if ($sort <= 0) {
@@ -3578,12 +3644,13 @@ function data_get_advanced_search_sql($sort, $data, $recordids, $selectdata, $so
             $sortcontentfull = $sortfield->get_sort_sql($sortcontent);
         }
 
-        $nestselectsql = 'SELECT r.id, r.approved, r.timecreated, r.timemodified, r.userid, u.firstname, u.lastname, ' . $sortcontentfull . '
+        $nestselectsql = 'SELECT r.id, r.approved, r.timecreated, r.timemodified, r.userid, ' . $namefields . ',
+                                 ' . $sortcontentfull . '
                               AS sortorder
                             FROM {data_content} c,
                                  {data_records} r,
                                  {user} u ';
-        $groupsql = ' GROUP BY r.id, r.approved, r.timecreated, r.timemodified, r.userid, u.firstname, u.lastname, ' .$sortcontentfull;
+        $groupsql = ' GROUP BY r.id, r.approved, r.timecreated, r.timemodified, r.userid, ' . $namefields . ', ' .$sortcontentfull;
     }
 
     // Default to a standard Where statement if $selectdata is empty.
@@ -3628,4 +3695,52 @@ function data_user_can_delete_preset($context, $preset) {
         }
         return $candelete;
     }
+}
+
+/**
+ * Delete a record entry.
+ *
+ * @param int $recordid The ID for the record to be deleted.
+ * @param object $data The data object for this activity.
+ * @param int $courseid ID for the current course (for logging).
+ * @param int $cmid The course module ID.
+ * @return bool True if the record deleted, false if not.
+ */
+function data_delete_record($recordid, $data, $courseid, $cmid) {
+    global $DB, $CFG;
+
+    if ($deleterecord = $DB->get_record('data_records', array('id' => $recordid))) {
+        if ($deleterecord->dataid == $data->id) {
+            if ($contents = $DB->get_records('data_content', array('recordid' => $deleterecord->id))) {
+                foreach ($contents as $content) {
+                    if ($field = data_get_field_from_id($content->fieldid, $data)) {
+                        $field->delete_content($content->recordid);
+                    }
+                }
+                $DB->delete_records('data_content', array('recordid'=>$deleterecord->id));
+                $DB->delete_records('data_records', array('id'=>$deleterecord->id));
+
+                // Delete cached RSS feeds.
+                if (!empty($CFG->enablerssfeeds)) {
+                    require_once($CFG->dirroot.'/mod/data/rsslib.php');
+                    data_rss_delete_file($data);
+                }
+
+                // Trigger an event for deleting this record.
+                $event = \mod_data\event\record_deleted::create(array(
+                    'objectid' => $deleterecord->id,
+                    'context' => context_module::instance($cmid),
+                    'courseid' => $courseid,
+                    'other' => array(
+                        'dataid' => $deleterecord->dataid
+                    )
+                ));
+                $event->add_record_snapshot('data_records', $deleterecord);
+                $event->trigger();
+
+                return true;
+            }
+        }
+    }
+    return false;
 }

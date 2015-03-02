@@ -88,6 +88,10 @@ function theme_clean_set_logo($css, $logo) {
 function theme_clean_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = array()) {
     if ($context->contextlevel == CONTEXT_SYSTEM and $filearea === 'logo') {
         $theme = theme_config::load('clean');
+        // By default, theme files must be cache-able by both browsers and proxies.
+        if (!array_key_exists('cacheability', $options)) {
+            $options['cacheability'] = 'public';
+        }
         return $theme->setting_file_serve('logo', $args, $forcedownload, $options);
     } else {
         send_file_not_found();
@@ -116,6 +120,9 @@ function theme_clean_set_customcss($css, $customcss) {
 /**
  * Returns an object containing HTML for the areas affected by settings.
  *
+ * Do not add Clean specific logic in here, child themes should be able to
+ * rely on that function just by declaring settings with similar names.
+ *
  * @param renderer_base $output Pass in $OUTPUT.
  * @param moodle_page $page Pass in $PAGE.
  * @return stdClass An object with the following properties:
@@ -140,35 +147,32 @@ function theme_clean_get_html_for_settings(renderer_base $output, moodle_page $p
 
     $return->footnote = '';
     if (!empty($page->theme->settings->footnote)) {
-        $return->footnote = '<div class="footnote text-center">'.$page->theme->settings->footnote.'</div>';
+        $return->footnote = '<div class="footnote text-center">'.format_text($page->theme->settings->footnote).'</div>';
     }
 
     return $return;
 }
 
 /**
- * Deprecated: Please call theme_clean_process_css instead.
+ * All theme functions should start with theme_clean_
  * @deprecated since 2.5.1
  */
-function clean_process_css($css, $theme) {
-    debugging('Please call theme_'.__FUNCTION__.' instead of '.__FUNCTION__, DEBUG_DEVELOPER);
-    return theme_clean_process_css($css, $theme);
+function clean_process_css() {
+    throw new coding_exception('Please call theme_'.__FUNCTION__.' instead of '.__FUNCTION__);
 }
 
 /**
- * Deprecated: Please call theme_clean_set_logo instead.
+ * All theme functions should start with theme_clean_
  * @deprecated since 2.5.1
  */
-function clean_set_logo($css, $logo) {
-    debugging('Please call theme_'.__FUNCTION__.' instead of '.__FUNCTION__, DEBUG_DEVELOPER);
-    return theme_clean_set_logo($css, $logo);
+function clean_set_logo() {
+    throw new coding_exception('Please call theme_'.__FUNCTION__.' instead of '.__FUNCTION__);
 }
 
 /**
- * Deprecated: Please call theme_clean_set_customcss instead.
+ * All theme functions should start with theme_clean_
  * @deprecated since 2.5.1
  */
-function clean_set_customcss($css, $customcss) {
-    debugging('Please call theme_'.__FUNCTION__.' instead of '.__FUNCTION__, DEBUG_DEVELOPER);
-    return theme_clean_set_customcss($css, $customcss);
+function clean_set_customcss() {
+    throw new coding_exception('Please call theme_'.__FUNCTION__.' instead of '.__FUNCTION__);
 }

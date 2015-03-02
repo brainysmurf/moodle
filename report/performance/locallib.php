@@ -209,13 +209,9 @@ class report_performance {
                             DEBUG_NORMAL => 'debugnormal',
                             DEBUG_ALL => 'debugall',
                             DEBUG_DEVELOPER => 'debugdeveloper');
-        // If debug is not set then consider it as 0.
-        if (!isset($CFG->themedesignermode)) {
-            $CFG->debug = DEBUG_NONE;
-        }
 
         $issueresult->statusstr = get_string($debugchoices[$CFG->debug], 'admin');
-        if ($CFG->debug != DEBUG_DEVELOPER) {
+        if (!$CFG->debugdeveloper) {
             $issueresult->status = self::REPORT_PERFORMANCE_OK;
             $issueresult->comment = get_string('check_debugmsg_comment_nodeveloper', 'report_performance');
         } else {
@@ -236,16 +232,19 @@ class report_performance {
      */
     public static function report_performance_check_automatic_backup() {
         global $CFG;
+        require_once($CFG->dirroot . '/backup/util/helper/backup_cron_helper.class.php');
+
         $issueresult = new report_performance_issue();
         $issueresult->issue = 'report_performance_check_automatic_backup';
         $issueresult->name = get_string('check_backup', 'report_performance');
 
-        if (!empty($CFG->backup_auto_active) && ($CFG->backup_auto_active == 1)) {
+        $automatedbackupsenabled = get_config('backup', 'backup_auto_active');
+        if ($automatedbackupsenabled == backup_cron_automated_helper::AUTO_BACKUP_ENABLED) {
             $issueresult->statusstr = get_string('autoactiveenabled', 'backup');
             $issueresult->status = self::REPORT_PERFORMANCE_WARNING;
             $issueresult->comment = get_string('check_backup_comment_enable', 'report_performance');
         } else {
-            if (empty($CFG->backup_auto_active)) {
+            if ($automatedbackupsenabled == backup_cron_automated_helper::AUTO_BACKUP_DISABLED) {
                 $issueresult->statusstr = get_string('autoactivedisabled', 'backup');
             } else {
                 $issueresult->statusstr = get_string('autoactivemanual', 'backup');

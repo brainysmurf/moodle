@@ -37,7 +37,10 @@ require_once(__DIR__.'/mysqli_native_moodle_temptables.php');
  */
 class mysqli_native_moodle_database extends moodle_database {
 
+    /** @var mysqli $mysqli */
     protected $mysqli = null;
+    /** @var bool is compressed row format supported cache */
+    protected $compressedrowformatsupported = null;
 
     private $transactions_supported = null;
 
@@ -280,6 +283,73 @@ class mysqli_native_moodle_database extends moodle_database {
     }
 
     /**
+     * Get the row format from the database schema.
+     *
+     * @param string $table
+     * @return string row_format name or null if not known or table does not exist.
+     */
+    public function get_row_format($table) {
+        $rowformat = null;
+        $table = $this->mysqli->real_escape_string($table);
+        $sql = "SELECT row_format
+                  FROM INFORMATION_SCHEMA.TABLES
+                 WHERE table_schema = DATABASE() AND table_name = '{$this->prefix}$table'";
+        $this->query_start($sql, NULL, SQL_QUERY_AUX);
+        $result = $this->mysqli->query($sql);
+        $this->query_end($result);
+        if ($rec = $result->fetch_assoc()) {
+            $rowformat = $rec['row_format'];
+        }
+        $result->close();
+
+        return $rowformat;
+    }
+
+    /**
+     * Is this database compatible with compressed row format?
+     * This feature is necessary for support of large number of text
+     * columns in InnoDB/XtraDB database.
+     *
+     * @param bool $cached use cached result
+     * @return bool true if table can be created or changed to compressed row format.
+     */
+    public function is_compressed_row_format_supported($cached = true) {
+        if ($cached and isset($this->compressedrowformatsupported)) {
+            return($this->compressedrowformatsupported);
+        }
+
+        $engine = strtolower($this->get_dbengine());
+        $info = $this->get_server_info();
+
+        if (version_compare($info['version'], '5.5.0') < 0) {
+            // MySQL 5.1 is not supported here because we cannot read the file format.
+            $this->compressedrowformatsupported = false;
+
+        } else if ($engine !== 'innodb' and $engine !== 'xtradb') {
+            // Other engines are not supported, most probably not compatible.
+            $this->compressedrowformatsupported = false;
+
+        } else if (!$filepertable = $this->get_record_sql("SHOW VARIABLES LIKE 'innodb_file_per_table'")) {
+            $this->compressedrowformatsupported = false;
+
+        } else if ($filepertable->value !== 'ON') {
+            $this->compressedrowformatsupported = false;
+
+        } else if (!$fileformat = $this->get_record_sql("SHOW VARIABLES LIKE 'innodb_file_format'")) {
+            $this->compressedrowformatsupported = false;
+
+        } else  if ($fileformat->value !== 'Barracuda') {
+            $this->compressedrowformatsupported = false;
+
+        } else {
+            // All the tests passed, we can safely use ROW_FORMAT=Compressed in sql statements.
+            $this->compressedrowformatsupported = true;
+        }
+
+        return $this->compressedrowformatsupported;
+    }
+
+    /**
      * Returns localised database type name
      * Note: can be used before connect()
      * @return string
@@ -295,15 +365,6 @@ class mysqli_native_moodle_database extends moodle_database {
      */
     public function get_configuration_help() {
         return get_string('nativemysqlihelp', 'install');
-    }
-
-    /**
-     * Returns localised database description
-     * Note: can be used before connect()
-     * @return string
-     */
-    public function get_configuration_hints() {
-        return get_string('databasesettingssub_mysqli', 'install');
     }
 
     /**
@@ -380,13 +441,10 @@ class mysqli_native_moodle_database extends moodle_database {
         if ($dbhost and !empty($this->dboptions['dbpersist'])) {
             $dbhost = "p:$dbhost";
         }
-        ob_start();
-        $this->mysqli = new mysqli($dbhost, $dbuser, $dbpass, $dbname, $dbport, $dbsocket);
-        $dberr = ob_get_contents();
-        ob_end_clean();
-        $errorno = @$this->mysqli->connect_errno;
+        $this->mysqli = @new mysqli($dbhost, $dbuser, $dbpass, $dbname, $dbport, $dbsocket);
 
-        if ($errorno !== 0) {
+        if ($this->mysqli->connect_errno !== 0) {
+            $dberr = $this->mysqli->connect_error;
             $this->mysqli = null;
             throw new dml_connection_exception($dberr);
         }
@@ -515,7 +573,7 @@ class mysqli_native_moodle_database extends moodle_database {
      * Returns detailed information about columns in table. This information is cached internally.
      * @param string $table name
      * @param bool $usecache
-     * @return array array of database_column_info objects indexed with column names
+     * @return database_column_info[] array of database_column_info objects indexed with column names
      */
     public function get_columns($table, $usecache=true) {
 
@@ -628,7 +686,7 @@ class mysqli_native_moodle_database extends moodle_database {
         }
 
         if ($usecache) {
-            $result = $cache->set($table, $structure);
+            $cache->set($table, $structure);
         }
 
         return $structure;
@@ -830,17 +888,38 @@ class mysqli_native_moodle_database extends moodle_database {
 
     /**
      * Do NOT use in code, to be used by database_manager only!
-     * @param string $sql query
+     * @param string|array $sql query
      * @return bool true
-     * @throws dml_exception A DML specific exception is thrown for any errors.
+     * @throws ddl_change_structure_exception A DDL specific exception is thrown for any errors.
      */
     public function change_database_structure($sql) {
+        $this->get_manager(); // Includes DDL exceptions classes ;-)
+        if (is_array($sql)) {
+            $sql = implode("\n;\n", $sql);
+        }
+
+        try {
+            $this->query_start($sql, null, SQL_QUERY_STRUCTURE);
+            $result = $this->mysqli->multi_query($sql);
+            if ($result === false) {
+                $this->query_end(false);
+            }
+            while ($this->mysqli->more_results()) {
+                $result = $this->mysqli->next_result();
+                if ($result === false) {
+                    $this->query_end(false);
+                }
+            }
+            $this->query_end(true);
+        } catch (ddl_change_structure_exception $e) {
+            while (@$this->mysqli->more_results()) {
+                @$this->mysqli->next_result();
+            }
+            $this->reset_caches();
+            throw $e;
+        }
+
         $this->reset_caches();
-
-        $this->query_start($sql, null, SQL_QUERY_STRUCTURE);
-        $result = $this->mysqli->query($sql);
-        $this->query_end($result);
-
         return true;
     }
 
@@ -921,10 +1000,8 @@ class mysqli_native_moodle_database extends moodle_database {
      * @throws dml_exception A DML specific exception is thrown for any errors.
      */
     public function get_recordset_sql($sql, array $params=null, $limitfrom=0, $limitnum=0) {
-        $limitfrom = (int)$limitfrom;
-        $limitnum  = (int)$limitnum;
-        $limitfrom = ($limitfrom < 0) ? 0 : $limitfrom;
-        $limitnum  = ($limitnum < 0)  ? 0 : $limitnum;
+
+        list($limitfrom, $limitnum) = $this->normalise_limit_from_num($limitfrom, $limitnum);
 
         if ($limitfrom or $limitnum) {
             if ($limitnum < 1) {
@@ -985,10 +1062,8 @@ class mysqli_native_moodle_database extends moodle_database {
      * @throws dml_exception A DML specific exception is thrown for any errors.
      */
     public function get_records_sql($sql, array $params=null, $limitfrom=0, $limitnum=0) {
-        $limitfrom = (int)$limitfrom;
-        $limitnum  = (int)$limitnum;
-        $limitfrom = ($limitfrom < 0) ? 0 : $limitfrom;
-        $limitnum  = ($limitnum < 0)  ? 0 : $limitnum;
+
+        list($limitfrom, $limitnum) = $this->normalise_limit_from_num($limitfrom, $limitnum);
 
         if ($limitfrom or $limitnum) {
             if ($limitnum < 1) {
@@ -1115,6 +1190,10 @@ class mysqli_native_moodle_database extends moodle_database {
         $dataobject = (array)$dataobject;
 
         $columns = $this->get_columns($table);
+        if (empty($columns)) {
+            throw new dml_exception('ddltablenotexist', $table);
+        }
+
         $cleaned = array();
 
         foreach ($dataobject as $field=>$value) {
@@ -1129,6 +1208,124 @@ class mysqli_native_moodle_database extends moodle_database {
         }
 
         return $this->insert_record_raw($table, $cleaned, $returnid, $bulk);
+    }
+
+    /**
+     * Insert multiple records into database as fast as possible.
+     *
+     * Order of inserts is maintained, but the operation is not atomic,
+     * use transactions if necessary.
+     *
+     * This method is intended for inserting of large number of small objects,
+     * do not use for huge objects with text or binary fields.
+     *
+     * @since Moodle 2.7
+     *
+     * @param string $table  The database table to be inserted into
+     * @param array|Traversable $dataobjects list of objects to be inserted, must be compatible with foreach
+     * @return void does not return new record ids
+     *
+     * @throws coding_exception if data objects have different structure
+     * @throws dml_exception A DML specific exception is thrown for any errors.
+     */
+    public function insert_records($table, $dataobjects) {
+        if (!is_array($dataobjects) and !$dataobjects instanceof Traversable) {
+            throw new coding_exception('insert_records() passed non-traversable object');
+        }
+
+        // MySQL has a relatively small query length limit by default,
+        // make sure 'max_allowed_packet' in my.cnf is high enough
+        // if you change the following default...
+        static $chunksize = null;
+        if ($chunksize === null) {
+            if (!empty($this->dboptions['bulkinsertsize'])) {
+                $chunksize = (int)$this->dboptions['bulkinsertsize'];
+
+            } else {
+                if (PHP_INT_SIZE === 4) {
+                    // Bad luck for Windows, we cannot do any maths with large numbers.
+                    $chunksize = 5;
+                } else {
+                    $sql = "SHOW VARIABLES LIKE 'max_allowed_packet'";
+                    $this->query_start($sql, null, SQL_QUERY_AUX);
+                    $result = $this->mysqli->query($sql);
+                    $this->query_end($result);
+                    $size = 0;
+                    if ($rec = $result->fetch_assoc()) {
+                        $size = $rec['Value'];
+                    }
+                    $result->close();
+                    // Hopefully 200kb per object are enough.
+                    $chunksize = (int)($size / 200000);
+                    if ($chunksize > 50) {
+                        $chunksize = 50;
+                    }
+                }
+            }
+        }
+
+        $columns = $this->get_columns($table, true);
+        $fields = null;
+        $count = 0;
+        $chunk = array();
+        foreach ($dataobjects as $dataobject) {
+            if (!is_array($dataobject) and !is_object($dataobject)) {
+                throw new coding_exception('insert_records() passed invalid record object');
+            }
+            $dataobject = (array)$dataobject;
+            if ($fields === null) {
+                $fields = array_keys($dataobject);
+                $columns = array_intersect_key($columns, $dataobject);
+                unset($columns['id']);
+            } else if ($fields !== array_keys($dataobject)) {
+                throw new coding_exception('All dataobjects in insert_records() must have the same structure!');
+            }
+
+            $count++;
+            $chunk[] = $dataobject;
+
+            if ($count === $chunksize) {
+                $this->insert_chunk($table, $chunk, $columns);
+                $chunk = array();
+                $count = 0;
+            }
+        }
+
+        if ($count) {
+            $this->insert_chunk($table, $chunk, $columns);
+        }
+    }
+
+    /**
+     * Insert records in chunks.
+     *
+     * Note: can be used only from insert_records().
+     *
+     * @param string $table
+     * @param array $chunk
+     * @param database_column_info[] $columns
+     */
+    protected function insert_chunk($table, array $chunk, array $columns) {
+        $fieldssql = '('.implode(',', array_keys($columns)).')';
+
+        $valuessql = '('.implode(',', array_fill(0, count($columns), '?')).')';
+        $valuessql = implode(',', array_fill(0, count($chunk), $valuessql));
+
+        $params = array();
+        foreach ($chunk as $dataobject) {
+            foreach ($columns as $field => $column) {
+                $params[] = $this->normalise_value($column, $dataobject[$field]);
+            }
+        }
+
+        $sql = "INSERT INTO {$this->prefix}$table $fieldssql VALUES $valuessql";
+
+        list($sql, $params, $type) = $this->fix_sql_params($sql, $params);
+        $rawsql = $this->emulate_bound_params($sql, $params);
+
+        $this->query_start($sql, $params, SQL_QUERY_INSERT);
+        $result = $this->mysqli->query($rawsql);
+        $this->query_end($result);
     }
 
     /**
@@ -1399,6 +1596,47 @@ class mysqli_native_moodle_database extends moodle_database {
      */
     public function sql_cast_2signed($fieldname) {
         return ' CAST(' . $fieldname . ' AS SIGNED) ';
+    }
+
+    /**
+     * Returns the SQL that allows to find intersection of two or more queries
+     *
+     * @since Moodle 2.8
+     *
+     * @param array $selects array of SQL select queries, each of them only returns fields with the names from $fields
+     * @param string $fields comma-separated list of fields
+     * @return string SQL query that will return only values that are present in each of selects
+     */
+    public function sql_intersect($selects, $fields) {
+        if (count($selects) <= 1) {
+            return parent::sql_intersect($selects, $fields);
+        }
+        $fields = preg_replace('/\s/', '', $fields);
+        static $aliascnt = 0;
+        $falias = 'intsctal'.($aliascnt++);
+        $rv = "SELECT $falias.".
+            preg_replace('/,/', ','.$falias.'.', $fields).
+            " FROM ($selects[0]) $falias";
+        for ($i = 1; $i < count($selects); $i++) {
+            $alias = 'intsctal'.($aliascnt++);
+            $rv .= " JOIN (".$selects[$i].") $alias ON ".
+                join(' AND ',
+                    array_map(
+                        create_function('$a', 'return "'.$falias.'.$a = '.$alias.'.$a";'),
+                        preg_split('/,/', $fields))
+                );
+        }
+        return $rv;
+    }
+
+    /**
+     * Does this driver support tool_replace?
+     *
+     * @since Moodle 2.6.1
+     * @return bool
+     */
+    public function replace_all_text_supported() {
+        return true;
     }
 
     public function session_lock_supported() {

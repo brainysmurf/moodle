@@ -31,7 +31,9 @@ use Behat\Mink\Exception\ExpectationException as ExpectationException,
     Behat\Mink\Exception\ElementNotFoundException as ElementNotFoundException,
     Behat\Mink\Exception\DriverException as DriverException,
     WebDriver\Exception\NoSuchElement as NoSuchElement,
-    WebDriver\Exception\StaleElementReference as StaleElementReference;
+    WebDriver\Exception\StaleElementReference as StaleElementReference,
+    Behat\Gherkin\Node\TableNode as TableNode,
+    Behat\Behat\Context\Step\Given as Given;
 
 /**
  * Cross component steps definitions.
@@ -47,6 +49,25 @@ use Behat\Mink\Exception\ExpectationException as ExpectationException,
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class behat_general extends behat_base {
+
+    /**
+     * @var string used by {@link switch_to_window()} and
+     * {@link switch_to_the_main_window()} to work-around a Chrome browser issue.
+     */
+    const MAIN_WINDOW_NAME = '__moodle_behat_main_window_name';
+
+    /**
+     * @var string when we want to check whether or not a new page has loaded,
+     * we first write this unique string into the page. Then later, by checking
+     * whether it is still there, we can tell if a new page has been loaded.
+     */
+    const PAGE_LOAD_DETECTION_STRING = 'new_page_not_loaded_since_behat_started_watching';
+
+    /**
+     * @var $pageloaddetectionrunning boolean Used to ensure that page load detection was started before a page reload
+     * was checked for.
+     */
+    private $pageloaddetectionrunning = false;
 
     /**
      * Opens Moodle homepage.
@@ -77,16 +98,16 @@ class behat_general extends behat_base {
         // moodle_page::$periodicrefreshdelay possible values.
         if (!$metarefresh = $this->getSession()->getPage()->find('xpath', "//head/descendant::meta[@http-equiv='refresh']")) {
             // We don't fail the scenario if no redirection with message is found to avoid race condition false failures.
-            return false;
+            return true;
         }
 
         // Wrapped in try & catch in case the redirection has already been executed.
         try {
             $content = $metarefresh->getAttribute('content');
         } catch (NoSuchElement $e) {
-            return false;
+            return true;
         } catch (StaleElementReference $e) {
-            return false;
+            return true;
         }
 
         // Getting the refresh time and the url if present.
@@ -118,12 +139,53 @@ class behat_general extends behat_base {
     }
 
     /**
+     * Switches to the specified iframe.
+     *
+     * @Given /^I switch to "(?P<iframe_name_string>(?:[^"]|\\")*)" iframe$/
+     * @param string $iframename
+     */
+    public function switch_to_iframe($iframename) {
+
+        // We spin to give time to the iframe to be loaded.
+        // Using extended timeout as we don't know about which
+        // kind of iframe will be loaded.
+        $this->spin(
+            function($context, $iframename) {
+                $context->getSession()->switchToIFrame($iframename);
+
+                // If no exception we are done.
+                return true;
+            },
+            $iframename,
+            self::EXTENDED_TIMEOUT
+        );
+    }
+
+    /**
+     * Switches to the main Moodle frame.
+     *
+     * @Given /^I switch to the main frame$/
+     */
+    public function switch_to_the_main_frame() {
+        $this->getSession()->switchToIFrame();
+    }
+
+    /**
      * Switches to the specified window. Useful when interacting with popup windows.
      *
      * @Given /^I switch to "(?P<window_name_string>(?:[^"]|\\")*)" window$/
      * @param string $windowname
      */
     public function switch_to_window($windowname) {
+        // In Behat, some browsers (e.g. Chrome) are unable to switch to a
+        // window without a name, and by default the main browser window does
+        // not have a name. To work-around this, when we switch away from an
+        // unnamed window (presumably the main window) to some other named
+        // window, then we first set the main window name to a conventional
+        // value that we can later use this name to switch back.
+        $this->getSession()->evaluateScript(
+                'if (window.name == "") window.name = "' . self::MAIN_WINDOW_NAME . '"');
+
         $this->getSession()->switchToWindow($windowname);
     }
 
@@ -133,7 +195,7 @@ class behat_general extends behat_base {
      * @Given /^I switch to the main window$/
      */
     public function switch_to_the_main_window() {
-        $this->getSession()->switchToWindow();
+        $this->getSession()->switchToWindow(self::MAIN_WINDOW_NAME);
     }
 
     /**
@@ -142,6 +204,14 @@ class behat_general extends behat_base {
      */
     public function accept_currently_displayed_alert_dialog() {
         $this->getSession()->getDriver()->getWebDriverSession()->accept_alert();
+    }
+
+    /**
+     * Dismisses the currently displayed alert dialog. This step does not work in all the browsers, consider it experimental.
+     * @Given /^I dismiss the currently displayed dialog$/
+     */
+    public function dismiss_currently_displayed_alert_dialog() {
+        $this->getSession()->getDriver()->getWebDriverSession()->dismiss_alert();
     }
 
     /**
@@ -154,6 +224,7 @@ class behat_general extends behat_base {
     public function click_link($link) {
 
         $linknode = $this->find_link($link);
+        $this->ensure_node_is_visible($linknode);
         $linknode->click();
     }
 
@@ -183,7 +254,41 @@ class behat_general extends behat_base {
             throw new DriverException('Waits are disabled in scenarios without Javascript support');
         }
 
-        $this->getSession()->wait(self::TIMEOUT, '(document.readyState === "complete")');
+        $this->getSession()->wait(self::TIMEOUT * 1000, self::PAGE_READY_JS);
+    }
+
+    /**
+     * Waits until the provided element selector exists in the DOM
+     *
+     * Using the protected method as this method will be usually
+     * called by other methods which are not returning a set of
+     * steps and performs the actions directly, so it would not
+     * be executed if it returns another step.
+
+     * @Given /^I wait until "(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" exists$/
+     * @param string $element
+     * @param string $selector
+     * @return void
+     */
+    public function wait_until_exists($element, $selectortype) {
+        $this->ensure_element_exists($element, $selectortype);
+    }
+
+    /**
+     * Waits until the provided element does not exist in the DOM
+     *
+     * Using the protected method as this method will be usually
+     * called by other methods which are not returning a set of
+     * steps and performs the actions directly, so it would not
+     * be executed if it returns another step.
+
+     * @Given /^I wait until "(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" does not exist$/
+     * @param string $element
+     * @param string $selector
+     * @return void
+     */
+    public function wait_until_does_not_exists($element, $selectortype) {
+        $this->ensure_element_does_not_exist($element, $selectortype);
     }
 
     /**
@@ -211,7 +316,54 @@ class behat_general extends behat_base {
 
         // Gets the node based on the requested selector type and locator.
         $node = $this->get_selected_node($selectortype, $element);
+        $this->ensure_node_is_visible($node);
         $node->click();
+    }
+
+    /**
+     * Sets the focus and takes away the focus from an element, generating blur JS event.
+     *
+     * @When /^I take focus off "(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)"$/
+     * @param string $element Element we look for
+     * @param string $selectortype The type of what we look for
+     */
+    public function i_take_focus_off_field($element, $selectortype) {
+        if (!$this->running_javascript()) {
+            throw new ExpectationException('Can\'t take focus off from "' . $element . '" in non-js mode', $this->getSession());
+        }
+        // Gets the node based on the requested selector type and locator.
+        $node = $this->get_selected_node($selectortype, $element);
+        $this->ensure_node_is_visible($node);
+
+        // Ensure element is focused before taking it off.
+        $node->focus();
+        $node->blur();
+    }
+
+    /**
+     * Clicks the specified element and confirms the expected dialogue.
+     *
+     * @When /^I click on "(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" confirming the dialogue$/
+     * @throws ElementNotFoundException Thrown by behat_base::find
+     * @param string $element Element we look for
+     * @param string $selectortype The type of what we look for
+     */
+    public function i_click_on_confirming_the_dialogue($element, $selectortype) {
+        $this->i_click_on($element, $selectortype);
+        $this->accept_currently_displayed_alert_dialog();
+    }
+
+    /**
+     * Clicks the specified element and dismissing the expected dialogue.
+     *
+     * @When /^I click on "(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" dismissing the dialogue$/
+     * @throws ElementNotFoundException Thrown by behat_base::find
+     * @param string $element Element we look for
+     * @param string $selectortype The type of what we look for
+     */
+    public function i_click_on_dismissing_the_dialogue($element, $selectortype) {
+        $this->i_click_on($element, $selectortype);
+        $this->dismiss_currently_displayed_alert_dialog();
     }
 
     /**
@@ -226,29 +378,8 @@ class behat_general extends behat_base {
     public function i_click_on_in_the($element, $selectortype, $nodeelement, $nodeselectortype) {
 
         $node = $this->get_node_in_container($selectortype, $element, $nodeselectortype, $nodeelement);
+        $this->ensure_node_is_visible($node);
         $node->click();
-    }
-
-    /**
-     * Click on the specified element inside a table row containing the specified text.
-     *
-     * @Given /^I click on "(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>(?:[^"]|\\")*)" in the "(?P<row_text_string>(?:[^"]|\\")*)" table row$/
-     * @throws ElementNotFoundException
-     * @param string $element Element we look for
-     * @param string $selectortype The type of what we look for
-     * @param string $tablerowtext The table row text
-     */
-    public function i_click_on_in_the_table_row($element, $selectortype, $tablerowtext) {
-
-        // The table row container.
-        $nocontainerexception = new ElementNotFoundException($this->getSession(), '"' . $tablerowtext . '" row text ');
-        $tablerowtext = $this->getSession()->getSelectorsHandler()->xpathLiteral($tablerowtext);
-        $rownode = $this->find('xpath', "//tr[contains(., $tablerowtext)]", $nocontainerexception);
-
-        // Looking for the element DOM node inside the specified row.
-        list($selector, $locator) = $this->transform_selector($selectortype, $element);
-        $elementnode = $this->find($selector, $locator, false, $rownode);
-        $elementnode->click();
     }
 
     /**
@@ -276,6 +407,110 @@ class behat_general extends behat_base {
     }
 
     /**
+     * Checks, that the specified element is visible. Only available in tests using Javascript.
+     *
+     * @Then /^"(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>(?:[^"]|\\")*)" should be visible$/
+     * @throws ElementNotFoundException
+     * @throws ExpectationException
+     * @throws DriverException
+     * @param string $element
+     * @param string $selectortype
+     * @return void
+     */
+    public function should_be_visible($element, $selectortype) {
+
+        if (!$this->running_javascript()) {
+            throw new DriverException('Visible checks are disabled in scenarios without Javascript support');
+        }
+
+        $node = $this->get_selected_node($selectortype, $element);
+        if (!$node->isVisible()) {
+            throw new ExpectationException('"' . $element . '" "' . $selectortype . '" is not visible', $this->getSession());
+        }
+    }
+
+    /**
+     * Checks, that the existing element is not visible. Only available in tests using Javascript.
+     *
+     * As a "not" method, it's performance could not be good, but in this
+     * case the performance is good because the element must exist,
+     * otherwise there would be a ElementNotFoundException, also here we are
+     * not spinning until the element is visible.
+     *
+     * @Then /^"(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>(?:[^"]|\\")*)" should not be visible$/
+     * @throws ElementNotFoundException
+     * @throws ExpectationException
+     * @param string $element
+     * @param string $selectortype
+     * @return void
+     */
+    public function should_not_be_visible($element, $selectortype) {
+
+        try {
+            $this->should_be_visible($element, $selectortype);
+            throw new ExpectationException('"' . $element . '" "' . $selectortype . '" is visible', $this->getSession());
+        } catch (ExpectationException $e) {
+            // All as expected.
+        }
+    }
+
+    /**
+     * Checks, that the specified element is visible inside the specified container. Only available in tests using Javascript.
+     *
+     * @Then /^"(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" in the "(?P<element_container_string>(?:[^"]|\\")*)" "(?P<text_selector_string>[^"]*)" should be visible$/
+     * @throws ElementNotFoundException
+     * @throws DriverException
+     * @throws ExpectationException
+     * @param string $element Element we look for
+     * @param string $selectortype The type of what we look for
+     * @param string $nodeelement Element we look in
+     * @param string $nodeselectortype The type of selector where we look in
+     */
+    public function in_the_should_be_visible($element, $selectortype, $nodeelement, $nodeselectortype) {
+
+        if (!$this->running_javascript()) {
+            throw new DriverException('Visible checks are disabled in scenarios without Javascript support');
+        }
+
+        $node = $this->get_node_in_container($selectortype, $element, $nodeselectortype, $nodeelement);
+        if (!$node->isVisible()) {
+            throw new ExpectationException(
+                '"' . $element . '" "' . $selectortype . '" in the "' . $nodeelement . '" "' . $nodeselectortype . '" is not visible',
+                $this->getSession()
+            );
+        }
+    }
+
+    /**
+     * Checks, that the existing element is not visible inside the existing container. Only available in tests using Javascript.
+     *
+     * As a "not" method, it's performance could not be good, but in this
+     * case the performance is good because the element must exist,
+     * otherwise there would be a ElementNotFoundException, also here we are
+     * not spinning until the element is visible.
+     *
+     * @Then /^"(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" in the "(?P<element_container_string>(?:[^"]|\\")*)" "(?P<text_selector_string>[^"]*)" should not be visible$/
+     * @throws ElementNotFoundException
+     * @throws ExpectationException
+     * @param string $element Element we look for
+     * @param string $selectortype The type of what we look for
+     * @param string $nodeelement Element we look in
+     * @param string $nodeselectortype The type of selector where we look in
+     */
+    public function in_the_should_not_be_visible($element, $selectortype, $nodeelement, $nodeselectortype) {
+
+        try {
+            $this->in_the_should_be_visible($element, $selectortype, $nodeelement, $nodeselectortype);
+            throw new ExpectationException(
+                '"' . $element . '" "' . $selectortype . '" in the "' . $nodeelement . '" "' . $nodeselectortype . '" is visible',
+                $this->getSession()
+            );
+        } catch (ExpectationException $e) {
+            // All as expected.
+        }
+    }
+
+    /**
      * Checks, that page contains specified text. It also checks if the text is visible when running Javascript tests.
      *
      * @Then /^I should see "(?P<text_string>(?:[^"]|\\")*)"$/
@@ -290,24 +525,39 @@ class behat_general extends behat_base {
         $xpath = "/descendant-or-self::*[contains(., $xpathliteral)]" .
             "[count(descendant::*[contains(., $xpathliteral)]) = 0]";
 
-        // Wait until it finds the text, otherwise custom exception.
         try {
             $nodes = $this->find_all('xpath', $xpath);
-
-            // We also check for the element visibility when running JS tests.
-            if ($this->running_javascript()) {
-                foreach ($nodes as $node) {
-                    if ($node->isVisible()) {
-                        return;
-                    }
-                }
-
-                throw new ExpectationException("'{$text}' text was found but was not visible", $this->getSession());
-            }
-
         } catch (ElementNotFoundException $e) {
             throw new ExpectationException('"' . $text . '" text was not found in the page', $this->getSession());
         }
+
+        // If we are not running javascript we have enough with the
+        // element existing as we can't check if it is visible.
+        if (!$this->running_javascript()) {
+            return;
+        }
+
+        // We spin as we don't have enough checking that the element is there, we
+        // should also ensure that the element is visible. Using microsleep as this
+        // is a repeated step and global performance is important.
+        $this->spin(
+            function($context, $args) {
+
+                foreach ($args['nodes'] as $node) {
+                    if ($node->isVisible()) {
+                        return true;
+                    }
+                }
+
+                // If non of the nodes is visible we loop again.
+                throw new ExpectationException('"' . $args['text'] . '" text was found but was not visible', $context->getSession());
+            },
+            array('nodes' => $nodes, 'text' => $text),
+            false,
+            false,
+            true
+        );
+
     }
 
     /**
@@ -319,16 +569,47 @@ class behat_general extends behat_base {
      */
     public function assert_page_not_contains_text($text) {
 
-        // Delegating the process to assert_page_contains_text.
+        // Looking for all the matching nodes without any other descendant matching the
+        // same xpath (we are using contains(., ....).
+        $xpathliteral = $this->getSession()->getSelectorsHandler()->xpathLiteral($text);
+        $xpath = "/descendant-or-self::*[contains(., $xpathliteral)]" .
+            "[count(descendant::*[contains(., $xpathliteral)]) = 0]";
+
+        // We should wait a while to ensure that the page is not still loading elements.
+        // Waiting less than self::TIMEOUT as we already waited for the DOM to be ready and
+        // all JS to be executed.
         try {
-            $this->assert_page_contains_text($text);
-        } catch (ExpectationException $e) {
-            // It should not appear, so this is good.
+            $nodes = $this->find_all('xpath', $xpath, false, false, self::REDUCED_TIMEOUT);
+        } catch (ElementNotFoundException $e) {
+            // All ok.
             return;
         }
 
-        // If the page contains the text this is failing.
-        throw new ExpectationException('"' . $text . '" text was found in the page', $this->getSession());
+        // If we are not running javascript we have enough with the
+        // element existing as we can't check if it is hidden.
+        if (!$this->running_javascript()) {
+            throw new ExpectationException('"' . $text . '" text was found in the page', $this->getSession());
+        }
+
+        // If the element is there we should be sure that it is not visible.
+        $this->spin(
+            function($context, $args) {
+
+                foreach ($args['nodes'] as $node) {
+                    if ($node->isVisible()) {
+                        throw new ExpectationException('"' . $args['text'] . '" text was found in the page', $context->getSession());
+                    }
+                }
+
+                // If non of the found nodes is visible we consider that the text is not visible.
+                return true;
+            },
+            array('nodes' => $nodes, 'text' => $text),
+            self::REDUCED_TIMEOUT,
+            false,
+            true
+        );
+
     }
 
     /**
@@ -355,22 +636,34 @@ class behat_general extends behat_base {
         // Wait until it finds the text inside the container, otherwise custom exception.
         try {
             $nodes = $this->find_all('xpath', $xpath, false, $container);
+        } catch (ElementNotFoundException $e) {
+            throw new ExpectationException('"' . $text . '" text was not found in the "' . $element . '" element', $this->getSession());
+        }
 
-            // We also check for the element visibility when running JS tests.
-            if ($this->running_javascript()) {
-                foreach ($nodes as $node) {
+        // If we are not running javascript we have enough with the
+        // element existing as we can't check if it is visible.
+        if (!$this->running_javascript()) {
+            return;
+        }
+
+        // We also check the element visibility when running JS tests. Using microsleep as this
+        // is a repeated step and global performance is important.
+        $this->spin(
+            function($context, $args) {
+
+                foreach ($args['nodes'] as $node) {
                     if ($node->isVisible()) {
-                        return;
+                        return true;
                     }
                 }
 
-                throw new ExpectationException("'{$text}' text was found in the {$element} element but was not visible", $this->getSession());
-            }
-
-        } catch (ElementNotFoundException $e) {
-            throw new ExpectationException('"' . $text . '" text was not found in the ' . $element . ' element', $this->getSession());
-        }
-
+                throw new ExpectationException('"' . $args['text'] . '" text was found in the "' . $args['element'] . '" element but was not visible', $context->getSession());
+            },
+            array('nodes' => $nodes, 'text' => $text, 'element' => $element),
+            false,
+            false,
+            true
+        );
     }
 
     /**
@@ -385,18 +678,48 @@ class behat_general extends behat_base {
      */
     public function assert_element_not_contains_text($text, $element, $selectortype) {
 
-        // Delegating the process to assert_element_contains_text.
+        // Getting the container where the text should be found.
+        $container = $this->get_selected_node($selectortype, $element);
+
+        // Looking for all the matching nodes without any other descendant matching the
+        // same xpath (we are using contains(., ....).
+        $xpathliteral = $this->getSession()->getSelectorsHandler()->xpathLiteral($text);
+        $xpath = "/descendant-or-self::*[contains(., $xpathliteral)]" .
+            "[count(descendant::*[contains(., $xpathliteral)]) = 0]";
+
+        // We should wait a while to ensure that the page is not still loading elements.
+        // Giving preference to the reliability of the results rather than to the performance.
         try {
-            $this->assert_element_contains_text($text, $element, $selectortype);
-        } catch (ExpectationException $e) {
-            // It should not appear, so this is good.
-            // We only catch ExpectationException as ElementNotFoundException
-            // will be thrown if the container does not exist.
+            $nodes = $this->find_all('xpath', $xpath, false, $container, self::REDUCED_TIMEOUT);
+        } catch (ElementNotFoundException $e) {
+            // All ok.
             return;
         }
 
-        // If the element contains the text this is failing.
-        throw new ExpectationException('"' . $text . '" text was found in the ' . $element . ' element', $this->getSession());
+        // If we are not running javascript we have enough with the
+        // element not being found as we can't check if it is visible.
+        if (!$this->running_javascript()) {
+            throw new ExpectationException('"' . $text . '" text was found in the "' . $element . '" element', $this->getSession());
+        }
+
+        // We need to ensure all the found nodes are hidden.
+        $this->spin(
+            function($context, $args) {
+
+                foreach ($args['nodes'] as $node) {
+                    if ($node->isVisible()) {
+                        throw new ExpectationException('"' . $args['text'] . '" text was found in the "' . $args['element'] . '" element', $context->getSession());
+                    }
+                }
+
+                // If all the found nodes are hidden we are happy.
+                return true;
+            },
+            array('nodes' => $nodes, 'text' => $text, 'element' => $element),
+            self::REDUCED_TIMEOUT,
+            false,
+            true
+        );
     }
 
     /**
@@ -528,12 +851,12 @@ class behat_general extends behat_base {
      *
      * This step is for advanced users, use it if you don't find anything else suitable for what you need.
      *
-     * @Then /^"(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" should exists$/
+     * @Then /^"(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" should exist$/
      * @throws ElementNotFoundException Thrown by behat_base::find
      * @param string $element The locator of the specified selector
      * @param string $selectortype The selector type
      */
-    public function should_exists($element, $selectortype) {
+    public function should_exist($element, $selectortype) {
 
         // Getting Mink selector and locator.
         list($selector, $locator) = $this->transform_selector($selectortype, $element);
@@ -547,15 +870,35 @@ class behat_general extends behat_base {
      *
      * This step is for advanced users, use it if you don't find anything else suitable for what you need.
      *
-     * @Then /^"(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" should not exists$/
+     * @Then /^"(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" should not exist$/
      * @throws ExpectationException
      * @param string $element The locator of the specified selector
      * @param string $selectortype The selector type
      */
-    public function should_not_exists($element, $selectortype) {
+    public function should_not_exist($element, $selectortype) {
+
+        // Getting Mink selector and locator.
+        list($selector, $locator) = $this->transform_selector($selectortype, $element);
 
         try {
-            $this->should_exists($element, $selectortype);
+
+            // Using directly the spin method as we want a reduced timeout but there is no
+            // need for a 0.1 seconds interval because in the optimistic case we will timeout.
+            $params = array('selector' => $selector, 'locator' => $locator);
+            // The exception does not really matter as we will catch it and will never "explode".
+            $exception = new ElementNotFoundException($this->getSession(), $selectortype, null, $element);
+
+            // If all goes good it will throw an ElementNotFoundExceptionn that we will catch.
+            $this->spin(
+                function($context, $args) {
+                    return $context->getSession()->getPage()->findAll($args['selector'], $args['locator']);
+                },
+                $params,
+                self::REDUCED_TIMEOUT,
+                $exception,
+                false
+            );
+
             throw new ExpectationException('The "' . $element . '" "' . $selectortype . '" exists in the current page', $this->getSession());
         } catch (ElementNotFoundException $e) {
             // It passes.
@@ -611,13 +954,452 @@ class behat_general extends behat_base {
      * @param string $containerselectortype The container locator
      */
     public function should_not_exist_in_the($element, $selectortype, $containerelement, $containerselectortype) {
+
+        // Get the container node; here we throw an exception
+        // if the container node does not exist.
+        $containernode = $this->get_selected_node($containerselectortype, $containerelement);
+
+        list($selector, $locator) = $this->transform_selector($selectortype, $element);
+
+        // Will throw an ElementNotFoundException if it does not exist, but, actually
+        // it should not exist, so we try & catch it.
         try {
-            $this->should_exist_in_the($element, $selectortype, $containerelement, $containerselectortype);
+            // Would be better to use a 1 second sleep because the element should not be there,
+            // but we would need to duplicate the whole find_all() logic to do it, the benefit of
+            // changing to 1 second sleep is not significant.
+            $this->find($selector, $locator, false, $containernode, self::REDUCED_TIMEOUT);
             throw new ExpectationException('The "' . $element . '" "' . $selectortype . '" exists in the "' .
                 $containerelement . '" "' . $containerselectortype . '"', $this->getSession());
         } catch (ElementNotFoundException $e) {
             // It passes.
             return;
+        }
+    }
+
+    /**
+     * Change browser window size small: 640x480, medium: 1024x768, large: 2560x1600, custom: widthxheight
+     *
+     * Example: I change window size to "small" or I change window size to "1024x768"
+     *
+     * @throws ExpectationException
+     * @Then /^I change window size to "([^"](small|medium|large|\d+x\d+))"$/
+     * @param string $windowsize size of the window (small|medium|large|wxh).
+     */
+    public function i_change_window_size_to($windowsize) {
+        $this->resize_window($windowsize);
+    }
+
+    /**
+     * Checks whether there is an attribute on the given element that contains the specified text.
+     *
+     * @Then /^the "(?P<attribute_string>[^"]*)" attribute of "(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" should contain "(?P<text_string>(?:[^"]|\\")*)"$/
+     * @throws ExpectationException
+     * @param string $attribute Name of attribute
+     * @param string $element The locator of the specified selector
+     * @param string $selectortype The selector type
+     * @param string $text Expected substring
+     */
+    public function the_attribute_of_should_contain($attribute, $element, $selectortype, $text) {
+        // Get the container node (exception if it doesn't exist).
+        $containernode = $this->get_selected_node($selectortype, $element);
+        $value = $containernode->getAttribute($attribute);
+        if ($value == null) {
+            throw new ExpectationException('The attribute "' . $attribute. '" does not exist',
+                    $this->getSession());
+        } else if (strpos($value, $text) === false) {
+            throw new ExpectationException('The attribute "' . $attribute .
+                    '" does not contain "' . $text . '" (actual value: "' . $value . '")',
+                    $this->getSession());
+        }
+    }
+
+    /**
+     * Checks that the attribute on the given element does not contain the specified text.
+     *
+     * @Then /^the "(?P<attribute_string>[^"]*)" attribute of "(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" should not contain "(?P<text_string>(?:[^"]|\\")*)"$/
+     * @throws ExpectationException
+     * @param string $attribute Name of attribute
+     * @param string $element The locator of the specified selector
+     * @param string $selectortype The selector type
+     * @param string $text Expected substring
+     */
+    public function the_attribute_of_should_not_contain($attribute, $element, $selectortype, $text) {
+        // Get the container node (exception if it doesn't exist).
+        $containernode = $this->get_selected_node($selectortype, $element);
+        $value = $containernode->getAttribute($attribute);
+        if ($value == null) {
+            throw new ExpectationException('The attribute "' . $attribute. '" does not exist',
+                    $this->getSession());
+        } else if (strpos($value, $text) !== false) {
+            throw new ExpectationException('The attribute "' . $attribute .
+                    '" contains "' . $text . '" (value: "' . $value . '")',
+                    $this->getSession());
+        }
+    }
+
+    /**
+     * Checks the provided value exists in specific row/column of table.
+     *
+     * @Then /^"(?P<row_string>[^"]*)" row "(?P<column_string>[^"]*)" column of "(?P<table_string>[^"]*)" table should contain "(?P<value_string>[^"]*)"$/
+     * @throws ElementNotFoundException
+     * @param string $row row text which will be looked in.
+     * @param string $column column text to search (or numeric value for the column position)
+     * @param string $table table id/class/caption
+     * @param string $value text to check.
+     */
+    public function row_column_of_table_should_contain($row, $column, $table, $value) {
+        $tablenode = $this->get_selected_node('table', $table);
+        $tablexpath = $tablenode->getXpath();
+
+        $rowliteral = $this->getSession()->getSelectorsHandler()->xpathLiteral($row);
+        $valueliteral = $this->getSession()->getSelectorsHandler()->xpathLiteral($value);
+        $columnliteral = $this->getSession()->getSelectorsHandler()->xpathLiteral($column);
+
+        if (preg_match('/^-?(\d+)-?$/', $column, $columnasnumber)) {
+            // Column indicated as a number, just use it as position of the column.
+            $columnpositionxpath = "/child::*[position() = {$columnasnumber[1]}]";
+        } else {
+            // Header can be in thead or tbody (first row), following xpath should work.
+            $theadheaderxpath = "thead/tr[1]/th[(normalize-space(.)=" . $columnliteral . " or a[normalize-space(text())=" .
+                    $columnliteral . "] or div[normalize-space(text())=" . $columnliteral . "])]";
+            $tbodyheaderxpath = "tbody/tr[1]/td[(normalize-space(.)=" . $columnliteral . " or a[normalize-space(text())=" .
+                    $columnliteral . "] or div[normalize-space(text())=" . $columnliteral . "])]";
+
+            // Check if column exists.
+            $columnheaderxpath = $tablexpath . "[" . $theadheaderxpath . " | " . $tbodyheaderxpath . "]";
+            $columnheader = $this->getSession()->getDriver()->find($columnheaderxpath);
+            if (empty($columnheader)) {
+                $columnexceptionmsg = $column . '" in table "' . $table . '"';
+                throw new ElementNotFoundException($this->getSession(), "\n$columnheaderxpath\n\n".'Column', null, $columnexceptionmsg);
+            }
+            // Following conditions were considered before finding column count.
+            // 1. Table header can be in thead/tr/th or tbody/tr/td[1].
+            // 2. First column can have th (Gradebook -> user report), so having lenient sibling check.
+            $columnpositionxpath = "/child::*[position() = count(" . $tablexpath . "/" . $theadheaderxpath .
+                "/preceding-sibling::*) + 1]";
+        }
+
+        // Check if value exists in specific row/column.
+        // Get row xpath.
+        $rowxpath = $tablexpath."/tbody/tr[th[normalize-space(.)=" . $rowliteral . "] | td[normalize-space(.)=" . $rowliteral . "]]";
+
+        $columnvaluexpath = $rowxpath . $columnpositionxpath . "[contains(normalize-space(.)," . $valueliteral . ")]";
+
+        // Looks for the requested node inside the container node.
+        $coumnnode = $this->getSession()->getDriver()->find($columnvaluexpath);
+        if (empty($coumnnode)) {
+            $locatorexceptionmsg = $value . '" in "' . $row . '" row with column "' . $column;
+            throw new ElementNotFoundException($this->getSession(), "\n$columnvaluexpath\n\n".'Column value', null, $locatorexceptionmsg);
+        }
+    }
+
+    /**
+     * Checks the provided value should not exist in specific row/column of table.
+     *
+     * @Then /^"(?P<row_string>[^"]*)" row "(?P<column_string>[^"]*)" column of "(?P<table_string>[^"]*)" table should not contain "(?P<value_string>[^"]*)"$/
+     * @throws ElementNotFoundException
+     * @param string $row row text which will be looked in.
+     * @param string $column column text to search
+     * @param string $table table id/class/caption
+     * @param string $value text to check.
+     */
+    public function row_column_of_table_should_not_contain($row, $column, $table, $value) {
+        try {
+            $this->row_column_of_table_should_contain($row, $column, $table, $value);
+            // Throw exception if found.
+            throw new ExpectationException(
+                '"' . $column . '" with value "' . $value . '" is present in "' . $row . '"  row for table "' . $table . '"',
+                $this->getSession()
+            );
+        } catch (ElementNotFoundException $e) {
+            // Table row/column doesn't contain this value. Nothing to do.
+            return;
+        }
+    }
+
+    /**
+     * Checks that the provided value exist in table.
+     * More info in http://docs.moodle.org/dev/Acceptance_testing#Providing_values_to_steps.
+     *
+     * First row may contain column headers or numeric indexes of the columns
+     * (syntax -1- is also considered to be column index). Column indexes are
+     * useful in case of multirow headers and/or presence of cells with colspan.
+     *
+     * @Then /^the following should exist in the "(?P<table_string>[^"]*)" table:$/
+     * @throws ExpectationException
+     * @param string $table name of table
+     * @param TableNode $data table with first row as header and following values
+     *        | Header 1 | Header 2 | Header 3 |
+     *        | Value 1 | Value 2 | Value 3|
+     */
+    public function following_should_exist_in_the_table($table, TableNode $data) {
+        $datahash = $data->getHash();
+
+        foreach ($datahash as $row) {
+            $firstcell = null;
+            foreach ($row as $column => $value) {
+                if ($firstcell === null) {
+                    $firstcell = $value;
+                } else {
+                    $this->row_column_of_table_should_contain($firstcell, $column, $table, $value);
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks that the provided value exist in table.
+     * More info in http://docs.moodle.org/dev/Acceptance_testing#Providing_values_to_steps.
+     *
+     * @Then /^the following should not exist in the "(?P<table_string>[^"]*)" table:$/
+     * @throws ExpectationException
+     * @param string $table name of table
+     * @param TableNode $data table with first row as header and following values
+     *        | Header 1 | Header 2 | Header 3 |
+     *        | Value 1 | Value 2 | Value 3|
+     */
+    public function following_should_not_exist_in_the_table($table, TableNode $data) {
+        $datahash = $data->getHash();
+
+        foreach ($datahash as $value) {
+            $row = array_shift($value);
+            foreach ($value as $column => $value) {
+                try {
+                    $this->row_column_of_table_should_contain($row, $column, $table, $value);
+                    // Throw exception if found.
+                    throw new ExpectationException('"' . $column . '" with value "' . $value . '" is present in "' .
+                        $row . '"  row for table "' . $table . '"', $this->getSession()
+                    );
+                } catch (ElementNotFoundException $e) {
+                    // Table row/column doesn't contain this value. Nothing to do.
+                    continue;
+                }
+            }
+        }
+    }
+
+    /**
+     * Given the text of a link, download the linked file and return the contents.
+     *
+     * This is a helper method used by {@link following_should_download_bytes()}
+     * and {@link following_should_download_between_and_bytes()}
+     *
+     * @param string $link the text of the link.
+     * @return string the content of the downloaded file.
+     */
+    protected function download_file_from_link($link) {
+        // Find the link.
+        $linknode = $this->find_link($link);
+        $this->ensure_node_is_visible($linknode);
+
+        // Get the href and check it.
+        $url = $linknode->getAttribute('href');
+        if (!$url) {
+            throw new ExpectationException('Download link does not have href attribute',
+                    $this->getSession());
+        }
+        if (!preg_match('~^https?://~', $url)) {
+            throw new ExpectationException('Download link not an absolute URL: ' . $url,
+                    $this->getSession());
+        }
+
+        // Download the URL and check the size.
+        $session = $this->getSession()->getCookie('MoodleSession');
+        return download_file_content($url, array('Cookie' => 'MoodleSession=' . $session));
+    }
+
+    /**
+     * Downloads the file from a link on the page and checks the size.
+     *
+     * Only works if the link has an href attribute. Javascript downloads are
+     * not supported. Currently, the href must be an absolute URL.
+     *
+     * @Then /^following "(?P<link_string>[^"]*)" should download "(?P<expected_bytes>\d+)" bytes$/
+     * @throws ExpectationException
+     * @param string $link the text of the link.
+     * @param number $expectedsize the expected file size in bytes.
+     */
+    public function following_should_download_bytes($link, $expectedsize) {
+        $exception = new ExpectationException('Error while downloading data from ' . $link, $this->getSession());
+
+        // It will stop spinning once file is downloaded or time out.
+        $result = $this->spin(
+            function($context, $args) {
+                $link = $args['link'];
+                return $this->download_file_from_link($link);
+            },
+            array('link' => $link),
+            self::EXTENDED_TIMEOUT,
+            $exception
+        );
+
+        // Check download size.
+        $actualsize = (int)strlen($result);
+        if ($actualsize !== (int)$expectedsize) {
+            throw new ExpectationException('Downloaded data was ' . $actualsize .
+                    ' bytes, expecting ' . $expectedsize, $this->getSession());
+        }
+    }
+
+    /**
+     * Downloads the file from a link on the page and checks the size is in a given range.
+     *
+     * Only works if the link has an href attribute. Javascript downloads are
+     * not supported. Currently, the href must be an absolute URL.
+     *
+     * The range includes the endpoints. That is, a 10 byte file in considered to
+     * be between "5" and "10" bytes, and between "10" and "20" bytes.
+     *
+     * @Then /^following "(?P<link_string>[^"]*)" should download between "(?P<min_bytes>\d+)" and "(?P<max_bytes>\d+)" bytes$/
+     * @throws ExpectationException
+     * @param string $link the text of the link.
+     * @param number $minexpectedsize the minimum expected file size in bytes.
+     * @param number $maxexpectedsize the maximum expected file size in bytes.
+     */
+    public function following_should_download_between_and_bytes($link, $minexpectedsize, $maxexpectedsize) {
+        // If the minimum is greater than the maximum then swap the values.
+        if ((int)$minexpectedsize > (int)$maxexpectedsize) {
+            list($minexpectedsize, $maxexpectedsize) = array($maxexpectedsize, $minexpectedsize);
+        }
+
+        $exception = new ExpectationException('Error while downloading data from ' . $link, $this->getSession());
+
+        // It will stop spinning once file is downloaded or time out.
+        $result = $this->spin(
+            function($context, $args) {
+                $link = $args['link'];
+
+                return $this->download_file_from_link($link);
+            },
+            array('link' => $link),
+            self::EXTENDED_TIMEOUT,
+            $exception
+        );
+
+        // Check download size.
+        $actualsize = (int)strlen($result);
+        if ($actualsize < $minexpectedsize || $actualsize > $maxexpectedsize) {
+            throw new ExpectationException('Downloaded data was ' . $actualsize .
+                    ' bytes, expecting between ' . $minexpectedsize . ' and ' .
+                    $maxexpectedsize, $this->getSession());
+        }
+    }
+
+    /**
+     * Prepare to detect whether or not a new page has loaded (or the same page reloaded) some time in the future.
+     *
+     * @Given /^I start watching to see if a new page loads$/
+     */
+    public function i_start_watching_to_see_if_a_new_page_loads() {
+        if (!$this->running_javascript()) {
+            throw new DriverException('Page load detection requires JavaScript.');
+        }
+
+        $session = $this->getSession();
+
+        if ($this->pageloaddetectionrunning || $session->getPage()->find('xpath', $this->get_page_load_xpath())) {
+            // If we find this node at this point we are already watching for a reload and the behat steps
+            // are out of order. We will treat this as an error - really it needs to be fixed as it indicates a problem.
+            throw new ExpectationException(
+                'Page load expectation error: page reloads are already been watched for.', $session);
+        }
+
+        $this->pageloaddetectionrunning = true;
+
+        $session->evaluateScript(
+                'var span = document.createElement("span");
+                span.setAttribute("data-rel", "' . self::PAGE_LOAD_DETECTION_STRING . '");
+                span.setAttribute("style", "display: none;");
+                document.body.appendChild(span);');
+    }
+
+    /**
+     * Verify that a new page has loaded (or the same page has reloaded) since the
+     * last "I start watching to see if a new page loads" step.
+     *
+     * @Given /^a new page should have loaded since I started watching$/
+     */
+    public function a_new_page_should_have_loaded_since_i_started_watching() {
+        $session = $this->getSession();
+
+        // Make sure page load tracking was started.
+        if (!$this->pageloaddetectionrunning) {
+            throw new ExpectationException(
+                'Page load expectation error: page load tracking was not started.', $session);
+        }
+
+        // As the node is inserted by code above it is either there or not, and we do not need spin and it is safe
+        // to use the native API here which is great as exception handling (the alternative is slow).
+        if ($session->getPage()->find('xpath', $this->get_page_load_xpath())) {
+            // We don't want to find this node, if we do we have an error.
+            throw new ExpectationException(
+                'Page load expectation error: a new page has not been loaded when it should have been.', $session);
+        }
+
+        // Cancel the tracking of pageloaddetectionrunning.
+        $this->pageloaddetectionrunning = false;
+    }
+
+    /**
+     * Verify that a new page has not loaded (or the same page has reloaded) since the
+     * last "I start watching to see if a new page loads" step.
+     *
+     * @Given /^a new page should not have loaded since I started watching$/
+     */
+    public function a_new_page_should_not_have_loaded_since_i_started_watching() {
+        $session = $this->getSession();
+
+        // Make sure page load tracking was started.
+        if (!$this->pageloaddetectionrunning) {
+            throw new ExpectationException(
+                'Page load expectation error: page load tracking was not started.', $session);
+        }
+
+        // We use our API here as we can use the exception handling provided by it.
+        $this->find(
+            'xpath',
+            $this->get_page_load_xpath(),
+            new ExpectationException(
+                'Page load expectation error: A new page has been loaded when it should not have been.',
+                $this->getSession()
+            )
+        );
+    }
+
+    /**
+     * Helper used by {@link a_new_page_should_have_loaded_since_i_started_watching}
+     * and {@link a_new_page_should_not_have_loaded_since_i_started_watching}
+     * @return string xpath expression.
+     */
+    protected function get_page_load_xpath() {
+        return "//span[@data-rel = '" . self::PAGE_LOAD_DETECTION_STRING . "']";
+    }
+
+    /**
+     * Wait unit user press Enter/Return key. Useful when debugging a scenario.
+     *
+     * @Then /^(?:|I )pause(?:| scenario execution)$/
+     */
+    public function i_pause_scenario_executon() {
+        global $CFG;
+
+        $posixexists = function_exists('posix_isatty');
+
+        // Make sure this step is only used with interactive terminal (if detected).
+        if ($posixexists && !@posix_isatty(STDOUT)) {
+            $session = $this->getSession();
+            throw new ExpectationException('Break point should only be used with interative terminal.', $session);
+        }
+
+        // Windows don't support ANSI code by default, but with ANSICON.
+        $isansicon = getenv('ANSICON');
+        if (($CFG->ostype === 'WINDOWS') && empty($isansicon)) {
+            fwrite(STDOUT, "Paused. Press Enter/Return to continue.");
+            fread(STDIN, 1024);
+        } else {
+            fwrite(STDOUT, "\033[s\n\033[0;93mPaused. Press \033[1;31mEnter/Return\033[0;93m to continue.\033[0m");
+            fread(STDIN, 1024);
+            fwrite(STDOUT, "\033[2A\033[u\033[2B");
         }
     }
 }

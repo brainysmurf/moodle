@@ -19,7 +19,7 @@
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package feedback
+ * @package mod_feedback
  */
 
 require_once("../../config.php");
@@ -84,9 +84,10 @@ if ($coursefilter) {
 $strfeedbacks = get_string("modulenameplural", "feedback");
 $strfeedback  = get_string("modulename", "feedback");
 
-$PAGE->set_heading(format_string($course->fullname));
-$PAGE->set_title(format_string($feedback->name));
+$PAGE->set_heading($course->fullname);
+$PAGE->set_title($feedback->name);
 echo $OUTPUT->header();
+echo $OUTPUT->heading(format_string($feedback->name));
 
 require('tabs.php');
 
@@ -111,11 +112,11 @@ if (($courses = $DB->get_records_sql_menu($sql, $params)) && !empty($searchcours
                 'value="'.get_string('searchagain').'" '.
                 'onclick="document.location=\'mapcourse.php?id='.$id.'\'"/>';
 
-    echo '<input type="hidden" name="searchcourse" value="'.$searchcourse.'"/>';
+    echo '<input type="hidden" name="searchcourse" value="'.s($searchcourse).'"/>';
     echo '<input type="hidden" name="feedbackid" value="'.$feedback->id.'"/>';
     echo $OUTPUT->help_icon('searchcourses', 'feedback');
 } else {
-    echo '<input type="text" name="searchcourse" value="'.$searchcourse.'"/> ';
+    echo '<input type="text" name="searchcourse" value="'.s($searchcourse).'"/> ';
     echo '<input type="submit" value="'.get_string('searchcourses').'"/>';
     echo $OUTPUT->help_icon('searchcourses', 'feedback');
 }
@@ -144,7 +145,7 @@ if ($coursemap = feedback_get_courses_from_sitecourse_map($feedback->id)) {
 
     $table->print_html();
 } else {
-    echo '<h3>'.get_string('mapcoursenone', 'feedback').'</h3>';
+    echo $OUTPUT->heading(get_string('mapcoursenone', 'feedback'), 3);
 }
 
 

@@ -104,11 +104,25 @@ switch($requestmethod) {
                     case 'visible':
                         require_capability('moodle/course:activityvisibility', $modcontext);
                         set_coursemodule_visible($cm->id, $value);
+                        \core\event\course_module_updated::create_from_cm($cm, $modcontext)->trigger();
+                        break;
+
+                    case 'duplicate':
+                        require_capability('moodle/course:manageactivities', $coursecontext);
+                        require_capability('moodle/backup:backuptargetimport', $coursecontext);
+                        require_capability('moodle/restore:restoretargetimport', $coursecontext);
+                        if (!course_allowed_module($course, $cm->modname)) {
+                            throw new moodle_exception('No permission to create that activity');
+                        }
+                        $sr = optional_param('sr', null, PARAM_INT);
+                        $result = mod_duplicate_activity($course, $cm, $sr);
+                        echo json_encode($result);
                         break;
 
                     case 'groupmode':
                         require_capability('moodle/course:manageactivities', $modcontext);
                         set_coursemodule_groupmode($cm->id, $value);
+                        \core\event\course_module_updated::create_from_cm($cm, $modcontext)->trigger();
                         break;
 
                     case 'indent':
@@ -133,8 +147,8 @@ switch($requestmethod) {
                             $beforemod = NULL;
                         }
 
-                        moveto_module($cm, $section, $beforemod);
-                        echo json_encode(array('visible' => $cm->visible));
+                        $isvisible = moveto_module($cm, $section, $beforemod);
+                        echo json_encode(array('visible' => (bool) $isvisible));
                         break;
                     case 'gettitle':
                         require_capability('moodle/course:manageactivities', $modcontext);
@@ -161,6 +175,8 @@ switch($requestmethod) {
 
                         if (!empty($module->name)) {
                             $DB->update_record($cm->modname, $module);
+                            $cm->name = $module->name;
+                            \core\event\course_module_updated::create_from_cm($cm, $modcontext)->trigger();
                             rebuild_course_cache($cm->course);
                         } else {
                             $module->name = $cm->name;

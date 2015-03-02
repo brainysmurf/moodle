@@ -157,7 +157,7 @@ class core_calendar_external extends external_api {
      * Get Calendar events
      *
      * @param array $events A list of events
-     * @package array $options various options
+     * @param array $options various options
      * @return array Array of event details
      * @since Moodle 2.5
      */
@@ -173,13 +173,19 @@ class core_calendar_external extends external_api {
 
         // Let us findout courses that we can return events from.
         if (!$hassystemcap) {
-            $courses = enrol_get_my_courses();
-            $courses = array_keys($courses);
             foreach ($params['events']['courseids'] as $id) {
-                if (in_array($id, $courses)) {
+               try {
+                    $context = context_course::instance($id);
+                    self::validate_context($context);
                     $funcparam['courses'][] = $id;
-                } else {
-                    $warnings[] = array('item' => $id, 'warningcode' => 'nopermissions', 'message' => 'you do not have permissions to access this course');
+                } catch (Exception $e) {
+                    $warnings[] = array(
+                        'item' => 'course',
+                        'itemid' => $id,
+                        'warningcode' => 'nopermissions',
+                        'message' => 'No access rights in course context '.$e->getMessage().$e->getTraceAsString()
+                    );
+                    continue;
                 }
             }
         } else {
@@ -235,7 +241,7 @@ class core_calendar_external extends external_api {
                 $events[$eventid] = $event;
             } else if (!empty($eventobj->modulename)) {
                 $cm = get_coursemodule_from_instance($eventobj->modulename, $eventobj->instance);
-                if (groups_course_module_visible($cm)) {
+                if (\core_availability\info_module::is_user_visible($cm, 0, false)) {
                     $events[$eventid] = $event;
                 }
             } else {

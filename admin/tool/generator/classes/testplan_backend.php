@@ -24,9 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/backend.php');
-require_once(__DIR__ . '/course_backend.php');
-
 /**
  * Generates the files required by JMeter.
  *

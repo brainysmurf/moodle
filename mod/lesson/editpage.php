@@ -18,8 +18,7 @@
 /**
  * Action for adding a question page.  Prints an HTML form.
  *
- * @package    mod
- * @subpackage lesson
+ * @package mod_lesson
  * @copyright  2009 Sam Hemelryk
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
@@ -44,6 +43,7 @@ $context = context_module::instance($cm->id);
 require_capability('mod/lesson:edit', $context);
 
 $PAGE->set_url('/mod/lesson/editpage.php', array('pageid'=>$pageid, 'id'=>$id, 'qtype'=>$qtype));
+$PAGE->set_pagelayout('admin');
 
 if ($edit) {
     $editpage = lesson_page::load($pageid, $lesson);
@@ -86,6 +86,31 @@ if ($edit) {
     $data->id = $cm->id;
     $editoroptions['context'] = $context;
     $data = file_prepare_standard_editor($data, 'contents', $editoroptions, $context, 'mod_lesson', 'page_contents',  $editpage->id);
+
+    $answerscount = 0;
+    $answers = $editpage->get_answers();
+    foreach ($answers as $answer) {
+        $answereditor = 'answer_editor['.$answerscount.']';
+        if (is_array($data->$answereditor)) {
+            $answerdata = $data->$answereditor;
+            $answerdraftid = file_get_submitted_draft_itemid($answereditor);
+            $answertext = file_prepare_draft_area($answerdraftid, $PAGE->cm->context->id,
+                    'mod_lesson', 'page_answers', $answer->id, $editoroptions, $answerdata['text']);
+            $data->$answereditor = array('text' => $answertext, 'format' => $answerdata['format'], 'itemid' => $answerdraftid);
+        }
+
+        $responseeditor = 'response_editor['.$answerscount.']';
+        if (is_array($data->$responseeditor)) {
+            $responsedata = $data->$responseeditor;
+            $responsedraftid = file_get_submitted_draft_itemid($responseeditor);
+            $responsetext = file_prepare_draft_area($responsedraftid, $PAGE->cm->context->id,
+                    'mod_lesson', 'page_responses', $answer->id, $editoroptions, $responsedata['text']);
+            $data->$responseeditor = array('text' => $responsetext, 'format' => $responsedata['format'],
+                    'itemid' => $responsedraftid);
+        }
+        $answerscount++;
+    }
+
     $mform->set_data($data);
     $PAGE->navbar->add(get_string('edit'), new moodle_url('/mod/lesson/edit.php', array('id'=>$id)));
     $PAGE->navbar->add(get_string('editingquestionpage', 'lesson', get_string($mform->qtypestring, 'lesson')));

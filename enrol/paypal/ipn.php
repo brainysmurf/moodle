@@ -177,7 +177,7 @@ if (strlen($result) > 0) {
 
         }
 
-        if (textlib::strtolower($data->business) !== textlib::strtolower($plugin->get_config('paypalbusiness'))) {   // Check that the email is the one we want it to be
+        if (core_text::strtolower($data->business) !== core_text::strtolower($plugin->get_config('paypalbusiness'))) {   // Check that the email is the one we want it to be
             message_paypal_error_to_admin("Business email is {$data->business} (not ".
                     $plugin->get_config('paypalbusiness').")", $data);
             die;
@@ -251,7 +251,7 @@ if (strlen($result) > 0) {
             $eventdata->modulename        = 'moodle';
             $eventdata->component         = 'enrol_paypal';
             $eventdata->name              = 'paypal_enrolment';
-            $eventdata->userfrom          = empty($teacher) ? get_admin() : $teacher;
+            $eventdata->userfrom          = empty($teacher) ? core_user::get_support_user() : $teacher;
             $eventdata->userto            = $user;
             $eventdata->subject           = get_string("enrolmentnew", 'enrol', $shortname);
             $eventdata->fullmessage       = get_string('welcometocoursetext', '', $a);

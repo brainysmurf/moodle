@@ -17,8 +17,7 @@
 /**
  * Defines the quiz module ettings form.
  *
- * @package    mod
- * @subpackage quiz
+ * @package    mod_quiz
  * @copyright  2006 Jamie Pratt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -37,8 +36,14 @@ require_once($CFG->dirroot . '/mod/quiz/locallib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_quiz_mod_form extends moodleform_mod {
+    /** @var array options to be used with date_time_selector fields in the quiz. */
+    public static $datefieldoptions = array('optional' => true, 'step' => 1);
+
     protected $_feedbacks;
     protected static $reviewfields = array(); // Initialised in the constructor.
+
+    /** @var int the max number of attempts allowed in any user or group override on this quiz. */
+    protected $maxattemptsanyoverride = null;
 
     public function __construct($current, $section, $cm, $course) {
         self::$reviewfields = array(
@@ -79,11 +84,11 @@ class mod_quiz_mod_form extends moodleform_mod {
 
         // Open and close dates.
         $mform->addElement('date_time_selector', 'timeopen', get_string('quizopen', 'quiz'),
-                array('optional' => true, 'step' => 1));
+                self::$datefieldoptions);
         $mform->addHelpButton('timeopen', 'quizopenclose', 'quiz');
 
         $mform->addElement('date_time_selector', 'timeclose', get_string('quizclose', 'quiz'),
-                array('optional' => true, 'step' => 1));
+                self::$datefieldoptions);
 
         // Time limit.
         $mform->addElement('duration', 'timelimit', get_string('timelimit', 'quiz'),
@@ -115,7 +120,12 @@ class mod_quiz_mod_form extends moodleform_mod {
         $this->standard_grading_coursemodule_elements();
 
         $mform->removeElement('grade');
-        $mform->addElement('hidden', 'grade', $quizconfig->maximumgrade);
+        if (property_exists($this->current, 'grade')) {
+            $currentgrade = $this->current->grade;
+        } else {
+            $currentgrade = $quizconfig->maximumgrade;
+        }
+        $mform->addElement('hidden', 'grade', $currentgrade);
         $mform->setType('grade', PARAM_FLOAT);
 
         // Number of attempts.
@@ -134,7 +144,9 @@ class mod_quiz_mod_form extends moodleform_mod {
         $mform->addHelpButton('grademethod', 'grademethod', 'quiz');
         $mform->setAdvanced('grademethod', $quizconfig->grademethod_adv);
         $mform->setDefault('grademethod', $quizconfig->grademethod);
-        $mform->disabledIf('grademethod', 'attempts', 'eq', 1);
+        if ($this->get_max_attempts_for_any_override() < 2) {
+            $mform->disabledIf('grademethod', 'attempts', 'eq', 1);
+        }
 
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'layouthdr', get_string('layout', 'quiz'));
@@ -149,33 +161,15 @@ class mod_quiz_mod_form extends moodleform_mod {
         $mform->setAdvanced('shufflequestions', $quizconfig->shufflequestions_adv);
         $mform->setDefault('shufflequestions', $quizconfig->shufflequestions);
 
-        // Questions per page.
-        $pageoptions = array();
-        $pageoptions[0] = get_string('neverallononepage', 'quiz');
-        $pageoptions[1] = get_string('everyquestion', 'quiz');
-        for ($i = 2; $i <= QUIZ_MAX_QPP_OPTION; ++$i) {
-            $pageoptions[$i] = get_string('everynquestions', 'quiz', $i);
-        }
-
         $pagegroup = array();
         $pagegroup[] = $mform->createElement('select', 'questionsperpage',
-                get_string('newpage', 'quiz'), $pageoptions, array('id' => 'id_questionsperpage'));
+                get_string('newpage', 'quiz'), quiz_questions_per_page_options(), array('id' => 'id_questionsperpage'));
         $mform->setDefault('questionsperpage', $quizconfig->questionsperpage);
 
         if (!empty($this->_cm)) {
             $pagegroup[] = $mform->createElement('checkbox', 'repaginatenow', '',
                     get_string('repaginatenow', 'quiz'), array('id' => 'id_repaginatenow'));
             $mform->disabledIf('repaginatenow', 'shufflequestions', 'eq', 1);
-
-            $PAGE->requires->js('/question/qengine.js');
-            $module = array(
-                'name'      => 'mod_quiz_edit',
-                'fullpath'  => '/mod/quiz/edit.js',
-                'requires'  => array('yui2-dom', 'yui2-event', 'yui2-container'),
-                'strings'   => array(),
-                'async'     => false,
-            );
-            $PAGE->requires->js_init_call('quiz_settings_init', null, false, $module);
         }
 
         $mform->addGroup($pagegroup, 'questionsperpagegrp',
@@ -217,7 +211,9 @@ class mod_quiz_mod_form extends moodleform_mod {
         $mform->addHelpButton('attemptonlast', 'eachattemptbuildsonthelast', 'quiz');
         $mform->setAdvanced('attemptonlast', $quizconfig->attemptonlast_adv);
         $mform->setDefault('attemptonlast', $quizconfig->attemptonlast);
-        $mform->disabledIf('attemptonlast', 'attempts', 'eq', 1);
+        if ($this->get_max_attempts_for_any_override() < 2) {
+            $mform->disabledIf('attemptonlast', 'attempts', 'eq', 1);
+        }
 
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'reviewoptionshdr',
@@ -247,11 +243,11 @@ class mod_quiz_mod_form extends moodleform_mod {
                 'neq', 'wontmatch');
 
         // -------------------------------------------------------------------------------
-        $mform->addElement('header', 'display', get_string('display', 'form'));
+        $mform->addElement('header', 'display', get_string('appearance'));
 
         // Show user picture.
-        $mform->addElement('selectyesno', 'showuserpicture',
-                get_string('showuserpicture', 'quiz'));
+        $mform->addElement('select', 'showuserpicture', get_string('showuserpicture', 'quiz'),
+                quiz_get_user_image_options());
         $mform->addHelpButton('showuserpicture', 'showuserpicture', 'quiz');
         $mform->setAdvanced('showuserpicture', $quizconfig->showuserpicture_adv);
         $mform->setDefault('showuserpicture', $quizconfig->showuserpicture);
@@ -307,15 +303,19 @@ class mod_quiz_mod_form extends moodleform_mod {
         $mform->addHelpButton('delay1', 'delay1st2nd', 'quiz');
         $mform->setAdvanced('delay1', $quizconfig->delay1_adv);
         $mform->setDefault('delay1', $quizconfig->delay1);
-        $mform->disabledIf('delay1', 'attempts', 'eq', 1);
+        if ($this->get_max_attempts_for_any_override() < 2) {
+            $mform->disabledIf('delay1', 'attempts', 'eq', 1);
+        }
 
         $mform->addElement('duration', 'delay2', get_string('delaylater', 'quiz'),
                 array('optional' => true));
         $mform->addHelpButton('delay2', 'delaylater', 'quiz');
         $mform->setAdvanced('delay2', $quizconfig->delay2_adv);
         $mform->setDefault('delay2', $quizconfig->delay2);
-        $mform->disabledIf('delay2', 'attempts', 'eq', 1);
-        $mform->disabledIf('delay2', 'attempts', 'eq', 2);
+        if ($this->get_max_attempts_for_any_override() < 3) {
+            $mform->disabledIf('delay2', 'attempts', 'eq', 1);
+            $mform->disabledIf('delay2', 'attempts', 'eq', 2);
+        }
 
         // Browser security choices.
         $mform->addElement('select', 'browsersecurity', get_string('browsersecurity', 'quiz'),
@@ -348,7 +348,7 @@ class mod_quiz_mod_form extends moodleform_mod {
         $repeatedoptions = array();
         $repeatarray[] = $mform->createElement('editor', 'feedbacktext',
                 get_string('feedback', 'quiz'), array('rows' => 3), array('maxfiles' => EDITOR_UNLIMITED_FILES,
-                        'noclean' => true, 'context' => $this->context, 'collapsed' => 1));
+                        'noclean' => true, 'context' => $this->context));
         $repeatarray[] = $mform->createElement('text', 'feedbackboundaries',
                 get_string('gradeboundary', 'quiz'), array('size' => 10));
         $repeatedoptions['feedbacktext']['type'] = PARAM_RAW;
@@ -370,7 +370,7 @@ class mod_quiz_mod_form extends moodleform_mod {
         $mform->insertElementBefore($mform->createElement('editor',
                 "feedbacktext[$nextel]", get_string('feedback', 'quiz'), array('rows' => 3),
                 array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true,
-                      'context' => $this->context, 'collapsed' => 1)),
+                      'context' => $this->context)),
                 'boundary_add_fields');
         $mform->insertElementBefore($mform->createElement('static',
                 'gradeboundarystatic2', get_string('gradeboundary', 'quiz'), '0%'),
@@ -395,6 +395,8 @@ class mod_quiz_mod_form extends moodleform_mod {
 
         // -------------------------------------------------------------------------------
         $this->add_action_buttons();
+
+        $PAGE->requires->yui_module('moodle-mod_quiz-modform', 'M.mod_quiz.modform.init');
     }
 
     protected function add_review_options_group($mform, $quizconfig, $whenname,
@@ -474,7 +476,7 @@ class mod_quiz_mod_form extends moodleform_mod {
 
                 if ($feedback->mingrade > 0) {
                     $toform['feedbackboundaries['.$key.']'] =
-                            (100.0 * $feedback->mingrade / $toform['grade']) . '%';
+                            round(100.0 * $feedback->mingrade / $toform['grade'], 6) . '%';
                 }
                 $key++;
             }
@@ -582,5 +584,67 @@ class mod_quiz_mod_form extends moodleform_mod {
         $errors = quiz_access_manager::validate_settings_form_fields($errors, $data, $files, $this);
 
         return $errors;
+    }
+
+    /**
+     * Display module-specific activity completion rules.
+     * Part of the API defined by moodleform_mod
+     * @return array Array of string IDs of added items, empty array if none
+     */
+    public function add_completion_rules() {
+        $mform = $this->_form;
+        $items = array();
+
+        $group = array();
+        $group[] = $mform->createElement('advcheckbox', 'completionpass', null, get_string('completionpass', 'quiz'),
+                array('group' => 'cpass'));
+
+        $group[] = $mform->createElement('advcheckbox', 'completionattemptsexhausted', null,
+                get_string('completionattemptsexhausted', 'quiz'),
+                array('group' => 'cattempts'));
+        $mform->disabledIf('completionattemptsexhausted', 'completionpass', 'notchecked');
+        $mform->addGroup($group, 'completionpassgroup', get_string('completionpass', 'quiz'), ' &nbsp; ', false);
+        $mform->addHelpButton('completionpassgroup', 'completionpass', 'quiz');
+        $items[] = 'completionpassgroup';
+        return $items;
+    }
+
+    /**
+     * Called during validation. Indicates whether a module-specific completion rule is selected.
+     *
+     * @param array $data Input data (not yet validated)
+     * @return bool True if one or more rules is enabled, false if none are.
+     */
+    public function completion_rule_enabled($data) {
+        return !empty($data['completionattemptsexhausted']) || !empty($data['completionpass']);
+    }
+
+    /**
+     * Get the maximum number of attempts that anyone might have due to a user
+     * or group override. Used to decide whether disabledIf rules should be applied.
+     * @return int the number of attempts allowed. For the purpose of this method,
+     * unlimited is returned as 1000, not 0.
+     */
+    public function get_max_attempts_for_any_override() {
+        global $DB;
+
+        if (empty($this->_instance)) {
+            // Quiz not created yet, so no overrides.
+            return 1;
+        }
+
+        if ($this->maxattemptsanyoverride === null) {
+            $this->maxattemptsanyoverride = $DB->get_field_sql("
+                    SELECT MAX(CASE WHEN attempts = 0 THEN 1000 ELSE attempts END)
+                      FROM {quiz_overrides}
+                     WHERE quiz = ?",
+                    array($this->_instance));
+            if ($this->maxattemptsanyoverride < 1) {
+                // This happens when no override alters the number of attempts.
+                $this->maxattemptsanyoverride = 1;
+            }
+        }
+
+        return $this->maxattemptsanyoverride;
     }
 }

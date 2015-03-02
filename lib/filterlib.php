@@ -247,7 +247,7 @@ class filter_manager {
      *
      * @param moodle_page $page the page we are going to add requirements to.
      * @param context $context the context which contents are going to be filtered.
-     * @since 2.3
+     * @since Moodle 2.3
      */
     public function setup_page_for_filters($page, $context) {
         $filters = $this->get_text_filters($context);
@@ -409,7 +409,7 @@ abstract class moodle_text_filter {
      *
      * @param moodle_page $page the page we are going to add requirements to.
      * @param context $context the context which contents are going to be filtered.
-     * @since 2.3
+     * @since Moodle 2.3
      */
     public function setup($page, $context) {
         // Override me, if needed.
@@ -513,12 +513,12 @@ function filter_get_all_installed() {
     global $CFG;
 
     $filternames = array();
-    foreach (get_plugin_list('filter') as $filter => $fulldir) {
+    foreach (core_component::get_plugin_list('filter') as $filter => $fulldir) {
         if (is_readable("$fulldir/filter.php")) {
             $filternames[$filter] = filter_get_name($filter);
         }
     }
-    collatorlib::asort($filternames);
+    core_collator::asort($filternames);
     return $filternames;
 }
 
@@ -527,7 +527,7 @@ function filter_get_all_installed() {
  *
  * @param string $filtername The filter name, for example 'tex'.
  * @param int $state One of the values TEXTFILTER_ON, TEXTFILTER_OFF or TEXTFILTER_DISABLED.
- * @param int $move 1 means up, 0 means the same, -1 means down
+ * @param int $move -1 means up, 0 means the same, 1 means down
  */
 function filter_set_global_state($filtername, $state, $move = 0) {
     global $DB;
@@ -571,17 +571,22 @@ function filter_set_global_state($filtername, $state, $move = 0) {
     if (isset($on[$filtername])) {
         $filter = $on[$filtername];
         if ($filter->active != $state) {
+            add_to_config_log('filter_active', $filter->active, $state, $filtername);
+
             $filter->active = $state;
             $DB->update_record('filter_active', $filter);
             if ($filter->active == TEXTFILTER_DISABLED) {
                 unset($on[$filtername]);
                 $off = array($filter->filter => $filter) + $off;
             }
+
         }
 
     } else if (isset($off[$filtername])) {
         $filter = $off[$filtername];
         if ($filter->active != $state) {
+            add_to_config_log('filter_active', $filter->active, $state, $filtername);
+
             $filter->active = $state;
             $DB->update_record('filter_active', $filter);
             if ($filter->active != TEXTFILTER_DISABLED) {
@@ -591,6 +596,8 @@ function filter_set_global_state($filtername, $state, $move = 0) {
         }
 
     } else {
+        add_to_config_log('filter_active', '', $state, $filtername);
+
         $filter = new stdClass();
         $filter->filter    = $filtername;
         $filter->contextid = $syscontext->id;
@@ -629,11 +636,11 @@ function filter_set_global_state($filtername, $state, $move = 0) {
             }
         }
 
-        collatorlib::asort_objects_by_property($on, 'newsortorder', collatorlib::SORT_NUMERIC);
+        core_collator::asort_objects_by_property($on, 'newsortorder', core_collator::SORT_NUMERIC);
     }
 
     // Inactive are sorted by filter name.
-    collatorlib::asort_objects_by_property($off, 'filter', collatorlib::SORT_NATURAL);
+    core_collator::asort_objects_by_property($off, 'filter', core_collator::SORT_NATURAL);
 
     // Update records if necessary.
     $i = 1;
@@ -715,7 +722,7 @@ function filter_get_string_filters() {
 function filter_set_applies_to_strings($filter, $applytostrings) {
     $stringfilters = filter_get_string_filters();
     $prevfilters = $stringfilters;
-    $allfilters = filter_get_all_installed();
+    $allfilters = core_component::get_plugin_list('filter');
 
     if ($applytostrings) {
         $stringfilters[$filter] = $filter;
@@ -1129,6 +1136,10 @@ function filter_delete_all_for_context($contextid) {
  */
 function filter_has_global_settings($filter) {
     global $CFG;
+    $settingspath = $CFG->dirroot . '/filter/' . $filter . '/settings.php';
+    if (is_readable($settingspath)) {
+        return true;
+    }
     $settingspath = $CFG->dirroot . '/filter/' . $filter . '/filtersettings.php';
     return is_readable($settingspath);
 }
@@ -1384,13 +1395,13 @@ function filter_remove_duplicates($linkarray) {
         if ($filterobject->casesensitive) {
             $exists = in_array($filterobject->phrase, $concepts);
         } else {
-            $exists = in_array(textlib::strtolower($filterobject->phrase), $lconcepts);
+            $exists = in_array(core_text::strtolower($filterobject->phrase), $lconcepts);
         }
 
         if (!$exists) {
             $cleanlinks[] = $filterobject;
             $concepts[] = $filterobject->phrase;
-            $lconcepts[] = textlib::strtolower($filterobject->phrase);
+            $lconcepts[] = core_text::strtolower($filterobject->phrase);
         }
     }
 

@@ -75,7 +75,8 @@ if ($allowedit and !$chapters) {
 }
 // Check chapterid and read chapter data
 if ($chapterid == '0') { // Go to first chapter if no given.
-    add_to_log($course->id, 'book', 'view', 'view.php?id='.$cm->id, $book->id, $cm->id);
+    \mod_book\event\course_module_viewed::create_from_book($book, $context)->trigger();
+
     foreach ($chapters as $ch) {
         if ($edit) {
             $chapterid = $ch->id;
@@ -110,7 +111,7 @@ unset($chapterid);
 
 // Security checks END.
 
-add_to_log($course->id, 'book', 'view chapter', 'view.php?id='.$cm->id.'&amp;chapterid='.$chapter->id, $chapter->id, $cm->id);
+\mod_book\event\chapter_viewed::create_from_chapter($book, $context, $chapter)->trigger();
 
 // Read standard strings.
 $strbooks = get_string('modulenameplural', 'mod_book');
@@ -172,22 +173,24 @@ if ($nextid) {
 // =====================================================
 
 echo $OUTPUT->header();
+echo $OUTPUT->heading($book->name);
 
 // upper nav
 echo '<div class="navtop">'.$chnavigation.'</div>';
 
 // chapter itself
-echo $OUTPUT->box_start('generalbox book_content');
+$hidden = $chapter->hidden ? ' dimmed_text' : null;
+echo $OUTPUT->box_start('generalbox book_content' . $hidden);
+
 if (!$book->customtitles) {
-    $hidden = $chapter->hidden ? 'dimmed_text' : '';
     if (!$chapter->subchapter) {
         $currtitle = book_get_chapter_title($chapter->id, $chapters, $book, $context);
-        echo $OUTPUT->heading($currtitle, 2, array('class' => 'book_chapter_title '.$hidden));
+        echo $OUTPUT->heading($currtitle, 3);
     } else {
         $currtitle = book_get_chapter_title($chapters[$chapter->id]->parent, $chapters, $book, $context);
         $currsubtitle = book_get_chapter_title($chapter->id, $chapters, $book, $context);
-        echo $OUTPUT->heading($currtitle, 2, array('class' => 'book_chapter_title '.$hidden));
-        echo $OUTPUT->heading($currsubtitle, 3, array('class' => 'book_chapter_title '.$hidden));
+        echo $OUTPUT->heading($currtitle, 3);
+        echo $OUTPUT->heading($currsubtitle, 4);
     }
 }
 $chaptertext = file_rewrite_pluginfile_urls($chapter->content, 'pluginfile.php', $context->id, 'mod_book', 'chapter', $chapter->id);

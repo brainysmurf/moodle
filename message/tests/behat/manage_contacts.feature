@@ -5,17 +5,17 @@ Feature: Manage contacts
   I need to add and remove users to/from my contacts list
 
   Background:
-    Given the following "users" exists:
+    Given the following "users" exist:
       | username | firstname | lastname | email |
       | user1 | User | One | one@asd.com |
       | user2 | User | Two | two@asd.com |
     And I log in as "user1"
-    And I send "Message 1 from user1 to user2" message to "user2"
-    And I send "Message 2 from user1 to user2" message to "user2"
-    And I follow "Messages"
-    And I fill in "Search people and messages" with "User Two"
+    And I send "Message 1 from user1 to user2" message to "User Two" user
+    And I send "Message 2 from user1 to user2" message to "User Two" user
+    And I navigate to "Messages" node in "My profile"
+    And I set the field "Search people and messages" to "User Two"
     And I press "Search people and messages"
-    When I click on "Add contact" "link" in the "User Two" table row
+    When I click on "Add contact" "link" in the "User Two" "table_row"
     Then I should see "Message 1 from user1 to user2"
     And I should see "Message 2 from user1 to user2"
     And I should see "User Two" in the "#message_contacts" "css_element"

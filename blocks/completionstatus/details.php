@@ -17,8 +17,7 @@
 /**
  * Block for displaying logged in user's course completion status
  *
- * @package    block
- * @subpackage completion
+ * @package    block_completionstatus
  * @copyright  2009-2012 Catalyst IT Ltd
  * @author     Aaron Barnes <aaronb@catalyst.net.nz>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -76,10 +75,9 @@ $page = get_string('completionprogressdetails', 'block_completionstatus');
 $title = format_string($course->fullname) . ': ' . $page;
 
 $PAGE->navbar->add($page);
-$PAGE->set_pagelayout('standard');
+$PAGE->set_pagelayout('report');
 $PAGE->set_url('/blocks/completionstatus/details.php', array('course' => $course->id, 'user' => $user->id));
-#$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
-$PAGE->set_title($course->fullname);
+$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
 $PAGE->set_heading($title);
 echo $OUTPUT->header();
 
@@ -211,12 +209,12 @@ if (empty($completions)) {
                 $agg = $info->get_aggregation_method($row['type']);
                 echo '('. html_writer::start_tag('i');
                 if ($agg == COMPLETION_AGGREGATION_ALL) {
-                    echo textlib::strtolower(get_string('all', 'completion'));
+                    echo core_text::strtolower(get_string('all', 'completion'));
                 } else {
-                    echo textlib::strtolower(get_string('any', 'completion'));
+                    echo core_text::strtolower(get_string('any', 'completion'));
                 }
 
-                echo html_writer::end_tag('i') .textlib::strtolower(get_string('required')).')';
+                echo html_writer::end_tag('i') .core_text::strtolower(get_string('required')).')';
                 $agg_type = false;
             }
         }

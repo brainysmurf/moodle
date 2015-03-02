@@ -18,7 +18,7 @@
  * Data generators tests
  *
  * @package    core
- * @category   test
+ * @category   phpunit
  * @copyright  2012 Petr Skoda {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * Test data generator
  *
  * @package    core
- * @category   test
+ * @category   phpunit
  * @copyright  2012 Petr Skoda {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -53,20 +53,84 @@ class core_test_generator_testcase extends advanced_testcase {
         $generator = $this->getDataGenerator()->get_plugin_generator('core_completion');
     }
 
-    public function test_create() {
-        global $DB;
+    public function test_create_user() {
+        global $DB, $CFG;
 
         $this->resetAfterTest(true);
         $generator = $this->getDataGenerator();
 
         $count = $DB->count_records('user');
+        $this->setCurrentTimeStart();
         $user = $generator->create_user();
-        $this->assertEquals($count+1, $DB->count_records('user'));
+        $this->assertEquals($count + 1, $DB->count_records('user'));
         $this->assertSame($user->username, clean_param($user->username, PARAM_USERNAME));
         $this->assertSame($user->email, clean_param($user->email, PARAM_EMAIL));
-        $user = $generator->create_user(array('firstname'=>'Žluťoučký', 'lastname'=>'Koníček'));
-        $this->assertSame($user->username, clean_param($user->username, PARAM_USERNAME));
-        $this->assertSame($user->email, clean_param($user->email, PARAM_EMAIL));
+        $this->assertSame(AUTH_PASSWORD_NOT_CACHED, $user->password);
+        $this->assertNotEmpty($user->firstnamephonetic);
+        $this->assertNotEmpty($user->lastnamephonetic);
+        $this->assertNotEmpty($user->alternatename);
+        $this->assertNotEmpty($user->middlename);
+        $this->assertSame('manual', $user->auth);
+        $this->assertSame('en', $user->lang);
+        $this->assertSame('1', $user->confirmed);
+        $this->assertSame('0', $user->deleted);
+        $this->assertTimeCurrent($user->timecreated);
+        $this->assertSame($user->timecreated, $user->timemodified);
+        $this->assertSame('0.0.0.0', $user->lastip);
+
+        $record = array(
+            'auth' => 'email',
+            'firstname' => 'Žluťoučký',
+            'lastname' => 'Koníček',
+            'firstnamephonetic' => 'Zhlutyoucky',
+            'lastnamephonetic' => 'Koniiczek',
+            'middlename' => 'Hopper',
+            'alternatename' => 'horse',
+            'idnumber' => 'abc1',
+            'mnethostid' => (string)$CFG->mnet_localhost_id,
+            'username' => 'konic666',
+            'password' => 'password1',
+            'email' => 'email@example.com',
+            'confirmed' => '1',
+            'lang' => 'cs',
+            'maildisplay' => '1',
+            'mailformat' => '0',
+            'maildigest' => '1',
+            'autosubscribe' => '0',
+            'trackforums' => '0',
+            'deleted' => '0',
+            'timecreated' => '666',
+        );
+        $user = $generator->create_user($record);
+        $this->assertEquals($count + 2, $DB->count_records('user'));
+        foreach ($record as $k => $v) {
+            if ($k === 'password') {
+                $this->assertTrue(password_verify($v, $user->password));
+            } else {
+                $this->assertSame($v, $user->{$k});
+            }
+        }
+
+        $record = array(
+            'firstname' => 'Some',
+            'lastname' => 'User',
+            'idnumber' => 'def',
+            'username' => 'user666',
+            'email' => 'email666@example.com',
+            'deleted' => '1',
+        );
+        $user = $generator->create_user($record);
+        $this->assertEquals($count + 3, $DB->count_records('user'));
+        $this->assertSame('', $user->idnumber);
+        $this->assertSame(md5($record['username']), $user->email);
+        $this->assertFalse(context_user::instance($user->id, IGNORE_MISSING));
+    }
+
+    public function test_create() {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $generator = $this->getDataGenerator();
 
         $count = $DB->count_records('course_categories');
         $category = $generator->create_category();
@@ -108,7 +172,7 @@ class core_test_generator_testcase extends advanced_testcase {
     }
 
     public function test_create_module() {
-        global $CFG, $SITE;
+        global $CFG, $SITE, $DB;
         if (!file_exists("$CFG->dirroot/mod/page/")) {
             $this->markTestSkipped('Can not find standard Page module');
         }
@@ -125,6 +189,135 @@ class core_test_generator_testcase extends advanced_testcase {
         $this->assertNotEmpty($page);
         $cm = get_coursemodule_from_instance('page', $page->id, $SITE->id, true);
         $this->assertEquals(3, $cm->sectionnum);
+
+        // Prepare environment to generate modules with all possible options.
+
+        // Enable advanced functionality.
+        $CFG->enablecompletion = 1;
+        $CFG->enableavailability = 1;
+        $CFG->enableoutcomes = 1;
+        require_once($CFG->libdir.'/gradelib.php');
+        require_once($CFG->libdir.'/completionlib.php');
+        require_once($CFG->dirroot.'/rating/lib.php');
+
+        // Create a course with enabled completion.
+        $course = $generator->create_course(array('enablecompletion' => true));
+
+        // Create new grading category in this course.
+        $grade_category = new grade_category();
+        $grade_category->courseid = $course->id;
+        $grade_category->fullname = 'Grade category';
+        $grade_category->insert();
+
+        // Create group and grouping.
+        $group = $generator->create_group(array('courseid' => $course->id));
+        $grouping = $generator->create_grouping(array('courseid' => $course->id));
+        $generator->create_grouping_group(array('groupid' => $group->id, 'groupingid' => $grouping->id));
+
+        // Prepare arrays with properties that we can both use for creating modules and asserting the data in created modules.
+
+        // General properties.
+        $optionsgeneral = array(
+            'visible' => 0, // Note: 'visibleold' will always be set to the same value as 'visible'.
+            'section' => 3, // Note: section will be created if does not exist.
+            // Module supports FEATURE_IDNUMBER.
+            'cmidnumber' => 'IDNUM', // Note: alternatively can have key 'idnumber'.
+            // Module supports FEATURE_GROUPS;
+            'groupmode' => SEPARATEGROUPS, // Note: will be reset to 0 if course groupmodeforce is set.
+            // Module supports FEATURE_GROUPINGS.
+            'groupingid' => $grouping->id,
+        );
+
+        // In case completion is enabled on site and for course every module can have manual completion.
+        $featurecompletionmanual = array(
+            'completion' => COMPLETION_TRACKING_MANUAL, // "Students can manually mark activity as completed."
+            'completionexpected' => time() + 7 * DAYSECS,
+        );
+
+        // Automatic completion is possible if module supports FEATURE_COMPLETION_TRACKS_VIEWS or FEATURE_GRADE_HAS_GRADE.
+        // Note: completionusegrade is stored in DB and can be found in cm_info as 'completiongradeitemnumber' - either NULL or 0.
+        // Note: module can have more autocompletion rules as defined in moodleform_mod::add_completion_rules().
+        $featurecompletionautomatic = array(
+            'completion' => COMPLETION_TRACKING_AUTOMATIC, // "Show activity as complete when conditions are met."
+            'completionview' => 1, // "Student must view this activity to complete it"
+            'completionusegrade' => 1, // "Student must receive a grade to complete this activity"
+        );
+
+        // Module supports FEATURE_RATE:
+        $featurerate = array(
+            'assessed' => RATING_AGGREGATE_AVERAGE, // "Aggregate type"
+            'scale' => 100, // Either max grade or negative number for scale id.
+            'ratingtime' => 1, // "Restrict ratings to items with dates in this range".
+            'assesstimestart' => time() - DAYSECS, // Note: Will be ignored if neither 'assessed' nor 'ratingtime' is set.
+            'assesstimefinish' => time() + DAYSECS, // Note: Will be ignored if neither 'assessed' nor 'ratingtime' is set.
+        );
+
+        // Module supports FEATURE_GRADE_HAS_GRADE:
+        $featuregrade = array(
+            'grade' => 10,
+            'gradecat' => $grade_category->id, // Note: if $CFG->enableoutcomes is set, this can be set to -1 to automatically create new grade category.
+        );
+
+        // Now let's create several modules with different options.
+        $m1 = $generator->create_module('assign',
+            array('course' => $course->id) +
+            $optionsgeneral);
+        $m2 = $generator->create_module('data',
+            array('course' => $course->id) +
+            $featurecompletionmanual +
+            $featurerate);
+        $m3 = $generator->create_module('assign',
+            array('course' => $course->id) +
+            $featurecompletionautomatic +
+            $featuregrade);
+
+        // We need id of the grading item for the second module to create availability dependency in the 3rd module.
+        $gradingitem = grade_item::fetch(array('courseid'=>$course->id, 'itemtype'=>'mod', 'itemmodule' => 'assign', 'iteminstance' => $m3->id));
+
+        // Now prepare option to create the 4th module with an availability condition.
+        $optionsavailability = array(
+            'availability' => '{"op":"&","showc":[true],"c":[' .
+                '{"type":"date","d":">=","t":' . (time() - WEEKSECS) . '}]}',
+        );
+
+        // Create module with conditional availability.
+        $m4 = $generator->create_module('assign',
+                array('course' => $course->id) +
+                $optionsavailability
+        );
+
+        // Verifying that everything is generated correctly.
+        $modinfo = get_fast_modinfo($course->id);
+        $cm1 = $modinfo->cms[$m1->cmid];
+        $this->assertEquals($optionsgeneral['visible'], $cm1->visible);
+        $this->assertEquals($optionsgeneral['section'], $cm1->sectionnum); // Note difference in key.
+        $this->assertEquals($optionsgeneral['cmidnumber'], $cm1->idnumber); // Note difference in key.
+        $this->assertEquals($optionsgeneral['groupmode'], $cm1->groupmode);
+        $this->assertEquals($optionsgeneral['groupingid'], $cm1->groupingid);
+
+        $cm2 = $modinfo->cms[$m2->cmid];
+        $this->assertEquals($featurecompletionmanual['completion'], $cm2->completion);
+        $this->assertEquals($featurecompletionmanual['completionexpected'], $cm2->completionexpected);
+        $this->assertEquals(null, $cm2->completiongradeitemnumber);
+        // Rating info is stored in the module's table (in our test {data}).
+        $data = $DB->get_record('data', array('id' => $m2->id));
+        $this->assertEquals($featurerate['assessed'], $data->assessed);
+        $this->assertEquals($featurerate['scale'], $data->scale);
+        $this->assertEquals($featurerate['assesstimestart'], $data->assesstimestart);
+        $this->assertEquals($featurerate['assesstimefinish'], $data->assesstimefinish);
+        // No validation for 'ratingtime'. It is only used in to enable/disable assesstime* when adding module.
+
+        $cm3 = $modinfo->cms[$m3->cmid];
+        $this->assertEquals($featurecompletionautomatic['completion'], $cm3->completion);
+        $this->assertEquals($featurecompletionautomatic['completionview'], $cm3->completionview);
+        $this->assertEquals(0, $cm3->completiongradeitemnumber); // Zero instead of default null since 'completionusegrade' was set.
+        $gradingitem = grade_item::fetch(array('courseid'=>$course->id, 'itemtype'=>'mod', 'itemmodule' => 'assign', 'iteminstance' => $m3->id));
+        $this->assertEquals(0, $gradingitem->grademin);
+        $this->assertEquals($featuregrade['grade'], $gradingitem->grademax);
+        $this->assertEquals($featuregrade['gradecat'], $gradingitem->categoryid);
+
+        $cm4 = $modinfo->cms[$m4->cmid];
+        $this->assertEquals($optionsavailability['availability'], $cm4->availability);
     }
 
     public function test_create_block() {
@@ -205,12 +398,10 @@ class core_test_generator_testcase extends advanced_testcase {
         $this->assertTrue($DB->record_exists('user_enrolments', array('enrolid'=>$maninstance3->id, 'userid'=>$user1->id)));
         $this->assertFalse($DB->record_exists('role_assignments', array('contextid'=>$context3->id, 'userid'=>$user1->id)));
 
-
         $result = $this->getDataGenerator()->enrol_user($user2->id, $course1->id, null, 'self');
         $this->assertTrue($result);
         $this->assertTrue($DB->record_exists('user_enrolments', array('enrolid'=>$instance1->id, 'userid'=>$user2->id)));
         $this->assertTrue($DB->record_exists('role_assignments', array('contextid'=>$context1->id, 'userid'=>$user2->id, 'roleid'=>$studentrole->id)));
-
 
         $selfplugin->add_instance($course2, array('status'=>ENROL_INSTANCE_ENABLED, 'roleid'=>$teacherrole->id));
         $result = $this->getDataGenerator()->enrol_user($user2->id, $course2->id, null, 'self');
@@ -219,6 +410,35 @@ class core_test_generator_testcase extends advanced_testcase {
         $DB->delete_records('enrol', array('enrol'=>'self', 'courseid'=>$course3->id));
         $result = $this->getDataGenerator()->enrol_user($user2->id, $course3->id, null, 'self');
         $this->assertFalse($result);
+    }
 
+    public function test_create_grade_category() {
+        global $DB, $CFG;
+        require_once $CFG->libdir . '/grade/constants.php';
+
+        $this->resetAfterTest(true);
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+
+        // Generate category and make sure number of records in DB table increases.
+        // Note we only count grade cats with depth > 1 because the course grade category
+        // is lazily created.
+        $count = $DB->count_records_select('grade_categories', 'depth <> 1');
+        $gradecategory = $generator->create_grade_category(array('courseid'=>$course->id));
+        $this->assertEquals($count+1, $DB->count_records_select('grade_categories', 'depth <> 1'));
+        $this->assertEquals(2, $gradecategory->depth);
+        $this->assertEquals($course->id, $gradecategory->courseid);
+        $this->assertEquals('Grade category 1', $gradecategory->fullname);
+
+        // Generate category and make sure aggregation is set.
+        $gradecategory = $generator->create_grade_category(
+                array('courseid' => $course->id, 'aggregation' => GRADE_AGGREGATE_MEDIAN));
+        $this->assertEquals(GRADE_AGGREGATE_MEDIAN, $gradecategory->aggregation);
+
+        // Generate category and make sure parent is set.
+        $gradecategory2 = $generator->create_grade_category(
+                array('courseid' => $course->id,
+                    'parent' => $gradecategory->id));
+        $this->assertEquals($gradecategory->id, $gradecategory2->parent);
     }
 }

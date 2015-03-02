@@ -51,6 +51,7 @@ class core_cohort_external extends external_api {
                             'idnumber' => new external_value(PARAM_RAW, 'cohort idnumber'),
                             'description' => new external_value(PARAM_RAW, 'cohort description', VALUE_OPTIONAL),
                             'descriptionformat' => new external_format_value('description', VALUE_DEFAULT),
+                            'visible' => new external_value(PARAM_BOOL, 'cohort visible', VALUE_OPTIONAL, true),
                         )
                     )
                 )
@@ -133,6 +134,7 @@ class core_cohort_external extends external_api {
                     'idnumber' => new external_value(PARAM_RAW, 'cohort idnumber'),
                     'description' => new external_value(PARAM_RAW, 'cohort description'),
                     'descriptionformat' => new external_format_value('description'),
+                    'visible' => new external_value(PARAM_BOOL, 'cohort visible'),
                 )
             )
         );
@@ -258,11 +260,12 @@ class core_cohort_external extends external_api {
         return new external_multiple_structure(
             new external_single_structure(
                 array(
-                    'id' => new external_value(PARAM_NUMBER, 'ID of the cohort'),
+                    'id' => new external_value(PARAM_INT, 'ID of the cohort'),
                     'name' => new external_value(PARAM_RAW, 'cohort name'),
                     'idnumber' => new external_value(PARAM_RAW, 'cohort idnumber'),
                     'description' => new external_value(PARAM_RAW, 'cohort description'),
                     'descriptionformat' => new external_format_value('description'),
+                    'visible' => new external_value(PARAM_BOOL, 'cohort visible'),
                 )
             )
         );
@@ -280,7 +283,7 @@ class core_cohort_external extends external_api {
                 'cohorts' => new external_multiple_structure(
                     new external_single_structure(
                         array(
-                            'id' => new external_value(PARAM_NUMBER, 'ID of the cohort'),
+                            'id' => new external_value(PARAM_INT, 'ID of the cohort'),
                             'categorytype' => new external_single_structure(
                                 array(
                                     'type' => new external_value(PARAM_TEXT, 'the name of the field: id (numeric value
@@ -293,6 +296,7 @@ class core_cohort_external extends external_api {
                             'idnumber' => new external_value(PARAM_RAW, 'cohort idnumber'),
                             'description' => new external_value(PARAM_RAW, 'cohort description', VALUE_OPTIONAL),
                             'descriptionformat' => new external_format_value('description', VALUE_DEFAULT),
+                            'visible' => new external_value(PARAM_BOOL, 'cohort visible', VALUE_OPTIONAL),
                         )
                     )
                 )

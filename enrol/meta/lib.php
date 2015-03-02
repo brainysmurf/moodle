@@ -118,15 +118,8 @@ class enrol_meta_plugin extends enrol_plugin {
      * @return void
      */
     public function course_updated($inserted, $course, $data) {
-        global $CFG;
-
-        if (!$inserted) {
-            // sync cohort enrols
-            require_once("$CFG->dirroot/enrol/meta/locallib.php");
-            enrol_meta_sync($course->id);
-        } else {
-            // cohorts are never inserted automatically
-        }
+        // Meta sync updates are slow, if enrolments get out of sync teacher will have to wait till next cron.
+        // We should probably add some sync button to the course enrol methods overview page.
     }
 
     /**
@@ -155,5 +148,26 @@ class enrol_meta_plugin extends enrol_plugin {
         require_once("$CFG->dirroot/enrol/meta/locallib.php");
         enrol_meta_sync();
     }
-}
 
+    /**
+     * Is it possible to delete enrol instance via standard UI?
+     *
+     * @param stdClass $instance
+     * @return bool
+     */
+    public function can_delete_instance($instance) {
+        $context = context_course::instance($instance->courseid);
+        return has_capability('enrol/meta:config', $context);
+    }
+
+    /**
+     * Is it possible to hide/show enrol instance via standard UI?
+     *
+     * @param stdClass $instance
+     * @return bool
+     */
+    public function can_hide_show_instance($instance) {
+        $context = context_course::instance($instance->courseid);
+        return has_capability('enrol/meta:config', $context);
+    }
+}

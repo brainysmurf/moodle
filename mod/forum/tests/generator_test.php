@@ -35,6 +35,19 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_forum_generator_testcase extends advanced_testcase {
+
+    public function setUp() {
+        // We must clear the subscription caches. This has to be done both before each test, and after in case of other
+        // tests using these functions.
+        \mod_forum\subscriptions::reset_forum_cache();
+    }
+
+    public function tearDown() {
+        // We must clear the subscription caches. This has to be done both before each test, and after in case of other
+        // tests using these functions.
+        \mod_forum\subscriptions::reset_forum_cache();
+    }
+
     public function test_generator() {
         global $DB;
 
@@ -145,5 +158,43 @@ class mod_forum_generator_testcase extends advanced_testcase {
         // is generated as well, so we should have 4 posts, not 3.
         $this->assertEquals(4, $DB->count_records_select('forum_posts', 'discussion = :discussion',
             array('discussion' => $discussion->id)));
+    }
+
+    public function test_create_content() {
+        global $DB;
+
+        $this->resetAfterTest(true);
+
+        // Create a bunch of users
+        $user1 = self::getDataGenerator()->create_user();
+        $user2 = self::getDataGenerator()->create_user();
+        $user3 = self::getDataGenerator()->create_user();
+        $user4 = self::getDataGenerator()->create_user();
+
+        $this->setAdminUser();
+
+        // Create course and forum.
+        $course = self::getDataGenerator()->create_course();
+        $forum = self::getDataGenerator()->create_module('forum', array('course' => $course));
+
+        $generator = self::getDataGenerator()->get_plugin_generator('mod_forum');
+        // This should create discussion.
+        $post1 = $generator->create_content($forum);
+        // This should create posts in the discussion.
+        $post2 = $generator->create_content($forum, array('parent' => $post1->id));
+        $post3 = $generator->create_content($forum, array('discussion' => $post1->discussion));
+        // This should create posts answering another post.
+        $post4 = $generator->create_content($forum, array('parent' => $post2->id));
+
+        $discussionrecords = $DB->get_records('forum_discussions', array('forum' => $forum->id));
+        $postrecords = $DB->get_records('forum_posts');
+        $postrecords2 = $DB->get_records('forum_posts', array('discussion' => $post1->discussion));
+        $this->assertEquals(1, count($discussionrecords));
+        $this->assertEquals(4, count($postrecords));
+        $this->assertEquals(4, count($postrecords2));
+        $this->assertEquals($post1->id, $discussionrecords[$post1->discussion]->firstpost);
+        $this->assertEquals($post1->id, $postrecords[$post2->id]->parent);
+        $this->assertEquals($post1->id, $postrecords[$post3->id]->parent);
+        $this->assertEquals($post2->id, $postrecords[$post4->id]->parent);
     }
 }

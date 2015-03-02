@@ -19,8 +19,7 @@
  * Local library file for Lesson.  These are non-standard functions that are used
  * only by Lesson.
  *
- * @package    mod
- * @subpackage lesson
+ * @package mod_lesson
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or late
  **/
@@ -467,7 +466,7 @@ function lesson_mediafile_block_contents($cmid, $lesson) {
 
     $bc = new block_contents();
     $bc->title = get_string('linkedmedia', 'lesson');
-    $bc->attributes['class'] = 'mediafile';
+    $bc->attributes['class'] = 'mediafile block';
     $bc->content = $content;
 
     return $bc;
@@ -489,14 +488,15 @@ function lesson_clock_block_contents($cmid, $lesson, $timer, $page) {
         return null;
     }
 
-    $content = '<div class="jshidewhenenabled">';
+    $content = '<div id="lesson-timer">';
     $content .=  $lesson->time_remaining($timer->starttime);
     $content .= '</div>';
 
     $clocksettings = array('starttime'=>$timer->starttime, 'servertime'=>time(),'testlength'=>($lesson->maxtime * 60));
-    $page->requires->data_for_js('clocksettings', $clocksettings);
+    $page->requires->data_for_js('clocksettings', $clocksettings, true);
+    $page->requires->strings_for_js(array('timeisup'), 'lesson');
     $page->requires->js('/mod/lesson/timer.js');
-    $page->requires->js_function_call('show_clock');
+    $page->requires->js_init_call('show_clock');
 
     $bc = new block_contents();
     $bc->title = get_string('timeremaining', 'lesson');
@@ -771,6 +771,12 @@ abstract class lesson_add_page_form_base extends moodleform {
         if ($value !== null) {
             $this->_form->setDefault($name, $value);
         }
+        $this->_form->addHelpButton($name, 'score', 'lesson');
+
+        // Score is only used for custom scoring. Disable the element when not in use to stop some confusion.
+        if (!$this->_customdata['lesson']->custom) {
+            $this->_form->freeze($name);
+        }
     }
 
     /**
@@ -785,8 +791,19 @@ abstract class lesson_add_page_form_base extends moodleform {
         if ($label === null) {
             $label = get_string('answer', 'lesson');
         }
-        $this->_form->addElement('editor', 'answer_editor['.$count.']', $label, array('rows'=>'4', 'columns'=>'80'), array('noclean'=>true));
-        $this->_form->setDefault('answer_editor['.$count.']', array('text'=>'', 'format'=>FORMAT_MOODLE));
+
+        if ($this->qtype != 'multichoice' && $this->qtype != 'matching') {
+            $this->_form->addElement('editor', 'answer_editor['.$count.']', $label,
+                    array('rows' => '4', 'columns' => '80'), array('noclean' => true));
+            $this->_form->setDefault('answer_editor['.$count.']', array('text' => '', 'format' => FORMAT_MOODLE));
+        } else {
+            $this->_form->addElement('editor', 'answer_editor['.$count.']', $label,
+                    array('rows' => '4', 'columns' => '80'),
+                    array('noclean' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $this->_customdata['maxbytes']));
+            $this->_form->setType('answer_editor['.$count.']', PARAM_RAW);
+            $this->_form->setDefault('answer_editor['.$count.']', array('text' => '', 'format' => FORMAT_HTML));
+        }
+
         if ($required) {
             $this->_form->addRule('answer_editor['.$count.']', get_string('required'), 'required', null, 'client');
         }
@@ -803,8 +820,12 @@ abstract class lesson_add_page_form_base extends moodleform {
         if ($label === null) {
             $label = get_string('response', 'lesson');
         }
-        $this->_form->addElement('editor', 'response_editor['.$count.']', $label, array('rows'=>'4', 'columns'=>'80'), array('noclean'=>true));
-        $this->_form->setDefault('response_editor['.$count.']', array('text'=>'', 'format'=>FORMAT_MOODLE));
+        $this->_form->addElement('editor', 'response_editor['.$count.']', $label,
+                 array('rows' => '4', 'columns' => '80'),
+                 array('noclean' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $this->_customdata['maxbytes']));
+        $this->_form->setType('response_editor['.$count.']', PARAM_RAW);
+        $this->_form->setDefault('response_editor['.$count.']', array('text' => '', 'format' => FORMAT_HTML));
+
         if ($required) {
             $this->_form->addRule('response_editor['.$count.']', get_string('required'), 'required', null, 'client');
         }
@@ -1198,6 +1219,18 @@ class lesson extends lesson_base {
      */
     public function start_timer() {
         global $USER, $DB;
+
+        $cm = get_coursemodule_from_instance('lesson', $this->properties()->id, $this->properties()->course,
+            false, MUST_EXIST);
+
+        // Trigger lesson started event.
+        $event = \mod_lesson\event\lesson_started::create(array(
+            'objectid' => $this->properties()->id,
+            'context' => context_module::instance($cm->id),
+            'courseid' => $this->properties()->course
+        ));
+        $event->trigger();
+
         $USER->startlesson[$this->properties->id] = true;
         $startlesson = new stdClass;
         $startlesson->lessonid = $this->properties->id;
@@ -1222,11 +1255,12 @@ class lesson extends lesson_base {
         global $USER, $DB;
         // clock code
         // get time information for this user
-        if (!$timer = $DB->get_records('lesson_timer', array ("lessonid" => $this->properties->id, "userid" => $USER->id), 'starttime DESC', '*', 0, 1)) {
-            print_error('cannotfindtimer', 'lesson');
-        } else {
-            $timer = current($timer); // this will get the latest start time record
+        $params = array("lessonid" => $this->properties->id, "userid" => $USER->id);
+        if (!$timer = $DB->get_records('lesson_timer', $params, 'starttime DESC', '*', 0, 1)) {
+            $this->start_timer();
+            $timer = $DB->get_records('lesson_timer', $params, 'starttime DESC', '*', 0, 1);
         }
+        $timer = current($timer); // This will get the latest start time record.
 
         if ($restart) {
             if ($continue) {
@@ -1250,6 +1284,18 @@ class lesson extends lesson_base {
     public function stop_timer() {
         global $USER, $DB;
         unset($USER->startlesson[$this->properties->id]);
+
+        $cm = get_coursemodule_from_instance('lesson', $this->properties()->id, $this->properties()->course,
+            false, MUST_EXIST);
+
+        // Trigger lesson ended event.
+        $event = \mod_lesson\event\lesson_ended::create(array(
+            'objectid' => $this->properties()->id,
+            'context' => context_module::instance($cm->id),
+            'courseid' => $this->properties()->course
+        ));
+        $event->trigger();
+
         return $this->update_timer(false, false);
     }
 
@@ -1428,8 +1474,24 @@ class lesson extends lesson_base {
         $clusterpages = $this->get_sub_pages_of($pageid, array(LESSON_PAGE_ENDOFCLUSTER));
         $unseen = array();
         foreach ($clusterpages as $key=>$cluster) {
-            if ($cluster->type !== lesson_page::TYPE_QUESTION) {
+            // Remove the page if  it is in a branch table or is an endofbranch.
+            if ($this->is_sub_page_of_type($cluster->id,
+                    array(LESSON_PAGE_BRANCHTABLE), array(LESSON_PAGE_ENDOFBRANCH, LESSON_PAGE_CLUSTER))
+                    || $cluster->qtype == LESSON_PAGE_ENDOFBRANCH) {
                 unset($clusterpages[$key]);
+            } else if ($cluster->qtype == LESSON_PAGE_BRANCHTABLE) {
+                // If branchtable, check to see if any pages inside have been viewed.
+                $branchpages = $this->get_sub_pages_of($cluster->id, array(LESSON_PAGE_BRANCHTABLE, LESSON_PAGE_ENDOFBRANCH));
+                $flag = true;
+                foreach ($branchpages as $branchpage) {
+                    if (array_key_exists($branchpage->id, $seenpages)) {  // Check if any of the pages have been viewed.
+                        $flag = false;
+                    }
+                }
+                if ($flag && count($branchpages) > 0) {
+                    // Add branch table.
+                    $unseen[] = $cluster;
+                }
             } elseif ($cluster->is_unseen($seenpages)) {
                 $unseen[] = $cluster;
             }
@@ -1451,15 +1513,15 @@ class lesson extends lesson_base {
                 return LESSON_EOL;
             } else {
                 $clusterendid = $pageid;
-                while ($clusterendid != 0) { // this condition should not be satisfied... should be a cluster page
-                    if ($lessonpages[$clusterendid]->qtype == LESSON_PAGE_CLUSTER) {
+                while ($clusterendid != 0) { // This condition should not be satisfied... should be an end of cluster page.
+                    if ($lessonpages[$clusterendid]->qtype == LESSON_PAGE_ENDOFCLUSTER) {
                         break;
                     }
-                    $clusterendid = $lessonpages[$clusterendid]->prevpageid;
+                    $clusterendid = $lessonpages[$clusterendid]->nextpageid;
                 }
                 $exitjump = $DB->get_field("lesson_answers", "jumpto", array("pageid" => $clusterendid, "lessonid" => $this->properties->id));
                 if ($exitjump == LESSON_NEXTPAGE) {
-                    $exitjump = $lessonpages[$pageid]->nextpageid;
+                    $exitjump = $lessonpages[$clusterendid]->nextpageid;
                 }
                 if ($exitjump == 0) {
                     return LESSON_EOL;
@@ -1473,6 +1535,9 @@ class lesson extends lesson_base {
                                 $found = true;
                             } else if ($page->qtype == LESSON_PAGE_ENDOFCLUSTER) {
                                 $exitjump = $DB->get_field("lesson_answers", "jumpto", array("pageid" => $page->id, "lessonid" => $this->properties->id));
+                                if ($exitjump == LESSON_NEXTPAGE) {
+                                    $exitjump = $lessonpages[$page->id]->nextpageid;
+                                }
                                 break;
                             }
                         }
@@ -1832,6 +1897,8 @@ abstract class lesson_page extends lesson_base {
         $context = context_module::instance($cm->id);
         $fs = get_file_storage();
         $fs->delete_area_files($context->id, 'mod_lesson', 'page_contents', $this->properties->id);
+        $fs->delete_area_files($context->id, 'mod_lesson', 'page_answers', $this->properties->id);
+        $fs->delete_area_files($context->id, 'mod_lesson', 'page_responses', $this->properties->id);
 
         // repair the hole in the linkage
         if (!$this->properties->prevpageid && !$this->properties->nextpageid) {
@@ -1960,12 +2027,17 @@ abstract class lesson_page extends lesson_base {
 
                 $attempt->timeseen = time();
                 // if allow modattempts, then update the old attempt record, otherwise, insert new answer record
+                $userisreviewing = false;
                 if (isset($USER->modattempts[$this->lesson->id])) {
                     $attempt->retry = $nretakes - 1; // they are going through on review, $nretakes will be too high
+                    $userisreviewing = true;
                 }
 
-                if ($this->lesson->retake || (!$this->lesson->retake && $nretakes == 0)) {
-                    $DB->insert_record("lesson_attempts", $attempt);
+                // Only insert a record if we are not reviewing the lesson.
+                if (!$userisreviewing) {
+                    if ($this->lesson->retake || (!$this->lesson->retake && $nretakes == 0)) {
+                        $DB->insert_record("lesson_attempts", $attempt);
+                    }
                 }
                 // "number of attempts remaining" message if $this->lesson->maxattempts > 1
                 // displaying of message(s) is at the end of page for more ergonomic display
@@ -2030,9 +2102,20 @@ abstract class lesson_page extends lesson_base {
                     $options->noclean = true;
                     $options->para = true;
                     $options->overflowdiv = true;
+                    $options->context = $context;
+                    $result->response = file_rewrite_pluginfile_urls($result->response, 'pluginfile.php', $context->id,
+                            'mod_lesson', 'page_responses', $result->answerid);
                     $result->feedback = $OUTPUT->box(format_text($this->get_contents(), $this->properties->contentsformat, $options), 'generalbox boxaligncenter');
-                    $result->feedback .= '<div class="correctanswer generalbox"><em>'.get_string("youranswer", "lesson").'</em> : '.$result->studentanswer; // already in clean html
-                    $result->feedback .= $OUTPUT->box($result->response, $class); // already conerted to HTML
+                    if (isset($result->studentanswerformat)) {
+                        // This is the student's answer so it should be cleaned.
+                        $studentanswer = format_text($result->studentanswer, $result->studentanswerformat,
+                                array('context' => $context, 'para' => true));
+                    } else {
+                        $studentanswer = format_string($result->studentanswer);
+                    }
+                    $result->feedback .= '<div class="correctanswer generalbox"><em>'
+                            . get_string("youranswer", "lesson").'</em> : ' . $studentanswer;
+                    $result->feedback .= $OUTPUT->box($result->response, $class); // Already converted to HTML.
                     $result->feedback .= '</div>';
                 }
             }
@@ -2113,6 +2196,54 @@ abstract class lesson_page extends lesson_base {
     }
 
     /**
+     * save editor answers files and update answer record
+     *
+     * @param object $context
+     * @param int $maxbytes
+     * @param object $answer
+     * @param object $answereditor
+     * @param object $responseeditor
+     */
+    public function save_answers_files($context, $maxbytes, &$answer, $answereditor = '', $responseeditor = '') {
+        global $DB;
+        if (isset($answereditor['itemid'])) {
+            $answer->answer = file_save_draft_area_files($answereditor['itemid'],
+                    $context->id, 'mod_lesson', 'page_answers', $answer->id,
+                    array('noclean' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes),
+                    $answer->answer, null);
+            $DB->set_field('lesson_answers', 'answer', $answer->answer, array('id' => $answer->id));
+        }
+        if (isset($responseeditor['itemid'])) {
+            $answer->response = file_save_draft_area_files($responseeditor['itemid'],
+                    $context->id, 'mod_lesson', 'page_responses', $answer->id,
+                    array('noclean' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes),
+                    $answer->response, null);
+            $DB->set_field('lesson_answers', 'response', $answer->response, array('id' => $answer->id));
+        }
+    }
+
+    /**
+     * Rewrite urls in response and optionality answer of a question answer
+     *
+     * @param object $answer
+     * @param bool $rewriteanswer must rewrite answer
+     * @return object answer with rewritten urls
+     */
+    public static function rewrite_answers_urls($answer, $rewriteanswer = true) {
+        global $PAGE;
+
+        $context = context_module::instance($PAGE->cm->id);
+        if ($rewriteanswer) {
+            $answer->answer = file_rewrite_pluginfile_urls($answer->answer, 'pluginfile.php', $context->id,
+                    'mod_lesson', 'page_answers', $answer->id);
+        }
+        $answer->response = file_rewrite_pluginfile_urls($answer->response, 'pluginfile.php', $context->id,
+                'mod_lesson', 'page_responses', $answer->id);
+
+        return $answer;
+    }
+
+    /**
      * Updates a lesson page and its answers within the database
      *
      * @param object $properties
@@ -2166,6 +2297,10 @@ abstract class lesson_page extends lesson_base {
                 } else {
                     $DB->update_record("lesson_answers", $this->answers[$i]->properties());
                 }
+
+                // Save files in answers and responses.
+                $this->save_answers_files($context, $maxbytes, $this->answers[$i],
+                        $properties->answer_editor[$i], $properties->response_editor[$i]);
 
             } else if (isset($this->answers[$i]->id)) {
                 $DB->delete_records('lesson_answers', array('id'=>$this->answers[$i]->id));
@@ -2226,12 +2361,15 @@ abstract class lesson_page extends lesson_base {
      * @return array
      */
     public function create_answers($properties) {
-        global $DB;
+        global $DB, $PAGE;
         // now add the answers
         $newanswer = new stdClass;
         $newanswer->lessonid = $this->lesson->id;
         $newanswer->pageid = $this->properties->id;
         $newanswer->timecreated = $this->properties->timecreated;
+
+        $cm = get_coursemodule_from_instance('lesson', $this->lesson->id, $this->lesson->course);
+        $context = context_module::instance($cm->id);
 
         $answers = array();
 
@@ -2255,6 +2393,13 @@ abstract class lesson_page extends lesson_base {
                     $answer->score = $properties->score[$i];
                 }
                 $answer->id = $DB->insert_record("lesson_answers", $answer);
+                if (isset($properties->response_editor[$i])) {
+                    $this->save_answers_files($context, $PAGE->course->maxbytes, $answer,
+                            $properties->answer_editor[$i], $properties->response_editor[$i]);
+                } else {
+                    $this->save_answers_files($context, $PAGE->course->maxbytes, $answer,
+                            $properties->answer_editor[$i]);
+                }
                 $answers[$answer->id] = new lesson_page_answer($answer);
             } else {
                 break;
@@ -2742,7 +2887,7 @@ class lesson_page_type_manager {
     public function load_all_pages(lesson $lesson) {
         global $DB;
         if (!($pages =$DB->get_records('lesson_pages', array('lessonid'=>$lesson->id)))) {
-            print_error('cannotfindpages', 'lesson');
+            return array(); // Records returned empty.
         }
         foreach ($pages as $key=>$page) {
             $pagetype = get_class($this->types[$page->qtype]);
@@ -2830,174 +2975,5 @@ class lesson_page_type_manager {
         }
 
         return $links;
-    }
-}
-
-/**
- * File browsing support class.
- *
- * @package    mod_lesson
- * @copyright  2013 Frédéric Massart
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class mod_lesson_file_info extends file_info {
-
-    /** @var stdClass Course object */
-    protected $course;
-    /** @var stdClass Course module object */
-    protected $cm;
-    /** @var array Available file areas */
-    protected $areas;
-    /** @var string File area to browse */
-    protected $filearea;
-
-    /**
-     * Constructor
-     *
-     * @param file_browser $browser file_browser instance
-     * @param stdClass $course course object
-     * @param stdClass $cm course module object
-     * @param stdClass $context module context
-     * @param array $areas available file areas
-     * @param string $filearea file area to browse
-     */
-    public function __construct($browser, $course, $cm, $context, $areas, $filearea) {
-        parent::__construct($browser, $context);
-        $this->course   = $course;
-        $this->cm       = $cm;
-        $this->areas    = $areas;
-        $this->filearea = $filearea;
-    }
-
-    /**
-     * Returns list of standard virtual file/directory identification.
-     * The difference from stored_file parameters is that null values
-     * are allowed in all fields
-     * @return array with keys contextid, filearea, itemid, filepath and filename
-     */
-    public function get_params() {
-        return array('contextid' => $this->context->id,
-                     'component' => 'mod_lesson',
-                     'filearea'  => $this->filearea,
-                     'itemid'    => null,
-                     'filepath'  => null,
-                     'filename'  => null);
-    }
-
-    /**
-     * Returns localised visible name.
-     * @return string
-     */
-    public function get_visible_name() {
-        return $this->areas[$this->filearea];
-    }
-
-    /**
-     * Can I add new files or directories?
-     * @return bool
-     */
-    public function is_writable() {
-        return false;
-    }
-
-    /**
-     * Is directory?
-     * @return bool
-     */
-    public function is_directory() {
-        return true;
-    }
-
-    /**
-     * Returns list of children.
-     * @return array of file_info instances
-     */
-    public function get_children() {
-        return $this->get_filtered_children('*', false, true);
-    }
-
-    /**
-     * Help function to return files matching extensions or their count
-     *
-     * @param string|array $extensions, either '*' or array of lowercase extensions, i.e. array('.gif','.jpg')
-     * @param bool|int $countonly if false returns the children, if an int returns just the
-     *    count of children but stops counting when $countonly number of children is reached
-     * @param bool $returnemptyfolders if true returns items that don't have matching files inside
-     * @return array|int array of file_info instances or the count
-     */
-    private function get_filtered_children($extensions = '*', $countonly = false, $returnemptyfolders = false) {
-        global $DB;
-
-        $params = array(
-            'contextid' => $this->context->id,
-            'component' => 'mod_lesson',
-            'filearea' => $this->filearea
-        );
-        $sql = 'SELECT DISTINCT itemid
-                  FROM {files}
-                 WHERE contextid = :contextid
-                   AND component = :component
-                   AND filearea = :filearea';
-
-        if (!$returnemptyfolders) {
-            $sql .= ' AND filename <> :emptyfilename';
-            $params['emptyfilename'] = '.';
-        }
-
-        list($sql2, $params2) = $this->build_search_files_sql($extensions);
-        $sql .= ' ' . $sql2;
-        $params = array_merge($params, $params2);
-
-        if ($countonly !== false) {
-            $sql .= ' ORDER BY itemid DESC';
-        }
-
-        $rs = $DB->get_recordset_sql($sql, $params);
-        $children = array();
-        foreach ($rs as $record) {
-            if (($child = $this->browser->get_file_info($this->context, 'mod_lesson', $this->filearea, $record->itemid))
-                    && ($returnemptyfolders || $child->count_non_empty_children($extensions))) {
-                $children[] = $child;
-            }
-            if ($countonly !== false && count($children) >= $countonly) {
-                break;
-            }
-        }
-        $rs->close();
-        if ($countonly !== false) {
-            return count($children);
-        }
-        return $children;
-    }
-
-    /**
-     * Returns list of children which are either files matching the specified extensions
-     * or folders that contain at least one such file.
-     *
-     * @param string|array $extensions, either '*' or array of lowercase extensions, i.e. array('.gif','.jpg')
-     * @return array of file_info instances
-     */
-    public function get_non_empty_children($extensions = '*') {
-        return $this->get_filtered_children($extensions, false);
-    }
-
-    /**
-     * Returns the number of children which are either files matching the specified extensions
-     * or folders containing at least one such file.
-     *
-     * @param string|array $extensions, for example '*' or array('.gif','.jpg')
-     * @param int $limit stop counting after at least $limit non-empty children are found
-     * @return int
-     */
-    public function count_non_empty_children($extensions = '*', $limit = 1) {
-        return $this->get_filtered_children($extensions, $limit);
-    }
-
-    /**
-     * Returns parent file_info instance
-     * @return file_info or null for root
-     */
-    public function get_parent() {
-        return $this->browser->get_file_info($this->context);
     }
 }

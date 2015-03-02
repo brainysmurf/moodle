@@ -44,15 +44,14 @@ require_once($CFG->dirroot.'/course/lib.php');
 function add_moduleinfo($moduleinfo, $course, $mform = null) {
     global $DB, $CFG;
 
+    // Attempt to include module library before we make any changes to DB.
+    include_modulelib($moduleinfo->modulename);
+
     $moduleinfo->course = $course->id;
     $moduleinfo = set_moduleinfo_defaults($moduleinfo);
 
     if (!empty($course->groupmodeforce) or !isset($moduleinfo->groupmode)) {
         $moduleinfo->groupmode = 0; // Do not set groupmode.
-    }
-
-    if (!course_allowed_module($course, $moduleinfo->modulename)) {
-        print_error('moduledisable', '', '', $moduleinfo->modulename);
     }
 
     // First add course_module record because we need the context.
@@ -62,9 +61,11 @@ function add_moduleinfo($moduleinfo, $course, $mform = null) {
     $newcm->instance         = 0; // Not known yet, will be updated later (this is similar to restore code).
     $newcm->visible          = $moduleinfo->visible;
     $newcm->visibleold       = $moduleinfo->visible;
+    if (isset($moduleinfo->cmidnumber)) {
+        $newcm->idnumber         = $moduleinfo->cmidnumber;
+    }
     $newcm->groupmode        = $moduleinfo->groupmode;
     $newcm->groupingid       = $moduleinfo->groupingid;
-    $newcm->groupmembersonly = $moduleinfo->groupmembersonly;
     $completion = new completion_info($course);
     if ($completion->is_enabled()) {
         $newcm->completion                = $moduleinfo->completion;
@@ -73,9 +74,26 @@ function add_moduleinfo($moduleinfo, $course, $mform = null) {
         $newcm->completionexpected        = $moduleinfo->completionexpected;
     }
     if(!empty($CFG->enableavailability)) {
-        $newcm->availablefrom             = $moduleinfo->availablefrom;
-        $newcm->availableuntil            = $moduleinfo->availableuntil;
-        $newcm->showavailability          = $moduleinfo->showavailability;
+        // This code is used both when submitting the form, which uses a long
+        // name to avoid clashes, and by unit test code which uses the real
+        // name in the table.
+        $newcm->availability = null;
+        if (property_exists($moduleinfo, 'availabilityconditionsjson')) {
+            if ($moduleinfo->availabilityconditionsjson !== '') {
+                $newcm->availability = $moduleinfo->availabilityconditionsjson;
+            }
+        } else if (property_exists($moduleinfo, 'availability')) {
+            $newcm->availability = $moduleinfo->availability;
+        }
+        // If there is any availability data, verify it.
+        if ($newcm->availability) {
+            $tree = new \core_availability\tree(json_decode($newcm->availability));
+            // Save time and database space by setting null if the only data
+            // is an empty tree.
+            if ($tree->is_empty()) {
+                $newcm->availability = null;
+            }
+        }
     }
     if (isset($moduleinfo->showdescription)) {
         $newcm->showdescription = $moduleinfo->showdescription;
@@ -83,11 +101,15 @@ function add_moduleinfo($moduleinfo, $course, $mform = null) {
         $newcm->showdescription = 0;
     }
 
+    // From this point we make database changes, so start transaction.
+    $transaction = $DB->start_delegated_transaction();
+
     if (!$moduleinfo->coursemodule = add_course_module($newcm)) {
         print_error('cannotaddcoursemodule');
     }
 
-    if (plugin_supports('mod', $moduleinfo->modulename, FEATURE_MOD_INTRO, true)) {
+    if (plugin_supports('mod', $moduleinfo->modulename, FEATURE_MOD_INTRO, true) &&
+            isset($moduleinfo->introeditor)) {
         $introeditor = $moduleinfo->introeditor;
         unset($moduleinfo->introeditor);
         $moduleinfo->intro       = $introeditor['text'];
@@ -95,17 +117,24 @@ function add_moduleinfo($moduleinfo, $course, $mform = null) {
     }
 
     $addinstancefunction    = $moduleinfo->modulename."_add_instance";
-    $returnfromfunc = $addinstancefunction($moduleinfo, $mform);
+    try {
+        $returnfromfunc = $addinstancefunction($moduleinfo, $mform);
+    } catch (moodle_exception $e) {
+        $returnfromfunc = $e;
+    }
     if (!$returnfromfunc or !is_number($returnfromfunc)) {
-        // Undo everything we can.
+        // Undo everything we can. This is not necessary for databases which
+        // support transactions, but improves consistency for other databases.
         $modcontext = context_module::instance($moduleinfo->coursemodule);
-        delete_context(CONTEXT_MODULE, $moduleinfo->coursemodule);
+        context_helper::delete_instance(CONTEXT_MODULE, $moduleinfo->coursemodule);
         $DB->delete_records('course_modules', array('id'=>$moduleinfo->coursemodule));
 
-        if (!is_number($returnfromfunc)) {
-            print_error('invalidfunction', '', course_get_url($course, $cw->section));
+        if ($e instanceof moodle_exception) {
+            throw $e;
+        } else if (!is_number($returnfromfunc)) {
+            print_error('invalidfunction', '', course_get_url($course, $moduleinfo->section));
         } else {
-            print_error('cannotaddnewmodule', '', course_get_url($course, $cw->section), $moduleinfo->modulename);
+            print_error('cannotaddnewmodule', '', course_get_url($course, $moduleinfo->section), $moduleinfo->modulename);
         }
     }
 
@@ -126,30 +155,16 @@ function add_moduleinfo($moduleinfo, $course, $mform = null) {
     // So we have to update one of them twice.
     $sectionid = course_add_cm_to_section($course, $moduleinfo->coursemodule, $moduleinfo->section);
 
-    // Make sure visibility is set correctly (in particular in calendar).
-    // Note: allow them to set it even without moodle/course:activityvisibility.
-    set_coursemodule_visible($moduleinfo->coursemodule, $moduleinfo->visible);
+    // Trigger event based on the action we did.
+    // Api create_from_cm expects modname and id property, and we don't want to modify $moduleinfo since we are returning it.
+    $eventdata = clone $moduleinfo;
+    $eventdata->modname = $eventdata->modulename;
+    $eventdata->id = $eventdata->coursemodule;
+    $event = \core\event\course_module_created::create_from_cm($eventdata, $modcontext);
+    $event->trigger();
 
-    if (isset($moduleinfo->cmidnumber)) { // Label.
-        // Set cm idnumber - uniqueness is already verified by form validation.
-        set_coursemodule_idnumber($moduleinfo->coursemodule, $moduleinfo->cmidnumber);
-    }
-
-    // Set up conditions.
-    if ($CFG->enableavailability) {
-        condition_info::update_cm_from_form((object)array('id'=>$moduleinfo->coursemodule), $moduleinfo, false);
-    }
-
-    $eventname = 'mod_created';
-
-    add_to_log($course->id, "course", "add mod",
-               "../mod/$moduleinfo->modulename/view.php?id=$moduleinfo->coursemodule",
-               "$moduleinfo->modulename $moduleinfo->instance");
-    add_to_log($course->id, $moduleinfo->modulename, "add",
-               "view.php?id=$moduleinfo->coursemodule",
-               "$moduleinfo->instance", $moduleinfo->coursemodule);
-
-    $moduleinfo = edit_module_post_actions($moduleinfo, $course, 'mod_created');
+    $moduleinfo = edit_module_post_actions($moduleinfo, $course);
+    $transaction->allow_commit();
 
     return $moduleinfo;
 }
@@ -157,30 +172,24 @@ function add_moduleinfo($moduleinfo, $course, $mform = null) {
 
 /**
  * Common create/update module module actions that need to be processed as soon as a module is created/updaded.
- * For example: trigger event, create grade parent category, add outcomes, rebuild caches, regrade, save plagiarism settings...
+ * For example:create grade parent category, add outcomes, rebuild caches, regrade, save plagiarism settings...
+ * Please note this api does not trigger events as of MOODLE 2.6. Please trigger events before calling this api.
  *
  * @param object $moduleinfo the module info
  * @param object $course the course of the module
- * @param string $eventname the event name to trigger
  *
- * return object moduleinfo update with grading management info
+ * @return object moduleinfo update with grading management info
  */
-function edit_module_post_actions($moduleinfo, $course, $eventname) {
-    global $USER, $CFG;
+function edit_module_post_actions($moduleinfo, $course) {
+    global $CFG;
+    require_once($CFG->libdir.'/gradelib.php');
 
     $modcontext = context_module::instance($moduleinfo->coursemodule);
-
-    // Trigger mod_created/mod_updated event with information about this module.
-    $eventdata = new stdClass();
-    $eventdata->modulename = $moduleinfo->modulename;
-    $eventdata->name       = $moduleinfo->name;
-    $eventdata->cmid       = $moduleinfo->coursemodule;
-    $eventdata->courseid   = $course->id;
-    $eventdata->userid     = $USER->id;
-    events_trigger($eventname, $eventdata);
+    $hasgrades = plugin_supports('mod', $moduleinfo->modulename, FEATURE_GRADE_HAS_GRADE, false);
+    $hasoutcomes = plugin_supports('mod', $moduleinfo->modulename, FEATURE_GRADE_OUTCOMES, true);
 
     // Sync idnumber with grade_item.
-    if ($grade_item = grade_item::fetch(array('itemtype'=>'mod', 'itemmodule'=>$moduleinfo->modulename,
+    if ($hasgrades && $grade_item = grade_item::fetch(array('itemtype'=>'mod', 'itemmodule'=>$moduleinfo->modulename,
                  'iteminstance'=>$moduleinfo->instance, 'itemnumber'=>0, 'courseid'=>$course->id))) {
         if ($grade_item->idnumber != $moduleinfo->cmidnumber) {
             $grade_item->idnumber = $moduleinfo->cmidnumber;
@@ -188,8 +197,12 @@ function edit_module_post_actions($moduleinfo, $course, $eventname) {
         }
     }
 
-    $items = grade_item::fetch_all(array('itemtype'=>'mod', 'itemmodule'=>$moduleinfo->modulename,
+    if ($hasgrades) {
+        $items = grade_item::fetch_all(array('itemtype'=>'mod', 'itemmodule'=>$moduleinfo->modulename,
                                          'iteminstance'=>$moduleinfo->instance, 'courseid'=>$course->id));
+    } else {
+        $items = array();
+    }
 
     // Create parent category if requested and move to correct parent category.
     if ($items and isset($moduleinfo->gradecat)) {
@@ -204,17 +217,29 @@ function edit_module_post_actions($moduleinfo, $course, $eventname) {
             }
             $moduleinfo->gradecat = $grade_category->id;
         }
+        $gradecategory = $grade_item->get_parent_category();
         foreach ($items as $itemid=>$unused) {
             $items[$itemid]->set_parent($moduleinfo->gradecat);
             if ($itemid == $grade_item->id) {
                 // Use updated grade_item.
                 $grade_item = $items[$itemid];
             }
+            if (!empty($moduleinfo->add)) {
+                if (grade_category::aggregation_uses_aggregationcoef($gradecategory->aggregation)) {
+                    if ($gradecategory->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN) {
+                        $grade_item->aggregationcoef = 1;
+                    } else {
+                        $grade_item->aggregationcoef = 0;
+                    }
+                    $grade_item->update();
+                }
+            }
         }
     }
 
+    require_once($CFG->libdir.'/grade/grade_outcome.php');
     // Add outcomes if requested.
-    if ($outcomes = grade_outcome::fetch_all_available($course->id)) {
+    if ($hasoutcomes && $outcomes = grade_outcome::fetch_all_available($course->id)) {
         $grade_items = array();
 
         // Outcome grade_item.itemnumber start at 1000, there is nothing above outcomes.
@@ -267,6 +292,17 @@ function edit_module_post_actions($moduleinfo, $course, $eventname) {
                 } else if (isset($moduleinfo->gradecat)) {
                     $outcome_item->set_parent($moduleinfo->gradecat);
                 }
+                $gradecategory = $outcome_item->get_parent_category();
+                if ($outcomeexists == false) {
+                    if (grade_category::aggregation_uses_aggregationcoef($gradecategory->aggregation)) {
+                        if ($gradecategory->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN) {
+                            $outcome_item->aggregationcoef = 1;
+                        } else {
+                            $outcome_item->aggregationcoef = 0;
+                        }
+                        $outcome_item->update();
+                    }
+                }
             }
         }
     }
@@ -293,8 +329,10 @@ function edit_module_post_actions($moduleinfo, $course, $eventname) {
         $moduleinfo->showgradingmanagement = $showgradingmanagement;
     }
 
-    rebuild_course_cache($course->id);
-    grade_regrade_final_grades($course->id);
+    rebuild_course_cache($course->id, true);
+    if ($hasgrades) {
+        grade_regrade_final_grades($course->id);
+    }
     require_once($CFG->libdir.'/plagiarismlib.php');
     plagiarism_save_form_elements($moduleinfo);
 
@@ -309,7 +347,6 @@ function edit_module_post_actions($moduleinfo, $course, $eventname) {
  * @return object the completed module info
  */
 function set_moduleinfo_defaults($moduleinfo) {
-    global $DB;
 
     if (empty($moduleinfo->coursemodule)) {
         // Add.
@@ -329,10 +366,6 @@ function set_moduleinfo_defaults($moduleinfo) {
         $moduleinfo->groupingid = 0;
     }
 
-    if (!isset($moduleinfo->groupmembersonly)) {
-        $moduleinfo->groupmembersonly = 0;
-    }
-
     if (!isset($moduleinfo->name)) { // Label.
         $moduleinfo->name = $moduleinfo->modulename;
     }
@@ -343,12 +376,22 @@ function set_moduleinfo_defaults($moduleinfo) {
     if (!isset($moduleinfo->completionview)) {
         $moduleinfo->completionview = COMPLETION_VIEW_NOT_REQUIRED;
     }
+    if (!isset($moduleinfo->completionexpected)) {
+        $moduleinfo->completionexpected = 0;
+    }
 
     // Convert the 'use grade' checkbox into a grade-item number: 0 if checked, null if not.
     if (isset($moduleinfo->completionusegrade) && $moduleinfo->completionusegrade) {
         $moduleinfo->completiongradeitemnumber = 0;
     } else {
         $moduleinfo->completiongradeitemnumber = null;
+    }
+
+    if (!isset($moduleinfo->conditiongradegroup)) {
+        $moduleinfo->conditiongradegroup = array();
+    }
+    if (!isset($moduleinfo->conditionfieldgroup)) {
+        $moduleinfo->conditionfieldgroup = array();
     }
 
     return $moduleinfo;
@@ -362,6 +405,7 @@ function set_moduleinfo_defaults($moduleinfo) {
  * @param object $modulename the module name
  * @param object $section the section of the module
  * @return array list containing module, context, course section.
+ * @throws moodle_exception if user is not allowed to perform the action or module is not allowed in this course
  */
 function can_add_moduleinfo($course, $modulename, $section) {
     global $DB;
@@ -386,6 +430,7 @@ function can_add_moduleinfo($course, $modulename, $section) {
  *
  * @param object $cm course module
  * @return array - list of course module, context, module, moduleinfo, and course section.
+ * @throws moodle_exception if user is not allowed to perform the action
  */
 function can_update_moduleinfo($cm) {
     global $DB;
@@ -421,6 +466,9 @@ function can_update_moduleinfo($cm) {
 function update_moduleinfo($cm, $moduleinfo, $course, $mform = null) {
     global $DB, $CFG;
 
+    // Attempt to include module library before we make any changes to DB.
+    include_modulelib($moduleinfo->modulename);
+
     $moduleinfo->course = $course->id;
     $moduleinfo = set_moduleinfo_defaults($moduleinfo);
 
@@ -433,23 +481,42 @@ function update_moduleinfo($cm, $moduleinfo, $course, $mform = null) {
     if (isset($moduleinfo->groupingid)) {
         $cm->groupingid = $moduleinfo->groupingid;
     }
-    if (isset($moduleinfo->groupmembersonly)) {
-        $cm->groupmembersonly = $moduleinfo->groupmembersonly;
-    }
 
     $completion = new completion_info($course);
-    if ($completion->is_enabled() && !empty($moduleinfo->completionunlocked)) {
-        // Update completion settings.
-        $cm->completion                = $moduleinfo->completion;
-        $cm->completiongradeitemnumber = $moduleinfo->completiongradeitemnumber;
-        $cm->completionview            = $moduleinfo->completionview;
-        $cm->completionexpected        = $moduleinfo->completionexpected;
+    if ($completion->is_enabled()) {
+        // Completion settings that would affect users who have already completed
+        // the activity may be locked; if so, these should not be updated.
+        if (!empty($moduleinfo->completionunlocked)) {
+            $cm->completion = $moduleinfo->completion;
+            $cm->completiongradeitemnumber = $moduleinfo->completiongradeitemnumber;
+            $cm->completionview = $moduleinfo->completionview;
+        }
+        // The expected date does not affect users who have completed the activity,
+        // so it is safe to update it regardless of the lock status.
+        $cm->completionexpected = $moduleinfo->completionexpected;
     }
     if (!empty($CFG->enableavailability)) {
-        $cm->availablefrom             = $moduleinfo->availablefrom;
-        $cm->availableuntil            = $moduleinfo->availableuntil;
-        $cm->showavailability          = $moduleinfo->showavailability;
-        condition_info::update_cm_from_form($cm,$moduleinfo,true);
+        // This code is used both when submitting the form, which uses a long
+        // name to avoid clashes, and by unit test code which uses the real
+        // name in the table.
+        if (property_exists($moduleinfo, 'availabilityconditionsjson')) {
+            if ($moduleinfo->availabilityconditionsjson !== '') {
+                $cm->availability = $moduleinfo->availabilityconditionsjson;
+            } else {
+                $cm->availability = null;
+            }
+        } else if (property_exists($moduleinfo, 'availability')) {
+            $cm->availability = $moduleinfo->availability;
+        }
+        // If there is any availability data, verify it.
+        if ($cm->availability) {
+            $tree = new \core_availability\tree(json_decode($cm->availability));
+            // Save time and database space by setting null if the only data
+            // is an empty tree.
+            if ($tree->is_empty()) {
+                $cm->availability = null;
+            }
+        }
     }
     if (isset($moduleinfo->showdescription)) {
         $cm->showdescription = $moduleinfo->showdescription;
@@ -489,15 +556,10 @@ function update_moduleinfo($cm, $moduleinfo, $course, $mform = null) {
     if ($completion->is_enabled() && !empty($moduleinfo->completionunlocked)) {
         $completion->reset_all_state($cm);
     }
+    $cm->name = $moduleinfo->name;
+    \core\event\course_module_updated::create_from_cm($cm, $modcontext)->trigger();
 
-    add_to_log($course->id, "course", "update mod",
-               "../mod/$moduleinfo->modulename/view.php?id=$moduleinfo->coursemodule",
-               "$moduleinfo->modulename $moduleinfo->instance");
-    add_to_log($course->id, $moduleinfo->modulename, "update",
-               "view.php?id=$moduleinfo->coursemodule",
-               "$moduleinfo->instance", $moduleinfo->coursemodule);
-
-    $moduleinfo = edit_module_post_actions($moduleinfo, $course, 'mod_updated');
+    $moduleinfo = edit_module_post_actions($moduleinfo, $course);
 
     return array($cm, $moduleinfo);
 }
@@ -506,6 +568,7 @@ function update_moduleinfo($cm, $moduleinfo, $course, $mform = null) {
  * Include once the module lib file.
  *
  * @param string $modulename module name of the lib to include
+ * @throws moodle_exception if lib.php file for the module does not exist
  */
 function include_modulelib($modulename) {
     global $CFG;

@@ -101,8 +101,20 @@ class enrol_flatfile_plugin extends enrol_plugin {
      * @param object $instance
      * @return bool
      */
-    public function instance_deleteable($instance) {
-        return true;
+    public function can_delete_instance($instance) {
+        $context = context_course::instance($instance->courseid);
+        return has_capability('enrol/flatfile:manage', $context);
+    }
+
+    /**
+     * Is it possible to hide/show enrol instance via standard UI?
+     *
+     * @param stdClass $instance
+     * @return bool
+     */
+    public function can_hide_show_instance($instance) {
+        $context = context_course::instance($instance->courseid);
+        return has_capability('enrol/flatfile:manage', $context);
     }
 
     /**
@@ -229,7 +241,7 @@ class enrol_flatfile_plugin extends enrol_plugin {
         global $CFG, $DB;
 
         // We may need more memory here.
-        @set_time_limit(0);
+        core_php_time_limit::raise();
         raise_memory_limit(MEMORY_HUGE);
 
         $filelocation = $this->get_config('location');
@@ -252,7 +264,7 @@ class enrol_flatfile_plugin extends enrol_plugin {
 
             $rolemap = $this->get_role_map($trace);
 
-            $content = textlib::convert($content, $this->get_config('encoding', 'utf-8'), 'utf-8');
+            $content = core_text::convert($content, $this->get_config('encoding', 'utf-8'), 'utf-8');
             $content = str_replace("\r", '', $content);
             $content = explode("\n", $content);
 
@@ -278,8 +290,8 @@ class enrol_flatfile_plugin extends enrol_plugin {
                     continue;
                 }
 
-                $fields[0] = trim(textlib::strtolower($fields[0]));
-                $fields[1] = trim(textlib::strtolower($fields[1]));
+                $fields[0] = trim(core_text::strtolower($fields[0]));
+                $fields[1] = trim(core_text::strtolower($fields[1]));
                 $fields[2] = trim($fields[2]);
                 $fields[3] = trim($fields[3]);
                 $fields[4] = isset($fields[4]) ? (int)trim($fields[4]) : 0;
@@ -399,7 +411,7 @@ class enrol_flatfile_plugin extends enrol_plugin {
      * @param bool $buffer_if_future
      */
     protected function process_records(progress_trace $trace, $action, $roleid, $user, $course, $timestart, $timeend, $buffer_if_future = true) {
-        global $CFG, $DB, $SESSION;
+        global $CFG, $DB;
 
         // Check if timestart is for future processing.
         if ($timestart > time() and $buffer_if_future) {
@@ -448,12 +460,7 @@ class enrol_flatfile_plugin extends enrol_plugin {
             }
 
             if ($notify and $this->get_config('mailstudents')) {
-                // Some nasty hackery to get strings and dates localised for target user.
-                $sessionlang = isset($SESSION->lang) ? $SESSION->lang : null;
-                if (get_string_manager()->translation_exists($user->lang, false)) {
-                    $SESSION->lang = $user->lang;
-                    moodle_setlocale();
-                }
+                $oldforcelang = force_current_language($user->lang);
 
                 // Send welcome notification to enrolled users.
                 $a = new stdClass();
@@ -478,22 +485,14 @@ class enrol_flatfile_plugin extends enrol_plugin {
                     $trace->output("Failed to notify enrolled user", 1);
                 }
 
-                if ($SESSION->lang !== $sessionlang) {
-                    $SESSION->lang = $sessionlang;
-                    moodle_setlocale();
-                }
+                force_current_language($oldforcelang);
             }
 
             if ($notify and $this->get_config('mailteachers', 0)) {
                 // Notify person responsible for enrolments.
                 $enroller = $this->get_enroller($course->id);
 
-                // Some nasty hackery to get strings and dates localised for target user.
-                $sessionlang = isset($SESSION->lang) ? $SESSION->lang : null;
-                if (get_string_manager()->translation_exists($enroller->lang, false)) {
-                    $SESSION->lang = $enroller->lang;
-                    moodle_setlocale();
-                }
+                $oldforcelang = force_current_language($enroller->lang);
 
                 $a = new stdClass();
                 $a->course = format_string($course->fullname, true, array('context' => $context));
@@ -517,10 +516,7 @@ class enrol_flatfile_plugin extends enrol_plugin {
                     $trace->output("Failed to notify enroller {$eventdata->userto->id}", 1);
                 }
 
-                if ($SESSION->lang !== $sessionlang) {
-                    $SESSION->lang = $sessionlang;
-                    moodle_setlocale();
-                }
+                force_current_language($oldforcelang);
             }
             return;
 
@@ -664,7 +660,7 @@ class enrol_flatfile_plugin extends enrol_plugin {
         $roles = $DB->get_records('role', null, '', 'id, name, shortname');
         foreach ($roles as $id=>$role) {
             $alias = $this->get_config('map_'.$id, $role->shortname, '');
-            $alias = trim(textlib::strtolower($alias));
+            $alias = trim(core_text::strtolower($alias));
             if ($alias === '') {
                 // Either not configured yet or somebody wants to skip these intentionally.
                 continue;
