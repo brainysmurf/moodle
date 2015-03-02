@@ -184,7 +184,7 @@ if (empty($PAGE->layout_options['noawesomebar'])) { ?>
 						//Input box
 						echo html_writer::empty_tag('input', array(
 							'type' => 'text',
-							'size' => $inputsize,
+							'size' => 100,
 							'name' => 'q',
 							'placeholder' => s($placeholder)
 						));
