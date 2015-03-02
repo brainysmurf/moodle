@@ -32,7 +32,7 @@
     require_once($CFG->dirroot .'/course/lib.php');
     require_once($CFG->libdir .'/filelib.php');
     require_once($CFG->dirroot .'/user/profile/lib.php');
-    require_once("$CFG->libdir/externallib.php");  
+    require_once("$CFG->libdir/externallib.php");
     require_once($CFG->dirroot .'/cohort/lib.php');
 
     redirect_if_major_upgrade_required();
@@ -144,13 +144,13 @@
             $context = context_course::instance(SITEID);
 
             // If the section name is set we show it.
-            if (!is_null($section->name)) {
+            /*if (!is_null($section->name)) {
                 echo $OUTPUT->heading(
                     format_string($section->name, true, array('context' => $context)),
                     2,
                     'sectionname'
                 );
-            }
+            }*/
 
             $summarytext = file_rewrite_pluginfile_urls($section->summary, 'pluginfile.php', $context->id, 'course', 'section', $section->id);
             $summaryformatoptions = new stdClass();
