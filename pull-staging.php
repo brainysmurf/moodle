@@ -6,6 +6,6 @@ $deployer = new \Tmd\AutoGitPull\Deployer(array(
     'branch' => 'staging'
 ));
 $deployer->postDeployCallback = function () {
-    echo 'Yay!';
+    passthru('php /var/www/dragonnet/moodle/admin/cli/purge_caches.php');
 };
 $deployer->deploy();
