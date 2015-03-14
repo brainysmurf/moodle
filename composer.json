@@ -1,5 +1,5 @@
 {
     "require": {
-        "tmd/auto-git-pull": "~1.0"
+        "tmd/auto-git-pull": "~1.1"
     }
 }
