@@ -49,5 +49,3 @@ If everything went right, you should see DragonNet. The green header reminds you
 
 The default database password is helloworld.
 
-
-Just testing auto pulling some more. It's gonna work this time for real
