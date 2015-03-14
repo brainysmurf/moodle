@@ -69,11 +69,11 @@
 
     // Implement ssis's need to have the frontpage redirect
 
-    if ( isset($SESSION->frontpageSection) && $SESSION->frontpageSection )
-	{
-		$frontpage_redirect_url = $CFG->wwwroot . '/course/view.php?id=1395&section=';
-		redirect( $frontpage_redirect_url.$SESSION->frontpageSection );
-	}
+    //if ( isset($SESSION->frontpageSection) && $SESSION->frontpageSection )
+	//{
+	//	$frontpage_redirect_url = $CFG->wwwroot . '/course/view.php?id=1395&section=';
+	//	redirect( $frontpage_redirect_url.$SESSION->frontpageSection );
+	//}
 
     if (get_home_page() != HOMEPAGE_SITE) {
         // Redirect logged-in users to My Moodle overview if required
