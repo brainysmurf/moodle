@@ -47,5 +47,6 @@ If everything went right, you should see DragonNet. The green header reminds you
 
 ![](http://img.ctrlv.in/img/14/11/15/5466bcedb61a3.png)
 
+
 The default database password is helloworld.
 
