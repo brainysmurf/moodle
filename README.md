@@ -14,7 +14,7 @@ DragonNet
 ##### 1. Clone this repository
 ```bash
 
-git clone https://github.com/brainysmurf/moodle.git
+git clone https://github.com/classroomtechtools/dragonnet
 cd moodle
 git submodule init
 git submodule update
