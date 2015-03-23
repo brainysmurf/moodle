@@ -24,7 +24,7 @@ if [ -d "dragonnet-vagrant" ]; then
     cd dragonnet-vagrant
     git pull
 else
-    git clone https://github.com/ssis-suzhou/dragonnet-vagrant.git
+    git clone git@bitbucket.org:ssis/dragonnet-vagrant.git
     cd dragonnet-vagrant
 fi
 
