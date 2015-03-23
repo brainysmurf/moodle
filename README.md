@@ -30,6 +30,8 @@ Call it dragonnet.sql and put it in the moodle directory.
 ```bash
 vagrant up
 ```
+NOTE: At this point you will need a username and password for the ssis/dragonnet-vagrant repo on Bitbucket. Ask one of us for access.
+
 The first time you start the server it will provision itself (install all the required software) and import the database. This may take a long time.
 If asked for a password, enter your local sudo password. This is so it can update your hosts file to make dragonnet.vagrant point to the virtual server.
 
