@@ -1393,7 +1393,7 @@ $string['passwordconfirmchange'] = 'Confirm password change';
 $string['passwordextlink'] = 'The following link has been provided to recover your lost password. This will take you out of Moodle.';
 $string['passwordforgotten'] = 'Forgotten password';
 $string['passwordforgotteninstructions'] = 'Your details must first be found in the user database. Please enter <strong>either</strong> your username or your registered email address in the appropriate box. There is no need to enter both.';
-$string['passwordforgotteninstructions2'] = 'Submit your DragonNet username below. Parents, your username is an email address. If you are still unable to reset your password, send a message to help@ssis-suzhou.net.';
+$string['passwordforgotteninstructions2'] = 'Submit your DragonNet username below. Parents, your username is an email address. If you are still unable to reset your password, please <a href="http://help.ssis-suzhou.net">open a help ticket</a>';
 $string['passwordchanged'] = 'Password has been changed';
 $string['passwordnohelp'] = 'No help is available to find your lost password. Please contact your Moodle administrator.';
 $string['passwordrecovery'] = 'Yes, help me log in';

@@ -12,7 +12,7 @@ $powerschoolID = optional_param('powerschool', '', PARAM_RAW);
 if (!empty($powerschoolID)) {
     $user = $DB->get_record('user', array('idnumber'=>$powerschoolID));
     if (!$user) {
-        death("Sorry, it seems like there is a problem with your account. Please contact help@ssis-suzhou.net with the name of your child(ren).");
+        death('Sorry, it seems like there is a problem with your account. Please <a href="http://help.ssis-suzhou.net">open a help ticket</a> with the name of your child(ren).');
     }
     $family_id = substr($powerschoolID, 0, 4);
 }
@@ -54,7 +54,7 @@ if ( empty($powerschoolID) )  {
 
         echo '<div class="local-alert"><i class="icon-envelope icon-4x pull-left"></i> ';
         echo '<p style="font-weight:bold;font-size:18px;">An email has been sent to "'.mask_email($user->email).'". </p>';
-        echo '<p>Please check and click the link to reset your password. The subject is "DragonNet Password Reset Link"; be sure to check your spam inboxes. If you have any further difficulties, please email help@ssis-suzhou.net with your child(ren)\'s name.</p></div>';
+        echo '<p>Please check and click the link to reset your password. The subject is "DragonNet Password Reset Link"; be sure to check your spam inboxes. If you have any further difficulties, please <a href="http://help.ssis-suzhou.net">open a help ticket</a> with your child(ren)\'s name.</p></div>';
         echo '<ul class="buttons">';
         echo '<a href="'.$CFG->wwwroot.'" class="btn"><i class="icon-home "></i> DragonNet Home</a>';
         echo '</ul>';
@@ -64,7 +64,7 @@ if ( empty($powerschoolID) )  {
         sign("phone", "Please contact a school secretary", "We need to change your username, and only secretaries can do that manually. Please <a href=\"http://www.ssis-suzhou.net/contact-us/index.aspx\">go to the school website</a> for contact information. You will simply need to tell them the name of your children who attend SSIS.");
 
 //         echo '<div class="local-alert"><i class="icon-question-sign icon-4x pull-left"></i> ';
-//         echo '<p>Please copy and paste the below text and send to <strong>help@ssis-suzhou.net</strong></p>';
+//         echo '<p>Please copy and paste the below text and <a href="http://help.ssis-suzhou.net">open a help ticket</a></p>';
 //         echo '<br />';
 //         echo '<textarea onclick="this.select()" style="width:70%;height:200px;padding:10px;">Dear Help,
 
@@ -79,7 +79,7 @@ if ( empty($powerschoolID) )  {
     } else {
         $user = $DB->get_record('user', array('idnumber'=>$family_id.'P'));
         if (!$user) {
-            death("Something wrong with your account. Please contact help@ssis-suzhou.net with the name of your child(ren).");
+            death('Something wrong with your account. Please <a href="http://help.ssis-suzhou.net">open a help ticket</a> with the name of your child(ren).');
         }
         //output_forms($user);
 

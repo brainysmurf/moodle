@@ -30,7 +30,7 @@ $string['cannotdowngrade'] = 'Cannot downgrade {$a->plugin} from {$a->oldversion
 $string['cannotfindadmin'] = 'Could not find an admin user!';
 $string['cannotinitpage'] = 'Cannot fully initialize page: invalid {$a->name} id {$a->id}';
 $string['cannotsetuptable'] = '{$a} tables could NOT be set up successfully!';
-$string['codingerror'] = '<p>Well, this is embarrasing.</p><p>DragonNet did something wrong; not your fault.</p><p>Please contact <b>help@ssis-suzhou.net</b> and we will get on it.</p><p>Providing any details and screen shots are much appreciated.</p><p><em>Error (for techies): {$a}</em></p>';
+$string['codingerror'] = '<p>Well, this is embarrasing.</p><p>DragonNet did something wrong; not your fault.</p><p>Please contact <b><a href="http://help.ssis-suzhou.net">open a help ticket</a></b> and we will get on it.</p><p>Providing any details and screen shots are much appreciated.</p><p><em>Error (for techies): {$a}</em></p>';
 $string['configmoodle'] = 'Moodle has not been configured yet. You need to edit config.php first.';
 $string['erroroccur'] = 'An error has occurred during this process';
 $string['invalidarraysize'] = 'Incorrect size of arrays in params of {$a}';

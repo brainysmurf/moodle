@@ -15,4 +15,4 @@ You will then be able to reset your password. The link above will expire after 2
 
 Note that DragonNet passwords require a symbol character, such as ! or @ or #.
 
-If you have further difficulties, please contact help@ssis-suzhou.net with the name of your child(ren)';
+If you have further difficulties, please <a href="http://help.ssis-suzhou.net">open a help ticket</a> with the name of your child(ren)';
