@@ -191,6 +191,9 @@ class awesomebar
 	}
 
 	private function is_beta_tester() {
+
+        return false;
+        /*
 		// returns true if the current user is a beta tester
 		global $USER, $DB;
 
@@ -200,7 +203,7 @@ class awesomebar
 
 		$courseid = $DB->get_field('course', 'id', array('fullname'=>'Beta Test'));
 		if (empty($courseid)) {
-			echo 'make an activity called "Beta Test" and self enrol into it to get the new Dragonnet menu    ';
+			#echo 'make an activity called "Beta Test" and self enrol into it to get the new Dragonnet menu    ';
 			return false;
 		}
 		$enrolid = $DB->get_field('enrol', 'id', array('courseid'=>$courseid, 'enrol'=>'self'));
