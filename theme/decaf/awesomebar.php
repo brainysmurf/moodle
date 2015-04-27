@@ -213,7 +213,7 @@ class awesomebar
 			$beta_tester_array[] = $beta_tester->userid;
 		}
 
-		return in_array($USER->id, $beta_tester_array);
+		return in_array($USER->id, $beta_tester_array); */
 	}
 
 	// !Custom Menus (Navigate)
