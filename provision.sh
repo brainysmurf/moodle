@@ -29,10 +29,10 @@ else
 fi
 
 # Remove default nginx site
-rm /etc/nginx/sites-enabled/default
+#rm /etc/nginx/sites-enabled/default
 
 # Copy modified configs
-cp -rT etc /etc
+#cp -rT etc /etc
 
 # Run startup stuff
 /etc/rc.local
@@ -68,8 +68,8 @@ else
 fi
 
 # Restart services
-service nginx restart
-service php5-fpm restart
+#service nginx restart
+#service php5-fpm restart
 service postgresql restart
 
 date > /etc/vagrant_provisioned_at

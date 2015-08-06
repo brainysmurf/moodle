@@ -18,9 +18,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "ubuntu/trusty64"
 
   config.vm.provision "shell",
-    path: "https://raw.githubusercontent.com/classroomtechtools/dragonnet/master/provision.sh"
+    path: "https://raw.githubusercontent.com/classroomtechtools/dragonnet/workaround/provision.sh"
 
-  config.vm.network "private_network", ip: "192.168.70.10"
+  config.vm.network "private_network", ip: "10.0.2.15"
   config.vm.hostname = "dragonnet.vagrant"
 
   # Makes it accessible locally at dragonnet.vagrant (modifies the hosts file)
